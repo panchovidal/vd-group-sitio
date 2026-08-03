@@ -467,6 +467,29 @@
   .ab-metrics{text-align:right;font-size:12.8px;color:var(--text-1);}
   .ab-metrics .m-val{font-weight:800;font-variant-numeric:tabular-nums;}
   .ab-metrics .m-pct{color:var(--text-3);font-weight:700;margin-left:8px;}
+
+/* ===== SUELDOS: Esquema del personal ===== */
+.cta-outline{display:inline-flex;align-items:center;gap:8px;padding:0 18px;height:44px;border-radius:var(--radius-md);border:1.5px solid var(--sky);background:transparent;color:var(--blue);font-weight:600;font-size:14px;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.cta-outline svg{width:18px;height:18px;}
+.cta-outline:hover{background:rgba(89,119,210,0.08);}
+.cta-outline.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.masa-subtitle{color:var(--text-2);font-size:14px;margin-top:4px;}
+.empleados-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:auto;margin-top:18px;}
+.empleados-table{width:100%;border-collapse:collapse;font-size:14px;}
+.empleados-table thead th{position:sticky;top:0;background:var(--bg);color:var(--text-2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:12px 16px;border-bottom:1px solid var(--border);white-space:nowrap;z-index:1;}
+.empleados-table tbody td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-1);white-space:nowrap;}
+.empleados-table tbody tr:last-child td{border-bottom:none;}
+.empleados-table tbody tr:hover{background:rgba(89,119,210,0.05);}
+.badge-condicion{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;}
+.badge-condicion.cond-a{background:rgba(213,242,106,0.35);color:#4b5a16;}
+.badge-condicion.cond-b{background:rgba(89,119,210,0.16);color:var(--blue);}
+.sueldo-edit-input{width:120px;padding:8px 10px;border:1.5px solid var(--sky);border-radius:var(--radius-sm);font-size:14px;font-weight:600;color:var(--text-1);background:#fff;}
+.sueldo-edit-input:focus{outline:none;border-color:var(--blue);}
+td.pct-up{color:#2a9d4a;font-weight:600;}
+.empty-state{padding:48px 20px;text-align:center;color:var(--text-3);font-size:14px;}
+.actualizacion-footer{display:none;align-items:center;justify-content:space-between;gap:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:16px 20px;margin-top:16px;}
+.actualizacion-hint{color:var(--text-2);font-size:13px;max-width:640px;}
+.actualizacion-buttons{display:flex;gap:10px;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -818,12 +841,124 @@
       </div>
     </section>
 
-    <!-- ===================== MÓDULO: SUELDOS (placeholder) ===================== -->
+    <!-- ===================== MÓDULO: SUELDOS ===================== -->
     <section class="module-screen" id="moduleSueldos">
-      <div class="placeholder-card">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-        <h2>Sueldos</h2>
-        <p>Esta sección todavía no está desarrollada. Vamos a construirla más adelante — el concepto "Sueldos" que ya existe en Configuración va a integrarse acá y va a impactar directamente en la Lista de órdenes.</p>
+      <div class="pagos-shell" id="sueldosSubnav">
+        <div class="pagos-topbar">
+          <div class="pagos-tab active" data-stab="esquema" onclick="goSueldosTab('esquema')">Esquema del personal</div>
+          <div class="pagos-tab" data-stab="liquidacion" onclick="goSueldosTab('liquidacion')">Liquidación</div>
+          <div class="spacer"></div>
+          <button class="cta-outline" id="btnActualizarSueldos" onclick="toggleActualizacionSueldos()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+            Actualización de sueldos
+          </button>
+          <button class="cta-nueva" id="ctaNuevoEmpleadoBtn" onclick="goSueldosTab('nuevoEmpleado')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Cargar nuevo empleado
+          </button>
+        </div>
+
+        <div class="pagos-body">
+
+          <!-- PANE: ESQUEMA DEL PERSONAL -->
+          <section class="pagos-pane active" id="stabEsquema">
+            <div class="topbar">
+              <div><h1>Esquema del personal</h1><div class="masa-subtitle" id="masaSalarialSubtitle">Masa salarial total: $0</div></div>
+            </div>
+            <div class="empleados-table-wrap">
+              <table class="empleados-table">
+                <thead>
+                  <tr>
+                    <th>N°</th>
+                    <th>Condición</th>
+                    <th>Nombre completo</th>
+                    <th>Turno</th>
+                    <th>Puesto</th>
+                    <th>Inicio de actividades</th>
+                    <th>SUELDO</th>
+                    <th>Sueldo anterior</th>
+                    <th>%</th>
+                    <th>% de masa</th>
+                  </tr>
+                </thead>
+                <tbody id="empleadosBody"></tbody>
+              </table>
+              <div class="empty-state" id="empleadosEmptyState" style="display:none;">Todavía no cargaste ningún empleado. Usá "Cargar nuevo empleado" para empezar.</div>
+            </div>
+            <div class="actualizacion-footer" id="actualizacionFooter">
+              <div class="actualizacion-hint">Editá el SUELDO de cada empleado. Los porcentajes se recalculan en vivo a medida que escribís. Los cambios quedan definitivos recién al presionar "Guardar cambios".</div>
+              <div class="actualizacion-buttons">
+                <button class="btn-primary" onclick="guardarActualizacionSueldos()">Guardar cambios</button>
+                <button class="btn-primary secondary" onclick="cancelarActualizacionSueldos()">Cancelar</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- PANE: LIQUIDACIÓN (placeholder) -->
+          <section class="pagos-pane" id="stabLiquidacion">
+            <div class="placeholder-card">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12h6M9 16h6M9 8h6M5 21V5a2 2 0 0 1 2-2h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2Z"/></svg></div>
+              <h2>Liquidación</h2>
+              <p>Esta sección todavía no está desarrollada. Vamos a construirla en un próximo paso, una vez definido el esquema del personal.</p>
+            </div>
+          </section>
+
+          <!-- PANE: CARGAR NUEVO EMPLEADO -->
+          <section class="pagos-pane" id="stabNuevoEmpleado">
+            <div class="screen-header">
+              <div class="back-btn" onclick="goSueldosTab('esquema')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+              <div><h1 style="font-size:22px;">Cargar nuevo empleado</h1></div>
+            </div>
+            <div class="form-card">
+              <div class="form-section-title">Datos del empleado</div>
+              <div class="field-row">
+                <div class="field" id="fld-eNumeracion" style="max-width:140px;"><label>Numeración</label><input type="text" id="eNumeracion" disabled></div>
+                <div class="field" id="fld-eCondicion"><label>Condición</label>
+                  <select id="eCondicion">
+                    <option value="">Seleccionar…</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                  </select>
+                </div>
+                <div class="field" id="fld-eTurno"><label>Turno</label>
+                  <select id="eTurno">
+                    <option value="">Seleccionar…</option>
+                    <option>Mañana</option>
+                    <option>Tarde</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field" id="fld-eNombreCompleto" style="flex:2"><label>Nombre completo</label><input type="text" id="eNombreCompleto" placeholder="Nombre y apellido"></div>
+                <div class="field" id="fld-ePuesto"><label>Puesto</label>
+                  <select id="ePuesto">
+                    <option value="">Seleccionar…</option>
+                    <option>Cajera / Admin</option>
+                    <option>Cocinero</option>
+                    <option>Encargado</option>
+                    <option>Mantenimiento</option>
+                    <option>Administración</option>
+                    <option>Ayudante de servicio</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field" id="fld-eInicioActividades"><label>Inicio de actividades</label>
+                  <div class="date-field-wrap">
+                    <input type="text" id="eInicioActividades" placeholder="dd/mm/aaaa" maxlength="10">
+                    <button type="button" class="cal-btn" data-target="eInicioActividades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></button>
+                  </div>
+                </div>
+                <div class="field" id="fld-eSueldo"><label>SUELDO</label><input type="text" id="eSueldo" placeholder="$0" oninput="onNuevoEmpleadoSueldoInput(this)"></div>
+              </div>
+              <div class="form-footer">
+                <button class="btn-primary" style="flex:1" onclick="guardarNuevoEmpleado()">Guardar empleado</button>
+                <button class="btn-primary secondary" onclick="goSueldosTab('esquema')">Cancelar</button>
+              </div>
+            </div>
+          </section>
+
+        </div>
       </div>
     </section>
 
@@ -3673,6 +3808,247 @@ function renderVentasAB(facturado, efectivo){
    INIT
    ========================================================= */
 renderList();
+
+/* ===== SUELDOS: Esquema del personal ===== */
+var empleadosCache = [];
+var modoActualizacionSueldos = false;
+var sueldosPendientes = {};
+var SUELDOS_PANE_ID = { esquema: "stabEsquema", liquidacion: "stabLiquidacion", nuevoEmpleado: "stabNuevoEmpleado" };
+
+function goSueldosTab(tab){
+  var scope = document.getElementById("sueldosSubnav");
+  scope.querySelectorAll(".pagos-tab").forEach(function(t){ t.classList.toggle("active", t.dataset.stab===tab); });
+  scope.querySelectorAll(".pagos-pane").forEach(function(p){ p.classList.remove("active"); });
+  var target = document.getElementById(SUELDOS_PANE_ID[tab]);
+  if(target) target.classList.add("active");
+  if(tab==="nuevoEmpleado"){ resetNuevoEmpleadoForm(); }
+  if(tab==="esquema"){ renderEmpleadosTable(); }
+}
+
+function resetNuevoEmpleadoForm(){
+  document.getElementById("eNumeracion").value = "N° " + (empleadosCache.length+1);
+  document.getElementById("eCondicion").value = "";
+  document.getElementById("eNombreCompleto").value = "";
+  document.getElementById("eTurno").value = "";
+  document.getElementById("ePuesto").value = "";
+  document.getElementById("eInicioActividades").value = "";
+  document.getElementById("eSueldo").value = "";
+}
+
+function parseSueldoInput(str){
+  var digits = String(str||"").replace(/[^\d]/g,"");
+  return digits ? Number(digits) : 0;
+}
+
+function formatearPesosVivo(n){
+  return "$" + Number(n||0).toLocaleString("es-AR");
+}
+
+function onNuevoEmpleadoSueldoInput(el){
+  var digits = el.value.replace(/[^\d]/g,"");
+  if(!digits){ el.value=""; return; }
+  el.value = formatearPesosVivo(Number(digits));
+}
+
+async function guardarNuevoEmpleado(){
+  var condicion = document.getElementById("eCondicion").value;
+  var nombre = document.getElementById("eNombreCompleto").value.trim();
+  var turno = document.getElementById("eTurno").value;
+  var puesto = document.getElementById("ePuesto").value;
+  var inicioDMY = document.getElementById("eInicioActividades").value.trim();
+  var sueldo = parseSueldoInput(document.getElementById("eSueldo").value);
+
+  if(!condicion || !nombre || !turno || !puesto){
+    alert("Completá todos los campos obligatorios antes de guardar.");
+    return;
+  }
+
+  var payload = {
+    condicion: condicion,
+    nombre_completo: nombre,
+    turno: turno,
+    puesto: puesto,
+    inicio_actividades: inicioDMY ? dmyToISO(inicioDMY) : null,
+    sueldo: sueldo,
+    creado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null
+  };
+
+  var res = await sb.from("lf_empleados").insert(payload).select().single();
+  if(res.error){
+    alert("No se pudo guardar el empleado: " + res.error.message);
+    return;
+  }
+
+  empleadosCache.push(res.data);
+  logHistorialSueldos("Alta de empleado", "Se cargó a " + nombre + " (" + puesto + ").");
+  goSueldosTab("esquema");
+}
+
+async function logHistorialSueldos(accion, detalle){
+  try{
+    await sb.from("lf_historial").insert({
+      usuario_id: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
+      usuario_nombre: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.nombre : "—",
+      accion: accion, detalle: detalle||"", modulo: "sueldos"
+    });
+  }catch(e){ console.warn("No se pudo registrar el historial de sueldos", e); }
+}
+
+async function loadEmpleados(){
+  try{
+    var res = await sb.from("lf_empleados").select("*").order("numeracion", { ascending:true });
+    if(res.error){ console.warn("No se pudieron cargar los empleados", res.error); return; }
+    empleadosCache = res.data || [];
+    sueldosPendientes = {};
+    renderEmpleadosTable();
+  }catch(e){ console.warn("No se pudieron cargar los empleados", e); }
+}
+
+function getSueldoPreview(emp){
+  if(modoActualizacionSueldos && Object.prototype.hasOwnProperty.call(sueldosPendientes, emp.id)){
+    return sueldosPendientes[emp.id];
+  }
+  return Number(emp.sueldo||0);
+}
+
+function calcPct(base, nuevo){
+  if(!base) return null;
+  return ((nuevo - base)/base)*100;
+}
+
+function fmtPct(n){
+  return (n>=0 ? "+" : "") + n.toFixed(1) + "%";
+}
+
+function escapeHtmlSueldos(str){
+  return String(str||"").replace(/[&<>"']/g, function(c){
+    if(c==="&") return "&amp;";
+    if(c==="<") return "&lt;";
+    if(c===">") return "&gt;";
+    if(c==='"') return "&quot;";
+    return "&#39;";
+  });
+}
+
+function renderEmpleadosTable(){
+  var tbody = document.getElementById("empleadosBody");
+  var emptyState = document.getElementById("empleadosEmptyState");
+  var subtitle = document.getElementById("masaSalarialSubtitle");
+  if(!tbody) return;
+
+  if(!empleadosCache.length){
+    tbody.innerHTML = "";
+    emptyState.style.display = "block";
+    subtitle.textContent = "Masa salarial total: $0";
+    return;
+  }
+  emptyState.style.display = "none";
+
+  var masaTotal = 0;
+  for(var i=0;i<empleadosCache.length;i++){ masaTotal += getSueldoPreview(empleadosCache[i]); }
+  subtitle.textContent = "Masa salarial total: " + fmtMoney(masaTotal);
+
+  var rows = "";
+  for(var j=0;j<empleadosCache.length;j++){
+    var emp = empleadosCache[j];
+    var sueldoActualDb = Number(emp.sueldo||0);
+    var sueldoPreview = getSueldoPreview(emp);
+    var pct = modoActualizacionSueldos
+      ? calcPct(sueldoActualDb, sueldoPreview)
+      : (emp.sueldo_anterior!=null ? calcPct(Number(emp.sueldo_anterior), sueldoActualDb) : null);
+    var pctMasa = masaTotal>0 ? (sueldoPreview/masaTotal*100) : 0;
+
+    var sueldoCell;
+    if(modoActualizacionSueldos){
+      sueldoCell = "<input type=\"text\" class=\"sueldo-edit-input\" data-id=\"" + emp.id + "\" value=\"" + formatearPesosVivo(sueldoPreview) + "\" oninput=\"onSueldoEditInput('" + emp.id + "', this)\">";
+    } else {
+      sueldoCell = fmtMoney(emp.sueldo);
+    }
+
+    var sueldoAnteriorCell = emp.sueldo_anterior!=null ? fmtMoney(emp.sueldo_anterior) : "—";
+    var inicioCell = emp.inicio_actividades ? isoToDMY(emp.inicio_actividades) : "—";
+    var pctCell = pct===null ? "—" : fmtPct(pct);
+    var pctClass = (pct!==null && pct>0) ? " class=\"pct-up\"" : "";
+
+    rows += "<tr>";
+    rows += "<td>" + emp.numeracion + "</td>";
+    rows += "<td><span class=\"badge-condicion cond-" + String(emp.condicion||"").toLowerCase() + "\">" + emp.condicion + "</span></td>";
+    rows += "<td>" + escapeHtmlSueldos(emp.nombre_completo) + "</td>";
+    rows += "<td>" + emp.turno + "</td>";
+    rows += "<td>" + emp.puesto + "</td>";
+    rows += "<td>" + inicioCell + "</td>";
+    rows += "<td>" + sueldoCell + "</td>";
+    rows += "<td>" + sueldoAnteriorCell + "</td>";
+    rows += "<td" + pctClass + ">" + pctCell + "</td>";
+    rows += "<td>" + pctMasa.toFixed(1) + "%</td>";
+    rows += "</tr>";
+  }
+  tbody.innerHTML = rows;
+}
+
+function onSueldoEditInput(id, inputEl){
+  var digits = inputEl.value.replace(/[^\d]/g,"");
+  var n = digits ? Number(digits) : 0;
+  sueldosPendientes[id] = n;
+  renderEmpleadosTable();
+  var again = document.querySelector(".sueldo-edit-input[data-id=\"" + id + "\"]");
+  if(again){ again.focus(); var pos = again.value.length; again.setSelectionRange(pos,pos); }
+}
+
+function toggleActualizacionSueldos(){
+  modoActualizacionSueldos = !modoActualizacionSueldos;
+  sueldosPendientes = {};
+  document.getElementById("btnActualizarSueldos").classList.toggle("active", modoActualizacionSueldos);
+  document.getElementById("actualizacionFooter").style.display = modoActualizacionSueldos ? "flex" : "none";
+  renderEmpleadosTable();
+}
+
+function cancelarActualizacionSueldos(){
+  modoActualizacionSueldos = false;
+  sueldosPendientes = {};
+  document.getElementById("btnActualizarSueldos").classList.remove("active");
+  document.getElementById("actualizacionFooter").style.display = "none";
+  renderEmpleadosTable();
+}
+
+async function guardarActualizacionSueldos(){
+  var ids = Object.keys(sueldosPendientes);
+  var cambios = ids.filter(function(id){
+    var emp = empleadosCache.find(function(e){ return e.id===id; });
+    return emp && sueldosPendientes[id] !== Number(emp.sueldo||0);
+  });
+  if(!cambios.length){
+    cancelarActualizacionSueldos();
+    return;
+  }
+  if(!confirm("Vas a actualizar el sueldo de " + cambios.length + " empleado(s). ¿Confirmás?")) return;
+
+  for(var i=0;i<cambios.length;i++){
+    var id = cambios[i];
+    var emp = empleadosCache.find(function(e){ return e.id===id; });
+    var nuevo = sueldosPendientes[id];
+    var anterior = Number(emp.sueldo||0);
+    var res = await sb.from("lf_empleados").update({
+      sueldo: nuevo,
+      sueldo_anterior: anterior,
+      modificado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
+      modificado_fecha: new Date().toISOString()
+    }).eq("id", id);
+    if(res.error){
+      alert("No se pudo actualizar el sueldo de " + emp.nombre_completo + ": " + res.error.message);
+      continue;
+    }
+    await logHistorialSueldos("Actualización de sueldo", emp.nombre_completo + ": " + fmtMoney(anterior) + " -> " + fmtMoney(nuevo) + ".");
+  }
+
+  modoActualizacionSueldos = false;
+  sueldosPendientes = {};
+  document.getElementById("btnActualizarSueldos").classList.remove("active");
+  document.getElementById("actualizacionFooter").style.display = "none";
+  await loadEmpleados();
+}
+
+loadEmpleados();
 </script>
 </body>
 </html>
