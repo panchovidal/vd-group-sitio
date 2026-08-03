@@ -1542,6 +1542,42 @@ function applyPerfilSession(perfil){
   document.getElementById("umUsuario").textContent = currentUser.usuario;
   document.getElementById("loginScreen").style.display = "none";
 }
+// Secciones del módulo La Fortaleza (deben coincidir con SECTIONS_BY_PROYECTO.fortaleza en home.html
+// y con los data-module de la barra lateral). El dueño siempre tiene acceso a todas.
+const FORTALEZA_SECCIONES = ["ventas","pagos","sueldos","reportes","config"];
+function tieneSeccionFortaleza(mod){
+  if(!currentPerfil) return false;
+  if(currentPerfil.rol === "dueño") return true;
+  return (currentPerfil.secciones||[]).includes("fortaleza:"+mod);
+}
+function aplicarGatingDeSecciones(){
+  let algunaVisible = false;
+  let primeraVisible = null;
+  document.querySelectorAll(".module-nav-item[data-module]").forEach(item=>{
+    const mod = item.dataset.module;
+    const permitido = tieneSeccionFortaleza(mod);
+    item.classList.toggle("hidden", !permitido);
+    if(permitido){
+      algunaVisible = true;
+      if(!primeraVisible) primeraVisible = mod;
+    }
+  });
+  const activo = document.querySelector(".module-nav-item.active");
+  const modActivo = activo ? activo.dataset.module : null;
+  if(!algunaVisible){
+    // Caso borde: el perfil tiene el proyecto "fortaleza" tildado pero ninguna sección habilitada.
+    document.querySelectorAll(".module-screen").forEach(s=>s.classList.remove("active"));
+    document.querySelector(".module-sidebar").classList.add("hidden");
+    document.querySelector(".module-main").innerHTML = `<div class="placeholder-card" style="margin:60px auto;">
+      <h2>Todavía no tenés acceso a ninguna sección</h2>
+      <p>Pedile al dueño que te habilite al menos una sección dentro de "La Fortaleza" desde Configuración de perfiles en VD Group.</p>
+    </div>`;
+    return;
+  }
+  if(!modActivo || !tieneSeccionFortaleza(modActivo)){
+    goModule(primeraVisible);
+  }
+}
 (async function initSession(){
   try{
     const { data: { session } } = await sb.auth.getSession();
@@ -1549,6 +1585,7 @@ function applyPerfilSession(perfil){
     const { data: perfil, error } = await sb.from("perfiles").select("*").eq("id", session.user.id).single();
     if(error || !perfil){ window.location.href = "home.html"; return; }
     applyPerfilSession(perfil);
+    aplicarGatingDeSecciones();
     await Promise.all([loadMasterData(), loadOrdenes()]);
     renderComprasLists();
     renderList();

@@ -189,6 +189,13 @@
   .pf-proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
   .pf-proj-chip{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#fff;background:var(--ink-3);border:1px solid var(--border-2);border-radius:9px;padding:9px 11px;cursor:pointer;}
   .pf-proj-chip input{accent-color:var(--orange);}
+  .pf-proj-block{margin-bottom:10px;}
+  .pf-sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 4px 20px;padding:10px 10px 10px 12px;border-left:2px solid var(--orange-dim);}
+  .pf-sec-grid.hidden{display:none;}
+  .pf-sec-chip{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-2);background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 9px;cursor:pointer;}
+  .pf-sec-chip input{accent-color:var(--orange);}
+  .pf-sec-empty-note{font-size:11px;color:var(--text-3);margin:6px 0 4px 20px;font-style:italic;}
+  .pf-proj-list{display:flex;flex-direction:column;gap:0;margin-bottom:16px;}
   .pf-add-btn{background:var(--orange);color:#fff;border:none;padding:10px 20px;border-radius:9px;font-size:12.8px;font-weight:800;cursor:pointer;}
   .pf-add-btn:hover{filter:brightness(1.1);}
   .pf-cancel-btn{background:var(--ink-3);color:var(--text-2);border:1px solid var(--border-2);padding:10px 16px;border-radius:9px;font-size:12.8px;font-weight:700;cursor:pointer;margin-left:8px;}
@@ -350,7 +357,7 @@
     <div class="pf-back" onclick="hidePerfiles()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
     <div><h1>Configuración de perfiles</h1><p>Usuarios con acceso al panel de VD Group · visible solo para el dueño</p></div>
   </div>
-  <p class="pf-hint">Ordenado alfabéticamente por usuario. Los "proyectos habilitados" todavía no restringen el acceso a los módulos — es un modelo preliminar, la lógica de permisos por proyecto la vamos a activar en el próximo paso.</p>
+  <p class="pf-hint">Ordenado alfabéticamente por usuario. Los proyectos y secciones tildados son los únicos a los que ese perfil puede entrar — el resto queda bloqueado de verdad, no solo oculto.</p>
   <div class="pf-card" id="pfList"></div>
 
   <div class="pf-form">
@@ -361,9 +368,9 @@
       </div>
     </div>
     <div class="pf-field" style="margin-bottom:16px;"><label>Email <span style="text-transform:none;font-weight:500;color:var(--text-3);">(para recuperar la contraseña)</span></label><input type="email" id="pfNewEmail" placeholder="usuario@vidalgroup.com.ar"></div>
-    <div class="pf-projects-label">Proyectos habilitados</div>
-    <div class="pf-projects-hint">A futuro, esto va a definir qué tarjetas puede abrir cada perfil.</div>
-    <div class="pf-proj-grid" id="pfNewProyectos"></div>
+    <div class="pf-projects-label">Proyectos y secciones habilitadas</div>
+    <div class="pf-projects-hint">Tildá los proyectos a los que va a poder entrar, y dentro de cada uno, las secciones específicas que puede ver y usar.</div>
+    <div class="pf-proj-list" id="pfNewProyectos"></div>
     <button class="pf-add-btn" onclick="addPerfil()">+ Agregar perfil</button>
   </div>
 </div>
@@ -403,6 +410,19 @@ const PROYECTOS = [
   {id:"vidal", nombre:"Vidal Desarrollos"},
   {id:"carwash", nombre:"Carwash"},
 ];
+// Secciones dentro de cada proyecto (hoy solo La Fortaleza las tiene definidas, coinciden
+// exactamente con los módulos del menú lateral de la-fortaleza.html). Un perfil sin ninguna
+// sección tildada dentro de un proyecto habilitado no puede leer ni escribir nada de ese
+// proyecto (la restricción real vive en RLS en Supabase, esto solo arma el checklist).
+const SECTIONS_BY_PROYECTO = {
+  fortaleza: [
+    {id:"ventas", nombre:"Ventas"},
+    {id:"pagos", nombre:"Pagos / Compras"},
+    {id:"sueldos", nombre:"Sueldos"},
+    {id:"reportes", nombre:"Reportes"},
+    {id:"config", nombre:"Configuración"},
+  ],
+};
 let currentPerfil = null;   // fila de public.perfiles del usuario logueado
 let perfilesCache = [];     // lista de perfiles (solo se llena para el dueño)
 let editingIndex = null;
@@ -568,10 +588,36 @@ function hidePerfiles(){
   document.getElementById("perfilesView").classList.add("hidden");
   document.getElementById("dashView").classList.remove("hidden");
 }
+function proyectosWithSeccionesHTML(prefix, selectedProyectos, selectedSecciones){
+  selectedProyectos = selectedProyectos || [];
+  selectedSecciones = selectedSecciones || [];
+  return PROYECTOS.map(p=>{
+    const checked = selectedProyectos.includes(p.id);
+    const secciones = SECTIONS_BY_PROYECTO[p.id] || [];
+    const secHTML = secciones.length ? `
+      <div class="pf-sec-grid ${checked?'':'hidden'}" id="${prefix}Sec_${p.id}">
+        ${secciones.map(s=>`<label class="pf-sec-chip"><input type="checkbox" value="${p.id}:${s.id}" ${selectedSecciones.includes(p.id+':'+s.id)?'checked':''}> ${s.nombre}</label>`).join("")}
+      </div>` : "";
+    return `<div class="pf-proj-block">
+      <label class="pf-proj-chip"><input type="checkbox" value="${p.id}" ${checked?'checked':''} onchange="toggleSeccionesFor('${prefix}','${p.id}',this.checked)"> ${p.nombre}</label>
+      ${secHTML}
+    </div>`;
+  }).join("");
+}
+function toggleSeccionesFor(prefix, proyectoId, checked){
+  const el = document.getElementById(prefix+"Sec_"+proyectoId);
+  if(el) el.classList.toggle("hidden", !checked);
+}
+function collectProyectosYSecciones(containerId){
+  const container = document.getElementById(containerId);
+  const proyectos = Array.from(container.querySelectorAll(".pf-proj-chip input:checked")).map(c=>c.value);
+  const secciones = Array.from(container.querySelectorAll(".pf-sec-chip input:checked")).map(c=>c.value)
+    .filter(s=>proyectos.includes(s.split(":")[0])); // ignora secciones de proyectos destildados
+  return { proyectos, secciones };
+}
 function renderPerfilesForm(){
-  document.getElementById("pfNewProyectos").innerHTML = PROYECTOS.map(p=>`
-    <label class="pf-proj-chip"><input type="checkbox" value="${p.id}" checked> ${p.nombre}</label>
-  `).join("");
+  // Perfil nuevo: arranca sin nada tildado, el dueño elige explícitamente qué habilitar.
+  document.getElementById("pfNewProyectos").innerHTML = proyectosWithSeccionesHTML("pfNew", [], []);
 }
 function proyectosChipsHTML(ids){
   if(!ids || !ids.length) return `<span class="pf-chip">sin proyectos</span>`;
@@ -581,21 +627,34 @@ function proyectosChipsHTML(ids){
     return `<span class="pf-chip">${p?p.nombre:id}</span>`;
   }).join("");
 }
+function seccionesChipsHTML(proyectos, secciones){
+  const withSections = (proyectos||[]).filter(id=>(SECTIONS_BY_PROYECTO[id]||[]).length);
+  if(!withSections.length) return "";
+  return withSections.map(pid=>{
+    const defs = SECTIONS_BY_PROYECTO[pid];
+    const activas = defs.filter(s=>(secciones||[]).includes(pid+":"+s.id));
+    if(!activas.length) return `<span class="pf-chip" style="opacity:.55;">${pid}: sin secciones</span>`;
+    return activas.map(s=>`<span class="pf-chip">${s.nombre}</span>`).join("");
+  }).join("");
+}
 function renderPerfilesList(){
   const list = perfilesCache.slice().sort((a,b)=>a.usuario.localeCompare(b.usuario,"es"));
   const el = document.getElementById("pfList");
   el.innerHTML = list.map((p,i)=>{
     if(editingIndex===i){
+      const lockUsuario = p.rol === "dueño"; // por las dudas, no se toca el usuario del dueño desde acá
       return `<div class="pf-row" style="flex-direction:column;align-items:stretch;">
         <div class="pf-field-row" style="width:100%;">
-          <input class="pf-field" style="flex:1;padding:9px 11px;border-radius:8px;border:1px solid var(--border-2);background:var(--ink-3);color:var(--text-3);font-size:12.8px;" id="editUsuario${i}" value="${p.usuario}" disabled title="El usuario no se puede modificar">
+          <input class="pf-field" style="flex:1;padding:9px 11px;border-radius:8px;border:1px solid var(--border-2);background:var(--ink-3);color:${lockUsuario?'var(--text-3)':'#fff'};font-size:12.8px;" id="editUsuario${i}" value="${p.usuario}" ${lockUsuario?'disabled title="El usuario del dueño no se puede modificar"':''}>
           <input id="editNombre${i}" value="${p.nombre||''}" placeholder="Nombre" style="flex:1;padding:9px 11px;border-radius:8px;border:1px solid var(--border-2);background:var(--ink-3);color:#fff;font-size:12.8px;">
         </div>
-        <!-- Reseteo de clave: no soportado todavía desde esta pantalla. Cuando exista una página de
-             restablecimiento de clave, se puede ofrecer acá vía supabase.auth.resetPasswordForEmail(email). -->
         <input id="editEmail${i}" value="${p.email||''}" placeholder="Email" style="width:100%;margin-top:8px;padding:9px 11px;border-radius:8px;border:1px solid var(--border-2);background:var(--ink-3);color:#fff;font-size:12.8px;">
-        <div class="pf-proj-grid" id="editProyectos${i}" style="margin-top:10px;">
-          ${PROYECTOS.map(pr=>`<label class="pf-proj-chip"><input type="checkbox" value="${pr.id}" ${(p.proyectos||[]).includes(pr.id)?'checked':''}> ${pr.nombre}</label>`).join("")}
+        <div class="pw-wrap" style="width:100%;margin-top:8px;">
+          <input type="password" id="editClave${i}" placeholder="Nueva clave (dejar en blanco para no cambiarla)" style="width:100%;padding:9px 40px 9px 11px;border-radius:8px;border:1px solid var(--border-2);background:var(--ink-3);color:#fff;font-size:12.8px;">
+          <button type="button" class="pw-toggle" onclick="togglePwVisibility('editClave${i}')" style="right:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+        <div class="pf-proj-list" id="editProyectos${i}" style="margin-top:10px;margin-bottom:0;">
+          ${proyectosWithSeccionesHTML("edit"+i, p.proyectos||[], p.secciones||[])}
         </div>
         <div class="row-actions" style="align-self:flex-end;margin-top:10px;display:flex;gap:6px;">
           <button class="icon-btn" onclick="saveEditPerfil(${i})" title="Guardar" style="background:rgba(255,255,255,.08);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
@@ -605,7 +664,7 @@ function renderPerfilesList(){
     }
     return `<div class="pf-row">
       <div class="pf-main"><strong>${p.usuario}${p.rol==="dueño"?' <span class="pf-chip owner" style="margin-left:4px;">Dueño</span>':''}</strong><span>${p.nombre?p.nombre+" · ":""}${p.email||"sin email"}</span></div>
-      <div class="pf-tags">${proyectosChipsHTML(p.proyectos)}</div>
+      <div class="pf-tags">${proyectosChipsHTML(p.proyectos)}${seccionesChipsHTML(p.proyectos, p.secciones)}</div>
       <div class="row-actions">
         <button class="icon-btn" onclick="startEditPerfil(${i})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
         <button class="icon-btn del-btn" onclick="requestDeletePerfil(${i})" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
@@ -618,7 +677,7 @@ async function addPerfil(){
   const usuario = document.getElementById("pfNewUsuario").value.trim();
   const clave = document.getElementById("pfNewClave").value;
   const email = document.getElementById("pfNewEmail").value.trim();
-  const proyectos = Array.from(document.querySelectorAll("#pfNewProyectos input:checked")).map(c=>c.value);
+  const { proyectos, secciones } = collectProyectosYSecciones("pfNewProyectos");
   if(!usuario){ showToast("Escribí un nombre de usuario", "warn"); return; }
   if(!clave || clave.length<6){ showToast("La clave tiene que tener al menos 6 caracteres", "warn"); return; }
   if(!email || !email.includes("@")){ showToast("Ingresá un email válido, para recuperación de clave", "warn"); return; }
@@ -632,7 +691,7 @@ async function addPerfil(){
         "Authorization": `Bearer ${session.access_token}`,
         "apikey": SUPABASE_ANON_KEY
       },
-      body: JSON.stringify({ usuario, nombre: tituleize(usuario), email, password: clave, proyectos })
+      body: JSON.stringify({ usuario, nombre: tituleize(usuario), email, password: clave, proyectos, secciones })
     });
     const result = await res.json();
     if(!res.ok || result.error){ showToast(result.error || "No se pudo crear el perfil", "warn"); return; }
@@ -650,15 +709,36 @@ function startEditPerfil(i){ editingIndex = i; renderPerfilesList(); }
 function cancelEditPerfil(){ editingIndex = null; renderPerfilesList(); }
 async function saveEditPerfil(i){
   const p = perfilesCache[i];
+  const usuario = document.getElementById("editUsuario"+i).value.trim();
   const nombre = document.getElementById("editNombre"+i).value.trim();
   const email = document.getElementById("editEmail"+i).value.trim();
-  const proyectos = Array.from(document.querySelectorAll("#editProyectos"+i+" input:checked")).map(c=>c.value);
+  const clave = document.getElementById("editClave"+i).value;
+  const { proyectos, secciones } = collectProyectosYSecciones("editProyectos"+i);
+  if(!usuario){ showToast("El usuario no puede quedar vacío", "warn"); return; }
   if(!email || !email.includes("@")){ showToast("Ingresá un email válido", "warn"); return; }
-  const { error } = await sb.from("perfiles").update({ nombre, email, proyectos }).eq("id", p.id);
-  if(error){ showToast("No se pudo actualizar el perfil", "warn"); return; }
-  editingIndex = null;
-  await loadPerfilesList();
-  showToast("Perfil actualizado correctamente");
+  if(clave && clave.length < 6){ showToast("La nueva clave tiene que tener al menos 6 caracteres", "warn"); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ showToast("Tu sesión expiró. Volvé a iniciar sesión.", "warn"); return; }
+  try{
+    const body = { id: p.id, usuario, nombre, email, proyectos, secciones };
+    if(clave) body.password = clave;
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/update-perfil`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`,
+        "apikey": SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify(body)
+    });
+    const result = await res.json();
+    if(!res.ok || result.error){ showToast(result.error || "No se pudo actualizar el perfil", "warn"); return; }
+    editingIndex = null;
+    await loadPerfilesList();
+    showToast("Perfil actualizado correctamente");
+  }catch(e){
+    showToast("No se pudo conectar con el servidor", "warn");
+  }
 }
 function requestDeletePerfil(i){
   const p = perfilesCache[i];
