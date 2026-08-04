@@ -474,19 +474,18 @@
 .cta-outline:hover{background:rgba(89,119,210,0.08);}
 .cta-outline.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .masa-subtitle{color:var(--text-2);font-size:14px;margin-top:4px;}
-.empleados-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:auto;margin-top:18px;}
-.empleados-table{width:100%;border-collapse:collapse;font-size:14px;}
-.empleados-table thead th{position:sticky;top:0;background:var(--bg);color:var(--text-2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:12px 16px;border-bottom:1px solid var(--border);white-space:nowrap;z-index:1;}
-.empleados-table tbody td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-1);white-space:nowrap;}
-.empleados-table tbody tr:last-child td{border-bottom:none;}
-.empleados-table tbody tr:hover{background:rgba(89,119,210,0.05);}
+.sueldos-grid{display:grid;grid-template-columns:var(--grid-template-sueldos, 56px 1fr);align-items:center;width:max-content;min-width:100%;}
+.sueldos-grid .cell{padding:13px 8px;font-size:13.3px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sueldos-grid .c-num-emp{font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center;padding:13px 4px;}
+.sueldos-grid .c-nombre-emp{font-weight:700;color:var(--text-1);}
+.sueldos-grid .c-monto-emp{font-weight:800;color:var(--text-1);text-align:right;font-variant-numeric:tabular-nums;padding-right:16px;}
+.sueldos-grid .c-fecha-emp{font-weight:600;color:var(--text-3);font-size:12px;font-variant-numeric:tabular-nums;}
+.sueldos-grid .pct-up{color:#2a9d4a;font-weight:600;}
 .badge-condicion{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;}
 .badge-condicion.cond-a{background:rgba(213,242,106,0.35);color:#4b5a16;}
 .badge-condicion.cond-b{background:rgba(89,119,210,0.16);color:var(--blue);}
 .sueldo-edit-input{width:120px;padding:8px 10px;border:1.5px solid var(--sky);border-radius:var(--radius-sm);font-size:14px;font-weight:600;color:var(--text-1);background:#fff;}
 .sueldo-edit-input:focus{outline:none;border-color:var(--blue);}
-td.pct-up{color:#2a9d4a;font-weight:600;}
-.empty-state{padding:48px 20px;text-align:center;color:var(--text-3);font-size:14px;}
 .actualizacion-footer{display:none;align-items:center;justify-content:space-between;gap:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:16px 20px;margin-top:16px;}
 .actualizacion-hint{color:var(--text-2);font-size:13px;max-width:640px;}
 .actualizacion-buttons{display:flex;gap:10px;flex-shrink:0;}
@@ -865,27 +864,26 @@ td.pct-up{color:#2a9d4a;font-weight:600;}
             <div class="topbar">
               <div><h1>Esquema del personal</h1><div class="masa-subtitle" id="masaSalarialSubtitle">Masa salarial total: $0</div></div>
             </div>
-            <div class="empleados-table-wrap">
-              <table class="empleados-table">
-                <thead>
-                  <tr>
-                    <th>N°</th>
-                    <th>Condición</th>
-                    <th>Nombre completo</th>
-                    <th>Turno</th>
-                    <th>Puesto</th>
-                    <th>Inicio de actividades</th>
-                    <th>SUELDO</th>
-                    <th>Sueldo anterior</th>
-                    <th>%</th>
-                    <th>% de masa</th>
-                  </tr>
-                </thead>
-                <tbody id="empleadosBody"></tbody>
-              </table>
-              <div class="empty-state" id="empleadosEmptyState" style="display:none;">Todavía no cargaste ningún empleado. Usá "Cargar nuevo empleado" para empezar.</div>
+            <div class="toolbar">
+              <div class="toolbar-inner">
+                <div class="toolbar-default"><span id="sueldosFilterLabel">Mostrando todos los empleados</span></div>
+                <button class="btn-ghost" onclick="toggleSueldosColumnPicker(event)" title="Elegí, reordená y ajustá el ancho de las columnas">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="3" width="7" height="18" rx="1"></rect></svg>
+                  Columnas
+                </button>
+              </div>
             </div>
-            <div class="actualizacion-footer" id="actualizacionFooter">
+            <div class="list-scroll">
+              <div class="sueldos-grid col-head-row" id="sueldosColHeadRow"></div>
+              <div class="list" id="empleadosBody"></div>
+              <div class="empty-state" id="empleadosEmptyState" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path></svg>
+                <strong>No hay empleados para mostrar</strong>
+                <span>Usá "Cargar nuevo empleado" para cargar el primero.</span>
+              </div>
+            </div>
+            <div class="filter-popover col-picker" id="sueldosColumnPickerPopover"></div>
+<div class="actualizacion-footer" id="actualizacionFooter">
               <div class="actualizacion-hint">Editá el SUELDO de cada empleado. Los porcentajes se recalculan en vivo a medida que escribís. Los cambios quedan definitivos recién al presionar "Guardar cambios".</div>
               <div class="actualizacion-buttons">
                 <button class="btn-primary" onclick="guardarActualizacionSueldos()">Guardar cambios</button>
@@ -3930,15 +3928,294 @@ function escapeHtmlSueldos(str){
   });
 }
 
+/* ---- Grilla de columnas (mostrar/ocultar, reordenar, redimensionar) — análoga a la de Lista de órdenes ---- */
+var SUELDOS_GRID_COLUMNS = [
+  { id:"condicion", label:"Condición", sortField:"condicion", defaultWidth:110, minWidth:80, maxWidth:160,
+    cell:function(e){ return "<div class=\"cell\"><span class=\"badge-condicion cond-" + String(e.condicion||"").toLowerCase() + "\">" + e.condicion + "</span></div>"; } },
+  { id:"nombre", label:"Nombre completo", sortField:"nombre_completo", defaultWidth:200, minWidth:130, maxWidth:360,
+    cell:function(e){ return "<div class=\"cell c-nombre-emp\">" + escapeHtmlSueldos(e.nombre_completo) + "</div>"; } },
+  { id:"turno", label:"Turno", sortField:"turno", defaultWidth:100, minWidth:80, maxWidth:160,
+    cell:function(e){ return "<div class=\"cell\">" + e.turno + "</div>"; } },
+  { id:"puesto", label:"Puesto", sortField:"puesto", defaultWidth:160, minWidth:100, maxWidth:260,
+    cell:function(e){ return "<div class=\"cell\">" + e.puesto + "</div>"; } },
+  { id:"inicio", label:"Inicio de actividades", sortField:"inicio_actividades", defaultWidth:160, minWidth:110, maxWidth:220,
+    cell:function(e){ return "<div class=\"cell c-fecha-emp\">" + (e.inicio_actividades ? isoToDMY(e.inicio_actividades) : "—") + "</div>"; } },
+  { id:"sueldo", label:"SUELDO", sortField:"sueldo", defaultWidth:150, minWidth:110, maxWidth:220,
+    cell:function(e){
+      if(modoActualizacionSueldos){
+        return "<div class=\"cell\"><input type=\"text\" class=\"sueldo-edit-input\" data-id=\"" + e.id + "\" value=\"" + formatearPesosVivo(getSueldoPreview(e)) + "\" oninput=\"onSueldoEditInput('" + e.id + "', this)\"></div>";
+      }
+      return "<div class=\"cell c-monto-emp\">" + fmtMoney(e.sueldo) + "</div>";
+    } },
+  { id:"sueldoAnterior", label:"Sueldo anterior", sortField:"sueldo_anterior", defaultWidth:150, minWidth:110, maxWidth:220,
+    cell:function(e){ return "<div class=\"cell c-monto-emp\">" + (e.sueldo_anterior!=null ? fmtMoney(e.sueldo_anterior) : "—") + "</div>"; } },
+  { id:"pct", label:"%", sortField:"__pct", defaultWidth:100, minWidth:80, maxWidth:140,
+    cell:function(e){
+      var pct = modoActualizacionSueldos
+        ? calcPct(Number(e.sueldo||0), getSueldoPreview(e))
+        : (e.sueldo_anterior!=null ? calcPct(Number(e.sueldo_anterior), Number(e.sueldo||0)) : null);
+      var cls = (pct!==null && pct>0) ? "pct-up" : "";
+      var txt = pct===null ? "—" : fmtPct(pct);
+      return "<div class=\"cell\"><span class=\"" + cls + "\">" + txt + "</span></div>";
+    } },
+  { id:"pctMasa", label:"% de masa", sortField:"__pctMasa", defaultWidth:110, minWidth:90, maxWidth:150,
+    cell:function(e){
+      var masaTotal = 0;
+      for(var i=0;i<empleadosCache.length;i++){ masaTotal += getSueldoPreview(empleadosCache[i]); }
+      var pctMasa = masaTotal>0 ? (getSueldoPreview(e)/masaTotal*100) : 0;
+      return "<div class=\"cell\">" + pctMasa.toFixed(1) + "%</div>";
+    } }
+];
+var SUELDOS_GRID_STATE_KEY = "lf_sueldos_grid_state_v1";
+
+function defaultSueldosGridState(){
+  return {
+    order: SUELDOS_GRID_COLUMNS.map(function(c){ return c.id; }),
+    visible: Object.fromEntries(SUELDOS_GRID_COLUMNS.map(function(c){ return [c.id, true]; })),
+    widths: Object.fromEntries(SUELDOS_GRID_COLUMNS.map(function(c){ return [c.id, c.defaultWidth]; }))
+  };
+}
+var sueldosGridState = defaultSueldosGridState();
+
+function loadSueldosGridState(){
+  var def = defaultSueldosGridState();
+  try{
+    var saved = JSON.parse(localStorage.getItem(SUELDOS_GRID_STATE_KEY)||"null");
+    if(saved){
+      var validIds = {};
+      SUELDOS_GRID_COLUMNS.forEach(function(c){ validIds[c.id]=true; });
+      var order = (saved.order||[]).filter(function(id){ return validIds[id]; });
+      def.order.forEach(function(id){ if(order.indexOf(id)===-1) order.push(id); });
+      sueldosGridState = {
+        order: order,
+        visible: Object.assign({}, def.visible, saved.visible||{}),
+        widths: Object.assign({}, def.widths, saved.widths||{})
+      };
+    }
+  }catch(e){ sueldosGridState = def; }
+  applySueldosWidthVars();
+}
+function persistSueldosGridState(){
+  try{ localStorage.setItem(SUELDOS_GRID_STATE_KEY, JSON.stringify(sueldosGridState)); }catch(e){}
+}
+function applySueldosWidthVars(){
+  Object.keys(sueldosGridState.widths).forEach(function(id){
+    document.documentElement.style.setProperty("--cw-" + id, sueldosGridState.widths[id]+"px");
+  });
+}
+function getSueldosVisibleColumnDefs(){
+  return sueldosGridState.order.filter(function(id){ return sueldosGridState.visible[id]; }).map(function(id){ return SUELDOS_GRID_COLUMNS.find(function(c){ return c.id===id; }); }).filter(Boolean);
+}
+function applySueldosGridTemplateColumns(){
+  var cols = getSueldosVisibleColumnDefs();
+  var parts = ["56px"].concat(cols.map(function(c){ return "var(--cw-" + c.id + ", " + c.defaultWidth + "px)"; }));
+  document.documentElement.style.setProperty("--grid-template-sueldos", parts.join(" "));
+}
+function renderSueldosGridHeader(){
+  var cols = getSueldosVisibleColumnDefs();
+  var parts = ["<div class=\"col-head\" data-field=\"__num\" onclick=\"sueldosResetSort()\" title=\"Volver al orden de carga\">N°</div>"];
+  cols.forEach(function(col){
+    var arrowHtml = col.sortField ? "<span class=\"sort-arrow\" data-arrow=\"" + col.sortField + "\">▲</span>" : "";
+    parts.push("<div class=\"col-head\" data-field=\"" + (col.sortField||"") + "\"><span class=\"lbl\">" + col.label + "</span>" + arrowHtml + "<div class=\"col-resize\" data-col=\"" + col.id + "\"></div></div>");
+  });
+  document.getElementById("sueldosColHeadRow").innerHTML = parts.join("");
+  applySueldosGridTemplateColumns();
+  wireSueldosColHeadClicks();
+  initSueldosColumnResize();
+}
+function wireSueldosColHeadClicks(){
+  document.querySelectorAll("#sueldosColHeadRow .col-head").forEach(function(h){
+    h.addEventListener("click", function(e){
+      if(e.target.closest(".col-resize")) return;
+      if(modoActualizacionSueldos) return;
+      var f = h.dataset.field;
+      if(!f || f==="__num") return;
+      if(sueldosSortField===f) sueldosSortDir = sueldosSortDir==="asc" ? "desc" : "asc";
+      else { sueldosSortField=f; sueldosSortDir="asc"; }
+      renderEmpleadosTable();
+    });
+  });
+}
+function initSueldosColumnResize(){
+  document.querySelectorAll("#sueldosColHeadRow .col-resize").forEach(function(handle){
+    handle.addEventListener("click", function(e){ e.stopPropagation(); });
+    handle.addEventListener("mousedown", function(e){
+      e.preventDefault(); e.stopPropagation();
+      var id = handle.dataset.col;
+      var colDef = SUELDOS_GRID_COLUMNS.find(function(c){ return c.id===id; });
+      if(!colDef) return;
+      var colHead = handle.closest(".col-head");
+      var startX = e.clientX;
+      var startWidth = colHead.getBoundingClientRect().width;
+      handle.classList.add("active");
+      document.body.classList.add("col-resizing");
+      function onMove(ev){
+        var raw = Math.round(startWidth + (ev.clientX-startX));
+        var clamped = Math.max(colDef.minWidth, Math.min(colDef.maxWidth, raw));
+        document.documentElement.style.setProperty("--cw-" + id, clamped+"px");
+      }
+      function onUp(){
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.classList.remove("col-resizing");
+        handle.classList.remove("active");
+        var cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--cw-" + id)) || colDef.defaultWidth;
+        sueldosGridState.widths[id] = cur;
+        persistSueldosGridState();
+      }
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  });
+}
+
+/* ---- selector de columnas (mostrar/ocultar + reordenar) ---- */
+var sueldosDragColId = null;
+function toggleSueldosColumnPicker(ev){
+  ev.stopPropagation();
+  var pop = document.getElementById("sueldosColumnPickerPopover");
+  var wasOpen = pop.classList.contains("show");
+  if(wasOpen){ pop.classList.remove("show"); return; }
+  renderSueldosColumnPicker();
+  pop.classList.add("show");
+  var btn = ev.currentTarget;
+  var r = btn.getBoundingClientRect();
+  pop.style.top = (r.bottom+8)+"px";
+  var left = r.right-270;
+  if(left<12) left=12;
+  pop.style.left = left+"px";
+}
+function closeSueldosColumnPicker(){ document.getElementById("sueldosColumnPickerPopover").classList.remove("show"); }
+function renderSueldosColumnPicker(){
+  var pop = document.getElementById("sueldosColumnPickerPopover");
+  var rows = sueldosGridState.order.map(function(id){
+    var col = SUELDOS_GRID_COLUMNS.find(function(c){ return c.id===id; });
+    if(!col) return "";
+    var checked = sueldosGridState.visible[id] ? "checked" : "";
+    return "<div class=\"colpick-row\" draggable=\"true\" data-id=\"" + id + "\" ondragstart=\"sueldosColPickDragStart(event)\" ondragover=\"sueldosColPickDragOver(event)\" ondragleave=\"sueldosColPickDragLeave(event)\" ondrop=\"sueldosColPickDrop(event)\" ondragend=\"sueldosColPickDragEnd(event)\">" +
+      "<span class=\"cp-handle\" title=\"Arrastrá para reordenar\">⠿⠿</span>" +
+      "<label><input type=\"checkbox\" " + checked + " onchange=\"toggleSueldosColumnVisible('" + id + "',this.checked)\"><span>" + col.label + "</span></label>" +
+      "</div>";
+  }).join("");
+  pop.innerHTML = "<h4>Columnas de la lista</h4>" +
+    "<div class=\"colpick-list\">" + rows + "</div>" +
+    "<div class=\"filter-actions\"><button class=\"fa-clear\" onclick=\"resetSueldosGridColumns()\">Restaurar</button><button class=\"fa-apply\" onclick=\"closeSueldosColumnPicker()\">Cerrar</button></div>";
+}
+function toggleSueldosColumnVisible(id, checked){
+  var nextVisible = Object.assign({}, sueldosGridState.visible);
+  nextVisible[id] = checked;
+  if(Object.values(nextVisible).filter(Boolean).length===0){
+    if(typeof showToast==="function") showToast("Tiene que quedar al menos una columna visible", "warn");
+    renderSueldosColumnPicker();
+    return;
+  }
+  sueldosGridState.visible[id] = checked;
+  persistSueldosGridState();
+  renderSueldosGridHeader(); renderEmpleadosTable();
+}
+function sueldosColPickDragStart(ev){
+  sueldosDragColId = ev.currentTarget.dataset.id;
+  ev.currentTarget.classList.add("dragging");
+  ev.dataTransfer.effectAllowed = "move";
+}
+function sueldosColPickDragOver(ev){ ev.preventDefault(); ev.currentTarget.classList.add("drag-over"); }
+function sueldosColPickDragLeave(ev){ ev.currentTarget.classList.remove("drag-over"); }
+function sueldosColPickDrop(ev){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove("drag-over");
+  var targetId = ev.currentTarget.dataset.id;
+  if(!sueldosDragColId || sueldosDragColId===targetId) return;
+  var order = sueldosGridState.order.slice();
+  var from = order.indexOf(sueldosDragColId);
+  var to = order.indexOf(targetId);
+  if(from<0||to<0) return;
+  order.splice(from,1);
+  order.splice(to,0,sueldosDragColId);
+  sueldosGridState.order = order;
+  persistSueldosGridState();
+  renderSueldosGridHeader(); renderEmpleadosTable(); renderSueldosColumnPicker();
+}
+function sueldosColPickDragEnd(ev){ ev.currentTarget.classList.remove("dragging"); sueldosDragColId = null; }
+function resetSueldosGridColumns(){
+  sueldosGridState = defaultSueldosGridState();
+  persistSueldosGridState();
+  applySueldosWidthVars();
+  renderSueldosGridHeader(); renderEmpleadosTable(); renderSueldosColumnPicker();
+  if(typeof showToast==="function") showToast("Columnas restauradas a su configuración original");
+}
+document.addEventListener("click", function(e){
+  var pop = document.getElementById("sueldosColumnPickerPopover");
+  if(pop && pop.classList.contains("show") && !pop.contains(e.target) && !e.target.closest("[onclick=\"toggleSueldosColumnPicker(event)\"]")) closeSueldosColumnPicker();
+});
+
+/* ---- orden de filas: se acomodan según la columna que se clickee (asc/desc), renumerando N° ---- */
+var sueldosSortField = null;
+var sueldosSortDir = "asc";
+var sueldosFrozenOrder = null;
+
+function sueldosResetSort(){
+  if(modoActualizacionSueldos) return;
+  sueldosSortField = null;
+  sueldosSortDir = "asc";
+  renderEmpleadosTable();
+}
+function getSueldoSortValue(e, field){
+  var masaTotal, i;
+  switch(field){
+    case "sueldo": return getSueldoPreview(e);
+    case "sueldo_anterior": return Number(e.sueldo_anterior||0);
+    case "inicio_actividades": return e.inicio_actividades || "";
+    case "__pct": {
+      var pct = modoActualizacionSueldos
+        ? calcPct(Number(e.sueldo||0), getSueldoPreview(e))
+        : (e.sueldo_anterior!=null ? calcPct(Number(e.sueldo_anterior), Number(e.sueldo||0)) : null);
+      return pct===null ? -Infinity : pct;
+    }
+    case "__pctMasa": {
+      masaTotal = 0;
+      for(i=0;i<empleadosCache.length;i++){ masaTotal += getSueldoPreview(empleadosCache[i]); }
+      return masaTotal>0 ? (getSueldoPreview(e)/masaTotal*100) : 0;
+    }
+    default: return String(e[field]||"").toLowerCase();
+  }
+}
+function getSortedEmpleados(){
+  if(modoActualizacionSueldos && sueldosFrozenOrder){
+    var byId = {};
+    empleadosCache.forEach(function(e){ byId[e.id]=e; });
+    return sueldosFrozenOrder.map(function(id){ return byId[id]; }).filter(Boolean);
+  }
+  var list = empleadosCache.slice();
+  if(!sueldosSortField){
+    list.sort(function(a,b){ return (a.numeracion||0) - (b.numeracion||0); });
+    return list;
+  }
+  list.sort(function(a,b){
+    var va = getSueldoSortValue(a, sueldosSortField);
+    var vb = getSueldoSortValue(b, sueldosSortField);
+    var cmp;
+    if(typeof va === "number" && typeof vb === "number") cmp = va - vb;
+    else cmp = String(va).localeCompare(String(vb), "es");
+    return sueldosSortDir==="desc" ? -cmp : cmp;
+  });
+  return list;
+}
+
 function renderEmpleadosTable(){
   var tbody = document.getElementById("empleadosBody");
   var emptyState = document.getElementById("empleadosEmptyState");
   var subtitle = document.getElementById("masaSalarialSubtitle");
   if(!tbody) return;
 
+  document.querySelectorAll("#sueldosColHeadRow .sort-arrow").forEach(function(a){
+    var f = a.dataset.arrow;
+    a.classList.toggle("active", f===sueldosSortField);
+    a.textContent = (f===sueldosSortField && sueldosSortDir==="desc") ? "▼" : "▲";
+  });
+
   if(!empleadosCache.length){
     tbody.innerHTML = "";
-    emptyState.style.display = "block";
+    emptyState.style.display = "flex";
     subtitle.textContent = "Masa salarial total: $0";
     return;
   }
@@ -3948,40 +4225,14 @@ function renderEmpleadosTable(){
   for(var i=0;i<empleadosCache.length;i++){ masaTotal += getSueldoPreview(empleadosCache[i]); }
   subtitle.textContent = "Masa salarial total: " + fmtMoney(masaTotal);
 
+  var list = getSortedEmpleados();
+  var cols = getSueldosVisibleColumnDefs();
   var rows = "";
-  for(var j=0;j<empleadosCache.length;j++){
-    var emp = empleadosCache[j];
-    var sueldoActualDb = Number(emp.sueldo||0);
-    var sueldoPreview = getSueldoPreview(emp);
-    var pct = modoActualizacionSueldos
-      ? calcPct(sueldoActualDb, sueldoPreview)
-      : (emp.sueldo_anterior!=null ? calcPct(Number(emp.sueldo_anterior), sueldoActualDb) : null);
-    var pctMasa = masaTotal>0 ? (sueldoPreview/masaTotal*100) : 0;
-
-    var sueldoCell;
-    if(modoActualizacionSueldos){
-      sueldoCell = "<input type=\"text\" class=\"sueldo-edit-input\" data-id=\"" + emp.id + "\" value=\"" + formatearPesosVivo(sueldoPreview) + "\" oninput=\"onSueldoEditInput('" + emp.id + "', this)\">";
-    } else {
-      sueldoCell = fmtMoney(emp.sueldo);
-    }
-
-    var sueldoAnteriorCell = emp.sueldo_anterior!=null ? fmtMoney(emp.sueldo_anterior) : "—";
-    var inicioCell = emp.inicio_actividades ? isoToDMY(emp.inicio_actividades) : "—";
-    var pctCell = pct===null ? "—" : fmtPct(pct);
-    var pctClass = (pct!==null && pct>0) ? " class=\"pct-up\"" : "";
-
-    rows += "<tr>";
-    rows += "<td>" + emp.numeracion + "</td>";
-    rows += "<td><span class=\"badge-condicion cond-" + String(emp.condicion||"").toLowerCase() + "\">" + emp.condicion + "</span></td>";
-    rows += "<td>" + escapeHtmlSueldos(emp.nombre_completo) + "</td>";
-    rows += "<td>" + emp.turno + "</td>";
-    rows += "<td>" + emp.puesto + "</td>";
-    rows += "<td>" + inicioCell + "</td>";
-    rows += "<td>" + sueldoCell + "</td>";
-    rows += "<td>" + sueldoAnteriorCell + "</td>";
-    rows += "<td" + pctClass + ">" + pctCell + "</td>";
-    rows += "<td>" + pctMasa.toFixed(1) + "%</td>";
-    rows += "</tr>";
+  for(var j=0;j<list.length;j++){
+    var emp = list[j];
+    var cellsHtml = "";
+    for(var k=0;k<cols.length;k++){ cellsHtml += cols[k].cell(emp); }
+    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\"><div class=\"cell c-num-emp\">" + (j+1) + "</div>" + cellsHtml + "</div>";
   }
   tbody.innerHTML = rows;
 }
@@ -3998,6 +4249,11 @@ function onSueldoEditInput(id, inputEl){
 function toggleActualizacionSueldos(){
   modoActualizacionSueldos = !modoActualizacionSueldos;
   sueldosPendientes = {};
+  if(modoActualizacionSueldos){
+    sueldosFrozenOrder = getSortedEmpleados().map(function(e){ return e.id; });
+  } else {
+    sueldosFrozenOrder = null;
+  }
   document.getElementById("btnActualizarSueldos").classList.toggle("active", modoActualizacionSueldos);
   document.getElementById("actualizacionFooter").style.display = modoActualizacionSueldos ? "flex" : "none";
   renderEmpleadosTable();
@@ -4006,6 +4262,7 @@ function toggleActualizacionSueldos(){
 function cancelarActualizacionSueldos(){
   modoActualizacionSueldos = false;
   sueldosPendientes = {};
+  sueldosFrozenOrder = null;
   document.getElementById("btnActualizarSueldos").classList.remove("active");
   document.getElementById("actualizacionFooter").style.display = "none";
   renderEmpleadosTable();
@@ -4043,11 +4300,14 @@ async function guardarActualizacionSueldos(){
 
   modoActualizacionSueldos = false;
   sueldosPendientes = {};
+  sueldosFrozenOrder = null;
   document.getElementById("btnActualizarSueldos").classList.remove("active");
   document.getElementById("actualizacionFooter").style.display = "none";
   await loadEmpleados();
 }
 
+loadSueldosGridState();
+renderSueldosGridHeader();
 loadEmpleados();
 </script>
 </body>
