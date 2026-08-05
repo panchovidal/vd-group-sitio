@@ -904,6 +904,11 @@
             <div class="toolbar">
               <div class="toolbar-inner">
                 <div class="toolbar-default"><span id="sueldosFilterLabel">Mostrando todos los empleados</span></div>
+                <div class="toolbar-default" id="ultimaActualizacionInfo" style="display:none;"></div>
+                <button class="btn-ghost" id="btnAnularActualizacion" onclick="anularUltimaActualizacionSueldos()" title="Deshace por completo la última actualización de sueldos guardada" style="display:none;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/></svg>
+                  Anular última actualización
+                </button>
                 <button class="btn-ghost" onclick="toggleSueldosColumnPicker(event)" title="Elegí, reordená y ajustá el ancho de las columnas">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="3" width="7" height="18" rx="1"></rect></svg>
                   Columnas
@@ -3906,7 +3911,7 @@ function goSueldosTab(tab){
   var target = document.getElementById(SUELDOS_PANE_ID[tab]);
   if(target) target.classList.add("active");
   if(tab==="nuevoEmpleado"){ resetNuevoEmpleadoForm(); }
-  if(tab==="esquema"){ renderEmpleadosTable(); }
+  if(tab==="esquema"){ renderEmpleadosTable(); renderUltimaActualizacionInfo(); }
   if(tab==="liquidacion"){ liqOnTabOpen(); }
 }
 
@@ -3955,6 +3960,9 @@ async function guardarNuevoEmpleado(){
     puesto: puesto,
     inicio_actividades: inicioDMY ? dmyToISO(inicioDMY) : null,
     sueldo: sueldo,
+    /* El sueldo anterior "en este momento" (antes de cualquier actualización real) queda
+       igual al sueldo actual, para que %/comparación siempre tengan una base. */
+    sueldo_anterior: sueldo,
     creado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null
   };
 
@@ -3986,6 +3994,7 @@ async function loadEmpleados(){
     empleadosCache = res.data || [];
     sueldosPendientes = {};
     renderEmpleadosTable();
+    if(typeof cargarUltimaActualizacionSueldos === "function") cargarUltimaActualizacionSueldos();
   }catch(e){ console.warn("No se pudieron cargar los empleados", e); }
 }
 
@@ -4051,7 +4060,9 @@ var SUELDOS_GRID_COLUMNS = [
       for(var i=0;i<empleadosCache.length;i++){ masaTotal += getSueldoPreview(empleadosCache[i]); }
       var pctMasa = masaTotal>0 ? (getSueldoPreview(e)/masaTotal*100) : 0;
       return "<div class=\"cell\">" + pctMasa.toFixed(1) + "%</div>";
-    } }
+    } },
+  { id:"ultimaActualizacion", label:"Última actualización", sortField:"modificado_fecha", defaultWidth:170, minWidth:130, maxWidth:230,
+    cell:function(e){ return "<div class=\"cell c-fecha-emp\">" + (e.modificado_fecha ? fmtFechaHora(e.modificado_fecha) : "—") + "</div>"; } }
 ];
 var SUELDOS_GRID_STATE_KEY = "lf_sueldos_grid_state_v1";
 
@@ -4251,6 +4262,7 @@ function getSueldoSortValue(e, field){
   switch(field){
     case "sueldo": return getSueldoPreview(e);
     case "sueldo_anterior": return Number(e.sueldo_anterior||0);
+    case "modificado_fecha": return e.modificado_fecha || "";
     case "inicio_actividades": return e.inicio_actividades || "";
     case "__pct": {
       var pct = modoActualizacionSueldos
@@ -4344,6 +4356,7 @@ function toggleActualizacionSueldos(){
   document.getElementById("btnActualizarSueldos").classList.toggle("active", modoActualizacionSueldos);
   document.getElementById("actualizacionFooter").style.display = modoActualizacionSueldos ? "flex" : "none";
   renderEmpleadosTable();
+  renderUltimaActualizacionInfo();
 }
 
 function cancelarActualizacionSueldos(){
@@ -4353,6 +4366,7 @@ function cancelarActualizacionSueldos(){
   document.getElementById("btnActualizarSueldos").classList.remove("active");
   document.getElementById("actualizacionFooter").style.display = "none";
   renderEmpleadosTable();
+  renderUltimaActualizacionInfo();
 }
 
 async function guardarActualizacionSueldos(){
@@ -4367,6 +4381,8 @@ async function guardarActualizacionSueldos(){
   }
   if(!confirm("Vas a actualizar el sueldo de " + cambios.length + " empleado(s). ¿Confirmás?")) return;
 
+  var fechaActualizacion = new Date().toISOString();
+  var detalleLote = [];
   for(var i=0;i<cambios.length;i++){
     var id = cambios[i];
     var emp = empleadosCache.find(function(e){ return e.id===id; });
@@ -4376,13 +4392,33 @@ async function guardarActualizacionSueldos(){
       sueldo: nuevo,
       sueldo_anterior: anterior,
       modificado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
-      modificado_fecha: new Date().toISOString()
+      modificado_fecha: fechaActualizacion
     }).eq("id", id);
     if(res.error){
       alert("No se pudo actualizar el sueldo de " + emp.nombre_completo + ": " + res.error.message);
       continue;
     }
+    /* Guardamos el estado previo completo (no solo el sueldo) para poder anular este lote
+       más adelante y dejar todo exactamente como estaba antes de esta actualización. */
+    detalleLote.push({
+      empleado_id: id,
+      nombre_completo: emp.nombre_completo,
+      sueldo_previo: anterior,
+      sueldo_nuevo: nuevo,
+      sueldo_anterior_previo: emp.sueldo_anterior!=null ? Number(emp.sueldo_anterior) : null,
+      modificado_por_previo: emp.modificado_por || null,
+      modificado_fecha_previo: emp.modificado_fecha || null
+    });
     await logHistorialSueldos("Actualización de sueldo", emp.nombre_completo + ": " + fmtMoney(anterior) + " -> " + fmtMoney(nuevo) + ".");
+  }
+
+  if(detalleLote.length){
+    await sb.from("lf_sueldos_actualizaciones").insert({
+      fecha: fechaActualizacion,
+      usuario_id: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
+      usuario_nombre: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.nombre : "—",
+      detalle: detalleLote
+    });
   }
 
   modoActualizacionSueldos = false;
@@ -4391,6 +4427,74 @@ async function guardarActualizacionSueldos(){
   document.getElementById("btnActualizarSueldos").classList.remove("active");
   document.getElementById("actualizacionFooter").style.display = "none";
   await loadEmpleados();
+  await cargarUltimaActualizacionSueldos();
+}
+
+/* ---------- anular la última actualización de sueldos (un solo nivel hacia atrás) ---------- */
+var ultimaActualizacionSueldos = null;
+
+async function cargarUltimaActualizacionSueldos(){
+  try{
+    var res = await sb.from("lf_sueldos_actualizaciones").select("*").order("fecha", { ascending:false }).limit(1).maybeSingle();
+    ultimaActualizacionSueldos = (res && !res.error) ? res.data : null;
+  }catch(e){
+    console.warn("No se pudo cargar la última actualización de sueldos", e);
+    ultimaActualizacionSueldos = null;
+  }
+  renderUltimaActualizacionInfo();
+}
+
+function renderUltimaActualizacionInfo(){
+  var info = document.getElementById("ultimaActualizacionInfo");
+  var btn = document.getElementById("btnAnularActualizacion");
+  if(!info || !btn) return;
+  var lote = ultimaActualizacionSueldos;
+  if(!lote || lote.anulada){
+    info.style.display = "none";
+    btn.style.display = "none";
+    return;
+  }
+  var n = (lote.detalle||[]).length;
+  info.textContent = "Última actualización: " + fmtFechaHora(lote.fecha) + " · " + (lote.usuario_nombre||"—") + " · " + n + " empleado" + (n===1?"":"s");
+  info.style.display = "";
+  btn.style.display = modoActualizacionSueldos ? "none" : "";
+}
+
+async function anularUltimaActualizacionSueldos(){
+  var lote = ultimaActualizacionSueldos;
+  if(!lote || lote.anulada){
+    alert("No hay ninguna actualización de sueldos reciente para anular.");
+    return;
+  }
+  var detalle = lote.detalle || [];
+  var nombres = detalle.map(function(d){ return d.nombre_completo + " (" + fmtMoney(d.sueldo_nuevo) + " → " + fmtMoney(d.sueldo_previo) + ")"; }).join("\n");
+  if(!confirm("Vas a anular la actualización de sueldos del " + fmtFechaHora(lote.fecha) + ", que afectó a " + detalle.length + " empleado(s):\n\n" + nombres + "\n\n¿Confirmás?")) return;
+
+  for(var i=0;i<detalle.length;i++){
+    var d = detalle[i];
+    var res = await sb.from("lf_empleados").update({
+      sueldo: d.sueldo_previo,
+      sueldo_anterior: d.sueldo_anterior_previo,
+      modificado_por: d.modificado_por_previo,
+      modificado_fecha: d.modificado_fecha_previo
+    }).eq("id", d.empleado_id);
+    if(res.error){
+      alert("No se pudo anular el sueldo de " + d.nombre_completo + ": " + res.error.message);
+      continue;
+    }
+  }
+
+  await sb.from("lf_sueldos_actualizaciones").update({
+    anulada: true,
+    anulada_en: new Date().toISOString(),
+    anulada_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
+    anulada_por_nombre: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.nombre : "—"
+  }).eq("id", lote.id);
+
+  await logHistorialSueldos("Anulación de actualización de sueldo", "Se anuló la actualización del " + fmtFechaHora(lote.fecha) + " (" + detalle.length + " empleado(s)).");
+
+  await loadEmpleados();
+  await cargarUltimaActualizacionSueldos();
 }
 
 /* ===== SUELDOS: Liquidación =====
