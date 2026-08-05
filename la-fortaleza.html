@@ -4894,9 +4894,9 @@ function liqRenderTablaPresentismo(){
       var esFeriado = liqState.feriados.indexOf(j)!==-1;
       var feriadoCls = esFeriado ? " liq-dia-feriado-col" : "";
       if(!d){
-        row += "<td class=\""+feriadoCls+"\">·</td>";
+        row += "<td class=\"liq-dia-ausente"+feriadoCls+"\">aus.</td>";
       } else if(d.estado==="ausente"){
-        row += "<td class=\"liq-dia-ausente"+feriadoCls+"\">ausente</td>";
+        row += "<td class=\"liq-dia-ausente"+feriadoCls+"\">aus.</td>";
       } else {
         var cls = "liq-dia-"+d.estado+feriadoCls;
         var obsHtml = "";
@@ -5000,10 +5000,18 @@ function liqOnMontoInput(el){
   if(liqState.liquidado) return;
   var key = el.dataset.emp, field = el.dataset.field;
   var val = liqParseMontoInput(el.value);
-  el.value = fmtMoney(val);
-  var pos = el.value.length; el.setSelectionRange && el.setSelectionRange(pos,pos);
   if(field==="a") liqState.montoA[key] = val; else liqState.pagoBManual[key] = val;
   liqRenderTablaLiquidacion();
+  /* liqRenderTablaLiquidacion() reconstruye toda la tabla (recalcula B, sugerido y totales),
+     lo que destruye y recrea el <input> sobre el que se estaba escribiendo. Sin este paso,
+     el foco se perdía después de cada dígito. Se restaura el foco y el cursor al final del
+     mismo campo, en el input recién creado que le corresponde. */
+  var restored = document.querySelector('#liqTablaLiquidacion input[data-emp="'+key+'"][data-field="'+field+'"]');
+  if(restored){
+    restored.focus();
+    var pos2 = restored.value.length;
+    restored.setSelectionRange && restored.setSelectionRange(pos2,pos2);
+  }
   liqGuardarDraft();
 }
 function liqParseMontoInput(str){
