@@ -3912,7 +3912,7 @@ function goSueldosTab(tab){
   if(target) target.classList.add("active");
   if(tab==="nuevoEmpleado"){ resetNuevoEmpleadoForm(); }
   if(tab==="esquema"){ renderEmpleadosTable(); renderUltimaActualizacionInfo(); }
-  if(tab==="liquidacion"){ liqOnTabOpen(); }
+  if(tab==="liquidacion"){ liqOnTabOpen(); if(liqInitDone && liqState.mes) liqRenderTablaLiquidacion(); }
 }
 
 function resetNuevoEmpleadoForm(){
@@ -4927,6 +4927,29 @@ function liqEmpleadosPorKey(){
   });
   return out;
 }
+/* ---------- Adelantos de sueldo (se extraen de Pagos, no se cargan a mano en Liquidación) ----------
+   Fuente: `ordenes` (lf_ordenes), la misma lista que alimenta el módulo Pagos — no hace falta ir a
+   buscarlas de nuevo a Supabase porque ya están en memoria (se mantienen frescas: initSession las
+   carga una vez y cada alta/baja en Pagos actualiza el array `ordenes` en el momento).
+   Regla acordada con Pancho el 05/08: una orden de Pagos cuenta como "adelanto del mes en estudio" si
+   Rubro="Sueldos" + Concepto="Adelanto de sueldo" + Estado="Pagado" (si quedó "Pendiente" es porque
+   todavía no se le entregó la plata al empleado, así que no debe descontarse todavía) + Fecha de orden
+   dentro del mes de liqState.mes. Se excluyen "Anulado" por ser correcciones de error de carga.
+   El campo Proveedor de esa orden es el nombre del empleado (mismo catálogo que lf_empleados,
+   confirmado con Pancho), así que se suma por nombre exacto — no hay lógica difusa de matching. */
+function liqAdelantosPorNombre(){
+  var mapa = {};
+  if(!liqState.mes) return mapa;
+  var mesPrefix = String(liqState.mes).slice(0,7); // "yyyy-mm"
+  (ordenes||[]).forEach(function(o){
+    if(o.rubro!=="Sueldos" || o.concepto!=="Adelanto de sueldo") return;
+    if(o.estado!=="Pagado") return;
+    if(!o.fechaOrden || String(o.fechaOrden).slice(0,7)!==mesPrefix) return;
+    var nombre = o.proveedor||"";
+    mapa[nombre] = (mapa[nombre]||0) + Number(o.monto||0);
+  });
+  return mapa;
+}
 function liqRenderTodo(){
   if(!liqState.mes) return;
   document.getElementById("liqUploadCard").style.display = "";
@@ -5050,26 +5073,29 @@ function liqRenderTablaLiquidacion(){
     return {key:"emp_"+e.id, emp:e, nombre:e.nombre_completo, tienePresentismo:false};
   }));
 
+  var adelantosPorNombre = liqAdelantosPorNombre();
+
   var thead = "<thead><tr>" +
     "<th class=\"liq-col-nombre\">Nombre</th><th>Cond.</th><th>Sueldo</th><th>A</th><th>B</th>" +
-    "<th>Horas<br>extra</th><th>Feriados<br>trabaj.</th><th>Ausen-<br>cias</th>" +
+    "<th>Adelan-<br>tos</th><th>Horas<br>extra</th><th>Feriados<br>trabaj.</th><th>Ausen-<br>cias</th>" +
     "<th>Sugerido<br>pago B</th><th>Pago B</th></tr></thead>";
 
   var totalA = 0, totalB = 0;
   var rows = "";
   filas.forEach(function(f){
     if(!f.emp){
-      rows += "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+"<span class=\"liq-sin-presentismo\">sin ficha en la base</span></td><td colspan=\"9\" class=\"liq-num-cell\" style=\"color:var(--text-3);\">—</td></tr>";
+      rows += "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+"<span class=\"liq-sin-presentismo\">sin ficha en la base</span></td><td colspan=\"10\" class=\"liq-num-cell\" style=\"color:var(--text-3);\">—</td></tr>";
       return;
     }
     var sueldo = Number(f.emp.sueldo||0);
     var esCondA = f.emp.condicion==="A";
     var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : 0) : 0;
     var b = sueldo - a;
+    var adelanto = Number(adelantosPorNombre[f.nombre]||0);
     var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
     var jornal = sueldo/30;
     var valorHora = jornal/8;
-    var sugerido = Math.round(sueldo - a - (agr.ausencias*jornal) + (agr.feriadosTrabajados*jornal) + (agr.horasExtraMin/60*valorHora));
+    var sugerido = Math.round(sueldo - a - adelanto - (agr.ausencias*jornal) + (agr.feriadosTrabajados*jornal) + (agr.horasExtraMin/60*valorHora));
     var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
     totalA += a; totalB += pagoB;
 
@@ -5085,6 +5111,7 @@ function liqRenderTablaLiquidacion(){
         ? "<input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"a\" value=\""+fmtMoney(a)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+">"
         : "<span class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(0)+"</span>") + "</td>" +
       "<td class=\"liq-num-cell\">"+fmtMoney(b)+"</td>" +
+      "<td class=\"liq-num-cell\" style=\""+(adelanto>0?"color:#B22A32;font-weight:700;":"color:var(--text-3);")+"\" title=\"Suma de Pagos con Rubro=Sueldos, Concepto=Adelanto de sueldo, Proveedor="+liqEscapeHtml(f.nombre)+", pagados este mes\">"+(adelanto>0?"−"+fmtMoney(adelanto):"—")+"</td>" +
       "<td class=\"liq-num-cell "+horasExtraCls+"\">"+(f.tienePresentismo?horasExtraTxt:"—")+"</td>" +
       "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.feriadosTrabajados:"—")+"</td>" +
       "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.ausencias:"—")+"</td>" +
@@ -5133,22 +5160,24 @@ function liqComputeTotales(){
     return {key:key, emp:porKey[key], tienePresentismo:true};
   }).concat(otros.map(function(e){ return {key:"emp_"+e.id, emp:e, tienePresentismo:false}; }));
 
-  var totalA=0, totalB=0, montosA={}, pagosB={}, recibos=[];
+  var adelantosPorNombre = liqAdelantosPorNombre();
+  var totalA=0, totalB=0, totalAdelantos=0, montosA={}, pagosB={}, recibos=[];
   filas.forEach(function(f){
     if(!f.emp) return;
     var sueldo = Number(f.emp.sueldo||0);
     var esCondA = f.emp.condicion==="A";
     var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : 0) : 0;
+    var adelanto = Number(adelantosPorNombre[f.emp.nombre_completo]||0);
     var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
     var jornal = sueldo/30;
     var valorHora = jornal/8;
-    var sugerido = Math.round(sueldo - a - (agr.ausencias*jornal) + (agr.feriadosTrabajados*jornal) + (agr.horasExtraMin/60*valorHora));
+    var sugerido = Math.round(sueldo - a - adelanto - (agr.ausencias*jornal) + (agr.feriadosTrabajados*jornal) + (agr.horasExtraMin/60*valorHora));
     var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
-    totalA += a; totalB += pagoB;
+    totalA += a; totalB += pagoB; totalAdelantos += adelanto;
     montosA[f.key] = a; pagosB[f.key] = pagoB;
     recibos.push({key:f.key, emp:f.emp, monto:pagoB});
   });
-  return {totalA:totalA, totalB:totalB, montosA:montosA, pagosB:pagosB, recibos:recibos};
+  return {totalA:totalA, totalB:totalB, totalAdelantos:totalAdelantos, montosA:montosA, pagosB:pagosB, recibos:recibos};
 }
 
 /* ---------- persistencia (lf_liquidaciones, una fila por mes) ---------- */
@@ -5310,6 +5339,7 @@ function liqConfirmarLiquidar(){
   var msg = "Vas a liquidar " + liqMesNombre(liqState.mes) + ":\n\n" +
     (tot.totalA>0 ? "• Parte A (Bco. Galicia): " + fmtMoney(tot.totalA) + "\n" : "") +
     (tot.totalB>0 ? "• Parte B (Efectivo, con recibo): " + fmtMoney(tot.totalB) + "\n" : "") +
+    (tot.totalAdelantos>0 ? "\n(Ya se descontaron " + fmtMoney(tot.totalAdelantos) + " en adelantos de sueldo pagados este mes, cargados desde Pagos)\n" : "") +
     "\nEsto va a crear la(s) orden(es) de pago en Pagos (como Pendiente) y va a descargar un .zip con los recibos de sueldo. ¿Confirmás?";
   if(!confirm(msg)) return;
   liqEjecutarLiquidar(tot);
