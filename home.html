@@ -50,6 +50,8 @@
   .login-card p.sub{font-size:13px;color:var(--app-text-2);margin:0 0 24px 0;line-height:1.55;}
   .login-notice{display:none;margin-top:14px;font-size:11.5px;color:var(--app-text-2);background:#F1F5FF;border:1px solid #D6E2FA;border-radius:9px;padding:11px 13px;line-height:1.55;}
   .login-notice.show{display:block;}
+  .remember-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--app-text-2);margin:2px 0 16px 0;cursor:pointer;user-select:none;}
+  .remember-row input{accent-color:var(--orange);width:14px;height:14px;cursor:pointer;}
   .forgot-link{display:block;text-align:center;margin-top:16px;font-size:12px;font-weight:700;color:var(--orange);text-decoration:none;cursor:pointer;}
   .forgot-link:hover{text-decoration:underline;}
   .field{margin-bottom:18px;}
@@ -255,6 +257,7 @@
         <button type="button" class="pw-toggle" onclick="togglePwVisibility('loginClave')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
     </div>
+    <label class="remember-row"><input type="checkbox" id="loginRemember"> Mantener sesión iniciada en este dispositivo</label>
     <button class="btn-orange" onclick="doLogin()">Ingresar</button>
     <a class="forgot-link" onclick="forgotPassword()">¿Olvidaste tu contraseña?</a>
     <div class="login-notice" id="loginNotice"></div>
@@ -402,7 +405,44 @@
    ========================================================= */
 const SUPABASE_URL = "https://dqtrbmmklwekqqsbwpqb.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_hXYyB1POFw-vnv54tdfZag_TkxbzrKb";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* =========================================================
+   PERSISTENCIA DE SESIÓN: "mantener sesión iniciada"
+   - Sin tildar (por defecto): la sesión vive en sessionStorage → se cierra sola
+     al cerrar la pestaña/navegador, hay que loguearse de nuevo la próxima vez.
+   - Tildado: la sesión vive en localStorage → sobrevive a cerrar el navegador.
+   El mismo esquema se usa en home.html, la-fortaleza.html y reset-password.html
+   para que la sesión se comparta de forma consistente entre las 3 páginas.
+   ========================================================= */
+const VDG_REMEMBER_KEY = "vdg_remember_me";
+function vdgGetRemember(){
+  try{ return localStorage.getItem(VDG_REMEMBER_KEY) === "1"; }catch(e){ return false; }
+}
+function vdgSetRemember(v){
+  try{
+    if(v) localStorage.setItem(VDG_REMEMBER_KEY, "1");
+    else localStorage.removeItem(VDG_REMEMBER_KEY);
+  }catch(e){}
+}
+const vdgDynamicStorage = {
+  getItem: (key) => {
+    try{ return (vdgGetRemember() ? window.localStorage : window.sessionStorage).getItem(key); }
+    catch(e){ return null; }
+  },
+  setItem: (key, value) => {
+    try{ (vdgGetRemember() ? window.localStorage : window.sessionStorage).setItem(key, value); }catch(e){}
+  },
+  removeItem: (key) => {
+    try{ window.localStorage.removeItem(key); }catch(e){}
+    try{ window.sessionStorage.removeItem(key); }catch(e){}
+  }
+};
+// Migración única: las sesiones guardadas con el modelo viejo (siempre en localStorage,
+// sin esta opción) dejan de reconocerse acá → todos tienen que volver a loguearse una vez,
+// y desde ese login ya pueden elegir si quieren mantener la sesión abierta o no.
+try{ localStorage.removeItem("sb-dqtrbmmklwekqqsbwpqb-auth-token"); }catch(e){}
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storage: vdgDynamicStorage, persistSession: true, autoRefreshToken: true }
+});
 
 const PROYECTOS = [
   {id:"fortaleza", nombre:"La Fortaleza"},
@@ -473,6 +513,9 @@ async function doLogin(){
   setFieldError(false);
   if(!usuario){ input.focus(); return; }
   if(!clave){ claveInput.focus(); return; }
+  // Se define ANTES de autenticar: supabase-js guarda los tokens de sesión al loguearse,
+  // y necesita saber en ese momento si van a localStorage (persiste) o sessionStorage (no).
+  vdgSetRemember(document.getElementById("loginRemember").checked);
   try{
     const { data: email, error: rpcError } = await sb.rpc("resolve_login_email", { p_usuario: usuario });
     if(rpcError || !email){ setFieldError(true); input.focus(); return; }
@@ -510,6 +553,7 @@ async function doLogout(){
   document.getElementById("gearMenu").classList.remove("show");
   document.getElementById("gearBtn").classList.remove("open");
   try{ await sb.auth.signOut(); }catch(e){}
+  vdgSetRemember(false); // vuelve al default (destildado) para el próximo login
   currentPerfil = null;
   perfilesCache = [];
   document.getElementById("dashView").classList.add("hidden");
@@ -518,6 +562,7 @@ async function doLogout(){
   document.getElementById("loginView").classList.remove("hidden");
   document.getElementById("loginUsuario").value = "";
   document.getElementById("loginClave").value = "";
+  document.getElementById("loginRemember").checked = false;
   setFieldError(false);
   setTimeout(()=>document.getElementById("loginUsuario").focus(), 50);
 }
