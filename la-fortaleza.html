@@ -532,6 +532,62 @@
 .liq-total-bar button:disabled{opacity:.45;cursor:not-allowed;}
 .liq-feriados-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
 .liq-liquidado-banner{display:flex;align-items:center;gap:10px;background:#E4F8ED;border:1px solid #B7E7C9;color:#137B44;border-radius:var(--radius-md);padding:12px 16px;font-size:13px;font-weight:700;margin-bottom:16px;}
+
+/* ---------- CAJA MAYOR ---------- */
+.cm-cierre-banner{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 18px;max-width:900px;margin-bottom:22px;}
+.cm-cierre-banner .ic{width:38px;height:38px;border-radius:10px;background:#EAF0FF;color:var(--sky);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cm-cierre-banner .ic svg{width:19px;height:19px;}
+.cm-cierre-banner .lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+.cm-cierre-banner .val{font-size:15px;font-weight:800;color:var(--text-1);margin-top:1px;}
+.cm-cierre-banner .sep{width:1px;align-self:stretch;background:var(--border);}
+.cm-check-banner{display:flex;align-items:flex-start;gap:10px;border-radius:var(--radius-md);padding:12px 16px;font-size:12.8px;font-weight:700;max-width:900px;line-height:1.6;}
+.cm-check-banner svg{width:17px;height:17px;flex-shrink:0;margin-top:1px;}
+.cm-check-banner.ok{background:#E4F8ED;border:1px solid #B7E7C9;color:#137B44;}
+.cm-check-banner.warn{background:#FCE6E7;border:1px solid #F3C0C3;color:#B22A32;}
+.cm-otros-egresos{font-size:11.8px;color:#93690A;background:#FFF6DF;border:1px solid #F0DBA0;border-radius:var(--radius-md);padding:10px 16px;max-width:900px;margin-top:10px;font-weight:600;line-height:1.6;}
+.cm-kpi-row{display:flex;gap:16px;margin:22px 0;flex-wrap:wrap;}
+.cm-kpi-row .kpi-tile{flex:1;min-width:170px;}
+.cm-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;margin-top:8px;}
+@media(max-width:980px){.cm-cols{grid-template-columns:1fr;}}
+.cm-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);}
+.cm-panel-head{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.cm-panel-head h3{margin:0;font-size:13.5px;font-weight:800;}
+.cm-panel-head .cnt{font-size:11px;font-weight:700;color:var(--text-3);background:#F1F2FA;padding:2px 9px;border-radius:20px;}
+.cm-panel-body{max-height:420px;overflow-y:auto;}
+.cm-table{width:100%;border-collapse:collapse;font-size:12.3px;}
+.cm-table thead th{position:sticky;top:0;background:#F7F8FC;text-align:left;font-size:10.2px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-2);padding:9px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.cm-table td{padding:10px;border-bottom:1px solid var(--border);color:var(--text-2);vertical-align:middle;white-space:nowrap;}
+.cm-table tbody tr:last-child td{border-bottom:none;}
+.cm-table tbody tr:hover{background:#FAFBFF;}
+.cm-table .c-monto{text-align:right;font-weight:800;color:var(--text-1);font-variant-numeric:tabular-nums;}
+.cm-table .c-fecha{color:var(--text-3);font-weight:600;font-variant-numeric:tabular-nums;}
+.cm-table .c-usuario{font-weight:700;color:var(--text-1);}
+.cm-tag-tm{background:#EAF1FF;color:#2B57C7;}
+.cm-tag-tt{background:#FFF6DF;color:#93690A;}
+.cm-btn-imputar{display:inline-flex;align-items:center;gap:5px;background:var(--blue);color:#fff;border:none;padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:700;cursor:pointer;transition:filter .15s ease;}
+.cm-btn-imputar:hover{filter:brightness(1.08);}
+.cm-btn-imputar svg{width:12px;height:12px;}
+.cm-btn-del{width:24px;height:24px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--text-3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+.cm-btn-del:hover{background:#FFF1F1;color:#C23434;border-color:#FBD8D8;}
+.cm-btn-del svg{width:12px;height:12px;}
+.cm-empty-mini{padding:30px 18px;text-align:center;color:var(--text-3);font-size:12.3px;font-weight:600;}
+.cm-empty-mini svg{width:26px;height:26px;opacity:.35;margin-bottom:8px;}
+.cm-saldo-strip{padding:13px 18px;background:#FBFBFE;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.cm-saldo-strip .lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+.cm-saldo-strip .val{font-size:17px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+.cm-already-note{font-size:11.5px;color:var(--text-3);font-weight:600;margin:-10px 0 18px 1px;max-width:900px;}
+.cm-salidas-form{background:#FBFBFE;border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;max-width:900px;margin-bottom:18px;}
+.cm-salidas-form .field-row{margin-bottom:0;}
+.cm-add-salida-row{display:flex;justify-content:flex-end;margin-top:4px;}
+.cm-btn-add{display:flex;align-items:center;gap:6px;background:var(--lime);color:var(--navy);border:none;border-radius:9px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer;transition:filter .15s ease,transform .15s ease;}
+.cm-btn-add:hover{filter:brightness(1.05);transform:translateY(-1px);}
+.cm-btn-add svg{width:14px;height:14px;}
+.cm-total-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--navy);border-radius:var(--radius-lg);padding:18px 22px;margin-top:22px;color:#fff;max-width:900px;flex-wrap:wrap;}
+.cm-total-bar .grp{display:flex;gap:26px;flex-wrap:wrap;}
+.cm-total-bar .lt-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);}
+.cm-total-bar .lt-value{font-size:19px;font-weight:800;margin-top:2px;}
+.cm-total-bar button:disabled{opacity:.45;cursor:not-allowed;}
+.cm-hint{font-size:12px;color:var(--text-3);margin:2px 0 18px 1px;max-width:900px;}
 </style>
 </head>
 <body>
@@ -568,6 +624,10 @@
     <div class="module-nav-item" data-module="ventas" onclick="goModule('ventas')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
       Ventas
+    </div>
+    <div class="module-nav-item" data-module="cajaMayor" onclick="goModule('cajaMayor')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="11" rx="1.6"/><path d="M7 9V6.5A2.5 2.5 0 019.5 4h5A2.5 2.5 0 0117 6.5V9"/><line x1="3" y1="13.2" x2="21" y2="13.2"/><circle cx="9" cy="16.6" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="16.6" r="1" fill="currentColor" stroke="none"/></svg>
+      Caja Mayor
     </div>
     <div class="module-nav-item active" data-module="pagos" onclick="goModule('pagos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="21" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l1.9 11.2a2 2 0 002 1.8h8.6a2 2 0 002-1.7L21 8H6"/></svg>
@@ -875,6 +935,134 @@
                 <div class="rank-card"><h3>Ventas por concepto</h3><div id="ventasPorConcepto"></div></div>
 
                 <div class="rank-card"><h3>Distribución de Ventas A vs B</h3><div id="ventasAB"></div></div>
+              </div>
+
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== MÓDULO: CAJA MAYOR ===================== -->
+    <section class="module-screen" id="moduleCajaMayor">
+      <div class="pagos-shell" id="cmSubnav">
+        <div class="pagos-topbar">
+          <div class="pagos-tab active" data-cmpane="imputacion">Imputación</div>
+        </div>
+        <div class="pagos-body">
+          <section class="pagos-pane active" id="cmpaneImputacion">
+            <div class="screen-header">
+              <div style="flex:1;">
+                <h1 style="font-size:20px;margin:0;font-weight:800;">Caja Mayor</h1>
+                <div class="sub" style="font-size:12.5px;color:var(--text-2);">Imputá los retiros a caja mayor del período y registrá las salidas de efectivo antes de cerrar</div>
+              </div>
+            </div>
+            <div class="screen-scroll">
+
+              <div class="cm-cierre-banner">
+                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="11" rx="1.6"/><path d="M7 9V6.5A2.5 2.5 0 019.5 4h5A2.5 2.5 0 0117 6.5V9"/><line x1="3" y1="13.2" x2="21" y2="13.2"/></svg></div>
+                <div><div class="lbl">Fecha de último cierre</div><div class="val" id="cmUltimaFecha">Todavía no se registró ningún cierre</div></div>
+                <div class="sep"></div>
+                <div><div class="lbl">Monto de último cierre</div><div class="val" id="cmUltimoMonto">—</div></div>
+              </div>
+
+              <div class="form-section-title" style="margin-top:0;">Movimientos de caja</div>
+              <div class="attach-zone" id="cmAttachZone" onclick="cmZoneClick()">
+                <input type="file" id="cmFileInput" accept=".xlsx,.xls" style="display:none">
+              </div>
+
+              <div class="form-section-title">Rango de fechas</div>
+              <div class="resumen-filters">
+                <div class="f"><label>Desde</label><input type="date" id="cmDesde" onchange="checkCMReady()"></div>
+                <div class="f"><label>Hasta</label><input type="date" id="cmHasta" onchange="checkCMReady()"></div>
+              </div>
+
+              <div class="continue-row-ventas">
+                <button class="btn-primary" id="btnContinuarCM" style="flex:0 0 auto;padding:12px 30px;" disabled onclick="cmProcesarArchivo()">Continuar</button>
+                <div class="hint-center-ventas" id="hintCM">Cargá el archivo de movimientos de caja y elegí el rango de fechas para continuar.</div>
+              </div>
+
+              <div id="cmResultados" class="hidden" style="margin-top:26px;">
+
+                <div class="cm-check-banner ok" id="cmCierreCheck"></div>
+                <div class="cm-otros-egresos hidden" id="cmOtrosEgresos"></div>
+
+                <div class="cm-kpi-row">
+                  <div class="kpi-tile"><div class="lbl">Retiros pendientes</div><div class="val" id="cmKpiPendientes">0</div></div>
+                  <div class="kpi-tile"><div class="lbl">Retiros imputados</div><div class="val" id="cmKpiImputados">0</div></div>
+                  <div class="kpi-tile accent"><div class="lbl">Saldo de Caja Mayor</div><div class="val" id="cmKpiSaldo">$0</div></div>
+                </div>
+                <div class="cm-already-note hidden" id="cmAlreadyNote"></div>
+
+                <div class="cm-cols">
+                  <div class="cm-panel">
+                    <div class="cm-panel-head"><h3>Retiros pendientes de imputar</h3><span class="cnt" id="cmCntPendientes">0</span></div>
+                    <div class="cm-panel-body"><table class="cm-table" id="cmTablaPendientes"></table></div>
+                  </div>
+                  <div class="cm-panel">
+                    <div class="cm-panel-head"><h3>Imputados en Caja Mayor</h3><span class="cnt" id="cmCntImputados">0</span></div>
+                    <div class="cm-panel-body"><table class="cm-table" id="cmTablaImputados"></table></div>
+                    <div class="cm-saldo-strip"><span class="lbl">Saldo acumulado (retiros)</span><span class="val" id="cmSaldoRetiros">$0</span></div>
+                  </div>
+                </div>
+
+                <div class="form-section-title">Salidas de caja mayor (gastos pagados en efectivo)</div>
+                <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Vas a registrar salidas de dinero de la caja mayor en este cierre?</div>
+                <div class="status-select-wrap" id="cmSalidasChips" style="margin-bottom:18px;">
+                  <div class="status-chip" data-s="si" onclick="cmSetSalidasToggle('si')">Sí</div>
+                  <div class="status-chip active" data-s="no" onclick="cmSetSalidasToggle('no')">No</div>
+                </div>
+
+                <div class="cm-salidas-form hidden" id="cmSalidasForm">
+                  <div class="field-row">
+                    <div class="field"><label>Fecha de imputación</label><input type="text" id="cmSalidaFechaImp" readonly></div>
+                    <div class="field"><label>Nro. de salida</label><input type="text" id="cmSalidaNro" readonly></div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label>Fecha en que se realizó la salida</label>
+                      <div class="date-field-wrap">
+                        <input type="text" id="cmSalidaFecha" placeholder="dd/mm/aaaa" maxlength="10">
+                        <button type="button" class="cal-btn" data-target="cmSalidaFecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                      </div>
+                    </div>
+                    <div class="field"><label>Monto de la salida</label><input type="text" id="cmSalidaMonto" placeholder="$0,00.-"></div>
+                  </div>
+                  <div class="field" id="fld-cmSalidaProveedor">
+                    <label>Proveedor</label>
+                    <select id="cmSalidaProveedor" onchange="onCMProveedorChange()"><option value="">Seleccionar proveedor…</option></select>
+                  </div>
+                  <label class="check-inline">
+                    <input type="checkbox" id="cmSalidaSinProveedor" onchange="onCMSinProveedorToggle()">
+                    No especifico proveedor
+                  </label>
+                  <div class="field-row">
+                    <div class="field"><label>Concepto <span class="hint">(automático)</span></label><input type="text" id="cmSalidaConcepto" readonly placeholder="Se completa según el proveedor"></div>
+                    <div class="field" id="fld-cmSalidaRubroWrap">
+                      <label>Rubro <span class="hint" id="cmSalidaRubroHint">(automático)</span></label>
+                      <input type="text" id="cmSalidaRubro" readonly placeholder="Se completa según el proveedor">
+                      <select id="cmSalidaRubroManual" style="display:none;" onchange="onCMRubroManualChange()"><option value="">Seleccionar rubro…</option></select>
+                    </div>
+                  </div>
+                  <div class="cm-add-salida-row">
+                    <button type="button" class="cm-btn-add" onclick="cmAddSalida()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar salida</button>
+                  </div>
+                </div>
+
+                <div class="cm-panel hidden" id="cmPanelSalidas">
+                  <div class="cm-panel-head"><h3>Salidas registradas en este cierre</h3><span class="cnt" id="cmCntSalidas">0</span></div>
+                  <div class="cm-panel-body"><table class="cm-table" id="cmTablaSalidas"></table></div>
+                </div>
+
+                <div class="cm-total-bar">
+                  <div class="grp">
+                    <div><div class="lt-label">Retiros imputados</div><div class="lt-value" id="cmTotalRetiros">$0</div></div>
+                    <div><div class="lt-label">Salidas</div><div class="lt-value" id="cmTotalSalidas">$0</div></div>
+                    <div><div class="lt-label">Saldo final</div><div class="lt-value" id="cmTotalSaldo">$0</div></div>
+                  </div>
+                  <button class="btn-primary" style="flex:0 0 auto;background:var(--lime);color:var(--navy);" id="cmBtnCerrar" onclick="cmConfirmarCierre()" disabled>Cerrar Caja Mayor</button>
+                </div>
+
               </div>
 
             </div>
@@ -1797,7 +1985,7 @@ function applyPerfilSession(perfil){
 }
 // Secciones del módulo La Fortaleza (deben coincidir con SECTIONS_BY_PROYECTO.fortaleza en home.html
 // y con los data-module de la barra lateral). El dueño siempre tiene acceso a todas.
-const FORTALEZA_SECCIONES = ["ventas","pagos","sueldos","reportes","config"];
+const FORTALEZA_SECCIONES = ["ventas","cajaMayor","pagos","sueldos","reportes","config"];
 function tieneSeccionFortaleza(mod){
   if(!currentPerfil) return false;
   if(currentPerfil.rol === "dueño") return true;
@@ -1857,6 +2045,7 @@ function goModule(mod){
   document.getElementById("module"+mod.charAt(0).toUpperCase()+mod.slice(1)).classList.add("active");
   if(mod==="config"){ showComprasChooser(); renderComprasLists(); renderActividad(); }
   if(mod==="ventas"){ initVentasResumen(); }
+  if(mod==="cajaMayor"){ cmInit(); }
 }
 function goVentasPane(pane){
   // hoy solo existe "resumen"; queda preparado para futuras pestañas del módulo Ventas (p.ej. Reportes).
@@ -5525,6 +5714,687 @@ var LIQ_RECIBO_TEMPLATE_B64 = "UEsDBBQAAAAIALoFBV0cQaguXwEAAFQFAAATAAAAW0NvbnRlb
 loadSueldosGridState();
 renderSueldosGridHeader();
 loadEmpleados();
+
+/* =========================================================
+   MÓDULO: CAJA MAYOR
+   — Primera versión ("primera prueba"). Lee el mismo archivo
+   "Movimientos de caja" que ya usa Ventas (reutiliza vReadWorkbook/
+   vFindColIndex/vParseFlexDate/vJornadaFecha) y arma los "turnos"
+   de caja agrupando cronológicamente Ingreso-Apertura de caja →
+   Retiro a caja mayor(es) → Retiro-Cierre de caja: el primer turno
+   de cada jornada (corte 5am, igual que Ventas) se etiqueta TM, el
+   segundo TT (si hubiera un tercero, poco frecuente, TT2). Si un
+   "Retiro a caja mayor" aparece sin apertura previa en el archivo
+   (arranca a mitad de turno) se abre un turno implícito.
+   Persistencia (localStorage, modelo de prueba, igual que el resto
+   del sitio): último cierre (fecha/monto) y el listado de retiros
+   ya imputados en cierres anteriores (para no duplicarlos si se
+   vuelve a cargar el mismo período). Las salidas de caja, al cerrar,
+   crean órdenes de pago "Pago B" reales en Pagos (mismo patrón que
+   usa Sueldos al liquidar).
+   ========================================================= */
+const CM_LS_KEY = "lf_caja_mayor_estado_v1";
+let cmState = {
+  file: null,
+  desde: null, hasta: null,
+  pendientes: [], imputados: [], salidas: [],
+  nextSalidaNro: 1,
+  salidasToggle: "no",
+  yaImputadosAntesCount: 0,
+  diffs: [], otrosEgresos: [],
+  historialKeys: [],
+  ultimoCierreFecha: null,
+  ultimoCierreMonto: null
+};
+function cmEsc(str){ return String(str).replace(/'/g,"\\'"); }
+function cmFmtDT(dt){ return pad2(dt.getDate())+"/"+pad2(dt.getMonth()+1)+" "+pad2(dt.getHours())+":"+pad2(dt.getMinutes()); }
+function cmTagClass(label){ return label==="TM" ? "cm-tag-tm" : "cm-tag-tt"; }
+function cmParseHora(val){
+  if(val===undefined || val===null) return {h:0,m:0};
+  if(val instanceof Date) return {h:val.getHours(), m:val.getMinutes()};
+  const s = String(val).trim();
+  if(!s || s==="-") return {h:0,m:0};
+  const parts = s.split(":");
+  const h = parseInt(parts[0],10), m = parseInt(parts[1],10);
+  return {h:isNaN(h)?0:h, m:isNaN(m)?0:m};
+}
+function cmCombineFechaHora(fechaVal, horaVal){
+  const fecha = vParseFlexDate(fechaVal);
+  if(!fecha) return null;
+  const {h,m} = cmParseHora(horaVal);
+  return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), h, m);
+}
+/* Reglas confirmadas con Pancho el 05/08/2026:
+   - Nunca hay más de 2 turnos por jornada (TM y TT). Si el archivo muestra
+     más aperturas/cierres de los que corresponden es porque los cajeros se
+     equivocaron (abrieron/cerraron de más, generalmente varios minutos o
+     incluso el mismo minuto de diferencia) — hay que colapsarlos en un único
+     turno real por franja horaria, nunca contarlos como turnos extra.
+   - El cierre de un turno y la apertura del siguiente tienen que coincidir
+     en el monto (continuidad de caja, diferencia = $0). Si no coincide, se
+     avisa en la bajada de la lectura del archivo ("Dif. de caja").
+   - Cualquier salida de dinero que no sea apertura/cierre de turno tiene que
+     ser un retiro a caja mayor — salvo "Devolución de seña/adelanto" (no es
+     caja mayor) y "Regularizador de mov. por error" (corrección de una venta
+     mal cargada, no un retiro real — confirmado con Pancho). El Concepto
+     histórico "Retiro de dinero" es lo mismo que "Retiro a caja mayor".
+     Cualquier otra salida de dinero con un Concepto no reconocido se lista
+     aparte para revisión manual, nunca se suma sola. */
+const CM_TIPO_POR_CONCEPTO = {
+  "ingreso - apertura de caja":"apertura",
+  "retiro a caja mayor":"retiro",
+  "retiro de dinero":"retiro",
+  "retiro - cierre de caja":"cierre"
+};
+const CM_CONCEPTOS_EGRESO_CONOCIDOS = new Set([
+  "ingreso - apertura de caja","retiro a caja mayor","retiro de dinero","retiro - cierre de caja",
+  "devolución de seña/adelanto","devolucion de seña/adelanto","regularizador de mov. por error"
+]);
+// Desempate cuando dos movimientos quedan con la misma Fecha+Hora de movimiento
+// (pasa en el archivo real): un retiro se procesa ANTES que un cierre en el
+// mismo minuto, para que quede imputado al turno que todavía está abierto en
+// vez de generar un turno fantasma de un solo retiro.
+const CM_TIPO_ORDEN = {"retiro":0, "cierre":1, "apertura":2};
+function cmBuildRetiros(header, rows){
+  const idxConcepto = vFindColIndex(header, ["Concepto"]);
+  const idxUsuario = vFindColIndex(header, ["Usuario"]);
+  const idxFechaMov = vFindColIndex(header, ["Fecha de movimiento"]);
+  const idxHoraMov = vFindColIndex(header, ["Hora de movimiento"]);
+  const idxIngresos = vFindColIndex(header, ["Ingresos"]);
+  const idxEgresos = vFindColIndex(header, ["Egresos"]);
+  if(idxConcepto===-1 || idxFechaMov===-1 || idxHoraMov===-1 || idxEgresos===-1 || idxIngresos===-1){
+    throw new Error("El archivo no tiene las columnas esperadas (Concepto, Fecha de movimiento, Hora de movimiento, Ingresos, Egresos).");
+  }
+  const events = [];
+  const otrosEgresos = [];
+  rows.forEach(r=>{
+    const conceptoRaw = (r[idxConcepto]||"").toString().trim();
+    const conceptoNorm = conceptoRaw.toLowerCase();
+    const egresosVal = r[idxEgresos];
+    const tieneEgreso = (egresosVal!==null && egresosVal!==undefined && egresosVal!=="-" && Number(egresosVal)!==0);
+    const tipo = CM_TIPO_POR_CONCEPTO[conceptoNorm];
+    const fechaVal = r[idxFechaMov], horaVal = r[idxHoraMov];
+    if(tipo){
+      const dt = cmCombineFechaHora(fechaVal, horaVal);
+      const jornada = vJornadaFecha(fechaVal, horaVal);
+      if(!dt || !jornada) return;
+      const usuario = idxUsuario!==-1 ? (r[idxUsuario]||"—").toString().trim() : "—";
+      const ingresosVal = r[idxIngresos];
+      const montoIn = (ingresosVal!==null && ingresosVal!==undefined && ingresosVal!=="-") ? Math.abs(Number(ingresosVal)||0) : 0;
+      const montoOut = tieneEgreso ? Math.abs(Number(egresosVal)||0) : 0;
+      events.push({tipo, dt, jornada, usuario, montoIn, montoOut, fechaMovISO: vToISODate(vParseFlexDate(fechaVal))});
+    } else if(tieneEgreso && !CM_CONCEPTOS_EGRESO_CONOCIDOS.has(conceptoNorm)){
+      // salida de dinero con un Concepto que no reconocemos: no la sumamos
+      // sola a caja mayor (podría ser otra cosa), se lista para que la revises.
+      const fecha = vParseFlexDate(fechaVal);
+      if(!fecha) return;
+      otrosEgresos.push({
+        fechaMovISO: vToISODate(fecha),
+        concepto: conceptoRaw || "(sin concepto)",
+        usuario: idxUsuario!==-1 ? (r[idxUsuario]||"—").toString().trim() : "—",
+        monto: Math.abs(Number(egresosVal)||0)
+      });
+    }
+  });
+  events.sort((a,b)=> (a.dt-b.dt) || (CM_TIPO_ORDEN[a.tipo]-CM_TIPO_ORDEN[b.tipo]));
+
+  const turnosPorDia = {};
+  let turnoActual = null;
+  events.forEach(ev=>{
+    const jISO = vToISODate(ev.jornada);
+    if(ev.tipo==="apertura"){
+      turnoActual = {aperturaEvent:ev, cierreEvent:null, retiros:[]};
+      (turnosPorDia[jISO] = turnosPorDia[jISO]||[]).push(turnoActual);
+    } else if(ev.tipo==="retiro"){
+      if(!turnoActual){
+        turnoActual = {aperturaEvent:null, cierreEvent:null, retiros:[]};
+        (turnosPorDia[jISO] = turnosPorDia[jISO]||[]).push(turnoActual);
+      }
+      turnoActual.retiros.push(ev);
+    } else if(ev.tipo==="cierre"){
+      if(turnoActual) turnoActual.cierreEvent = ev;
+      turnoActual = null;
+    }
+  });
+
+  // Nunca más de 2 turnos por jornada: si quedaron de más (aperturas/cierres
+  // duplicados por error de carga), se fusiona el de menos actividad con el
+  // turno vecino más cercano, sin perder ningún retiro.
+  Object.keys(turnosPorDia).forEach(jISO=>{
+    let turnos = turnosPorDia[jISO];
+    while(turnos.length > 2){
+      let idxMenor = 0;
+      for(let i=1;i<turnos.length;i++){ if(turnos[i].retiros.length < turnos[idxMenor].retiros.length) idxMenor = i; }
+      const fusionado = turnos.splice(idxMenor,1)[0];
+      const idxVecino = idxMenor < turnos.length ? idxMenor : idxMenor-1;
+      const vecino = turnos[idxVecino];
+      vecino.retiros = vecino.retiros.concat(fusionado.retiros).sort((a,b)=>a.dt-b.dt);
+      if(!vecino.aperturaEvent && fusionado.aperturaEvent) vecino.aperturaEvent = fusionado.aperturaEvent;
+      if(!vecino.cierreEvent && fusionado.cierreEvent) vecino.cierreEvent = fusionado.cierreEvent;
+    }
+    turnosPorDia[jISO] = turnos;
+  });
+
+  const out = [];
+  const secuenciaTurnos = [];
+  Object.keys(turnosPorDia).sort().forEach(jISO=>{
+    turnosPorDia[jISO].forEach((turno, ti)=>{
+      const label = ti===0 ? "TM" : (ti===1 ? "TT" : "TT"+ti);
+      turno.label = label; turno.jornadaISO = jISO;
+      secuenciaTurnos.push(turno);
+      turno.retiros.forEach((ev, ri)=>{
+        out.push({
+          key: ev.usuario+"|"+ev.dt.toISOString()+"|"+ev.montoOut,
+          turnoLabel: label,
+          rtNum: ri+1,
+          usuario: ev.usuario,
+          dt: ev.dt,
+          fechaMovISO: ev.fechaMovISO,
+          monto: ev.montoOut
+        });
+      });
+    });
+  });
+  out.sort((a,b)=>a.dt-b.dt);
+
+  // Continuidad de caja: el cierre de cada turno tiene que coincidir con la
+  // apertura del siguiente (diferencia = $0). Si no, se reporta.
+  const diffs = [];
+  for(let i=0;i<secuenciaTurnos.length-1;i++){
+    const actual = secuenciaTurnos[i], siguiente = secuenciaTurnos[i+1];
+    if(!actual.cierreEvent || !siguiente.aperturaEvent) continue;
+    const diff = siguiente.aperturaEvent.montoIn - actual.cierreEvent.montoOut;
+    if(Math.round(diff)!==0){
+      diffs.push({
+        desde: actual.label, desdeFecha: actual.jornadaISO,
+        hasta: siguiente.label, hastaFecha: siguiente.jornadaISO,
+        diff
+      });
+    }
+  }
+
+  return {retiros: out, diffs, otrosEgresos};
+}
+
+/* ---------- carga del archivo (reutiliza attach-zone + vReadWorkbook, igual que Ventas) ---------- */
+function renderCMZone(){
+  const zone = document.getElementById("cmAttachZone");
+  const f = cmState.file;
+  if(f){
+    zone.classList.add("filled");
+    zone.innerHTML = `
+      <div class="az-left">
+        <div class="az-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        <div class="az-text"><div class="az-name">${f.fileName}</div><div class="az-sub">✓ ${f.rows.length} filas</div></div>
+      </div>
+      <div class="az-actions">
+        <button type="button" class="az-btn" onclick="event.stopPropagation(); cmZoneClick()" title="Reemplazar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/></svg></button>
+      </div>
+      <input type="file" id="cmFileInput" accept=".xlsx,.xls" style="display:none">`;
+  } else {
+    zone.classList.remove("filled");
+    zone.innerHTML = `
+      <div class="az-left">
+        <div class="az-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        <div class="az-text"><div class="az-name">Movimientos de caja</div><div class="az-sub">Excel (.xlsx) · click o arrastrá el archivo acá</div></div>
+      </div>
+      <input type="file" id="cmFileInput" accept=".xlsx,.xls" style="display:none">`;
+  }
+  wireCMZoneInput();
+}
+function wireCMZoneInput(){
+  const inputEl = document.getElementById("cmFileInput");
+  inputEl.addEventListener("change",(e)=>{ const f=e.target.files[0]; if(f) setCMFile(f); });
+  const zone = document.getElementById("cmAttachZone");
+  zone.addEventListener("dragover",(e)=>{ e.preventDefault(); zone.classList.add("dragover"); });
+  zone.addEventListener("dragleave",()=> zone.classList.remove("dragover"));
+  zone.addEventListener("drop",(e)=>{
+    e.preventDefault(); e.stopPropagation(); zone.classList.remove("dragover");
+    const f = e.dataTransfer.files[0];
+    if(f) setCMFile(f);
+  });
+}
+function cmZoneClick(){ document.getElementById("cmFileInput").click(); }
+async function setCMFile(file){
+  try{
+    const parsed = await vReadWorkbook(file);
+    cmState.file = {...parsed, fileName:file.name};
+    showToast(file.name+" cargado correctamente");
+  }catch(err){
+    cmState.file = null;
+    showToast("Error al leer "+file.name+": "+err.message, "warn");
+  }
+  renderCMZone();
+  checkCMReady();
+  cmSaveState();
+}
+function checkCMReady(){
+  const desde = document.getElementById("cmDesde").value;
+  const hasta = document.getElementById("cmHasta").value;
+  const ready = !!(cmState.file && desde && hasta);
+  document.getElementById("btnContinuarCM").disabled = !ready;
+  document.getElementById("hintCM").textContent = ready ? "Todo listo, hacé clic en Continuar." : "Cargá el archivo de movimientos de caja y elegí el rango de fechas para continuar.";
+}
+
+/* ---------- procesar archivo + rango de fechas ---------- */
+function cmProcesarArchivo(){
+  if(!cmState.file){ showToast("Cargá primero el archivo de movimientos de caja", "warn"); return; }
+  const desde = document.getElementById("cmDesde").value;
+  const hasta = document.getElementById("cmHasta").value;
+  if(!desde || !hasta){ showToast("Elegí el rango de fechas", "warn"); return; }
+  if(desde > hasta){ showToast("La fecha 'Desde' no puede ser posterior a 'Hasta'", "warn"); return; }
+  let parsed;
+  try{
+    parsed = cmBuildRetiros(cmState.file.header, cmState.file.rows);
+  }catch(err){
+    showToast(err.message, "warn"); return;
+  }
+  const enRango = parsed.retiros.filter(r=> r.fechaMovISO >= desde && r.fechaMovISO <= hasta);
+  const yaImputadosAntes = enRango.filter(r=> cmState.historialKeys.includes(r.key));
+  const pendientes = enRango.filter(r=> !cmState.historialKeys.includes(r.key));
+  // diffs/otros egresos: solo los que caen (parcial o totalmente) dentro del período elegido
+  const diffsEnRango = parsed.diffs.filter(d=> d.hastaFecha>=desde && d.desdeFecha<=hasta);
+  const otrosEnRango = parsed.otrosEgresos.filter(o=> o.fechaMovISO>=desde && o.fechaMovISO<=hasta);
+
+  cmState.desde = desde; cmState.hasta = hasta;
+  cmState.pendientes = pendientes;
+  cmState.imputados = [];
+  cmState.salidas = [];
+  cmState.nextSalidaNro = 1;
+  cmState.salidasToggle = "no";
+  cmState.yaImputadosAntesCount = yaImputadosAntes.length;
+  cmState.diffs = diffsEnRango;
+  cmState.otrosEgresos = otrosEnRango;
+
+  document.getElementById("cmResultados").classList.remove("hidden");
+  cmSetSalidasToggle("no");
+  cmRenderChecks();
+  cmRenderAll();
+  cmSaveState();
+  showToast("Se encontraron "+pendientes.length+" retiro(s) a caja mayor en el período elegido");
+}
+function cmRenderChecks(){
+  const wrap = document.getElementById("cmCierreCheck");
+  const diffs = cmState.diffs||[];
+  if(!diffs.length){
+    wrap.className = "cm-check-banner ok";
+    wrap.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M20 6L9 17l-5-5\"/></svg> Cierres de caja OK — no hay diferencias entre el cierre de un turno y la apertura del siguiente.";
+  } else {
+    wrap.className = "cm-check-banner warn";
+    wrap.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"12\"/><line x1=\"12\" y1=\"16\" x2=\"12.01\" y2=\"16\"/></svg><div>"+
+      diffs.map(d=> "Dif. de caja: "+fmtMoney(Math.abs(d.diff))+" · "+d.desde+" ("+isoToDMY(d.desdeFecha)+") → "+d.hasta+" ("+isoToDMY(d.hastaFecha)+")").join("<br>")+
+      "</div>";
+  }
+  const otros = cmState.otrosEgresos||[];
+  const otrosWrap = document.getElementById("cmOtrosEgresos");
+  if(!otros.length){
+    otrosWrap.classList.add("hidden");
+    otrosWrap.innerHTML = "";
+  } else {
+    otrosWrap.classList.remove("hidden");
+    otrosWrap.innerHTML = "Hay "+otros.length+" salida(s) de dinero con un concepto no reconocido en este período (no se sumaron a caja mayor, revisalas manualmente): "+
+      otros.map(o=> isoToDMY(o.fechaMovISO)+" · \""+o.concepto+"\" · "+o.usuario+" · "+fmtMoney(o.monto)).join(" — ");
+  }
+}
+
+/* ---------- tablas ---------- */
+function cmRenderPendientes(){
+  const tbl = document.getElementById("cmTablaPendientes");
+  const hoyDMY = isoToDMY(todayISO());
+  const thead = "<thead><tr><th>Fecha imp.</th><th>Retiro</th><th>Turno</th><th>Fecha y hora</th><th>Usuario</th><th>Monto</th><th></th></tr></thead>";
+  let body;
+  if(!cmState.pendientes.length){
+    body = "<tbody><tr><td colspan=\"7\"><div class=\"cm-empty-mini\">No hay retiros pendientes de imputar en el período elegido.</div></td></tr></tbody>";
+  } else {
+    body = "<tbody>"+cmState.pendientes.map(r=>`
+      <tr>
+        <td class="c-fecha">${hoyDMY}</td>
+        <td>rt.${r.rtNum}</td>
+        <td><span class="tag ${cmTagClass(r.turnoLabel)}">${r.turnoLabel}</span></td>
+        <td class="c-fecha">${cmFmtDT(r.dt)}</td>
+        <td class="c-usuario">${r.usuario}</td>
+        <td class="c-monto">${fmtMoney(r.monto)}</td>
+        <td><button type="button" class="cm-btn-imputar" onclick="cmImputar('${cmEsc(r.key)}')">Imputar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></td>
+      </tr>`).join("")+"</tbody>";
+  }
+  tbl.innerHTML = thead+body;
+}
+function cmRenderImputados(){
+  const tbl = document.getElementById("cmTablaImputados");
+  const thead = "<thead><tr><th>Fecha imp.</th><th>Retiro</th><th>Turno</th><th>Usuario</th><th>Ingreso</th><th>Saldo</th></tr></thead>";
+  let body;
+  if(!cmState.imputados.length){
+    body = "<tbody><tr><td colspan=\"6\"><div class=\"cm-empty-mini\">Todavía no imputaste ningún retiro.</div></td></tr></tbody>";
+  } else {
+    let acum = 0;
+    body = "<tbody>"+cmState.imputados.map(r=>{
+      acum += r.monto;
+      return `<tr>
+        <td class="c-fecha">${isoToDMY(r.fechaImputacionISO)}</td>
+        <td>rt.${r.rtNum}</td>
+        <td><span class="tag ${cmTagClass(r.turnoLabel)}">${r.turnoLabel}</span></td>
+        <td class="c-usuario">${r.usuario}</td>
+        <td class="c-monto">${fmtMoney(r.monto)}</td>
+        <td class="c-monto">${fmtMoney(acum)}</td>
+      </tr>`;
+    }).join("")+"</tbody>";
+  }
+  tbl.innerHTML = thead+body;
+}
+function cmRenderSalidas(){
+  const tbl = document.getElementById("cmTablaSalidas");
+  const thead = "<thead><tr><th>Fecha imp.</th><th>Nro.</th><th>Fecha salida</th><th>Rubro</th><th>Concepto</th><th>Proveedor</th><th>Monto</th><th></th></tr></thead>";
+  let body;
+  if(!cmState.salidas.length){
+    body = "<tbody><tr><td colspan=\"8\"><div class=\"cm-empty-mini\">Todavía no registraste salidas en este cierre.</div></td></tr></tbody>";
+  } else {
+    body = "<tbody>"+cmState.salidas.map((s,i)=>`
+      <tr>
+        <td class="c-fecha">${isoToDMY(s.fechaImpISO)}</td>
+        <td>${s.nro}</td>
+        <td class="c-fecha">${isoToDMY(s.fechaSalidaISO)}</td>
+        <td>${s.rubro||"—"}</td>
+        <td>${s.concepto||"—"}</td>
+        <td class="c-usuario">${s.proveedor}</td>
+        <td class="c-monto">${fmtMoney(s.monto)}</td>
+        <td><button type="button" class="cm-btn-del" onclick="cmRemoveSalida(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
+      </tr>`).join("")+"</tbody>";
+  }
+  tbl.innerHTML = thead+body;
+}
+function cmRenderAll(){ cmRenderPendientes(); cmRenderImputados(); cmRenderSalidas(); cmRecalcTotales(); }
+function cmRecalcTotales(){
+  const totalRetiros = cmState.imputados.reduce((s,r)=>s+r.monto,0);
+  const totalSalidas = cmState.salidas.reduce((s,r)=>s+r.monto,0);
+  const saldo = totalRetiros - totalSalidas;
+  document.getElementById("cmKpiPendientes").textContent = cmState.pendientes.length;
+  document.getElementById("cmKpiImputados").textContent = cmState.imputados.length;
+  document.getElementById("cmKpiSaldo").textContent = fmtMoney(saldo);
+  document.getElementById("cmCntPendientes").textContent = cmState.pendientes.length;
+  document.getElementById("cmCntImputados").textContent = cmState.imputados.length;
+  document.getElementById("cmCntSalidas").textContent = cmState.salidas.length;
+  document.getElementById("cmSaldoRetiros").textContent = fmtMoney(totalRetiros);
+  document.getElementById("cmTotalRetiros").textContent = fmtMoney(totalRetiros);
+  document.getElementById("cmTotalSalidas").textContent = fmtMoney(totalSalidas);
+  document.getElementById("cmTotalSaldo").textContent = fmtMoney(saldo);
+  document.getElementById("cmBtnCerrar").disabled = !(cmState.imputados.length>0 || cmState.salidas.length>0);
+  const note = document.getElementById("cmAlreadyNote");
+  if(cmState.yaImputadosAntesCount>0){
+    note.textContent = cmState.yaImputadosAntesCount+" retiro(s) del período elegido ya se habían imputado en un cierre anterior y no se muestran en la lista.";
+    note.classList.remove("hidden");
+  } else {
+    note.textContent = "";
+    note.classList.add("hidden");
+  }
+  const panelSalidas = document.getElementById("cmPanelSalidas");
+  panelSalidas.classList.toggle("hidden", !(cmState.salidasToggle==="si" || cmState.salidas.length>0));
+}
+function cmImputar(key){
+  const idx = cmState.pendientes.findIndex(r=>r.key===key);
+  if(idx===-1) return;
+  const [r] = cmState.pendientes.splice(idx,1);
+  r.fechaImputacionISO = todayISO();
+  cmState.imputados.push(r);
+  cmRenderAll();
+  cmSaveState();
+}
+
+/* ---------- salidas de caja (gastos en efectivo) ---------- */
+function cmSetSalidasToggle(val){
+  document.querySelectorAll("#cmSalidasChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===val));
+  cmState.salidasToggle = val;
+  const form = document.getElementById("cmSalidasForm");
+  if(val==="si"){
+    form.classList.remove("hidden");
+    cmResetSalidaForm();
+  } else {
+    form.classList.add("hidden");
+  }
+  cmRecalcTotales();
+  cmSaveState();
+}
+function cmResetSalidaForm(){
+  document.getElementById("cmSalidaFechaImp").value = isoToDMY(todayISO());
+  document.getElementById("cmSalidaNro").value = "Pago "+cmState.nextSalidaNro;
+  document.getElementById("cmSalidaFecha").value = "";
+  populateSelect(document.getElementById("cmSalidaProveedor"), proveedoresConfig.map(p=>p.nombre), "Seleccionar proveedor…");
+  document.getElementById("cmSalidaProveedor").value = "";
+  document.getElementById("cmSalidaConcepto").value = "";
+  document.getElementById("cmSalidaRubro").value = "";
+  document.getElementById("cmSalidaSinProveedor").checked = false;
+  onCMSinProveedorToggle();
+  document.getElementById("cmSalidaMonto").value = "";
+  document.querySelectorAll("#cmSalidasForm .field").forEach(f=>f.classList.remove("error"));
+}
+function onCMProveedorChange(){
+  const nombre = document.getElementById("cmSalidaProveedor").value;
+  const p = proveedoresConfig.find(x=>x.nombre===nombre);
+  document.getElementById("cmSalidaConcepto").value = p ? p.concepto : "";
+  document.getElementById("cmSalidaRubro").value = p ? p.rubro : "";
+}
+function onCMSinProveedorToggle(){
+  const sin = document.getElementById("cmSalidaSinProveedor").checked;
+  const provSelect = document.getElementById("cmSalidaProveedor");
+  const rubroInput = document.getElementById("cmSalidaRubro");
+  const rubroSelect = document.getElementById("cmSalidaRubroManual");
+  provSelect.disabled = sin;
+  markFieldError("fld-cmSalidaProveedor", false);
+  markFieldError("fld-cmSalidaRubroWrap", false);
+  if(sin){
+    provSelect.value = "";
+    rubroInput.style.display = "none";
+    rubroSelect.style.display = "";
+    document.getElementById("cmSalidaRubroHint").textContent = "(elegí manualmente)";
+    populateSelect(rubroSelect, rubrosConfig.map(r=>r.nombre), "Seleccionar rubro…");
+    rubroSelect.value = "";
+    document.getElementById("cmSalidaConcepto").value = "";
+  } else {
+    rubroInput.style.display = "";
+    rubroSelect.style.display = "none";
+    document.getElementById("cmSalidaRubroHint").textContent = "(automático)";
+    rubroInput.value = "";
+    document.getElementById("cmSalidaConcepto").value = "";
+  }
+}
+function onCMRubroManualChange(){
+  const rubroNombre = document.getElementById("cmSalidaRubroManual").value;
+  const r = rubrosConfig.find(x=>x.nombre===rubroNombre);
+  document.getElementById("cmSalidaConcepto").value = r ? r.concepto : "";
+}
+attachMoneyMask("cmSalidaMonto");
+function cmAddSalida(){
+  const fechaSalidaISO = dmyToISO(document.getElementById("cmSalidaFecha").value);
+  const sinProveedor = document.getElementById("cmSalidaSinProveedor").checked;
+  let proveedor, concepto, rubro;
+  if(sinProveedor){
+    proveedor = "No especifica proveedor";
+    rubro = document.getElementById("cmSalidaRubroManual").value;
+    const rInfo = rubrosConfig.find(x=>x.nombre===rubro);
+    concepto = rInfo ? rInfo.concepto : "";
+  } else {
+    proveedor = document.getElementById("cmSalidaProveedor").value;
+    concepto = document.getElementById("cmSalidaConcepto").value;
+    rubro = document.getElementById("cmSalidaRubro").value;
+  }
+  const monto = parseMoneyInput(document.getElementById("cmSalidaMonto").value);
+
+  let ok = true;
+  markFieldError("fld-cmSalidaProveedor", false);
+  markFieldError("fld-cmSalidaRubroWrap", false);
+  if(!fechaSalidaISO) ok = false;
+  if(sinProveedor){ if(!rubro){ markFieldError("fld-cmSalidaRubroWrap", true); ok=false; } }
+  else { if(!proveedor){ markFieldError("fld-cmSalidaProveedor", true); ok=false; } }
+  if(monto<=0) ok = false;
+  if(!ok){ showToast("Completá la fecha, el proveedor/rubro y el monto de la salida", "warn"); return; }
+
+  cmState.salidas.push({
+    nro: "Pago "+cmState.nextSalidaNro,
+    fechaImpISO: todayISO(), fechaSalidaISO, proveedor, concepto, rubro, monto
+  });
+  cmState.nextSalidaNro++;
+  cmResetSalidaForm();
+  cmRenderSalidas();
+  cmRecalcTotales();
+  cmSaveState();
+  showToast("Salida agregada");
+}
+function cmRemoveSalida(idx){
+  cmState.salidas.splice(idx,1);
+  cmState.salidas.forEach((s,i)=>{ s.nro = "Pago "+(i+1); });
+  cmState.nextSalidaNro = cmState.salidas.length+1;
+  cmRenderSalidas();
+  cmRecalcTotales();
+  cmSaveState();
+}
+
+/* ---------- cierre: crea las órdenes de pago (Pago B) en Pagos y persiste el último cierre ---------- */
+function cmConfirmarCierre(){
+  if(!cmState.imputados.length && !cmState.salidas.length){
+    showToast("No hay retiros imputados ni salidas registradas para cerrar", "warn");
+    return;
+  }
+  const totalRetiros = cmState.imputados.reduce((s,r)=>s+r.monto,0);
+  const totalSalidas = cmState.salidas.reduce((s,r)=>s+r.monto,0);
+  const saldo = totalRetiros - totalSalidas;
+  const msg = "Vas a cerrar Caja Mayor:\n\n"+
+    "• Retiros imputados: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+")\n"+
+    "• Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+")\n"+
+    "• Saldo final: "+fmtMoney(saldo)+"\n\n"+
+    (cmState.salidas.length>0 ? "Esto va a crear "+cmState.salidas.length+" orden(es) de pago (Pago B) en Pagos.\n\n" : "")+
+    "¿Confirmás el cierre?";
+  if(!confirm(msg)) return;
+  cmEjecutarCierre(totalRetiros, totalSalidas, saldo);
+}
+async function cmEjecutarCierre(totalRetiros, totalSalidas, saldo){
+  const hoy = todayISO();
+  const creadoPorId = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null;
+  const creadoPorNombre = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.nombre : "—";
+  const nuevasOrdenes = [];
+  try{
+    for(const salida of cmState.salidas){
+      const payload = {
+        fecha_orden: hoy, comprobante_tipo: "Pago B", fecha_comprobante: salida.fechaSalidaISO, comprobante: "",
+        proveedor: salida.proveedor, concepto: salida.concepto, rubro: salida.rubro,
+        monto_factura: salida.monto, monto_retencion: 0, monto: salida.monto,
+        estado: "Pagado", metodo: "Efectivo", fecha_venc: null, fecha_pago: salida.fechaSalidaISO,
+        notas: "Salida de Caja Mayor — cierre del "+isoToDMY(hoy)+" ("+salida.nro+").",
+        unread: true, creado_por: creadoPorId, creado_por_nombre: creadoPorNombre,
+        modificado_por: creadoPorId, modificado_por_nombre: creadoPorNombre, modificado_fecha: new Date().toISOString()
+      };
+      const res = await sb.from("lf_ordenes").insert(payload).select().single();
+      if(res.error){
+        showToast("No se pudo crear la orden de pago de '"+salida.nro+"': "+res.error.message+". El cierre se canceló, no se perdió nada, intentá de nuevo.", "warn");
+        return;
+      }
+      nuevasOrdenes.push(mapOrdenRow(res.data));
+    }
+  }catch(e){
+    showToast("Ocurrió un error creando las órdenes de pago. El cierre se canceló, intentá de nuevo.", "warn");
+    return;
+  }
+
+  nuevasOrdenes.forEach(o=>{
+    ordenes.unshift(o);
+    logHistorialOrden("Creó una orden de pago", o.id+" ("+o.proveedor+", "+fmtMoney(o.monto)+", desde Caja Mayor)");
+  });
+  if(nuevasOrdenes.length){
+    if(typeof renderList==="function") renderList();
+    if(typeof updateCounts==="function") updateCounts();
+  }
+
+  cmState.imputados.forEach(r=> cmState.historialKeys.push(r.key));
+  cmState.ultimoCierreFecha = hoy;
+  cmState.ultimoCierreMonto = saldo;
+  if(typeof logAudit==="function") logAudit("Cerró Caja Mayor", "Retiros: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+"), Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+"), Saldo: "+fmtMoney(saldo), "cajaMayor");
+
+  cmState.file = null;
+  cmState.pendientes = [];
+  cmState.imputados = [];
+  cmState.salidas = [];
+  cmState.nextSalidaNro = 1;
+  cmState.salidasToggle = "no";
+  cmState.desde = null; cmState.hasta = null;
+  cmState.yaImputadosAntesCount = 0;
+  cmState.diffs = []; cmState.otrosEgresos = [];
+
+  cmSaveState();
+  renderCMZone();
+  document.getElementById("cmDesde").value = "";
+  document.getElementById("cmHasta").value = "";
+  document.getElementById("cmResultados").classList.add("hidden");
+  checkCMReady();
+  cmRenderUltimoCierre();
+  showToast("Caja Mayor cerrada correctamente"+(nuevasOrdenes.length?(" · "+nuevasOrdenes.length+" orden(es) de pago creada(s)"):""));
+}
+
+/* ---------- persistencia local + init del módulo ---------- */
+function cmSerializeRetiro(r){ return {...r, dt: r.dt.toISOString()}; }
+function cmDeserializeRetiro(r){ return {...r, dt: new Date(r.dt)}; }
+function cmSaveState(){
+  try{
+    localStorage.setItem(CM_LS_KEY, JSON.stringify({
+      file: cmState.file, desde: cmState.desde, hasta: cmState.hasta,
+      pendientes: cmState.pendientes.map(cmSerializeRetiro),
+      imputados: cmState.imputados.map(cmSerializeRetiro),
+      salidas: cmState.salidas,
+      nextSalidaNro: cmState.nextSalidaNro,
+      salidasToggle: cmState.salidasToggle,
+      yaImputadosAntesCount: cmState.yaImputadosAntesCount,
+      diffs: cmState.diffs, otrosEgresos: cmState.otrosEgresos,
+      historialKeys: cmState.historialKeys,
+      ultimoCierreFecha: cmState.ultimoCierreFecha,
+      ultimoCierreMonto: cmState.ultimoCierreMonto
+    }));
+  }catch(e){ console.warn("No se pudo guardar el estado de Caja Mayor en este navegador:", e); }
+}
+function cmLoadState(){
+  try{
+    const raw = localStorage.getItem(CM_LS_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    cmState.file = data.file || null;
+    cmState.desde = data.desde || null;
+    cmState.hasta = data.hasta || null;
+    cmState.pendientes = (data.pendientes||[]).map(cmDeserializeRetiro);
+    cmState.imputados = (data.imputados||[]).map(cmDeserializeRetiro);
+    cmState.salidas = data.salidas || [];
+    cmState.nextSalidaNro = data.nextSalidaNro || 1;
+    cmState.salidasToggle = data.salidasToggle || "no";
+    cmState.yaImputadosAntesCount = data.yaImputadosAntesCount || 0;
+    cmState.diffs = data.diffs || [];
+    cmState.otrosEgresos = data.otrosEgresos || [];
+    cmState.historialKeys = data.historialKeys || [];
+    cmState.ultimoCierreFecha = data.ultimoCierreFecha || null;
+    cmState.ultimoCierreMonto = (data.ultimoCierreMonto===undefined) ? null : data.ultimoCierreMonto;
+  }catch(e){ console.warn("No se pudo leer el estado de Caja Mayor guardado en este navegador:", e); }
+}
+function cmRenderUltimoCierre(){
+  document.getElementById("cmUltimaFecha").textContent = cmState.ultimoCierreFecha ? isoToDMY(cmState.ultimoCierreFecha) : "Todavía no se registró ningún cierre";
+  document.getElementById("cmUltimoMonto").textContent = (cmState.ultimoCierreMonto===null || cmState.ultimoCierreMonto===undefined) ? "—" : fmtMoney(cmState.ultimoCierreMonto);
+}
+function cmInit(){
+  cmLoadState();
+  cmRenderUltimoCierre();
+  renderCMZone();
+  document.getElementById("cmDesde").value = cmState.desde || "";
+  document.getElementById("cmHasta").value = cmState.hasta || "";
+  checkCMReady();
+  if(cmState.pendientes.length || cmState.imputados.length || cmState.salidas.length){
+    document.getElementById("cmResultados").classList.remove("hidden");
+    document.querySelectorAll("#cmSalidasChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===cmState.salidasToggle));
+    document.getElementById("cmSalidasForm").classList.toggle("hidden", cmState.salidasToggle!=="si");
+    if(cmState.salidasToggle==="si"){
+      document.getElementById("cmSalidaFechaImp").value = isoToDMY(todayISO());
+      document.getElementById("cmSalidaNro").value = "Pago "+cmState.nextSalidaNro;
+      populateSelect(document.getElementById("cmSalidaProveedor"), proveedoresConfig.map(p=>p.nombre), "Seleccionar proveedor…");
+    }
+    cmRenderChecks();
+    cmRenderAll();
+  } else {
+    document.getElementById("cmResultados").classList.add("hidden");
+  }
+}
 </script>
 </body>
 </html>
+
