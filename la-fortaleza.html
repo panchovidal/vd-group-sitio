@@ -498,6 +498,10 @@
 .liq-table{border-collapse:collapse;width:max-content;min-width:100%;font-size:12.3px;}
 .liq-table th,.liq-table td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;}
 .liq-table thead th{background:#F7F8FC;font-weight:800;color:var(--text-2);position:sticky;top:0;z-index:1;}
+.liq-table thead tr:first-child th{top:0;}
+.liq-table thead tr:last-child th{top:37px;}
+.liq-table thead th.liq-th-group{border-bottom:1px solid var(--border);}
+.liq-table thead th.liq-th-sub{font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em;padding-top:6px;padding-bottom:8px;}
 .liq-table .liq-col-nombre{text-align:left;position:sticky;left:0;background:#fff;z-index:2;font-weight:700;color:var(--text-1);min-width:170px;box-shadow:1px 0 0 var(--border);}
 .liq-table thead th.liq-col-nombre{background:#F7F8FC;}
 .liq-col-esperado{display:block;font-size:11px;font-weight:600;color:var(--text-3);}
@@ -5084,13 +5088,25 @@ function liqRenderTablaLiquidacion(){
 
   var adelantosPorNombre = liqAdelantosPorNombre();
 
-  var thead = "<thead><tr>" +
-    "<th class=\"liq-col-nombre\">Nombre</th><th>Cond.</th><th>Sueldo</th><th>A</th><th>B</th>" +
-    "<th>Adelantos</th>" +
-    "<th>Horas extra (reporte)</th><th>Horas extra (manual)</th>" +
-    "<th>Feriados (reporte)</th><th>Feriados (manual)</th>" +
-    "<th>Ausencias (reporte)</th><th>Ausencias (manual)</th>" +
-    "<th>Sugerido pago B</th><th>Pago B</th></tr></thead>";
+  // Encabezado de 2 filas: Horas extra/Feriados/Ausencias comparten un título agrupado (colspan=2)
+  // con "Reporte"/"Manual" como subtítulos, en vez de repetir la variable en cada columna
+  // (pedido de Pancho, 10/08 — tabla más angosta y más fácil de leer).
+  var thead = "<thead>" +
+    "<tr>" +
+      "<th rowspan=\"2\" class=\"liq-col-nombre\">Nombre</th>" +
+      "<th rowspan=\"2\">Cond.</th><th rowspan=\"2\">Sueldo</th><th rowspan=\"2\">A</th><th rowspan=\"2\">B</th>" +
+      "<th rowspan=\"2\">Adelantos</th>" +
+      "<th colspan=\"2\" class=\"liq-th-group\">Horas extra</th>" +
+      "<th colspan=\"2\" class=\"liq-th-group\">Feriados</th>" +
+      "<th colspan=\"2\" class=\"liq-th-group\">Ausencias</th>" +
+      "<th rowspan=\"2\">Sugerido pago B</th><th rowspan=\"2\">Pago B</th>" +
+    "</tr>" +
+    "<tr>" +
+      "<th class=\"liq-th-sub\">Reporte</th><th class=\"liq-th-sub\">Manual</th>" +
+      "<th class=\"liq-th-sub\">Reporte</th><th class=\"liq-th-sub\">Manual</th>" +
+      "<th class=\"liq-th-sub\">Reporte</th><th class=\"liq-th-sub\">Manual</th>" +
+    "</tr>" +
+    "</thead>";
 
   var totalA = 0, totalB = 0;
   var rows = "";
