@@ -1093,31 +1093,7 @@
    ========================================================= */
 const SUPABASE_URL = "https://dqtrbmmklwekqqsbwpqb.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_hXYyB1POFw-vnv54tdfZag_TkxbzrKb";
-/* Mismo esquema de persistencia de sesión que home.html (ver ese archivo para el detalle):
-   sin "mantener sesión" tildado, la sesión vive en sessionStorage y se cierra sola al
-   cerrar la pestaña/navegador. Tiene que ser IDÉNTICO en las 3 páginas para que la sesión
-   se comparta bien al navegar entre ellas. */
-const VDG_REMEMBER_KEY = "vdg_remember_me";
-function vdgGetRemember(){
-  try{ return localStorage.getItem(VDG_REMEMBER_KEY) === "1"; }catch(e){ return false; }
-}
-const vdgDynamicStorage = {
-  getItem: (key) => {
-    try{ return (vdgGetRemember() ? window.localStorage : window.sessionStorage).getItem(key); }
-    catch(e){ return null; }
-  },
-  setItem: (key, value) => {
-    try{ (vdgGetRemember() ? window.localStorage : window.sessionStorage).setItem(key, value); }catch(e){}
-  },
-  removeItem: (key) => {
-    try{ window.localStorage.removeItem(key); }catch(e){}
-    try{ window.sessionStorage.removeItem(key); }catch(e){}
-  }
-};
-try{ localStorage.removeItem("sb-dqtrbmmklwekqqsbwpqb-auth-token"); }catch(e){}
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { storage: vdgDynamicStorage, persistSession: true, autoRefreshToken: true }
-});
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* =========================================================
    CONFIG (listas maestras — jerarquía Concepto > Rubro > Proveedor)
@@ -1539,7 +1515,6 @@ function toggleUserMenu(ev){
 async function doLogout(ev){
   if(ev) ev.stopPropagation();
   await sb.auth.signOut();
-  try{ localStorage.removeItem(VDG_REMEMBER_KEY); }catch(e){} // vuelve al default para el próximo login
   window.location.href = "home.html";
 }
 document.addEventListener("click",(e)=>{
