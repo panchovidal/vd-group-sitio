@@ -519,6 +519,8 @@
 .liq-num-cell{text-align:right;font-variant-numeric:tabular-nums;}
 .liq-input-monto{width:100px;padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:12.3px;font-weight:700;text-align:right;color:var(--text-1);}
 .liq-input-monto:focus{outline:none;border-color:var(--sky);}
+.liq-input-num{width:64px;padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:12.3px;font-weight:700;text-align:right;color:var(--text-1);}
+.liq-input-num:focus{outline:none;border-color:var(--sky);}
 .liq-sin-presentismo{display:block;font-size:10.5px;font-weight:600;color:var(--text-3);}
 .liq-total-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--navy);border-radius:var(--radius-lg);padding:18px 22px;margin-top:16px;color:#fff;}
 .liq-total-bar .lt-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);}
@@ -4530,6 +4532,9 @@ var liqState = {
   feriados: [],              // ["yyyy-mm-dd", ...]
   montoA: {},                // {empKey: numero}
   pagoBManual: {},           // {empKey: numero} — solo si el usuario editó el sugerido
+  horasExtraManual: {},      // {empKey: numero de horas, ej. 1.5} — arranca vacío/0, ver §1 nuevo en las reglas
+  feriadosManual: {},        // {empKey: cantidad de jornales}
+  ausenciasManual: {},       // {empKey: cantidad de jornales}
   liquidado: false,
   liquidacionId: null,
   ordenAId: null,
@@ -4931,10 +4936,14 @@ function liqEmpleadosPorKey(){
    Fuente: `ordenes` (lf_ordenes), la misma lista que alimenta el módulo Pagos — no hace falta ir a
    buscarlas de nuevo a Supabase porque ya están en memoria (se mantienen frescas: initSession las
    carga una vez y cada alta/baja en Pagos actualiza el array `ordenes` en el momento).
-   Regla acordada con Pancho el 05/08: una orden de Pagos cuenta como "adelanto del mes en estudio" si
-   Rubro="Sueldos" + Concepto="Adelanto de sueldo" + Estado="Pagado" (si quedó "Pendiente" es porque
-   todavía no se le entregó la plata al empleado, así que no debe descontarse todavía) + Fecha de orden
-   dentro del mes de liqState.mes. Se excluyen "Anulado" por ser correcciones de error de carga.
+   Regla acordada con Pancho el 05/08, CORREGIDA el 06/08 (Concepto/Rubro estaban invertidos —
+   verificado en vivo contra Config > Compras > Rubros: el Concepto "Sueldos y CS" tiene dos Rubros,
+   "Adelanto de sueldo" [7 proveedores, los empleados] y "Sueldos" [sin proveedores, usado por las
+   órdenes que genera el botón Liquidar, ver liqEjecutarLiquidar]): una orden de Pagos cuenta como
+   "adelanto del mes en estudio" si Concepto="Sueldos y CS" + Rubro="Adelanto de sueldo" +
+   Estado="Pagado" (si quedó "Pendiente" es porque todavía no se le entregó la plata al empleado, así
+   que no debe descontarse todavía) + Fecha de orden dentro del mes de liqState.mes. Se excluyen
+   "Anulado" por ser correcciones de error de carga.
    El campo Proveedor de esa orden es el nombre del empleado (mismo catálogo que lf_empleados,
    confirmado con Pancho), así que se suma por nombre exacto — no hay lógica difusa de matching. */
 function liqAdelantosPorNombre(){
@@ -4942,7 +4951,7 @@ function liqAdelantosPorNombre(){
   if(!liqState.mes) return mapa;
   var mesPrefix = String(liqState.mes).slice(0,7); // "yyyy-mm"
   (ordenes||[]).forEach(function(o){
-    if(o.rubro!=="Sueldos" || o.concepto!=="Adelanto de sueldo") return;
+    if(o.concepto!=="Sueldos y CS" || o.rubro!=="Adelanto de sueldo") return;
     if(o.estado!=="Pagado") return;
     if(!o.fechaOrden || String(o.fechaOrden).slice(0,7)!==mesPrefix) return;
     var nombre = o.proveedor||"";
@@ -5077,14 +5086,17 @@ function liqRenderTablaLiquidacion(){
 
   var thead = "<thead><tr>" +
     "<th class=\"liq-col-nombre\">Nombre</th><th>Cond.</th><th>Sueldo</th><th>A</th><th>B</th>" +
-    "<th>Adelantos</th><th>Horas extra</th><th>Feriados trabajados</th><th>Ausencias</th>" +
+    "<th>Adelantos</th>" +
+    "<th>Horas extra (reporte)</th><th>Horas extra (manual)</th>" +
+    "<th>Feriados (reporte)</th><th>Feriados (manual)</th>" +
+    "<th>Ausencias (reporte)</th><th>Ausencias (manual)</th>" +
     "<th>Sugerido pago B</th><th>Pago B</th></tr></thead>";
 
   var totalA = 0, totalB = 0;
   var rows = "";
   filas.forEach(function(f){
     if(!f.emp){
-      rows += "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+"<span class=\"liq-sin-presentismo\">sin ficha en la base</span></td><td colspan=\"10\" class=\"liq-num-cell\" style=\"color:var(--text-3);\">—</td></tr>";
+      rows += "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+"<span class=\"liq-sin-presentismo\">sin ficha en la base</span></td><td colspan=\"13\" class=\"liq-num-cell\" style=\"color:var(--text-3);\">—</td></tr>";
       return;
     }
     var sueldo = Number(f.emp.sueldo||0);
@@ -5095,13 +5107,21 @@ function liqRenderTablaLiquidacion(){
     var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
     var jornal = sueldo/30;
     var valorHora = jornal/8;
-    var sugerido = Math.round(sueldo - a - adelanto - (agr.ausencias*jornal) + (agr.feriadosTrabajados*jornal) + (agr.horasExtraMin/60*valorHora));
+    // Overrides manuales — el Sugerido pago B usa SOLO estos valores (arrancan en 0), la columna
+    // "(reporte)" es puramente informativa para decidir qué tipear (pedido de Pancho, 06/08).
+    var horasExtraManual = Number(liqState.horasExtraManual[f.key]||0);
+    var feriadosManual = Number(liqState.feriadosManual[f.key]||0);
+    var ausenciasManual = Number(liqState.ausenciasManual[f.key]||0);
+    var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora));
     var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
     totalA += a; totalB += pagoB;
 
     var horasExtraTxt = liqFmtHM(agr.horasExtraMin);
     var horasExtraCls = agr.horasExtraMin>0 ? "liq-dia-verde" : agr.horasExtraMin<0 ? "liq-dia-rojo" : "";
     var dis = liqState.liquidado ? "disabled" : "";
+    var manualInput = function(field, val){
+      return "<input type=\"text\" class=\"liq-input-num\" data-emp=\""+f.key+"\" data-field=\""+field+"\" value=\""+liqFmtDecimal(val)+"\" oninput=\"liqOnVariableManualInput(this)\" "+dis+">";
+    };
 
     rows += "<tr>" +
       "<td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+(f.tienePresentismo?"":"<span class=\"liq-sin-presentismo\">sin presentismo</span>")+"</td>" +
@@ -5111,10 +5131,13 @@ function liqRenderTablaLiquidacion(){
         ? "<input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"a\" value=\""+fmtMoney(a)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+">"
         : "<span class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(0)+"</span>") + "</td>" +
       "<td class=\"liq-num-cell\">"+fmtMoney(b)+"</td>" +
-      "<td class=\"liq-num-cell\" style=\""+(adelanto>0?"color:#B22A32;font-weight:700;":"color:var(--text-3);")+"\" title=\"Suma de Pagos con Rubro=Sueldos, Concepto=Adelanto de sueldo, Proveedor="+liqEscapeHtml(f.nombre)+", pagados este mes\">"+(adelanto>0?"−"+fmtMoney(adelanto):"—")+"</td>" +
+      "<td class=\"liq-num-cell\" style=\""+(adelanto>0?"color:#B22A32;font-weight:700;":"color:var(--text-3);")+"\" title=\"Suma de Pagos con Concepto=Sueldos y CS, Rubro=Adelanto de sueldo, Proveedor="+liqEscapeHtml(f.nombre)+", pagados este mes\">"+(adelanto>0?"−"+fmtMoney(adelanto):"—")+"</td>" +
       "<td class=\"liq-num-cell "+horasExtraCls+"\">"+(f.tienePresentismo?horasExtraTxt:"—")+"</td>" +
+      "<td>"+manualInput("horasExtraManual", horasExtraManual)+"</td>" +
       "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.feriadosTrabajados:"—")+"</td>" +
+      "<td>"+manualInput("feriadosManual", feriadosManual)+"</td>" +
       "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.ausencias:"—")+"</td>" +
+      "<td>"+manualInput("ausenciasManual", ausenciasManual)+"</td>" +
       "<td class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(sugerido)+"</td>" +
       "<td><input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"pagob\" value=\""+fmtMoney(pagoB)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+"></td>" +
       "</tr>";
@@ -5145,6 +5168,36 @@ function liqOnMontoInput(el){
   }
   liqGuardarDraft();
 }
+/* ---------- overrides manuales de Horas extra / Feriados / Ausencias (pedido de Pancho, 06/08) ----------
+   Cada una tiene una columna "(reporte)" de solo lectura (lo que calculó el motor de Presentismo, sin
+   cambios) y una columna "(manual)" editable que arranca en 0/vacío. El Sugerido pago B se calcula
+   SOLO con el valor manual — la columna de reporte queda como referencia para decidir qué tipear,
+   nunca pisa el cálculo por sí sola. Disponible para los 8 empleados (también Vanina, que no tiene
+   fichadas: para ella la columna "reporte" siempre muestra "—", pero el manual funciona igual). */
+function liqOnVariableManualInput(el){
+  if(liqState.liquidado) return;
+  var key = el.dataset.emp, field = el.dataset.field;
+  var val = liqParseDecimalInput(el.value);
+  liqState[field][key] = val;
+  liqRenderTablaLiquidacion();
+  var restored = document.querySelector('#liqTablaLiquidacion input[data-emp="'+key+'"][data-field="'+field+'"]');
+  if(restored){
+    restored.focus();
+    var pos2 = restored.value.length;
+    restored.setSelectionRange && restored.setSelectionRange(pos2,pos2);
+  }
+  liqGuardarDraft();
+}
+function liqParseDecimalInput(str){
+  var s = String(str||"").trim().replace(",", ".").replace(/[^0-9.\-]/g,"");
+  var val = parseFloat(s);
+  return isNaN(val) ? 0 : val;
+}
+function liqFmtDecimal(n){
+  n = Number(n||0);
+  var r = Math.round(n*100)/100;
+  return String(r).replace(".", ",");
+}
 function liqParseMontoInput(str){
   var digits = String(str||"").replace(/[^\d]/g,"");
   return digits ? Number(digits) : 0;
@@ -5168,10 +5221,12 @@ function liqComputeTotales(){
     var esCondA = f.emp.condicion==="A";
     var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : 0) : 0;
     var adelanto = Number(adelantosPorNombre[f.emp.nombre_completo]||0);
-    var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
     var jornal = sueldo/30;
     var valorHora = jornal/8;
-    var sugerido = Math.round(sueldo - a - adelanto - (agr.ausencias*jornal) + (agr.feriadosTrabajados*jornal) + (agr.horasExtraMin/60*valorHora));
+    var horasExtraManual = Number(liqState.horasExtraManual[f.key]||0);
+    var feriadosManual = Number(liqState.feriadosManual[f.key]||0);
+    var ausenciasManual = Number(liqState.ausenciasManual[f.key]||0);
+    var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora));
     var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
     totalA += a; totalB += pagoB; totalAdelantos += adelanto;
     montosA[f.key] = a; pagosB[f.key] = pagoB;
@@ -5196,6 +5251,9 @@ async function liqGuardarDraftAhora(){
     feriados: liqState.feriados,
     montos_a: liqState.montoA,
     pagos_b: liqState.pagoBManual,
+    horas_extra_manual: liqState.horasExtraManual,
+    feriados_manual: liqState.feriadosManual,
+    ausencias_manual: liqState.ausenciasManual,
     total_a: tot.totalA,
     total_b: tot.totalB,
     modificado_por: (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null
@@ -5229,6 +5287,9 @@ async function liqOnTabOpen(){
       liqState.feriados = row.feriados || [];
       liqState.montoA = row.montos_a || {};
       liqState.pagoBManual = row.pagos_b || {};
+      liqState.horasExtraManual = row.horas_extra_manual || {};
+      liqState.feriadosManual = row.feriados_manual || {};
+      liqState.ausenciasManual = row.ausencias_manual || {};
       liqState.liquidado = !!row.liquidado;
       liqState.liquidacionId = row.id;
       liqState.ordenAId = row.orden_a_id;
@@ -5355,7 +5416,7 @@ async function liqEjecutarLiquidar(tot){
     if(tot.totalA>0){
       var payloadA = {
         fecha_orden: hoy, comprobante_tipo: null, fecha_comprobante: hoy, comprobante: "",
-        proveedor: "No especifica proveedor", concepto: "Sueldos", rubro: "",
+        proveedor: "No especifica proveedor", concepto: "Sueldos y CS", rubro: "Sueldos",
         monto_factura: tot.totalA, monto_retencion: 0, monto: tot.totalA,
         estado: "Pendiente", metodo: "Bco. Galicia", fecha_venc: null, fecha_pago: null,
         notas: "Liquidación de sueldos — parte A — " + mesNombre + ".",
@@ -5371,7 +5432,7 @@ async function liqEjecutarLiquidar(tot){
     if(tot.totalB>0){
       var payloadB = {
         fecha_orden: hoy, comprobante_tipo: "Pago B", fecha_comprobante: hoy, comprobante: "",
-        proveedor: "No especifica proveedor", concepto: "Sueldos", rubro: "",
+        proveedor: "No especifica proveedor", concepto: "Sueldos y CS", rubro: "Sueldos",
         monto_factura: tot.totalB, monto_retencion: 0, monto: tot.totalB,
         estado: "Pendiente", metodo: "Efectivo", fecha_venc: null, fecha_pago: null,
         notas: "Liquidación de sueldos — parte B — " + mesNombre + ".",
