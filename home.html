@@ -50,6 +50,8 @@
   .login-card p.sub{font-size:13px;color:var(--app-text-2);margin:0 0 24px 0;line-height:1.55;}
   .login-notice{display:none;margin-top:14px;font-size:11.5px;color:var(--app-text-2);background:#F1F5FF;border:1px solid #D6E2FA;border-radius:9px;padding:11px 13px;line-height:1.55;}
   .login-notice.show{display:block;}
+  .remember-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--app-text-2);margin:2px 0 16px 0;cursor:pointer;user-select:none;}
+  .remember-row input{accent-color:var(--orange);width:14px;height:14px;cursor:pointer;}
   .forgot-link{display:block;text-align:center;margin-top:16px;font-size:12px;font-weight:700;color:var(--orange);text-decoration:none;cursor:pointer;}
   .forgot-link:hover{text-decoration:underline;}
   .field{margin-bottom:18px;}
@@ -255,6 +257,7 @@
         <button type="button" class="pw-toggle" onclick="togglePwVisibility('loginClave')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
     </div>
+    <label class="remember-row"><input type="checkbox" id="loginRemember"> Mantener sesión iniciada en este dispositivo</label>
     <button class="btn-orange" onclick="doLogin()">Ingresar</button>
     <a class="forgot-link" onclick="forgotPassword()">¿Olvidaste tu contraseña?</a>
     <div class="login-notice" id="loginNotice"></div>
@@ -402,10 +405,45 @@
    ========================================================= */
 const SUPABASE_URL = "https://dqtrbmmklwekqqsbwpqb.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_hXYyB1POFw-vnv54tdfZag_TkxbzrKb";
-// Limpieza única de una prueba de "mantener sesión" que se revirtió por no andar bien:
-// borra la llave residual para que no quede dando vueltas en el navegador.
-try{ localStorage.removeItem("vdg_remember_me"); }catch(e){}
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* =========================================================
+   "MANTENER SESIÓN INICIADA"
+   El cliente de Supabase siempre persiste el token en localStorage (el
+   comportamiento default del SDK, simple y confiable). Encima de eso
+   agregamos una capa propia, sin tocar el storage interno del SDK:
+   - Al loguearse, si NO se tildó "mantener sesión", marcamos esta pestaña/
+     ventana como la "sesión activa" en sessionStorage (que el navegador
+     borra solo al cerrarse).
+   - En cada carga de página, si hay un token guardado pero esta pestaña
+     no viene marcada como sesión activa (o sea: el navegador se cerró y
+     se volvió a abrir) y no se pidió "mantener sesión", cerramos la
+     sesión y pedimos loguearse de nuevo.
+   - Si se tildó "mantener sesión", no se fuerza nada: el token en
+     localStorage sigue siendo válido aunque se cierre el navegador.
+   Mismo esquema en home.html y la-fortaleza.html para que sea consistente
+   al navegar entre las dos páginas.
+   ========================================================= */
+const VDG_REMEMBER_KEY = "vdg_remember_me";
+const VDG_SESSION_ACTIVE_KEY = "vdg_session_active";
+function vdgGetRemember(){
+  try{ return localStorage.getItem(VDG_REMEMBER_KEY) === "1"; }catch(e){ return false; }
+}
+function vdgSetRemember(v){
+  try{ if(v) localStorage.setItem(VDG_REMEMBER_KEY, "1"); else localStorage.removeItem(VDG_REMEMBER_KEY); }catch(e){}
+}
+function vdgMarkSessionActive(){
+  try{ sessionStorage.setItem(VDG_SESSION_ACTIVE_KEY, "1"); }catch(e){}
+}
+function vdgIsSessionActive(){
+  try{ return sessionStorage.getItem(VDG_SESSION_ACTIVE_KEY) === "1"; }catch(e){ return false; }
+}
+async function vdgEnforceSessionPolicy(){
+  if(vdgIsSessionActive()) return;
+  if(vdgGetRemember()){ vdgMarkSessionActive(); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){ try{ await sb.auth.signOut(); }catch(e){} }
+}
 
 const PROYECTOS = [
   {id:"fortaleza", nombre:"La Fortaleza"},
@@ -489,6 +527,8 @@ async function doLogin(){
       try{ await sb.auth.signOut(); }catch(e){}
       return;
     }
+    vdgSetRemember(document.getElementById("loginRemember").checked);
+    vdgMarkSessionActive();
     applySession(perfil);
     claveInput.value = "";
   }catch(e){
@@ -513,6 +553,8 @@ async function doLogout(){
   document.getElementById("gearMenu").classList.remove("show");
   document.getElementById("gearBtn").classList.remove("open");
   try{ await sb.auth.signOut(); }catch(e){}
+  vdgSetRemember(false);
+  try{ sessionStorage.removeItem(VDG_SESSION_ACTIVE_KEY); }catch(e){}
   currentPerfil = null;
   perfilesCache = [];
   document.getElementById("dashView").classList.add("hidden");
@@ -521,6 +563,7 @@ async function doLogout(){
   document.getElementById("loginView").classList.remove("hidden");
   document.getElementById("loginUsuario").value = "";
   document.getElementById("loginClave").value = "";
+  document.getElementById("loginRemember").checked = false;
   setFieldError(false);
   setTimeout(()=>document.getElementById("loginUsuario").focus(), 50);
 }
@@ -530,6 +573,7 @@ document.getElementById("loginClave").addEventListener("keydown", e=>{ if(e.key=
 /* restaura la sesión (Supabase Auth persiste el token en el localStorage propio del SDK) */
 (async function initSession(){
   try{
+    await vdgEnforceSessionPolicy();
     const { data: { session } } = await sb.auth.getSession();
     if(!session) return;
     const { data: perfil, error } = await sb.from("perfiles").select("*").eq("id", session.user.id).single();

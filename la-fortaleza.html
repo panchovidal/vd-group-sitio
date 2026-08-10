@@ -1325,6 +1325,27 @@ const SUPABASE_URL = "https://dqtrbmmklwekqqsbwpqb.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_hXYyB1POFw-vnv54tdfZag_TkxbzrKb";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/* Mismo esquema de "mantener sesión iniciada" que home.html (ver ese archivo para el
+   detalle). Acá no hay checkbox porque el login siempre ocurre en home.html; esta página
+   solo hereda la sesión y respeta la misma política antes de darla por válida. */
+const VDG_REMEMBER_KEY = "vdg_remember_me";
+const VDG_SESSION_ACTIVE_KEY = "vdg_session_active";
+function vdgGetRemember(){
+  try{ return localStorage.getItem(VDG_REMEMBER_KEY) === "1"; }catch(e){ return false; }
+}
+function vdgMarkSessionActive(){
+  try{ sessionStorage.setItem(VDG_SESSION_ACTIVE_KEY, "1"); }catch(e){}
+}
+function vdgIsSessionActive(){
+  try{ return sessionStorage.getItem(VDG_SESSION_ACTIVE_KEY) === "1"; }catch(e){ return false; }
+}
+async function vdgEnforceSessionPolicy(){
+  if(vdgIsSessionActive()) return;
+  if(vdgGetRemember()){ vdgMarkSessionActive(); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){ try{ await sb.auth.signOut(); }catch(e){} }
+}
+
 /* =========================================================
    CONFIG (listas maestras — jerarquía Concepto > Rubro > Proveedor)
    ========================================================= */
@@ -1745,6 +1766,8 @@ function toggleUserMenu(ev){
 async function doLogout(ev){
   if(ev) ev.stopPropagation();
   await sb.auth.signOut();
+  try{ localStorage.removeItem(VDG_REMEMBER_KEY); }catch(e){}
+  try{ sessionStorage.removeItem(VDG_SESSION_ACTIVE_KEY); }catch(e){}
   window.location.href = "home.html";
 }
 document.addEventListener("click",(e)=>{
@@ -1810,6 +1833,7 @@ function aplicarGatingDeSecciones(){
 }
 (async function initSession(){
   try{
+    await vdgEnforceSessionPolicy();
     const { data: { session } } = await sb.auth.getSession();
     if(!session){ window.location.href = "home.html"; return; }
     const { data: perfil, error } = await sb.from("perfiles").select("*").eq("id", session.user.id).single();
