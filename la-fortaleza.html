@@ -246,6 +246,11 @@
   .status-chip[data-s="Pagado"].active{background:#E4F8ED;border-color:#1F9D5A;color:#137B44;}
   .status-chip[data-s="Vencido"].active{background:#FCE6E7;border-color:#D1414A;color:#B22A32;}
   .status-chip[data-s="Anulado"].active{background:#EEEFF5;border-color:#9498B8;color:#6D7191;}
+  .status-chip.active{background:#EAF1FF;border-color:var(--blue);color:var(--blue);}
+  .status-chip[data-s="si"].active{background:#E4F8ED;border-color:#1F9D5A;color:#137B44;}
+  .status-chip[data-s="no"].active{background:#EEEFF5;border-color:#9498B8;color:#6D7191;}
+  .status-chip[data-t="ingreso"].active{background:#E4F8ED;border-color:#1F9D5A;color:#137B44;}
+  .status-chip[data-t="diferencia"].active{background:#FCE6E7;border-color:#D1414A;color:#B22A32;}
 
   .panel-foot{padding:16px 24px 20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
   .btn-primary{flex:1;background:var(--blue);color:#fff;border:none;padding:12px 16px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;transition:filter .15s ease, transform .15s ease;}
@@ -549,6 +554,13 @@
 .cm-kpi-row .kpi-tile{flex:1;min-width:170px;}
 .cm-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;margin-top:8px;}
 @media(max-width:980px){.cm-cols{grid-template-columns:1fr;}}
+.cm-col-left,.cm-col-right{display:flex;flex-direction:column;min-width:0;}
+.cm-col-left .cm-salidas-form{max-width:none;}
+.cm-conteo-input{width:150px;font-size:12px;padding:6px 9px;border:1.5px solid var(--border);border-radius:7px;font-weight:600;color:var(--text-1);transition:all .15s ease;}
+.cm-conteo-input::placeholder{color:var(--text-3);font-weight:500;}
+.cm-conteo-input.cm-conteo-ok{border-color:#1F9D5A;background:#F1FBF5;color:#137B44;}
+.cm-conteo-input.cm-conteo-bad{border-color:#D1414A;background:#FDF1F1;color:#B22A32;}
+.cm-row-actions{display:flex;align-items:center;gap:6px;}
 .cm-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);}
 .cm-panel-head{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .cm-panel-head h3{margin:0;font-size:13.5px;font-weight:800;}
@@ -1021,146 +1033,136 @@
                 <div class="cm-already-note hidden" id="cmAlreadyNote"></div>
 
                 <div class="cm-cols">
-                  <div class="cm-panel">
-                    <div class="cm-panel-head"><h3>Retiros pendientes de imputar</h3><span class="cnt" id="cmCntPendientes">0</span></div>
-                    <div class="cm-panel-body"><table class="cm-table" id="cmTablaPendientes"></table></div>
-                  </div>
-                  <div class="cm-panel">
-                    <div class="cm-panel-head"><h3>Imputados en Caja Mayor</h3><span class="cnt" id="cmCntImputados">0</span></div>
-                    <div class="cm-panel-body"><table class="cm-table" id="cmTablaImputados"></table></div>
-                    <div class="cm-saldo-strip"><span class="lbl">Saldo acumulado (retiros)</span><span class="val" id="cmSaldoRetiros">$0</span></div>
-                  </div>
-                </div>
+                  <div class="cm-col-left">
+                    <div class="cm-panel">
+                      <div class="cm-panel-head"><h3>Retiros pendientes de imputar</h3><span class="cnt" id="cmCntPendientes">0</span></div>
+                      <div class="cm-panel-body"><table class="cm-table" id="cmTablaPendientes"></table></div>
+                    </div>
 
-                <div class="form-section-title">Salidas de caja mayor (gastos pagados en efectivo)</div>
-                <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Vas a registrar salidas de dinero de la caja mayor en este cierre?</div>
-                <div class="status-select-wrap" id="cmSalidasChips" style="margin-bottom:18px;">
-                  <div class="status-chip" data-s="si" onclick="cmSetSalidasToggle('si')">Sí</div>
-                  <div class="status-chip active" data-s="no" onclick="cmSetSalidasToggle('no')">No</div>
-                </div>
+                    <div class="form-section-title">Salidas de caja mayor (gastos pagados en efectivo)</div>
+                    <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Vas a registrar salidas de dinero de la caja mayor en este cierre?</div>
+                    <div class="status-select-wrap" id="cmSalidasChips" style="margin-bottom:18px;">
+                      <div class="status-chip" data-s="si" onclick="cmSetSalidasToggle('si')">Sí</div>
+                      <div class="status-chip active" data-s="no" onclick="cmSetSalidasToggle('no')">No</div>
+                    </div>
 
-                <div class="cm-salidas-form hidden" id="cmSalidasForm">
-                  <div class="field-row">
-                    <div class="field"><label>Fecha de imputación</label><input type="text" id="cmSalidaFechaImp" readonly></div>
-                    <div class="field"><label>Nro. de salida</label><input type="text" id="cmSalidaNro" readonly></div>
-                  </div>
-                  <div class="field-row">
-                    <div class="field">
-                      <label>Fecha en que se realizó la salida</label>
-                      <div class="date-field-wrap">
-                        <input type="text" id="cmSalidaFecha" placeholder="dd/mm/aaaa" maxlength="10">
-                        <button type="button" class="cal-btn" data-target="cmSalidaFecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                    <div class="cm-salidas-form hidden" id="cmSalidasForm">
+                      <div class="field-row">
+                        <div class="field"><label>Fecha de imputación</label><input type="text" id="cmSalidaFechaImp" readonly></div>
+                        <div class="field"><label>Nro. de salida</label><input type="text" id="cmSalidaNro" readonly></div>
+                      </div>
+                      <div class="field-row">
+                        <div class="field">
+                          <label>Fecha en que se realizó la salida</label>
+                          <div class="date-field-wrap">
+                            <input type="text" id="cmSalidaFecha" placeholder="dd/mm/aaaa" maxlength="10">
+                            <button type="button" class="cal-btn" data-target="cmSalidaFecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                          </div>
+                        </div>
+                        <div class="field"><label>Monto de la salida</label><input type="text" id="cmSalidaMonto" placeholder="$0,00.-"></div>
+                      </div>
+                      <div class="field" id="fld-cmSalidaProveedor">
+                        <label>Proveedor</label>
+                        <select id="cmSalidaProveedor" onchange="onCMProveedorChange()"><option value="">Seleccionar proveedor…</option></select>
+                      </div>
+                      <label class="check-inline">
+                        <input type="checkbox" id="cmSalidaSinProveedor" onchange="onCMSinProveedorToggle()">
+                        No especifico proveedor
+                      </label>
+                      <div class="field-row">
+                        <div class="field"><label>Concepto <span class="hint">(automático)</span></label><input type="text" id="cmSalidaConcepto" readonly placeholder="Se completa según el proveedor"></div>
+                        <div class="field" id="fld-cmSalidaRubroWrap">
+                          <label>Rubro <span class="hint" id="cmSalidaRubroHint">(automático)</span></label>
+                          <input type="text" id="cmSalidaRubro" readonly placeholder="Se completa según el proveedor">
+                          <select id="cmSalidaRubroManual" style="display:none;" onchange="onCMRubroManualChange()"><option value="">Seleccionar rubro…</option></select>
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label>Observaciones <span class="hint">(opcional)</span></label>
+                        <input type="text" id="cmSalidaObs" placeholder="Ej: reposición de capacitor">
+                      </div>
+                      <div class="cm-add-salida-row">
+                        <button type="button" class="cm-btn-add" onclick="cmAddSalida()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar salida</button>
                       </div>
                     </div>
-                    <div class="field"><label>Monto de la salida</label><input type="text" id="cmSalidaMonto" placeholder="$0,00.-"></div>
-                  </div>
-                  <div class="field" id="fld-cmSalidaProveedor">
-                    <label>Proveedor</label>
-                    <select id="cmSalidaProveedor" onchange="onCMProveedorChange()"><option value="">Seleccionar proveedor…</option></select>
-                  </div>
-                  <label class="check-inline">
-                    <input type="checkbox" id="cmSalidaSinProveedor" onchange="onCMSinProveedorToggle()">
-                    No especifico proveedor
-                  </label>
-                  <div class="field-row">
-                    <div class="field"><label>Concepto <span class="hint">(automático)</span></label><input type="text" id="cmSalidaConcepto" readonly placeholder="Se completa según el proveedor"></div>
-                    <div class="field" id="fld-cmSalidaRubroWrap">
-                      <label>Rubro <span class="hint" id="cmSalidaRubroHint">(automático)</span></label>
-                      <input type="text" id="cmSalidaRubro" readonly placeholder="Se completa según el proveedor">
-                      <select id="cmSalidaRubroManual" style="display:none;" onchange="onCMRubroManualChange()"><option value="">Seleccionar rubro…</option></select>
+
+                    <div class="form-section-title">Ajustes por ingresos/diferencias</div>
+                    <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Encontraste un faltante o un ingreso en la caja que no corresponde a un retiro?</div>
+                    <div class="status-select-wrap" id="cmAjustesChips" style="margin-bottom:18px;">
+                      <div class="status-chip" data-s="si" onclick="cmSetAjustesToggle('si')">Sí</div>
+                      <div class="status-chip active" data-s="no" onclick="cmSetAjustesToggle('no')">No</div>
                     </div>
-                  </div>
-                  <div class="field">
-                    <label>Observaciones <span class="hint">(opcional)</span></label>
-                    <input type="text" id="cmSalidaObs" placeholder="Ej: reposición de capacitor">
-                  </div>
-                  <div class="cm-add-salida-row">
-                    <button type="button" class="cm-btn-add" onclick="cmAddSalida()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar salida</button>
-                  </div>
-                </div>
 
-                <div class="cm-panel hidden" id="cmPanelSalidas">
-                  <div class="cm-panel-head"><h3>Salidas registradas en este cierre</h3><span class="cnt" id="cmCntSalidas">0</span></div>
-                  <div class="cm-panel-body"><table class="cm-table" id="cmTablaSalidas"></table></div>
-                </div>
-
-                <div class="form-section-title">Ajustes por ingresos/diferencias</div>
-                <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Encontraste un faltante o un ingreso en la caja que no corresponde a un retiro?</div>
-                <div class="status-select-wrap" id="cmAjustesChips" style="margin-bottom:18px;">
-                  <div class="status-chip" data-s="si" onclick="cmSetAjustesToggle('si')">Sí</div>
-                  <div class="status-chip active" data-s="no" onclick="cmSetAjustesToggle('no')">No</div>
-                </div>
-
-                <div class="cm-salidas-form hidden" id="cmAjustesForm">
-                  <div class="field-row">
-                    <div class="field"><label>Fecha de imputación</label><input type="text" id="cmAjusteFechaImp" readonly></div>
-                    <div class="field"><label>Nro. de ajuste</label><input type="text" id="cmAjusteNro" readonly></div>
-                  </div>
-                  <div class="field-row">
-                    <div class="field">
-                      <label>Fecha del movimiento</label>
-                      <div class="date-field-wrap">
-                        <input type="text" id="cmAjusteFecha" placeholder="dd/mm/aaaa" maxlength="10">
-                        <button type="button" class="cal-btn" data-target="cmAjusteFecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                    <div class="cm-salidas-form hidden" id="cmAjustesForm">
+                      <div class="field-row">
+                        <div class="field"><label>Fecha de imputación</label><input type="text" id="cmAjusteFechaImp" readonly></div>
+                        <div class="field"><label>Nro. de ajuste</label><input type="text" id="cmAjusteNro" readonly></div>
+                      </div>
+                      <div class="field-row">
+                        <div class="field">
+                          <label>Fecha del movimiento</label>
+                          <div class="date-field-wrap">
+                            <input type="text" id="cmAjusteFecha" placeholder="dd/mm/aaaa" maxlength="10">
+                            <button type="button" class="cal-btn" data-target="cmAjusteFecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                          </div>
+                        </div>
+                        <div class="field"><label>Monto</label><input type="text" id="cmAjusteMonto" placeholder="$0,00.-"></div>
+                      </div>
+                      <div class="field">
+                        <label>Tipo de ajuste</label>
+                        <div class="status-select-wrap" id="cmAjusteTipoChips">
+                          <div class="status-chip" data-t="ingreso" onclick="cmSetAjusteTipo('ingreso')">Ingreso (suma al saldo)</div>
+                          <div class="status-chip active" data-t="diferencia" onclick="cmSetAjusteTipo('diferencia')">Diferencia / faltante (genera orden de pago)</div>
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label>Observaciones</label>
+                        <input type="text" id="cmAjusteObs" placeholder="Ej: ajuste por diferencia de caja del turno TM">
+                      </div>
+                      <div class="cm-add-salida-row">
+                        <button type="button" class="cm-btn-add" onclick="cmAddAjuste()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar ajuste</button>
                       </div>
                     </div>
-                    <div class="field"><label>Monto</label><input type="text" id="cmAjusteMonto" placeholder="$0,00.-"></div>
-                  </div>
-                  <div class="field">
-                    <label>Tipo de ajuste</label>
-                    <div class="status-select-wrap" id="cmAjusteTipoChips">
-                      <div class="status-chip" data-t="ingreso" onclick="cmSetAjusteTipo('ingreso')">Ingreso (suma al saldo)</div>
-                      <div class="status-chip active" data-t="diferencia" onclick="cmSetAjusteTipo('diferencia')">Diferencia / faltante (genera orden de pago)</div>
+
+                    <div class="form-section-title">Retiro a oficina</div>
+                    <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Vas a trasladar dinero de Caja Mayor a la caja de oficina en este cierre? No genera orden de pago, es un movimiento interno.</div>
+                    <div class="status-select-wrap" id="cmOficinaChips" style="margin-bottom:18px;">
+                      <div class="status-chip" data-s="si" onclick="cmSetOficinaToggle('si')">Sí</div>
+                      <div class="status-chip active" data-s="no" onclick="cmSetOficinaToggle('no')">No</div>
                     </div>
-                  </div>
-                  <div class="field">
-                    <label>Observaciones</label>
-                    <input type="text" id="cmAjusteObs" placeholder="Ej: ajuste por diferencia de caja del turno TM">
-                  </div>
-                  <div class="cm-add-salida-row">
-                    <button type="button" class="cm-btn-add" onclick="cmAddAjuste()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar ajuste</button>
-                  </div>
-                </div>
 
-                <div class="cm-panel hidden" id="cmPanelAjustes">
-                  <div class="cm-panel-head"><h3>Ajustes registrados en este cierre</h3><span class="cnt" id="cmCntAjustes">0</span></div>
-                  <div class="cm-panel-body"><table class="cm-table" id="cmTablaAjustes"></table></div>
-                </div>
-
-                <div class="form-section-title">Retiro a oficina</div>
-                <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Vas a trasladar dinero de Caja Mayor a la caja de oficina en este cierre? No genera orden de pago, es un movimiento interno.</div>
-                <div class="status-select-wrap" id="cmOficinaChips" style="margin-bottom:18px;">
-                  <div class="status-chip" data-s="si" onclick="cmSetOficinaToggle('si')">Sí</div>
-                  <div class="status-chip active" data-s="no" onclick="cmSetOficinaToggle('no')">No</div>
-                </div>
-
-                <div class="cm-salidas-form hidden" id="cmOficinaForm">
-                  <div class="field-row">
-                    <div class="field"><label>Fecha de imputación</label><input type="text" id="cmOficinaFechaImp" readonly></div>
-                    <div class="field"><label>Nro.</label><input type="text" id="cmOficinaNro" readonly></div>
-                  </div>
-                  <div class="field-row">
-                    <div class="field">
-                      <label>Fecha del movimiento</label>
-                      <div class="date-field-wrap">
-                        <input type="text" id="cmOficinaFecha" placeholder="dd/mm/aaaa" maxlength="10">
-                        <button type="button" class="cal-btn" data-target="cmOficinaFecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                    <div class="cm-salidas-form hidden" id="cmOficinaForm">
+                      <div class="field-row">
+                        <div class="field"><label>Fecha de imputación</label><input type="text" id="cmOficinaFechaImp" readonly></div>
+                        <div class="field"><label>Nro.</label><input type="text" id="cmOficinaNro" readonly></div>
+                      </div>
+                      <div class="field-row">
+                        <div class="field">
+                          <label>Fecha del movimiento</label>
+                          <div class="date-field-wrap">
+                            <input type="text" id="cmOficinaFecha" placeholder="dd/mm/aaaa" maxlength="10">
+                            <button type="button" class="cal-btn" data-target="cmOficinaFecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                          </div>
+                        </div>
+                        <div class="field"><label>Monto</label><input type="text" id="cmOficinaMonto" placeholder="$0,00.-"></div>
+                      </div>
+                      <div class="field">
+                        <label>Observaciones <span class="hint">(opcional)</span></label>
+                        <input type="text" id="cmOficinaObs" placeholder="Ej: traslado semanal a oficina">
+                      </div>
+                      <div class="cm-add-salida-row">
+                        <button type="button" class="cm-btn-add" onclick="cmAddRetiroOficina()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar retiro a oficina</button>
                       </div>
                     </div>
-                    <div class="field"><label>Monto</label><input type="text" id="cmOficinaMonto" placeholder="$0,00.-"></div>
                   </div>
-                  <div class="field">
-                    <label>Observaciones <span class="hint">(opcional)</span></label>
-                    <input type="text" id="cmOficinaObs" placeholder="Ej: traslado semanal a oficina">
-                  </div>
-                  <div class="cm-add-salida-row">
-                    <button type="button" class="cm-btn-add" onclick="cmAddRetiroOficina()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar retiro a oficina</button>
-                  </div>
-                </div>
 
-                <div class="cm-panel hidden" id="cmPanelOficina">
-                  <div class="cm-panel-head"><h3>Retiros a oficina registrados en este cierre</h3><span class="cnt" id="cmCntOficina">0</span></div>
-                  <div class="cm-panel-body"><table class="cm-table" id="cmTablaOficina"></table></div>
+                  <div class="cm-col-right">
+                    <div class="cm-panel">
+                      <div class="cm-panel-head"><h3>Imputados en Caja Mayor</h3><span class="cnt" id="cmCntImputados">0</span></div>
+                      <div class="cm-panel-body"><table class="cm-table" id="cmTablaImputados"></table></div>
+                      <div class="cm-saldo-strip"><span class="lbl">Saldo acumulado</span><span class="val" id="cmSaldoRetiros">$0</span></div>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="cm-total-bar">
@@ -1491,6 +1493,8 @@
                   <select id="actFiltroModulo" onchange="renderActividad()">
                     <option value="">Todas</option>
                     <option value="pagos">Pagos</option>
+                    <option value="sueldos">Sueldos</option>
+                    <option value="cajaMayor">Caja Mayor</option>
                     <option value="config">Configuración</option>
                   </select>
                 </div>
@@ -3629,7 +3633,7 @@ async function renderActividad(){
   el.innerHTML = rows.map(h=>`
     <div class="config-list-row" style="align-items:flex-start;">
       <div style="flex:1;min-width:0;">
-        <div class="main-txt" style="white-space:normal;">${h.accion} <span class="tag" style="font-size:9.5px;">${(h.modulo||"config")==="pagos"?"Pagos":"Configuración"}</span></div>
+        <div class="main-txt" style="white-space:normal;">${h.accion} <span class="tag" style="font-size:9.5px;">${({pagos:"Pagos",sueldos:"Sueldos",cajaMayor:"Caja Mayor",config:"Configuración"})[h.modulo||"config"] || "Configuración"}</span></div>
         <div class="sub-txt" style="display:block;margin-top:2px;font-weight:500;white-space:normal;">${h.detalle||""}</div>
       </div>
       <div style="text-align:right;flex-shrink:0;">
@@ -5896,6 +5900,7 @@ let cmState = {
   yaImputadosAntesCount: 0,
   diffs: [], otrosEgresos: [],
   historialKeys: [],
+  descartadosKeys: [],
   ultimoCierreFecha: null,
   ultimoCierreMonto: null,
   historialCierres: []
@@ -5908,6 +5913,15 @@ function cmConceptoDeRubroDiferencia(){
   return r ? r.concepto : "Diferencias de caja mayor";
 }
 function cmEsc(str){ return String(str).replace(/'/g,"\\'"); }
+async function logHistorialCajaMayor(accion, detalle){
+  try{
+    await sb.from("lf_historial").insert({
+      usuario_id: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
+      usuario_nombre: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.nombre : "—",
+      accion: accion, detalle: detalle||"", modulo: "cajaMayor"
+    });
+  }catch(e){ console.warn("No se pudo registrar el historial de Caja Mayor", e); }
+}
 function cmFmtDT(dt){ return pad2(dt.getDate())+"/"+pad2(dt.getMonth()+1)+" "+pad2(dt.getHours())+":"+pad2(dt.getMinutes()); }
 function cmTagClass(label){ return label==="TM" ? "cm-tag-tm" : "cm-tag-tt"; }
 function cmParseHora(val){
@@ -5938,13 +5952,17 @@ function cmCombineFechaHora(fechaVal, horaVal){
      ser un retiro a caja mayor — salvo "Devolución de seña/adelanto" (no es
      caja mayor) y "Regularizador de mov. por error" (corrección de una venta
      mal cargada, no un retiro real — confirmado con Pancho). El Concepto
-     histórico "Retiro de dinero" es lo mismo que "Retiro a caja mayor".
+     histórico "Retiro de dinero" NO es lo mismo que "Retiro a caja mayor":
+     es un ajuste interno por un error en las comandas de una venta, no un
+     retiro real de efectivo (corregido/confirmado con Pancho el 12/08/2026;
+     únicamente "Retiro a caja mayor" cuenta como retiro a imputar). Se trata
+     igual que "Regularizador de mov. por error": Concepto conocido, pero no
+     se suma como retiro ni se lista como egreso no reconocido.
      Cualquier otra salida de dinero con un Concepto no reconocido se lista
      aparte para revisión manual, nunca se suma sola. */
 const CM_TIPO_POR_CONCEPTO = {
   "ingreso - apertura de caja":"apertura",
   "retiro a caja mayor":"retiro",
-  "retiro de dinero":"retiro",
   "retiro - cierre de caja":"cierre"
 };
 const CM_CONCEPTOS_EGRESO_CONOCIDOS = new Set([
@@ -6152,7 +6170,7 @@ function cmProcesarArchivo(){
   }
   const enRango = parsed.retiros.filter(r=> r.fechaMovISO >= desde && r.fechaMovISO <= hasta);
   const yaImputadosAntes = enRango.filter(r=> cmState.historialKeys.includes(r.key));
-  const pendientes = enRango.filter(r=> !cmState.historialKeys.includes(r.key));
+  const pendientes = enRango.filter(r=> !cmState.historialKeys.includes(r.key) && !cmState.descartadosKeys.includes(r.key));
   // diffs/otros egresos: solo los que caen (parcial o totalmente) dentro del período elegido
   const diffsEnRango = parsed.diffs.filter(d=> d.hastaFecha>=desde && d.desdeFecha<=hasta);
   const otrosEnRango = parsed.otrosEgresos.filter(o=> o.fechaMovISO>=desde && o.fechaMovISO<=hasta);
@@ -6199,13 +6217,46 @@ function cmRenderChecks(){
 }
 
 /* ---------- tablas ---------- */
+function cmParseSumaExpr(str){
+  if(str===undefined || str===null) return null;
+  const s = String(str).replace(/\s+/g,"");
+  if(!s) return null;
+  if(!/^[+-]?[0-9]+([.,][0-9]+)?([+-][0-9]+([.,][0-9]+)?)*$/.test(s)) return NaN;
+  const tokens = s.match(/[+-]?[0-9]+(?:[.,][0-9]+)?/g);
+  if(!tokens) return NaN;
+  let total = 0;
+  for(const t of tokens){
+    const num = parseFloat(t.replace(",", "."));
+    if(isNaN(num)) return NaN;
+    total += num;
+  }
+  return total;
+}
+function cmCheckConteo(input, monto){
+  const val = cmParseSumaExpr(input.value);
+  input.classList.remove("cm-conteo-ok","cm-conteo-bad");
+  if(input.value.trim()==="" || val===null) return;
+  if(isNaN(val)){ input.classList.add("cm-conteo-bad"); return; }
+  if(Math.abs(val-monto) < 0.5) input.classList.add("cm-conteo-ok");
+  else input.classList.add("cm-conteo-bad");
+}
+function cmDescartarPendiente(key){
+  const idx = cmState.pendientes.findIndex(r=>r.key===key);
+  if(idx===-1) return;
+  if(!confirm("¿Confirmás que este retiro no ocurrió realmente (error de carga) y hay que descartarlo? No va a volver a aparecer, incluso si volvés a procesar el mismo archivo/período.")) return;
+  cmState.pendientes.splice(idx,1);
+  cmState.descartadosKeys.push(key);
+  cmRenderAll();
+  cmSaveState();
+  showToast("Se descartó el retiro pendiente");
+}
 function cmRenderPendientes(){
   const tbl = document.getElementById("cmTablaPendientes");
   const hoyDMY = isoToDMY(todayISO());
-  const thead = "<thead><tr><th>Fecha imp.</th><th>Retiro</th><th>Turno</th><th>Fecha y hora</th><th>Usuario</th><th>Monto</th><th></th></tr></thead>";
+  const thead = "<thead><tr><th>Fecha imp.</th><th>Retiro</th><th>Turno</th><th>Fecha y hora</th><th>Usuario</th><th>Monto</th><th>Conteo manual</th><th></th></tr></thead>";
   let body;
   if(!cmState.pendientes.length){
-    body = "<tbody><tr><td colspan=\"7\"><div class=\"cm-empty-mini\">No hay retiros pendientes de imputar en el período elegido.</div></td></tr></tbody>";
+    body = "<tbody><tr><td colspan=\"8\"><div class=\"cm-empty-mini\">No hay retiros pendientes de imputar en el período elegido.</div></td></tr></tbody>";
   } else {
     body = "<tbody>"+cmState.pendientes.map(r=>`
       <tr>
@@ -6215,53 +6266,77 @@ function cmRenderPendientes(){
         <td class="c-fecha">${cmFmtDT(r.dt)}</td>
         <td class="c-usuario">${r.usuario}</td>
         <td class="c-monto">${fmtMoney(r.monto)}</td>
-        <td><button type="button" class="cm-btn-imputar" onclick="cmImputar('${cmEsc(r.key)}')">Imputar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></td>
+        <td><input type="text" class="cm-conteo-input" placeholder="ej: 500+300+200" oninput="cmCheckConteo(this, ${r.monto})"></td>
+        <td class="cm-row-actions">
+          <button type="button" class="cm-btn-imputar" onclick="cmImputar('${cmEsc(r.key)}')">Imputar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+          <button type="button" class="cm-btn-del" onclick="cmDescartarPendiente('${cmEsc(r.key)}')" title="Descartar (no ocurrió)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </td>
       </tr>`).join("")+"</tbody>";
   }
   tbl.innerHTML = thead+body;
+}
+function cmRegistradoPorActual(){
+  return (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.nombre : "—";
+}
+/* ---------- lista unificada: retiros imputados + ajustes + salidas + retiro a oficina ---------- */
+function cmBuildUnificado(){
+  const filas = [];
+  cmState.imputados.forEach(r=> filas.push({
+    fecha: r.fechaImputacionISO, tsOrden: r.dt ? r.dt.getTime() : 0,
+    turnoHtml: `<span class="tag ${cmTagClass(r.turnoLabel)}">${r.turnoLabel}</span>`,
+    usuario: r.usuario, detalle: "Retiro rt."+r.rtNum, monto: r.monto, signo: 1,
+    accionHtml: `<button type="button" class="cm-btn-anular" onclick="cmAnularImputacion('${cmEsc(r.key)}')" title="Anular imputación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/></svg>Anular</button>`
+  }));
+  cmState.ajustes.forEach((a,i)=> filas.push({
+    fecha: a.fechaAjusteISO, tsOrden: 0,
+    turnoHtml: "",
+    usuario: a.registradoPor || "—",
+    detalle: (a.tipo==="ingreso"?"Ajuste (ingreso) · ":"Ajuste (diferencia) · ")+a.observaciones,
+    monto: a.monto, signo: a.tipo==="ingreso" ? 1 : -1,
+    accionHtml: `<button type="button" class="cm-btn-del" onclick="cmRemoveAjuste(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`
+  }));
+  cmState.salidas.forEach((s,i)=> filas.push({
+    fecha: s.fechaSalidaISO, tsOrden: 0,
+    turnoHtml: "",
+    usuario: s.registradoPor || "—",
+    detalle: "Salida · "+s.proveedor+(s.obs?" ("+s.obs+")":""),
+    monto: s.monto, signo: -1,
+    accionHtml: `<button type="button" class="cm-btn-del" onclick="cmRemoveSalida(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`
+  }));
+  cmState.retirosOficina.forEach((r,i)=> filas.push({
+    fecha: r.fechaMovISO, tsOrden: 0,
+    turnoHtml: "",
+    usuario: r.registradoPor || "—",
+    detalle: "Retiro a oficina"+(r.obs?" ("+r.obs+")":""),
+    monto: r.monto, signo: -1,
+    accionHtml: `<button type="button" class="cm-btn-del" onclick="cmRemoveRetiroOficina(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`
+  }));
+  filas.sort((x,y)=> (x.fecha||"").localeCompare(y.fecha||"") || (x.tsOrden - y.tsOrden));
+  return filas;
 }
 function cmRenderImputados(){
   const tbl = document.getElementById("cmTablaImputados");
-  const thead = "<thead><tr><th>Fecha imp.</th><th>Retiro</th><th>Turno</th><th>Usuario</th><th>Ingreso</th><th>Saldo</th><th></th></tr></thead>";
+  const thead = "<thead><tr><th>Fecha</th><th>Retiro</th><th>Turno</th><th>Usuario</th><th>Detalle</th><th>Monto</th><th>Saldo</th><th></th></tr></thead>";
+  const filas = cmBuildUnificado();
   let body;
-  if(!cmState.imputados.length){
-    body = "<tbody><tr><td colspan=\"7\"><div class=\"cm-empty-mini\">Todavía no imputaste ningún retiro.</div></td></tr></tbody>";
+  if(!filas.length){
+    body = "<tbody><tr><td colspan=\"8\"><div class=\"cm-empty-mini\">Todavía no se registró ningún movimiento en este cierre.</div></td></tr></tbody>";
   } else {
-    let acum = 0;
-    body = "<tbody>"+cmState.imputados.map(r=>{
-      acum += r.monto;
+    let acum = cmState.ultimoCierreMonto || 0;
+    body = "<tbody>"+filas.map(f=>{
+      acum += f.signo * f.monto;
+      const dirHtml = f.signo>0 ? `<span class="tag cm-tag-ingreso">Entrada</span>` : `<span class="tag cm-tag-diferencia">Salida</span>`;
       return `<tr>
-        <td class="c-fecha">${isoToDMY(r.fechaImputacionISO)}</td>
-        <td>rt.${r.rtNum}</td>
-        <td><span class="tag ${cmTagClass(r.turnoLabel)}">${r.turnoLabel}</span></td>
-        <td class="c-usuario">${r.usuario}</td>
-        <td class="c-monto">${fmtMoney(r.monto)}</td>
+        <td class="c-fecha">${isoToDMY(f.fecha)}</td>
+        <td>${dirHtml}</td>
+        <td>${f.turnoHtml}</td>
+        <td class="c-usuario">${f.usuario}</td>
+        <td>${f.detalle}</td>
+        <td class="c-monto">${f.signo>0?"+":"−"}${fmtMoney(f.monto)}</td>
         <td class="c-monto">${fmtMoney(acum)}</td>
-        <td><button type="button" class="cm-btn-anular" onclick="cmAnularImputacion('${cmEsc(r.key)}')" title="Anular imputación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/></svg>Anular</button></td>
+        <td>${f.accionHtml}</td>
       </tr>`;
     }).join("")+"</tbody>";
-  }
-  tbl.innerHTML = thead+body;
-}
-function cmRenderSalidas(){
-  const tbl = document.getElementById("cmTablaSalidas");
-  const thead = "<thead><tr><th>Fecha imp.</th><th>Nro.</th><th>Fecha salida</th><th>Rubro</th><th>Concepto</th><th>Proveedor</th><th>Observaciones</th><th>Monto</th><th></th></tr></thead>";
-  let body;
-  if(!cmState.salidas.length){
-    body = "<tbody><tr><td colspan=\"9\"><div class=\"cm-empty-mini\">Todavía no registraste salidas en este cierre.</div></td></tr></tbody>";
-  } else {
-    body = "<tbody>"+cmState.salidas.map((s,i)=>`
-      <tr>
-        <td class="c-fecha">${isoToDMY(s.fechaImpISO)}</td>
-        <td>${s.nro}</td>
-        <td class="c-fecha">${isoToDMY(s.fechaSalidaISO)}</td>
-        <td>${s.rubro||"—"}</td>
-        <td>${s.concepto||"—"}</td>
-        <td class="c-usuario">${s.proveedor}</td>
-        <td>${s.obs||"—"}</td>
-        <td class="c-monto">${fmtMoney(s.monto)}</td>
-        <td><button type="button" class="cm-btn-del" onclick="cmRemoveSalida(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
-      </tr>`).join("")+"</tbody>";
   }
   tbl.innerHTML = thead+body;
 }
@@ -6305,11 +6380,11 @@ function cmAddAjuste(){
   cmState.ajustes.push({
     nro: "Ajuste "+cmState.nextAjusteNro,
     fechaImpISO: todayISO(), fechaAjusteISO: fechaISO,
-    tipo, monto, observaciones: obs
+    tipo, monto, observaciones: obs, registradoPor: cmRegistradoPorActual()
   });
   cmState.nextAjusteNro++;
   cmResetAjusteForm();
-  cmRenderAjustes();
+  cmRenderImputados();
   cmRecalcTotales();
   cmSaveState();
   showToast("Ajuste agregado");
@@ -6318,29 +6393,9 @@ function cmRemoveAjuste(idx){
   cmState.ajustes.splice(idx,1);
   cmState.ajustes.forEach((a,i)=>{ a.nro = "Ajuste "+(i+1); });
   cmState.nextAjusteNro = cmState.ajustes.length+1;
-  cmRenderAjustes();
+  cmRenderImputados();
   cmRecalcTotales();
   cmSaveState();
-}
-function cmRenderAjustes(){
-  const tbl = document.getElementById("cmTablaAjustes");
-  const thead = "<thead><tr><th>Fecha imp.</th><th>Nro.</th><th>Fecha mov.</th><th>Tipo</th><th>Observaciones</th><th>Monto</th><th></th></tr></thead>";
-  let body;
-  if(!cmState.ajustes.length){
-    body = "<tbody><tr><td colspan=\"7\"><div class=\"cm-empty-mini\">Todavía no registraste ajustes en este cierre.</div></td></tr></tbody>";
-  } else {
-    body = "<tbody>"+cmState.ajustes.map((a,i)=>`
-      <tr>
-        <td class="c-fecha">${isoToDMY(a.fechaImpISO)}</td>
-        <td>${a.nro}</td>
-        <td class="c-fecha">${isoToDMY(a.fechaAjusteISO)}</td>
-        <td><span class="tag ${a.tipo==="ingreso"?"cm-tag-ingreso":"cm-tag-diferencia"}">${a.tipo==="ingreso"?"Ingreso":"Diferencia"}</span></td>
-        <td>${a.observaciones}</td>
-        <td class="c-monto">${fmtMoney(a.monto)}</td>
-        <td><button type="button" class="cm-btn-del" onclick="cmRemoveAjuste(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
-      </tr>`).join("")+"</tbody>";
-  }
-  tbl.innerHTML = thead+body;
 }
 /* ---------- retiro a oficina (traslado interno, no genera orden de pago) ---------- */
 function cmSetOficinaToggle(val){
@@ -6374,11 +6429,11 @@ function cmAddRetiroOficina(){
   if(!ok){ showToast("Completá la fecha y el monto del retiro a oficina", "warn"); return; }
   cmState.retirosOficina.push({
     nro: "Retiro oficina "+cmState.nextOficinaNro,
-    fechaImpISO: todayISO(), fechaMovISO: fechaISO, monto, obs
+    fechaImpISO: todayISO(), fechaMovISO: fechaISO, monto, obs, registradoPor: cmRegistradoPorActual()
   });
   cmState.nextOficinaNro++;
   cmResetOficinaForm();
-  cmRenderRetirosOficina();
+  cmRenderImputados();
   cmRecalcTotales();
   cmSaveState();
   showToast("Retiro a oficina agregado");
@@ -6387,46 +6442,29 @@ function cmRemoveRetiroOficina(idx){
   cmState.retirosOficina.splice(idx,1);
   cmState.retirosOficina.forEach((r,i)=>{ r.nro = "Retiro oficina "+(i+1); });
   cmState.nextOficinaNro = cmState.retirosOficina.length+1;
-  cmRenderRetirosOficina();
+  cmRenderImputados();
   cmRecalcTotales();
   cmSaveState();
 }
-function cmRenderRetirosOficina(){
-  const tbl = document.getElementById("cmTablaOficina");
-  const thead = "<thead><tr><th>Fecha imp.</th><th>Nro.</th><th>Fecha mov.</th><th>Observaciones</th><th>Monto</th><th></th></tr></thead>";
-  let body;
-  if(!cmState.retirosOficina.length){
-    body = "<tbody><tr><td colspan=\"6\"><div class=\"cm-empty-mini\">Todavía no registraste retiros a oficina en este cierre.</div></td></tr></tbody>";
-  } else {
-    body = "<tbody>"+cmState.retirosOficina.map((r,i)=>`
-      <tr>
-        <td class="c-fecha">${isoToDMY(r.fechaImpISO)}</td>
-        <td>${r.nro}</td>
-        <td class="c-fecha">${isoToDMY(r.fechaMovISO)}</td>
-        <td>${r.obs||"—"}</td>
-        <td class="c-monto">${fmtMoney(r.monto)}</td>
-        <td><button type="button" class="cm-btn-del" onclick="cmRemoveRetiroOficina(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
-      </tr>`).join("")+"</tbody>";
-  }
-  tbl.innerHTML = thead+body;
-}
-function cmRenderAll(){ cmRenderPendientes(); cmRenderImputados(); cmRenderSalidas(); cmRenderAjustes(); cmRenderRetirosOficina(); cmRecalcTotales(); }
+function cmRenderAll(){ cmRenderPendientes(); cmRenderImputados(); cmRecalcTotales(); }
 function cmRecalcTotales(){
+  const saldoInicial = cmState.ultimoCierreMonto || 0;
   const totalRetiros = cmState.imputados.reduce((s,r)=>s+r.monto,0);
   const totalSalidas = cmState.salidas.reduce((s,r)=>s+r.monto,0);
   const totalAjusteIngreso = cmState.ajustes.filter(a=>a.tipo==="ingreso").reduce((s,a)=>s+a.monto,0);
   const totalAjusteDiferencia = cmState.ajustes.filter(a=>a.tipo==="diferencia").reduce((s,a)=>s+a.monto,0);
   const totalOficina = cmState.retirosOficina.reduce((s,r)=>s+r.monto,0);
-  const saldo = totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia - totalOficina;
+  // "Saldo al último cierre" es el saldo inicial de esta caja: se suma como
+  // punto de partida y todo lo demás se acumula sobre ese valor (cuenta
+  // corriente). El KPI "Saldo de Caja Mayor" y el "Saldo final" de abajo
+  // muestran siempre este mismo número — es la misma cuenta.
+  const saldo = saldoInicial + totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia - totalOficina;
   document.getElementById("cmKpiPendientes").textContent = cmState.pendientes.length;
   document.getElementById("cmKpiImputados").textContent = cmState.imputados.length;
   document.getElementById("cmKpiSaldo").textContent = fmtMoney(saldo);
   document.getElementById("cmCntPendientes").textContent = cmState.pendientes.length;
-  document.getElementById("cmCntImputados").textContent = cmState.imputados.length;
-  document.getElementById("cmCntSalidas").textContent = cmState.salidas.length;
-  document.getElementById("cmCntAjustes").textContent = cmState.ajustes.length;
-  document.getElementById("cmCntOficina").textContent = cmState.retirosOficina.length;
-  document.getElementById("cmSaldoRetiros").textContent = fmtMoney(totalRetiros);
+  document.getElementById("cmCntImputados").textContent = cmState.imputados.length + cmState.ajustes.length + cmState.salidas.length + cmState.retirosOficina.length;
+  document.getElementById("cmSaldoRetiros").textContent = fmtMoney(saldo);
   document.getElementById("cmTotalRetiros").textContent = fmtMoney(totalRetiros);
   document.getElementById("cmTotalSalidas").textContent = fmtMoney(totalSalidas);
   const netoAjustes = totalAjusteIngreso - totalAjusteDiferencia;
@@ -6442,12 +6480,6 @@ function cmRecalcTotales(){
     note.textContent = "";
     note.classList.add("hidden");
   }
-  const panelSalidas = document.getElementById("cmPanelSalidas");
-  panelSalidas.classList.toggle("hidden", !(cmState.salidasToggle==="si" || cmState.salidas.length>0));
-  const panelAjustes = document.getElementById("cmPanelAjustes");
-  panelAjustes.classList.toggle("hidden", !(cmState.ajustesToggle==="si" || cmState.ajustes.length>0));
-  const panelOficina = document.getElementById("cmPanelOficina");
-  panelOficina.classList.toggle("hidden", !(cmState.oficinaToggle==="si" || cmState.retirosOficina.length>0));
 }
 function cmImputar(key){
   const idx = cmState.pendientes.findIndex(r=>r.key===key);
@@ -6562,11 +6594,12 @@ function cmAddSalida(){
 
   cmState.salidas.push({
     nro: "Pago "+cmState.nextSalidaNro,
-    fechaImpISO: todayISO(), fechaSalidaISO, proveedor, concepto, rubro, monto, obs
+    fechaImpISO: todayISO(), fechaSalidaISO, proveedor, concepto, rubro, monto, obs,
+    registradoPor: cmRegistradoPorActual()
   });
   cmState.nextSalidaNro++;
   cmResetSalidaForm();
-  cmRenderSalidas();
+  cmRenderImputados();
   cmRecalcTotales();
   cmSaveState();
   showToast("Salida agregada");
@@ -6575,7 +6608,7 @@ function cmRemoveSalida(idx){
   cmState.salidas.splice(idx,1);
   cmState.salidas.forEach((s,i)=>{ s.nro = "Pago "+(i+1); });
   cmState.nextSalidaNro = cmState.salidas.length+1;
-  cmRenderSalidas();
+  cmRenderImputados();
   cmRecalcTotales();
   cmSaveState();
 }
@@ -6586,14 +6619,16 @@ function cmConfirmarCierre(){
     showToast("No hay retiros imputados, salidas, ajustes ni retiros a oficina registrados para cerrar", "warn");
     return;
   }
+  const saldoInicial = cmState.ultimoCierreMonto || 0;
   const totalRetiros = cmState.imputados.reduce((s,r)=>s+r.monto,0);
   const totalSalidas = cmState.salidas.reduce((s,r)=>s+r.monto,0);
   const totalAjusteIngreso = cmState.ajustes.filter(a=>a.tipo==="ingreso").reduce((s,a)=>s+a.monto,0);
   const totalAjusteDiferencia = cmState.ajustes.filter(a=>a.tipo==="diferencia").reduce((s,a)=>s+a.monto,0);
   const totalOficina = cmState.retirosOficina.reduce((s,r)=>s+r.monto,0);
-  const saldo = totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia - totalOficina;
+  const saldo = saldoInicial + totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia - totalOficina;
   const cantOrdenes = cmState.salidas.length + cmState.ajustes.filter(a=>a.tipo==="diferencia").length;
   const msg = "Vas a cerrar Caja Mayor:\n\n"+
+    "• Saldo inicial (último cierre): "+fmtMoney(saldoInicial)+"\n"+
     "• Retiros imputados: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+")\n"+
     "• Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+")\n"+
     (cmState.ajustes.length>0 ? "• Ajustes: "+cmState.ajustes.length+" — ingresos "+fmtMoney(totalAjusteIngreso)+", diferencias "+fmtMoney(totalAjusteDiferencia)+"\n" : "")+
@@ -6602,9 +6637,9 @@ function cmConfirmarCierre(){
     (cantOrdenes>0 ? "Esto va a crear "+cantOrdenes+" orden(es) de pago en Pagos.\n\n" : "")+
     "¿Confirmás el cierre?";
   if(!confirm(msg)) return;
-  cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo);
+  cmEjecutarCierre(saldoInicial, totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo);
 }
-async function cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo){
+async function cmEjecutarCierre(saldoInicial, totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo){
   const hoy = todayISO();
   const creadoPorId = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null;
   const creadoPorNombre = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.nombre : "—";
@@ -6662,7 +6697,11 @@ async function cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, 
   cmState.imputados.forEach(r=> cmState.historialKeys.push(r.key));
   cmState.ultimoCierreFecha = hoy;
   cmState.ultimoCierreMonto = saldo;
-  if(typeof logAudit==="function") logAudit("Cerró Caja Mayor", "Retiros: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+"), Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+"), Ajustes: "+cmState.ajustes.length+", Retiro a oficina: "+fmtMoney(totalOficina)+", Saldo: "+fmtMoney(saldo), "cajaMayor");
+  {
+    const detalleCierre = "Retiros: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+"), Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+"), Ajustes: "+cmState.ajustes.length+", Retiro a oficina: "+fmtMoney(totalOficina)+", Saldo: "+fmtMoney(saldo);
+    if(typeof logAudit==="function") logAudit("Cerró Caja Mayor", detalleCierre, "cajaMayor");
+    logHistorialCajaMayor("Cerró Caja Mayor", detalleCierre);
+  }
 
   const numero = cmState.historialCierres.length+1;
   cmState.historialCierres.unshift({
@@ -6671,7 +6710,7 @@ async function cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, 
     salidas: cmState.salidas.slice(),
     ajustes: cmState.ajustes.slice(),
     retirosOficina: cmState.retirosOficina.slice(),
-    totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo,
+    saldoInicial, totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo,
     ordenesCreadas: nuevasOrdenes.map(o=>o.id)
   });
 
@@ -6724,6 +6763,7 @@ function cmSaveState(){
       yaImputadosAntesCount: cmState.yaImputadosAntesCount,
       diffs: cmState.diffs, otrosEgresos: cmState.otrosEgresos,
       historialKeys: cmState.historialKeys,
+      descartadosKeys: cmState.descartadosKeys,
       ultimoCierreFecha: cmState.ultimoCierreFecha,
       ultimoCierreMonto: cmState.ultimoCierreMonto,
       historialCierres: cmState.historialCierres.map(c=>({...c, retirosImputados: c.retirosImputados.map(cmSerializeRetiro)}))
@@ -6753,6 +6793,7 @@ function cmLoadState(){
     cmState.diffs = data.diffs || [];
     cmState.otrosEgresos = data.otrosEgresos || [];
     cmState.historialKeys = data.historialKeys || [];
+    cmState.descartadosKeys = data.descartadosKeys || [];
     cmState.ultimoCierreFecha = data.ultimoCierreFecha || null;
     cmState.ultimoCierreMonto = (data.ultimoCierreMonto===undefined) ? null : data.ultimoCierreMonto;
     cmState.historialCierres = (data.historialCierres||[]).map(c=>({...c, retirosImputados:(c.retirosImputados||[]).map(cmDeserializeRetiro)}));
@@ -6776,11 +6817,26 @@ function cmBuildResumenFilas(cierre){
 }
 function cmRenderResumenTable(cierre){
   const filas = cmBuildResumenFilas(cierre);
-  let acumDebe=0, acumHaber=0;
-  const rowsHTML = filas.length ? filas.map(f=>{
-    acumDebe+=f.debe; acumHaber+=f.haber;
-    return `<tr><td class="c-fecha">${isoToDMY(f.fecha)}</td><td>${f.detalle}</td><td class="c-monto">${f.debe?fmtMoney(f.debe):"—"}</td><td class="c-monto">${f.haber?fmtMoney(f.haber):"—"}</td></tr>`;
-  }).join("") : `<tr><td colspan="4"><div class="cm-empty-mini">Este cierre no tiene movimientos.</div></td></tr>`;
+  // "Saldo anterior" arranca la cuenta con el saldo del cierre previo (cuenta
+  // corriente acumulada). Cierres de antes de esta función no tienen
+  // saldoInicial guardado: en ese caso no se muestra la fila (no inventamos
+  // un valor que no se registró en su momento).
+  const tieneSaldoInicial = cierre.saldoInicial!==undefined && cierre.saldoInicial!==null;
+  const saldoInicial = tieneSaldoInicial ? cierre.saldoInicial : 0;
+  let acumDebe = saldoInicial<0 ? Math.abs(saldoInicial) : 0;
+  let acumHaber = saldoInicial>0 ? saldoInicial : 0;
+  let rowsHTML = "";
+  if(tieneSaldoInicial){
+    rowsHTML += `<tr><td class="c-fecha">—</td><td>Saldo anterior (cierre previo)</td><td class="c-monto">${saldoInicial<0?fmtMoney(Math.abs(saldoInicial)):"—"}</td><td class="c-monto">${saldoInicial>0?fmtMoney(saldoInicial):"—"}</td></tr>`;
+  }
+  if(filas.length){
+    rowsHTML += filas.map(f=>{
+      acumDebe+=f.debe; acumHaber+=f.haber;
+      return `<tr><td class="c-fecha">${isoToDMY(f.fecha)}</td><td>${f.detalle}</td><td class="c-monto">${f.debe?fmtMoney(f.debe):"—"}</td><td class="c-monto">${f.haber?fmtMoney(f.haber):"—"}</td></tr>`;
+    }).join("");
+  } else if(!tieneSaldoInicial){
+    rowsHTML = `<tr><td colspan="4"><div class="cm-empty-mini">Este cierre no tiene movimientos.</div></td></tr>`;
+  }
   const saldo = acumHaber - acumDebe;
   const totalOficina = (cierre.retirosOficina||[]).reduce((s,r)=>s+r.monto,0);
   return `<div class="cm-resumen-head">Cierre #${cierre.numero} · ${isoToDMY(cierre.fecha)}${totalOficina>0 ? " · Retiro a oficina: "+fmtMoney(totalOficina) : ""}</div>
@@ -6825,7 +6881,10 @@ function cmRenderHistorialTabla(){
         <td class="c-monto">${(neto>=0?"+":"−")+fmtMoney(Math.abs(neto))}</td>
         <td class="c-monto">${fmtMoney(c.totalOficina||0)}</td>
         <td class="c-monto">${fmtMoney(c.saldo)}</td>
-        <td><button type="button" class="cm-btn-imputar" onclick="cmVerDetalleCierre(${c.numero})">Ver</button></td>
+        <td class="cm-row-actions">
+          <button type="button" class="cm-btn-imputar" onclick="cmVerDetalleCierre(${c.numero})">Ver</button>
+          <button type="button" class="cm-btn-del" onclick="cmEliminarCierre(${c.numero})" title="Eliminar cierre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </td>
       </tr>`;
     }).join("")+"</tbody>";
   }
@@ -6844,6 +6903,45 @@ function cmVerDetalleCierre(numero){
   document.getElementById("cmHistorialDetalle").innerHTML = cmRenderResumenTable(c);
   document.getElementById("cmPanelHistorialDetalle").style.display = "";
   document.getElementById("cmPanelHistorialDetalle").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+/* ---------- eliminar un cierre del historial ---------- */
+function cmEliminarCierre(numero){
+  const idx = cmState.historialCierres.findIndex(c=>c.numero===numero);
+  if(idx===-1) return;
+  const c = cmState.historialCierres[idx];
+  const ok = confirm(
+    "¿Eliminar el cierre #"+numero+" ("+isoToDMY(c.fecha)+", saldo "+fmtMoney(c.saldo)+") del historial de Caja Mayor?\n\n"+
+    "Esto NO anula ni elimina las órdenes de pago que ese cierre haya generado en Pagos — revisalas ahí manualmente si corresponde. "+
+    "Los retiros que estaban imputados en este cierre vuelven a quedar disponibles para imputar si volvés a procesar el mismo archivo.\n\n"+
+    "Esta acción queda registrada en el historial de movimientos del sitio."
+  );
+  if(!ok) return;
+
+  // Libera los retiros de este cierre para que puedan volver a imputarse si se reprocesa el mismo archivo/período
+  const keysDelCierre = (c.retirosImputados||[]).map(r=>r.key);
+  cmState.historialKeys = cmState.historialKeys.filter(k=> !keysDelCierre.includes(k));
+
+  cmState.historialCierres.splice(idx,1);
+  cmHistorialSeleccion.delete(numero);
+
+  // El "saldo al último cierre" se recalcula a partir del cierre remanente más reciente (o queda null si no queda ninguno)
+  const masReciente = cmState.historialCierres[0];
+  cmState.ultimoCierreFecha = masReciente ? masReciente.fecha : null;
+  cmState.ultimoCierreMonto = masReciente ? masReciente.saldo : null;
+
+  {
+    const detalleElim = "Cierre #"+numero+" del "+isoToDMY(c.fecha)+" (saldo "+fmtMoney(c.saldo)+") — no se anularon las órdenes de pago ya generadas en Pagos.";
+    if(typeof logAudit==="function") logAudit("Eliminó un cierre de Caja Mayor", detalleElim, "cajaMayor");
+    logHistorialCajaMayor("Eliminó un cierre de Caja Mayor", detalleElim);
+  }
+
+  cmSaveState();
+  document.getElementById("cmPanelHistorialDetalle").style.display = "none";
+  cmRenderUltimoCierre();
+  cmRenderResumenUltimoCierre();
+  cmRenderHistorialTabla();
+  cmRecalcTotales();
+  showToast("Se eliminó el cierre #"+numero+" del historial");
 }
 function cmDescargarExcelCierres(){
   if(typeof XLSX === "undefined"){ showToast("No se pudo cargar el módulo de Excel (revisá la conexión a internet)", "warn"); return; }
