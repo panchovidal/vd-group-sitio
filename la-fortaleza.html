@@ -1087,7 +1087,7 @@
                     </div>
 
                     <div class="form-section-title">Ajustes por ingresos/diferencias</div>
-                    <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Encontraste un faltante o un ingreso en la caja que no corresponde a un retiro?</div>
+                    <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Encontraste un faltante o un ingreso en la caja que no corresponde a un retiro? Es un movimiento interno, no genera orden de pago.</div>
                     <div class="status-select-wrap" id="cmAjustesChips" style="margin-bottom:18px;">
                       <div class="status-chip" data-s="si" onclick="cmSetAjustesToggle('si')">Sí</div>
                       <div class="status-chip active" data-s="no" onclick="cmSetAjustesToggle('no')">No</div>
@@ -1112,7 +1112,7 @@
                         <label>Tipo de ajuste</label>
                         <div class="status-select-wrap" id="cmAjusteTipoChips">
                           <div class="status-chip" data-t="ingreso" onclick="cmSetAjusteTipo('ingreso')">Ingreso (suma al saldo)</div>
-                          <div class="status-chip active" data-t="diferencia" onclick="cmSetAjusteTipo('diferencia')">Diferencia / faltante (genera orden de pago)</div>
+                          <div class="status-chip active" data-t="diferencia" onclick="cmSetAjusteTipo('diferencia')">Diferencia / faltante (resta del saldo)</div>
                         </div>
                       </div>
                       <div class="field">
@@ -5895,7 +5895,7 @@ let cmState = {
   file: null,
   desde: null, hasta: null,
   pendientes: [], imputados: [], salidas: [], ajustes: [], retirosOficina: [],
-  nextSalidaNro: 1, nextAjusteNro: 1, nextOficinaNro: 1,
+  nextSalidaNro: 1, nextAjusteNro: 1, nextOficinaNro: 1, nextSeq: 1,
   salidasToggle: "no", ajustesToggle: "no", oficinaToggle: "no",
   yaImputadosAntesCount: 0,
   diffs: [], otrosEgresos: [],
@@ -6282,13 +6282,13 @@ function cmRegistradoPorActual(){
 function cmBuildUnificado(){
   const filas = [];
   cmState.imputados.forEach(r=> filas.push({
-    fecha: r.fechaImputacionISO, tsOrden: r.dt ? r.dt.getTime() : 0,
+    fecha: r.fechaImputacionISO, seq: r.seq||0,
     turnoHtml: `<span class="tag ${cmTagClass(r.turnoLabel)}">${r.turnoLabel}</span>`,
     usuario: r.usuario, detalle: "Retiro rt."+r.rtNum, monto: r.monto, signo: 1,
     accionHtml: `<button type="button" class="cm-btn-anular" onclick="cmAnularImputacion('${cmEsc(r.key)}')" title="Anular imputación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/></svg>Anular</button>`
   }));
   cmState.ajustes.forEach((a,i)=> filas.push({
-    fecha: a.fechaAjusteISO, tsOrden: 0,
+    fecha: a.fechaAjusteISO, seq: a.seq||0,
     turnoHtml: "",
     usuario: a.registradoPor || "—",
     detalle: (a.tipo==="ingreso"?"Ajuste (ingreso) · ":"Ajuste (diferencia) · ")+a.observaciones,
@@ -6296,7 +6296,7 @@ function cmBuildUnificado(){
     accionHtml: `<button type="button" class="cm-btn-del" onclick="cmRemoveAjuste(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`
   }));
   cmState.salidas.forEach((s,i)=> filas.push({
-    fecha: s.fechaSalidaISO, tsOrden: 0,
+    fecha: s.fechaSalidaISO, seq: s.seq||0,
     turnoHtml: "",
     usuario: s.registradoPor || "—",
     detalle: "Salida · "+s.proveedor+(s.obs?" ("+s.obs+")":""),
@@ -6304,14 +6304,16 @@ function cmBuildUnificado(){
     accionHtml: `<button type="button" class="cm-btn-del" onclick="cmRemoveSalida(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`
   }));
   cmState.retirosOficina.forEach((r,i)=> filas.push({
-    fecha: r.fechaMovISO, tsOrden: 0,
+    fecha: r.fechaMovISO, seq: r.seq||0,
     turnoHtml: "",
     usuario: r.registradoPor || "—",
     detalle: "Retiro a oficina"+(r.obs?" ("+r.obs+")":""),
     monto: r.monto, signo: -1,
     accionHtml: `<button type="button" class="cm-btn-del" onclick="cmRemoveRetiroOficina(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`
   }));
-  filas.sort((x,y)=> (x.fecha||"").localeCompare(y.fecha||"") || (x.tsOrden - y.tsOrden));
+  // Orden cronológico según se va ingresando cada movimiento a Caja Mayor
+  // (no según la fecha del movimiento en sí, que puede ser anterior).
+  filas.sort((x,y)=> (x.seq - y.seq) || (x.fecha||"").localeCompare(y.fecha||""));
   return filas;
 }
 function cmRenderImputados(){
@@ -6380,7 +6382,8 @@ function cmAddAjuste(){
   cmState.ajustes.push({
     nro: "Ajuste "+cmState.nextAjusteNro,
     fechaImpISO: todayISO(), fechaAjusteISO: fechaISO,
-    tipo, monto, observaciones: obs, registradoPor: cmRegistradoPorActual()
+    tipo, monto, observaciones: obs, registradoPor: cmRegistradoPorActual(),
+    seq: cmState.nextSeq++
   });
   cmState.nextAjusteNro++;
   cmResetAjusteForm();
@@ -6429,7 +6432,8 @@ function cmAddRetiroOficina(){
   if(!ok){ showToast("Completá la fecha y el monto del retiro a oficina", "warn"); return; }
   cmState.retirosOficina.push({
     nro: "Retiro oficina "+cmState.nextOficinaNro,
-    fechaImpISO: todayISO(), fechaMovISO: fechaISO, monto, obs, registradoPor: cmRegistradoPorActual()
+    fechaImpISO: todayISO(), fechaMovISO: fechaISO, monto, obs, registradoPor: cmRegistradoPorActual(),
+    seq: cmState.nextSeq++
   });
   cmState.nextOficinaNro++;
   cmResetOficinaForm();
@@ -6486,6 +6490,7 @@ function cmImputar(key){
   if(idx===-1) return;
   const [r] = cmState.pendientes.splice(idx,1);
   r.fechaImputacionISO = todayISO();
+  r.seq = cmState.nextSeq++;
   cmState.imputados.push(r);
   cmRenderAll();
   cmSaveState();
@@ -6595,7 +6600,7 @@ function cmAddSalida(){
   cmState.salidas.push({
     nro: "Pago "+cmState.nextSalidaNro,
     fechaImpISO: todayISO(), fechaSalidaISO, proveedor, concepto, rubro, monto, obs,
-    registradoPor: cmRegistradoPorActual()
+    registradoPor: cmRegistradoPorActual(), seq: cmState.nextSeq++
   });
   cmState.nextSalidaNro++;
   cmResetSalidaForm();
@@ -6626,12 +6631,12 @@ function cmConfirmarCierre(){
   const totalAjusteDiferencia = cmState.ajustes.filter(a=>a.tipo==="diferencia").reduce((s,a)=>s+a.monto,0);
   const totalOficina = cmState.retirosOficina.reduce((s,r)=>s+r.monto,0);
   const saldo = saldoInicial + totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia - totalOficina;
-  const cantOrdenes = cmState.salidas.length + cmState.ajustes.filter(a=>a.tipo==="diferencia").length;
+  const cantOrdenes = cmState.salidas.length;
   const msg = "Vas a cerrar Caja Mayor:\n\n"+
     "• Saldo inicial (último cierre): "+fmtMoney(saldoInicial)+"\n"+
     "• Retiros imputados: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+")\n"+
     "• Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+")\n"+
-    (cmState.ajustes.length>0 ? "• Ajustes: "+cmState.ajustes.length+" — ingresos "+fmtMoney(totalAjusteIngreso)+", diferencias "+fmtMoney(totalAjusteDiferencia)+"\n" : "")+
+    (cmState.ajustes.length>0 ? "• Ajustes: "+cmState.ajustes.length+" — ingresos "+fmtMoney(totalAjusteIngreso)+", diferencias "+fmtMoney(totalAjusteDiferencia)+" — movimiento interno, no genera orden de pago\n" : "")+
     (cmState.retirosOficina.length>0 ? "• Retiro a oficina: "+cmState.retirosOficina.length+" ("+fmtMoney(totalOficina)+") — movimiento interno, no genera orden de pago\n" : "")+
     "• Saldo final: "+fmtMoney(saldo)+"\n\n"+
     (cantOrdenes>0 ? "Esto va a crear "+cantOrdenes+" orden(es) de pago en Pagos.\n\n" : "")+
@@ -6644,7 +6649,10 @@ async function cmEjecutarCierre(saldoInicial, totalRetiros, totalSalidas, totalA
   const creadoPorId = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null;
   const creadoPorNombre = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.nombre : "—";
   const nuevasOrdenes = [];
-  const ajustesDiferencia = cmState.ajustes.filter(a=>a.tipo==="diferencia");
+  // Los ajustes (ingreso o diferencia) y el retiro a oficina son movimientos
+  // internos de Caja Mayor: solo las salidas generan orden de pago en Pagos
+  // (confirmado con Pancho el 12/08/2026 — antes se creaba una orden por cada
+  // ajuste de tipo "diferencia", eso quedó descartado).
   try{
     for(const salida of cmState.salidas){
       const payload = {
@@ -6659,23 +6667,6 @@ async function cmEjecutarCierre(saldoInicial, totalRetiros, totalSalidas, totalA
       const res = await sb.from("lf_ordenes").insert(payload).select().single();
       if(res.error){
         showToast("No se pudo crear la orden de pago de '"+salida.nro+"': "+res.error.message+". El cierre se canceló, no se perdió nada, intentá de nuevo.", "warn");
-        return;
-      }
-      nuevasOrdenes.push(mapOrdenRow(res.data));
-    }
-    for(const ajuste of ajustesDiferencia){
-      const payload = {
-        fecha_orden: hoy, comprobante_tipo: "Pago B", fecha_comprobante: ajuste.fechaAjusteISO, comprobante: "",
-        proveedor: "Ajuste de Caja Mayor", concepto: cmConceptoDeRubroDiferencia(), rubro: CM_RUBRO_DIFERENCIA,
-        monto_factura: ajuste.monto, monto_retencion: 0, monto: ajuste.monto,
-        estado: "Pagado", metodo: "Efectivo", fecha_venc: null, fecha_pago: ajuste.fechaAjusteISO,
-        notas: "Ajuste de Caja Mayor — cierre del "+isoToDMY(hoy)+" ("+ajuste.nro+"): "+ajuste.observaciones,
-        unread: true, creado_por: creadoPorId, creado_por_nombre: creadoPorNombre,
-        modificado_por: creadoPorId, modificado_por_nombre: creadoPorNombre, modificado_fecha: new Date().toISOString()
-      };
-      const res = await sb.from("lf_ordenes").insert(payload).select().single();
-      if(res.error){
-        showToast("No se pudo crear la orden de pago del '"+ajuste.nro+"': "+res.error.message+". El cierre se canceló, no se perdió nada, intentá de nuevo.", "warn");
         return;
       }
       nuevasOrdenes.push(mapOrdenRow(res.data));
@@ -6706,7 +6697,7 @@ async function cmEjecutarCierre(saldoInicial, totalRetiros, totalSalidas, totalA
   const numero = cmState.historialCierres.length+1;
   cmState.historialCierres.unshift({
     numero, fecha: hoy,
-    retirosImputados: cmState.imputados.map(cmSerializeRetiro),
+    retirosImputados: cmState.imputados.slice(),
     salidas: cmState.salidas.slice(),
     ajustes: cmState.ajustes.slice(),
     retirosOficina: cmState.retirosOficina.slice(),
@@ -6757,6 +6748,7 @@ function cmSaveState(){
       nextSalidaNro: cmState.nextSalidaNro,
       nextAjusteNro: cmState.nextAjusteNro,
       nextOficinaNro: cmState.nextOficinaNro,
+      nextSeq: cmState.nextSeq,
       salidasToggle: cmState.salidasToggle,
       ajustesToggle: cmState.ajustesToggle,
       oficinaToggle: cmState.oficinaToggle,
@@ -6786,6 +6778,7 @@ function cmLoadState(){
     cmState.nextSalidaNro = data.nextSalidaNro || 1;
     cmState.nextAjusteNro = data.nextAjusteNro || 1;
     cmState.nextOficinaNro = data.nextOficinaNro || 1;
+    cmState.nextSeq = data.nextSeq || 1;
     cmState.salidasToggle = data.salidasToggle || "no";
     cmState.ajustesToggle = data.ajustesToggle || "no";
     cmState.oficinaToggle = data.oficinaToggle || "no";
