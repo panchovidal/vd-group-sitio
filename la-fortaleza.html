@@ -423,6 +423,51 @@
   .chooser-card h4{margin:0 0 4px 0;font-size:14px;font-weight:800;color:var(--text-1);}
   .chooser-card span{font-size:12px;color:var(--text-2);line-height:1.4;}
 
+  /* ---------- COSTEO DE PRODUCTOS ---------- */
+  .costeo-group-title{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--sky);margin:22px 0 10px 0;}
+  .costeo-group-title:first-child{margin-top:0;}
+  .costeo-prov-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);max-width:760px;overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:18px;}
+  .costeo-prov-row{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s ease;}
+  .costeo-prov-row:last-child{border-bottom:none;}
+  .costeo-prov-row:hover{background:#FAFBFF;}
+  .costeo-prov-row .cp-name{font-weight:700;color:var(--text-1);flex:1;min-width:0;}
+  .costeo-prov-row .cp-rubro{font-size:11px;font-weight:700;color:var(--text-3);}
+  .costeo-prov-row .cp-count{font-size:11px;font-weight:800;color:var(--sky);background:#EAF0FF;border-radius:20px;padding:3px 10px;flex-shrink:0;}
+  .costeo-prov-row .cp-arrow{width:16px;height:16px;color:var(--text-3);flex-shrink:0;}
+
+  .costeo-orden-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;gap:16px;margin-bottom:10px;max-width:980px;box-shadow:var(--shadow-sm);}
+  .costeo-orden-card .co-fecha{font-size:12px;font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;width:78px;flex-shrink:0;}
+  .costeo-orden-card .co-main{flex:1;min-width:0;}
+  .costeo-orden-card .co-prov{font-weight:800;color:var(--text-1);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .costeo-orden-card .co-sub{font-size:11.5px;color:var(--text-3);font-weight:600;margin-top:2px;}
+  .costeo-orden-card .co-monto{font-weight:800;color:var(--text-1);font-variant-numeric:tabular-nums;width:118px;text-align:right;flex-shrink:0;}
+  .costeo-orden-card .co-recon{width:150px;flex-shrink:0;text-align:center;}
+  .recon-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:20px;white-space:nowrap;}
+  .recon-ok{background:#E4F8ED;color:#137B44;}
+  .recon-bad{background:#FCE6E7;color:#B22A32;}
+  .recon-pending{background:#EEEFF5;color:#6D7191;}
+
+  .ci-table{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);max-width:1180px;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .ci-head-row, .ci-row{display:grid;grid-template-columns:2.1fr 1fr 0.8fr 1fr 0.8fr 0.9fr 1.15fr 76px;gap:10px;align-items:center;padding:10px 16px;}
+  .ci-head-row{background:#F7F8FD;border-bottom:2px solid var(--border);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-2);}
+  .ci-row{border-bottom:1px solid var(--border);font-size:12.8px;}
+  .ci-row:last-child{border-bottom:none;}
+  .ci-row input, .ci-row select{width:100%;padding:7px 9px;border-radius:7px;border:1px solid var(--sky);font-size:12.5px;outline:none;}
+  .ci-row .ci-costo{font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .ci-row .ci-um-lbl{font-size:11px;color:var(--text-3);font-weight:700;}
+  .ci-row .ci-actions{display:flex;gap:4px;justify-content:flex-end;}
+  .ci-add-bar{padding:14px 16px;background:#FAFBFF;display:grid;grid-template-columns:2.1fr 1fr 0.8fr 1fr 0.8fr 0.9fr auto;gap:10px;align-items:center;}
+  .ci-add-bar input, .ci-add-bar select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--border);font-size:12.8px;outline:none;}
+  .ci-add-bar input:focus, .ci-add-bar select:focus{border-color:var(--sky);}
+  .ci-add-bar button{background:var(--blue);color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .ci-add-bar button:hover{filter:brightness(1.1);}
+  .ci-summary{display:flex;align-items:center;gap:26px;max-width:1180px;margin-top:14px;padding:16px 18px;border-radius:12px;background:#F7F8FD;border:1px solid var(--border);flex-wrap:wrap;}
+  .ci-summary .cis-item{font-size:12px;color:var(--text-2);font-weight:600;}
+  .ci-summary .cis-item strong{display:block;font-size:16px;color:var(--navy);font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .factura-link{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--blue);text-decoration:none;cursor:pointer;flex-shrink:0;}
+  .factura-link:hover{text-decoration:underline;}
+  .factura-link svg{width:14px;height:14px;}
+
   /* ---------- RESUMEN: barras apiladas por categoría ---------- */
   .stack-total-row{font-size:13px;color:var(--text-2);margin-bottom:10px;}
   .stack-total-row strong{color:var(--navy);font-size:15px;font-weight:800;}
@@ -655,6 +700,10 @@
     <div class="module-nav-item active" data-module="pagos" onclick="goModule('pagos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="21" r="1.4" fill="currentColor" stroke="none"/><path d="M2.5 3h2.2l1.9 11.2a2 2 0 002 1.8h8.6a2 2 0 002-1.7L21 8H6"/></svg>
       Pagos
+    </div>
+    <div class="module-nav-item" data-module="costeo" onclick="goModule('costeo')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L13.42 20.58a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7" cy="7" r="1.4" fill="currentColor" stroke="none"/></svg>
+      Costeo
     </div>
     <div class="module-nav-item" data-module="sueldos" onclick="goModule('sueldos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1377,6 +1426,105 @@
         </div>
       </div>
     </section>
+
+    <!-- ===================== MÓDULO: COSTEO DE PRODUCTOS ===================== -->
+    <section class="module-screen" id="moduleCosteo">
+      <div class="pagos-shell" id="costeoSubnav">
+        <div class="pagos-topbar">
+          <div class="pagos-tab active" data-ctpane="proveedores" onclick="goCosteoTab('proveedores')">Proveedores</div>
+          <div class="pagos-tab" data-ctpane="compras" onclick="goCosteoTab('compras')">Carga de compras</div>
+          <div class="pagos-tab" data-ctpane="recetas" onclick="goCosteoTab('recetas')">Recetas</div>
+          <div class="pagos-tab" data-ctpane="precios" onclick="goCosteoTab('precios')">Precios de venta</div>
+        </div>
+
+        <div class="pagos-body">
+
+          <!-- COSTEO > PROVEEDORES -->
+          <section class="pagos-pane active" id="ctpProveedores">
+            <div class="screen-header" id="costeoProvHeaderList">
+              <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Proveedores</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Proveedores de Servicio de cocina, Servicio de padel y Cafetería y bebidas — extraídos de Pagos, agrupados y ordenados alfabéticamente</div></div>
+            </div>
+            <div class="screen-header" id="costeoProvHeaderInsumos" style="display:none;">
+              <div class="back-btn" onclick="costeoShowProvList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+              <div><h1 style="font-size:20px;margin:0;font-weight:800;" id="costeoProvNombre">Proveedor</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);" id="costeoProvSub"></div></div>
+            </div>
+            <div class="screen-scroll">
+              <div id="costeoProvListWrap"></div>
+              <div id="costeoProvInsumosWrap" style="display:none;">
+                <p class="config-hint">Insumos que se le pueden llegar a pedir a este proveedor. Van a aparecer como sugerencia al escribir la nomenclatura en la carga de una orden de compra suya.</p>
+                <div class="config-card" id="costeoInsumosList" style="max-width:760px;"></div>
+                <div class="config-card" style="margin-top:14px;max-width:760px;"><div class="config-add-bar">
+                  <input type="text" id="costeoNewInsumoNombre" placeholder="Nombre del insumo (tal cual figura en la factura)" autocomplete="off">
+                  <input type="text" id="costeoNewInsumoUM" placeholder="Unidad de medida (ej. Kg, Unidad, Litro)" list="dlUnidadesMedida">
+                  <button onclick="costeoAddInsumo()">+ Agregar insumo</button>
+                </div></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- COSTEO > CARGA DE COMPRAS -->
+          <section class="pagos-pane" id="ctpCompras">
+            <div class="screen-header" id="costeoComprasHeaderList">
+              <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Carga de compras</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Órdenes de pago de Servicio de cocina, Servicio de padel y Cafetería y bebidas — desde la más nueva a la más vieja</div></div>
+            </div>
+            <div class="screen-header" id="costeoComprasHeaderItems" style="display:none;">
+              <div class="back-btn" onclick="costeoShowComprasList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+              <div style="flex:1;min-width:0;"><h1 style="font-size:20px;margin:0;font-weight:800;" id="costeoOrdenTitulo">OP-0000</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);" id="costeoOrdenSub"></div></div>
+              <a class="factura-link" id="costeoOrdenAdjuntoLink" style="display:none;" onclick="costeoVerAdjuntoOrden()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>Ver factura / presupuesto</a>
+            </div>
+            <div class="screen-scroll">
+              <div id="costeoComprasListWrap"></div>
+              <div id="costeoComprasItemsWrap" style="display:none;">
+                <div class="ci-table">
+                  <div class="ci-head-row">
+                    <div>Nomenclatura</div><div>Precio de lista</div><div>Cantidad</div><div>Unidad medida</div><div>Bultos/packs</div><div>IVA</div><div>Costo/un</div><div></div>
+                  </div>
+                  <div id="costeoItemsList"></div>
+                  <div class="ci-add-bar">
+                    <input type="text" id="ciNewNomenclatura" placeholder="Insumo…" list="dlInsumosProveedor" autocomplete="off">
+                    <input type="text" id="ciNewPrecio" placeholder="Precio $" inputmode="decimal">
+                    <input type="text" id="ciNewCantidad" placeholder="1" inputmode="decimal">
+                    <input type="text" id="ciNewUM" placeholder="Kg, Unidad…" list="dlUnidadesMedida">
+                    <input type="text" id="ciNewBultos" placeholder="1" inputmode="decimal">
+                    <select id="ciNewIVA"><option value="1.21">21%</option><option value="1.105">10,5%</option><option value="1.00">0% / Exento</option></select>
+                    <button onclick="costeoAddItem()">+ Agregar</button>
+                  </div>
+                </div>
+                <div class="ci-summary">
+                  <div class="cis-item">Suma de ítems cargados<strong id="ciSumaItems">$0</strong></div>
+                  <div class="cis-item">Total de la factura<strong id="ciTotalFactura">$0</strong></div>
+                  <div class="cis-item">Diferencia<strong id="ciDiferencia">$0</strong></div>
+                  <div id="ciReconBadge"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- COSTEO > RECETAS (placeholder, próxima etapa) -->
+          <section class="pagos-pane" id="ctpRecetas">
+            <div class="placeholder-card" style="margin:60px auto;">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+              <h2>Recetas</h2>
+              <p>Esta sección todavía no está desarrollada. Acá vamos a cargar, para cada producto de cocina, la cantidad de cada insumo por porción — para llevar el costo/un de los insumos cargados en Carga de compras al costo de cada producto elaborado.</p>
+            </div>
+          </section>
+
+          <!-- COSTEO > PRECIOS DE VENTA (placeholder, próxima etapa) -->
+          <section class="pagos-pane" id="ctpPrecios">
+            <div class="placeholder-card" style="margin:60px auto;">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+              <h2>Precios de venta</h2>
+              <p>Esta sección todavía no está desarrollada. Acá vamos a comparar el precio de venta actual de cada producto del Índice de artículos contra su costo de materia prima, para definir el margen.</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+    <datalist id="dlUnidadesMedida">
+      <option value="Unidad"></option><option value="Kg"></option><option value="Gramo"></option><option value="Litro"></option><option value="Ml"></option><option value="Docena"></option><option value="Caja"></option><option value="Paquete"></option><option value="Bolsa"></option><option value="Botella"></option><option value="Fardo"></option><option value="Atado"></option>
+    </datalist>
+    <datalist id="dlInsumosProveedor"></datalist>
 
     <!-- ===================== MÓDULO: REPORTES (placeholder) ===================== -->
     <section class="module-screen" id="moduleReportes">
@@ -2142,7 +2290,7 @@ function applyPerfilSession(perfil){
 }
 // Secciones del módulo La Fortaleza (deben coincidir con SECTIONS_BY_PROYECTO.fortaleza en home.html
 // y con los data-module de la barra lateral). El dueño siempre tiene acceso a todas.
-const FORTALEZA_SECCIONES = ["ventas","cajaMayor","pagos","sueldos","reportes","config"];
+const FORTALEZA_SECCIONES = ["ventas","cajaMayor","pagos","costeo","sueldos","reportes","config"];
 function tieneSeccionFortaleza(mod){
   if(!currentPerfil) return false;
   if(currentPerfil.rol === "dueño") return true;
@@ -2203,6 +2351,7 @@ function goModule(mod){
   if(mod==="config"){ showComprasChooser(); renderComprasLists(); renderActividad(); }
   if(mod==="ventas"){ initVentasResumen(); }
   if(mod==="cajaMayor"){ cmInit(); }
+  if(mod==="costeo"){ initCosteo(); }
 }
 function goVentasPane(pane){
   // hoy solo existe "resumen"; queda preparado para futuras pestañas del módulo Ventas (p.ej. Reportes).
@@ -2978,6 +3127,23 @@ async function confirmDeleteAction(){
       return;
     }
     await executeConfigDelete(pendingDelete.kind, pendingDelete.i);
+    closeConfirm();
+    return;
+  }
+  if(pendingDelete.scope==="costeo"){
+    if(pendingDelete.kind==="insumo"){
+      const { error } = await sb.from("lf_costeo_insumos").delete().eq("id", pendingDelete.id);
+      if(error){ showToast("No se pudo eliminar el insumo", "warn"); closeConfirm(); return; }
+      await loadCosteoInsumos();
+      renderCosteoInsumosList(); renderCosteoProvList();
+      showToast("Insumo eliminado");
+    } else if(pendingDelete.kind==="item"){
+      const { error } = await sb.from("lf_costeo_compra_items").delete().eq("id", pendingDelete.id);
+      if(error){ showToast("No se pudo eliminar el ítem", "warn"); closeConfirm(); return; }
+      await loadCosteoCompraItems();
+      renderCosteoItemsList(); renderCosteoComprasList();
+      showToast("Ítem eliminado");
+    }
     closeConfirm();
     return;
   }
@@ -7001,6 +7167,372 @@ function cmInit(){
   } else {
     document.getElementById("cmResultados").classList.add("hidden");
   }
+}
+
+/* =========================================================
+   COSTEO DE PRODUCTOS (Supabase: lf_costeo_insumos, lf_costeo_compra_items)
+   ---------------------------------------------------------
+   Primera modelización (agosto 2026): cubre
+   Proveedores (insumos que se le pueden pedir a cada proveedor de
+   Servicio de cocina / Servicio de padel / Cafetería y Bebidas) y
+   Carga de compras (ítems cargados en cada orden de esos 3 conceptos,
+   con costo/un calculado). Recetas y Precios de venta quedan como
+   placeholder para la próxima etapa.
+   Nota: en Pagos, estas 3 categorías viven como CONCEPTO (no como
+   rubro) — "Servicio de cocina", "Servicio de padel", "Cafeteria y
+   Bebidas" — cada una con varios rubros propios (Almacén, Carnicería,
+   Bebidas, Torneos y Competencias, etc.). Acá se agrupa por ese
+   concepto, que es el nivel que efectivamente separa estos 3 rubros
+   de costeo del resto de los gastos del club (Impuestos, Mantenimiento,
+   Sueldos, etc.).
+   ========================================================= */
+const COSTEO_CONCEPTOS = ["Cafeteria y Bebidas","Servicio de cocina","Servicio de padel"]; // orden alfabético
+let costeoInsumos = [];       // [{id, proveedor_id, nomenclatura, unidad_medida}]
+let costeoCompraItems = [];   // [{id, orden_id, insumo_id, nomenclatura, precio_lista, cantidad, unidad_medida, bultos, iva, costo_un, monto_linea}]
+let costeoOpenProveedorId = null;
+let costeoOpenOrdenId = null;
+let costeoEditingInsumo = null;
+let costeoEditingItem = null;
+
+function costeoEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function parseDecimalCosteo(str){ if(str===undefined||str===null||str==="") return 0; const n = Number(String(str).replace(/\./g,"").replace(",", ".")) || Number(String(str).replace(",", ".")); return isNaN(n) ? 0 : n; }
+function fmtNumCosteo(n){ return Number(n||0).toLocaleString("es-AR",{maximumFractionDigits:3}); }
+function ivaLabelCosteo(v){ v=Number(v); if(v===1.21) return "21%"; if(v===1.105) return "10,5%"; return "0% / Exento"; }
+
+function costeoOrdenesFiltradas(){ return ordenes.filter(o=>COSTEO_CONCEPTOS.includes(o.concepto)); }
+function costeoProveedoresList(){ return proveedoresConfig.filter(p=>COSTEO_CONCEPTOS.includes(p.concepto)); }
+
+async function loadCosteoInsumos(){
+  const { data, error } = await sb.from("lf_costeo_insumos").select("*").order("nomenclatura");
+  if(error){ showToast("No se pudieron cargar los insumos de proveedores", "warn"); return; }
+  costeoInsumos = data || [];
+}
+async function loadCosteoCompraItems(){
+  const ids = costeoOrdenesFiltradas().map(o=>o.id);
+  if(!ids.length){ costeoCompraItems = []; return; }
+  const { data, error } = await sb.from("lf_costeo_compra_items").select("*").in("orden_id", ids).order("created_at");
+  if(error){ showToast("No se pudieron cargar los ítems de compra", "warn"); return; }
+  costeoCompraItems = data || [];
+}
+async function initCosteo(){
+  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems()]);
+  costeoShowProvList();
+  costeoShowComprasList();
+}
+function goCosteoTab(pane){
+  const scope = document.getElementById("costeoSubnav");
+  scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.ctpane===pane));
+  scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
+  document.getElementById("ctp"+pane.charAt(0).toUpperCase()+pane.slice(1)).classList.add("active");
+}
+
+/* ---- Proveedores (Costeo) ---- */
+function costeoInsumosCount(proveedorId){ return costeoInsumos.filter(i=>i.proveedor_id===proveedorId).length; }
+function renderCosteoProvList(){
+  const provs = costeoProveedoresList();
+  const wrap = document.getElementById("costeoProvListWrap");
+  if(!provs.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay proveedores cargados en Pagos para Servicio de cocina, Servicio de padel o Cafetería y Bebidas.</div>`; return; }
+  let html = "";
+  COSTEO_CONCEPTOS.forEach(concepto=>{
+    const items = provs.filter(p=>p.concepto===concepto).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+    if(!items.length) return;
+    html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div><div class="costeo-prov-card">`;
+    items.forEach(p=>{
+      html += `<div class="costeo-prov-row" onclick="costeoOpenProveedor('${p.id}')">
+        <span class="cp-name">${costeoEsc(p.nombre)}</span>
+        <span class="cp-rubro">${costeoEsc(p.rubro||"")}</span>
+        <span class="cp-count">${costeoInsumosCount(p.id)} insumo(s)</span>
+        <svg class="cp-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  wrap.innerHTML = html || `<div class="empty-mini">Todavía no hay proveedores cargados en Pagos para Servicio de cocina, Servicio de padel o Cafetería y Bebidas.</div>`;
+}
+function costeoShowProvList(){
+  document.getElementById("costeoProvHeaderList").style.display = "";
+  document.getElementById("costeoProvHeaderInsumos").style.display = "none";
+  document.getElementById("costeoProvListWrap").style.display = "";
+  document.getElementById("costeoProvInsumosWrap").style.display = "none";
+  costeoOpenProveedorId = null; costeoEditingInsumo = null;
+  renderCosteoProvList();
+}
+function costeoOpenProveedor(id){
+  costeoOpenProveedorId = id; costeoEditingInsumo = null;
+  const p = proveedoresConfig.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById("costeoProvHeaderList").style.display = "none";
+  document.getElementById("costeoProvHeaderInsumos").style.display = "";
+  document.getElementById("costeoProvListWrap").style.display = "none";
+  document.getElementById("costeoProvInsumosWrap").style.display = "";
+  document.getElementById("costeoProvNombre").textContent = p.nombre;
+  document.getElementById("costeoProvSub").textContent = `${p.concepto} — ${p.rubro||"Sin rubro"}`;
+  document.getElementById("costeoNewInsumoNombre").value = "";
+  document.getElementById("costeoNewInsumoUM").value = "";
+  renderCosteoInsumosList();
+}
+function renderCosteoInsumosList(){
+  const list = costeoInsumos.filter(i=>i.proveedor_id===costeoOpenProveedorId).sort((a,b)=>a.nomenclatura.localeCompare(b.nomenclatura,"es"));
+  const el = document.getElementById("costeoInsumosList");
+  if(!list.length){ el.innerHTML = `<div class="empty-mini">Todavía no hay insumos cargados para este proveedor.</div>`; return; }
+  el.innerHTML = list.map(ins=>{
+    if(costeoEditingInsumo===ins.id){
+      return `<div class="config-list-row editing">
+        <input class="edit-input" id="editInsNombre_${ins.id}" value="${costeoEsc(ins.nomenclatura)}">
+        <input class="edit-input" id="editInsUM_${ins.id}" value="${costeoEsc(ins.unidad_medida||"")}" list="dlUnidadesMedida" style="max-width:170px;">
+        <div class="row-actions">
+          <button class="icon-btn" onclick="costeoSaveInsumo('${ins.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+          <button class="icon-btn" onclick="costeoCancelEditInsumo()" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div></div>`;
+    }
+    return `<div class="config-list-row">
+      <span class="main-txt">${costeoEsc(ins.nomenclatura)}</span>
+      <span class="sub-txt">${costeoEsc(ins.unidad_medida||"—")}</span>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="costeoStartEditInsumo('${ins.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
+        <button class="icon-btn del-btn" onclick="costeoRequestDeleteInsumo('${ins.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+      </div></div>`;
+  }).join("");
+}
+function costeoStartEditInsumo(id){ costeoEditingInsumo = id; renderCosteoInsumosList(); }
+function costeoCancelEditInsumo(){ costeoEditingInsumo = null; renderCosteoInsumosList(); }
+async function costeoAddInsumo(){
+  if(!costeoOpenProveedorId) return;
+  const nombre = document.getElementById("costeoNewInsumoNombre").value.trim();
+  const um = document.getElementById("costeoNewInsumoUM").value.trim();
+  if(!nombre){ showToast("Escribí el nombre del insumo", "warn"); return; }
+  if(costeoInsumos.some(i=>i.proveedor_id===costeoOpenProveedorId && i.nomenclatura.toLowerCase()===nombre.toLowerCase())){ showToast("Ese insumo ya está cargado para este proveedor", "warn"); return; }
+  const { error } = await sb.from("lf_costeo_insumos").insert({ proveedor_id: costeoOpenProveedorId, nomenclatura: nombre, unidad_medida: um||null, creado_por: currentPerfil?currentPerfil.id:null });
+  if(error){ showToast(error.code==="23505" ? "Ese insumo ya está cargado para este proveedor" : "No se pudo agregar el insumo", "warn"); return; }
+  document.getElementById("costeoNewInsumoNombre").value = "";
+  document.getElementById("costeoNewInsumoUM").value = "";
+  await loadCosteoInsumos();
+  renderCosteoInsumosList(); renderCosteoProvList();
+  logHistorialConfig("Agregó un insumo de costeo", `"${nombre}" (${(proveedoresConfig.find(p=>p.id===costeoOpenProveedorId)||{}).nombre||""})`);
+  showToast("Insumo agregado correctamente");
+}
+async function costeoSaveInsumo(id){
+  const nombre = document.getElementById("editInsNombre_"+id).value.trim();
+  const um = document.getElementById("editInsUM_"+id).value.trim();
+  if(!nombre){ showToast("El nombre no puede estar vacío", "warn"); return; }
+  const { error } = await sb.from("lf_costeo_insumos").update({ nomenclatura: nombre, unidad_medida: um||null }).eq("id", id);
+  if(error){ showToast(error.code==="23505" ? "Ya existe un insumo con ese nombre para este proveedor" : "No se pudo actualizar el insumo", "warn"); return; }
+  costeoEditingInsumo = null;
+  await loadCosteoInsumos();
+  renderCosteoInsumosList();
+  showToast("Insumo actualizado correctamente");
+}
+function costeoRequestDeleteInsumo(id){
+  const ins = costeoInsumos.find(i=>i.id===id);
+  if(!ins) return;
+  pendingDelete = {scope:"costeo", kind:"insumo", id};
+  document.getElementById("confirmTitle").textContent = "¿Eliminar este insumo?";
+  document.getElementById("confirmText").textContent = `Vas a eliminar "${ins.nomenclatura}" de la lista de este proveedor. Esta acción no se puede deshacer.`;
+  document.getElementById("confirmDeleteBtn").textContent = "Eliminar";
+  document.getElementById("confirmOverlay").classList.add("show");
+}
+
+/* ---- Carga de compras (Costeo) ---- */
+function costeoRefreshInsumosDatalist(proveedorNombre){
+  const prov = proveedoresConfig.find(p=>p.nombre===proveedorNombre);
+  const dl = document.getElementById("dlInsumosProveedor");
+  const opciones = prov ? costeoInsumos.filter(i=>i.proveedor_id===prov.id) : [];
+  dl.innerHTML = opciones.map(i=>`<option value="${costeoEsc(i.nomenclatura)}">`).join("");
+  return prov;
+}
+function renderCosteoComprasList(){
+  const wrap = document.getElementById("costeoComprasListWrap");
+  const todas = costeoOrdenesFiltradas();
+  if(!todas.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay órdenes de pago cargadas en Pagos para estos rubros.</div>`; return; }
+  let html = "";
+  COSTEO_CONCEPTOS.forEach(concepto=>{
+    const items = todas.filter(o=>o.concepto===concepto).sort((a,b)=>(b.fechaOrden||"").localeCompare(a.fechaOrden||""));
+    if(!items.length) return;
+    html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div>`;
+    items.forEach(o=>{
+      const itemsOrden = costeoCompraItems.filter(it=>it.orden_id===o.id);
+      const sumaItems = itemsOrden.reduce((s,it)=>s+Number(it.monto_linea||0),0);
+      const totalFactura = Number(o.montoFactura||0);
+      let badge;
+      if(!itemsOrden.length) badge = `<span class="recon-badge recon-pending">Sin cargar</span>`;
+      else if(Math.abs(sumaItems-totalFactura) < 1) badge = `<span class="recon-badge recon-ok">✓ Coincide con la factura</span>`;
+      else badge = `<span class="recon-badge recon-bad">Dif. ${fmtMoney(sumaItems-totalFactura)}</span>`;
+      html += `<div class="costeo-orden-card">
+        <div class="co-fecha">${isoToDMY(o.fechaOrden)}</div>
+        <div class="co-main">
+          <div class="co-prov">${costeoEsc(o.proveedor)}</div>
+          <div class="co-sub">${costeoEsc(o.rubro||"")} · ${costeoEsc(o.comprobanteTipo||"")}${o.comprobante?(" N° "+costeoEsc(o.comprobante)):""} · <span class="badge badge-${o.estado}">${o.estado}</span></div>
+        </div>
+        <div class="co-monto">${fmtMoney(o.montoFactura)}</div>
+        <div class="co-recon">${badge}</div>
+        <button class="btn-ghost" onclick="costeoOpenOrden('${o.id}')">Cargar productos</button>
+      </div>`;
+    });
+  });
+  wrap.innerHTML = html;
+}
+function costeoShowComprasList(){
+  document.getElementById("costeoComprasHeaderList").style.display = "";
+  document.getElementById("costeoComprasHeaderItems").style.display = "none";
+  document.getElementById("costeoComprasListWrap").style.display = "";
+  document.getElementById("costeoComprasItemsWrap").style.display = "none";
+  costeoOpenOrdenId = null; costeoEditingItem = null;
+  renderCosteoComprasList();
+}
+function costeoOpenOrden(id){
+  costeoOpenOrdenId = id; costeoEditingItem = null;
+  const o = ordenes.find(x=>x.id===id);
+  if(!o) return;
+  document.getElementById("costeoComprasHeaderList").style.display = "none";
+  document.getElementById("costeoComprasHeaderItems").style.display = "";
+  document.getElementById("costeoComprasListWrap").style.display = "none";
+  document.getElementById("costeoComprasItemsWrap").style.display = "";
+  document.getElementById("costeoOrdenTitulo").textContent = o.id + " · " + o.proveedor;
+  document.getElementById("costeoOrdenSub").textContent = `${o.concepto} — ${o.rubro||""} · ${o.comprobanteTipo||""}${o.comprobante?(" N° "+o.comprobante):""} · ${isoToDMY(o.fechaOrden)}`;
+  const linkEl = document.getElementById("costeoOrdenAdjuntoLink");
+  linkEl.style.display = (o.adjunto && o.adjunto.path) ? "" : "none";
+  costeoRefreshInsumosDatalist(o.proveedor);
+  document.getElementById("ciNewNomenclatura").value = "";
+  document.getElementById("ciNewPrecio").value = "";
+  document.getElementById("ciNewCantidad").value = "";
+  document.getElementById("ciNewUM").value = "";
+  document.getElementById("ciNewBultos").value = "";
+  renderCosteoItemsList();
+}
+async function costeoVerAdjuntoOrden(){
+  const o = ordenes.find(x=>x.id===costeoOpenOrdenId);
+  if(!o || !o.adjunto || !o.adjunto.path) return;
+  const { data, error } = await sb.storage.from(ADJUNTOS_BUCKET).createSignedUrl(o.adjunto.path, 3600);
+  if(error || !data){ showToast("No se pudo abrir el archivo", "warn"); return; }
+  window.open(data.signedUrl, "_blank", "noopener");
+}
+function costeoItemsDeOrden(){ return costeoCompraItems.filter(it=>it.orden_id===costeoOpenOrdenId); }
+function renderCosteoItemsList(){
+  const list = costeoItemsDeOrden();
+  const el = document.getElementById("costeoItemsList");
+  if(!list.length){ el.innerHTML = `<div class="empty-mini" style="padding:16px;">Todavía no cargaste ítems para esta orden.</div>`; }
+  else{
+    el.innerHTML = list.map(it=>{
+      if(costeoEditingItem===it.id){
+        return `<div class="ci-row" style="background:#FAFBFF;">
+          <input id="ei_nom_${it.id}" value="${costeoEsc(it.nomenclatura)}" list="dlInsumosProveedor">
+          <input id="ei_pl_${it.id}" value="${it.precio_lista}" inputmode="decimal">
+          <input id="ei_ca_${it.id}" value="${it.cantidad}" inputmode="decimal">
+          <input id="ei_um_${it.id}" value="${costeoEsc(it.unidad_medida||"")}" list="dlUnidadesMedida">
+          <input id="ei_bu_${it.id}" value="${it.bultos}" inputmode="decimal">
+          <select id="ei_iva_${it.id}">
+            <option value="1.21" ${Number(it.iva)===1.21?"selected":""}>21%</option>
+            <option value="1.105" ${Number(it.iva)===1.105?"selected":""}>10,5%</option>
+            <option value="1.00" ${Number(it.iva)===1?"selected":""}>0% / Exento</option>
+          </select>
+          <div class="ci-costo">—</div>
+          <div class="ci-actions">
+            <button class="icon-btn" onclick="costeoSaveItem('${it.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <button class="icon-btn" onclick="costeoCancelEditItem()" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+        </div>`;
+      }
+      return `<div class="ci-row">
+        <div>${costeoEsc(it.nomenclatura)}</div>
+        <div>${fmtMoney(it.precio_lista)}</div>
+        <div>${fmtNumCosteo(it.cantidad)}</div>
+        <div class="ci-um-lbl">${costeoEsc(it.unidad_medida||"—")}</div>
+        <div>${fmtNumCosteo(it.bultos)}</div>
+        <div>${ivaLabelCosteo(it.iva)}</div>
+        <div class="ci-costo">${fmtMoney(it.costo_un)} <span class="ci-um-lbl">/ ${costeoEsc(it.unidad_medida||"u.")}</span></div>
+        <div class="ci-actions">
+          <button class="icon-btn" onclick="costeoStartEditItem('${it.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
+          <button class="icon-btn del-btn" onclick="costeoRequestDeleteItem('${it.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+  costeoUpdateSummary();
+}
+function costeoUpdateSummary(){
+  const o = ordenes.find(x=>x.id===costeoOpenOrdenId);
+  const list = costeoItemsDeOrden();
+  const suma = list.reduce((s,it)=>s+Number(it.monto_linea||0),0);
+  const total = o ? Number(o.montoFactura||0) : 0;
+  const dif = suma-total;
+  document.getElementById("ciSumaItems").textContent = fmtMoney(suma);
+  document.getElementById("ciTotalFactura").textContent = fmtMoney(total);
+  document.getElementById("ciDiferencia").textContent = fmtMoney(dif);
+  const badgeEl = document.getElementById("ciReconBadge");
+  if(!list.length) badgeEl.innerHTML = `<span class="recon-badge recon-pending">Sin cargar</span>`;
+  else if(Math.abs(dif) < 1) badgeEl.innerHTML = `<span class="recon-badge recon-ok">✓ Coincide con la factura</span>`;
+  else badgeEl.innerHTML = `<span class="recon-badge recon-bad">No coincide con la factura</span>`;
+}
+async function costeoAddItem(){
+  if(!costeoOpenOrdenId) return;
+  const nombre = document.getElementById("ciNewNomenclatura").value.trim();
+  const precio = parseDecimalCosteo(document.getElementById("ciNewPrecio").value);
+  const cantidad = parseDecimalCosteo(document.getElementById("ciNewCantidad").value) || 1;
+  const um = document.getElementById("ciNewUM").value.trim();
+  const bultos = parseDecimalCosteo(document.getElementById("ciNewBultos").value) || 1;
+  const iva = Number(document.getElementById("ciNewIVA").value);
+  if(!nombre){ showToast("Escribí el nombre del insumo", "warn"); return; }
+  if(!precio){ showToast("Cargá el precio de lista", "warn"); return; }
+
+  // Si el insumo todavía no está en la lista de este proveedor (solapa Proveedores), lo agregamos
+  // automáticamente para que quede disponible como sugerencia la próxima vez.
+  const o = ordenes.find(x=>x.id===costeoOpenOrdenId);
+  const prov = o ? proveedoresConfig.find(p=>p.nombre===o.proveedor) : null;
+  let insumoId = null;
+  if(prov){
+    let existente = costeoInsumos.find(i=>i.proveedor_id===prov.id && i.nomenclatura.toLowerCase()===nombre.toLowerCase());
+    if(!existente){
+      const { data, error } = await sb.from("lf_costeo_insumos").insert({ proveedor_id: prov.id, nomenclatura: nombre, unidad_medida: um||null, creado_por: currentPerfil?currentPerfil.id:null }).select().single();
+      if(!error && data){ costeoInsumos.push(data); existente = data; }
+    }
+    insumoId = existente ? existente.id : null;
+  }
+
+  const { error } = await sb.from("lf_costeo_compra_items").insert({
+    orden_id: costeoOpenOrdenId, insumo_id: insumoId, nomenclatura: nombre,
+    precio_lista: precio, cantidad, unidad_medida: um||null, bultos, iva,
+    creado_por: currentPerfil?currentPerfil.id:null
+  });
+  if(error){ showToast("No se pudo agregar el ítem", "warn"); return; }
+  document.getElementById("ciNewNomenclatura").value = "";
+  document.getElementById("ciNewPrecio").value = "";
+  document.getElementById("ciNewCantidad").value = "";
+  document.getElementById("ciNewUM").value = "";
+  document.getElementById("ciNewBultos").value = "";
+  await loadCosteoCompraItems();
+  if(prov) costeoRefreshInsumosDatalist(o.proveedor);
+  renderCosteoItemsList();
+  logHistorialConfig("Cargó un ítem de compra (Costeo)", `${nombre} — orden ${costeoOpenOrdenId}`);
+  showToast("Ítem agregado correctamente");
+}
+function costeoStartEditItem(id){ costeoEditingItem = id; renderCosteoItemsList(); }
+function costeoCancelEditItem(){ costeoEditingItem = null; renderCosteoItemsList(); }
+async function costeoSaveItem(id){
+  const nombre = document.getElementById("ei_nom_"+id).value.trim();
+  const precio = parseDecimalCosteo(document.getElementById("ei_pl_"+id).value);
+  const cantidad = parseDecimalCosteo(document.getElementById("ei_ca_"+id).value) || 1;
+  const um = document.getElementById("ei_um_"+id).value.trim();
+  const bultos = parseDecimalCosteo(document.getElementById("ei_bu_"+id).value) || 1;
+  const iva = Number(document.getElementById("ei_iva_"+id).value);
+  if(!nombre || !precio){ showToast("Completá nombre y precio de lista", "warn"); return; }
+  const { error } = await sb.from("lf_costeo_compra_items").update({
+    nomenclatura: nombre, precio_lista: precio, cantidad, unidad_medida: um||null, bultos, iva,
+    modificado_por: currentPerfil?currentPerfil.id:null, modificado_fecha: new Date().toISOString()
+  }).eq("id", id);
+  if(error){ showToast("No se pudo actualizar el ítem", "warn"); return; }
+  costeoEditingItem = null;
+  await loadCosteoCompraItems();
+  renderCosteoItemsList();
+  showToast("Ítem actualizado correctamente");
+}
+function costeoRequestDeleteItem(id){
+  const it = costeoCompraItems.find(x=>x.id===id);
+  if(!it) return;
+  pendingDelete = {scope:"costeo", kind:"item", id};
+  document.getElementById("confirmTitle").textContent = "¿Eliminar este ítem?";
+  document.getElementById("confirmText").textContent = `Vas a eliminar "${it.nomenclatura}" de esta orden. Esta acción no se puede deshacer.`;
+  document.getElementById("confirmDeleteBtn").textContent = "Eliminar";
+  document.getElementById("confirmOverlay").classList.add("show");
 }
 </script>
 </body>
