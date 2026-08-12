@@ -1127,11 +1127,48 @@
                   <div class="cm-panel-body"><table class="cm-table" id="cmTablaAjustes"></table></div>
                 </div>
 
+                <div class="form-section-title">Retiro a oficina</div>
+                <div class="hint-center-ventas" style="text-align:left;margin:-8px 0 14px 1px;">¿Vas a trasladar dinero de Caja Mayor a la caja de oficina en este cierre? No genera orden de pago, es un movimiento interno.</div>
+                <div class="status-select-wrap" id="cmOficinaChips" style="margin-bottom:18px;">
+                  <div class="status-chip" data-s="si" onclick="cmSetOficinaToggle('si')">Sí</div>
+                  <div class="status-chip active" data-s="no" onclick="cmSetOficinaToggle('no')">No</div>
+                </div>
+
+                <div class="cm-salidas-form hidden" id="cmOficinaForm">
+                  <div class="field-row">
+                    <div class="field"><label>Fecha de imputación</label><input type="text" id="cmOficinaFechaImp" readonly></div>
+                    <div class="field"><label>Nro.</label><input type="text" id="cmOficinaNro" readonly></div>
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label>Fecha del movimiento</label>
+                      <div class="date-field-wrap">
+                        <input type="text" id="cmOficinaFecha" placeholder="dd/mm/aaaa" maxlength="10">
+                        <button type="button" class="cal-btn" data-target="cmOficinaFecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                      </div>
+                    </div>
+                    <div class="field"><label>Monto</label><input type="text" id="cmOficinaMonto" placeholder="$0,00.-"></div>
+                  </div>
+                  <div class="field">
+                    <label>Observaciones <span class="hint">(opcional)</span></label>
+                    <input type="text" id="cmOficinaObs" placeholder="Ej: traslado semanal a oficina">
+                  </div>
+                  <div class="cm-add-salida-row">
+                    <button type="button" class="cm-btn-add" onclick="cmAddRetiroOficina()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar retiro a oficina</button>
+                  </div>
+                </div>
+
+                <div class="cm-panel hidden" id="cmPanelOficina">
+                  <div class="cm-panel-head"><h3>Retiros a oficina registrados en este cierre</h3><span class="cnt" id="cmCntOficina">0</span></div>
+                  <div class="cm-panel-body"><table class="cm-table" id="cmTablaOficina"></table></div>
+                </div>
+
                 <div class="cm-total-bar">
                   <div class="grp">
                     <div><div class="lt-label">Retiros imputados</div><div class="lt-value" id="cmTotalRetiros">$0</div></div>
                     <div><div class="lt-label">Salidas</div><div class="lt-value" id="cmTotalSalidas">$0</div></div>
                     <div><div class="lt-label">Ajustes (neto)</div><div class="lt-value" id="cmTotalAjustes">$0</div></div>
+                    <div><div class="lt-label">Retiro a oficina</div><div class="lt-value" id="cmTotalOficina">$0</div></div>
                     <div><div class="lt-label">Saldo final</div><div class="lt-value" id="cmTotalSaldo">$0</div></div>
                   </div>
                   <button class="btn-primary" style="flex:0 0 auto;background:var(--lime);color:var(--navy);" id="cmBtnCerrar" onclick="cmConfirmarCierre()" disabled>Cerrar Caja Mayor</button>
@@ -5853,9 +5890,9 @@ const CM_LS_KEY = "lf_caja_mayor_estado_v1";
 let cmState = {
   file: null,
   desde: null, hasta: null,
-  pendientes: [], imputados: [], salidas: [], ajustes: [],
-  nextSalidaNro: 1, nextAjusteNro: 1,
-  salidasToggle: "no", ajustesToggle: "no",
+  pendientes: [], imputados: [], salidas: [], ajustes: [], retirosOficina: [],
+  nextSalidaNro: 1, nextAjusteNro: 1, nextOficinaNro: 1,
+  salidasToggle: "no", ajustesToggle: "no", oficinaToggle: "no",
   yaImputadosAntesCount: 0,
   diffs: [], otrosEgresos: [],
   historialKeys: [],
@@ -6305,13 +6342,82 @@ function cmRenderAjustes(){
   }
   tbl.innerHTML = thead+body;
 }
-function cmRenderAll(){ cmRenderPendientes(); cmRenderImputados(); cmRenderSalidas(); cmRenderAjustes(); cmRecalcTotales(); }
+/* ---------- retiro a oficina (traslado interno, no genera orden de pago) ---------- */
+function cmSetOficinaToggle(val){
+  document.querySelectorAll("#cmOficinaChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===val));
+  cmState.oficinaToggle = val;
+  const form = document.getElementById("cmOficinaForm");
+  if(val==="si"){
+    form.classList.remove("hidden");
+    cmResetOficinaForm();
+  } else {
+    form.classList.add("hidden");
+  }
+  cmRecalcTotales();
+  cmSaveState();
+}
+function cmResetOficinaForm(){
+  document.getElementById("cmOficinaFechaImp").value = isoToDMY(todayISO());
+  document.getElementById("cmOficinaNro").value = "Retiro oficina "+cmState.nextOficinaNro;
+  document.getElementById("cmOficinaFecha").value = "";
+  document.getElementById("cmOficinaMonto").value = "";
+  document.getElementById("cmOficinaObs").value = "";
+}
+attachMoneyMask("cmOficinaMonto");
+function cmAddRetiroOficina(){
+  const fechaISO = dmyToISO(document.getElementById("cmOficinaFecha").value);
+  const monto = parseMoneyInput(document.getElementById("cmOficinaMonto").value);
+  const obs = document.getElementById("cmOficinaObs").value.trim();
+  let ok = true;
+  if(!fechaISO) ok = false;
+  if(monto<=0) ok = false;
+  if(!ok){ showToast("Completá la fecha y el monto del retiro a oficina", "warn"); return; }
+  cmState.retirosOficina.push({
+    nro: "Retiro oficina "+cmState.nextOficinaNro,
+    fechaImpISO: todayISO(), fechaMovISO: fechaISO, monto, obs
+  });
+  cmState.nextOficinaNro++;
+  cmResetOficinaForm();
+  cmRenderRetirosOficina();
+  cmRecalcTotales();
+  cmSaveState();
+  showToast("Retiro a oficina agregado");
+}
+function cmRemoveRetiroOficina(idx){
+  cmState.retirosOficina.splice(idx,1);
+  cmState.retirosOficina.forEach((r,i)=>{ r.nro = "Retiro oficina "+(i+1); });
+  cmState.nextOficinaNro = cmState.retirosOficina.length+1;
+  cmRenderRetirosOficina();
+  cmRecalcTotales();
+  cmSaveState();
+}
+function cmRenderRetirosOficina(){
+  const tbl = document.getElementById("cmTablaOficina");
+  const thead = "<thead><tr><th>Fecha imp.</th><th>Nro.</th><th>Fecha mov.</th><th>Observaciones</th><th>Monto</th><th></th></tr></thead>";
+  let body;
+  if(!cmState.retirosOficina.length){
+    body = "<tbody><tr><td colspan=\"6\"><div class=\"cm-empty-mini\">Todavía no registraste retiros a oficina en este cierre.</div></td></tr></tbody>";
+  } else {
+    body = "<tbody>"+cmState.retirosOficina.map((r,i)=>`
+      <tr>
+        <td class="c-fecha">${isoToDMY(r.fechaImpISO)}</td>
+        <td>${r.nro}</td>
+        <td class="c-fecha">${isoToDMY(r.fechaMovISO)}</td>
+        <td>${r.obs||"—"}</td>
+        <td class="c-monto">${fmtMoney(r.monto)}</td>
+        <td><button type="button" class="cm-btn-del" onclick="cmRemoveRetiroOficina(${i})" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
+      </tr>`).join("")+"</tbody>";
+  }
+  tbl.innerHTML = thead+body;
+}
+function cmRenderAll(){ cmRenderPendientes(); cmRenderImputados(); cmRenderSalidas(); cmRenderAjustes(); cmRenderRetirosOficina(); cmRecalcTotales(); }
 function cmRecalcTotales(){
   const totalRetiros = cmState.imputados.reduce((s,r)=>s+r.monto,0);
   const totalSalidas = cmState.salidas.reduce((s,r)=>s+r.monto,0);
   const totalAjusteIngreso = cmState.ajustes.filter(a=>a.tipo==="ingreso").reduce((s,a)=>s+a.monto,0);
   const totalAjusteDiferencia = cmState.ajustes.filter(a=>a.tipo==="diferencia").reduce((s,a)=>s+a.monto,0);
-  const saldo = totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia;
+  const totalOficina = cmState.retirosOficina.reduce((s,r)=>s+r.monto,0);
+  const saldo = totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia - totalOficina;
   document.getElementById("cmKpiPendientes").textContent = cmState.pendientes.length;
   document.getElementById("cmKpiImputados").textContent = cmState.imputados.length;
   document.getElementById("cmKpiSaldo").textContent = fmtMoney(saldo);
@@ -6319,13 +6425,15 @@ function cmRecalcTotales(){
   document.getElementById("cmCntImputados").textContent = cmState.imputados.length;
   document.getElementById("cmCntSalidas").textContent = cmState.salidas.length;
   document.getElementById("cmCntAjustes").textContent = cmState.ajustes.length;
+  document.getElementById("cmCntOficina").textContent = cmState.retirosOficina.length;
   document.getElementById("cmSaldoRetiros").textContent = fmtMoney(totalRetiros);
   document.getElementById("cmTotalRetiros").textContent = fmtMoney(totalRetiros);
   document.getElementById("cmTotalSalidas").textContent = fmtMoney(totalSalidas);
   const netoAjustes = totalAjusteIngreso - totalAjusteDiferencia;
   document.getElementById("cmTotalAjustes").textContent = (netoAjustes>=0?"+":"−")+fmtMoney(Math.abs(netoAjustes));
+  document.getElementById("cmTotalOficina").textContent = fmtMoney(totalOficina);
   document.getElementById("cmTotalSaldo").textContent = fmtMoney(saldo);
-  document.getElementById("cmBtnCerrar").disabled = !(cmState.imputados.length>0 || cmState.salidas.length>0 || cmState.ajustes.length>0);
+  document.getElementById("cmBtnCerrar").disabled = !(cmState.imputados.length>0 || cmState.salidas.length>0 || cmState.ajustes.length>0 || cmState.retirosOficina.length>0);
   const note = document.getElementById("cmAlreadyNote");
   if(cmState.yaImputadosAntesCount>0){
     note.textContent = cmState.yaImputadosAntesCount+" retiro(s) del período elegido ya se habían imputado en un cierre anterior y no se muestran en la lista.";
@@ -6338,6 +6446,8 @@ function cmRecalcTotales(){
   panelSalidas.classList.toggle("hidden", !(cmState.salidasToggle==="si" || cmState.salidas.length>0));
   const panelAjustes = document.getElementById("cmPanelAjustes");
   panelAjustes.classList.toggle("hidden", !(cmState.ajustesToggle==="si" || cmState.ajustes.length>0));
+  const panelOficina = document.getElementById("cmPanelOficina");
+  panelOficina.classList.toggle("hidden", !(cmState.oficinaToggle==="si" || cmState.retirosOficina.length>0));
 }
 function cmImputar(key){
   const idx = cmState.pendientes.findIndex(r=>r.key===key);
@@ -6472,27 +6582,29 @@ function cmRemoveSalida(idx){
 
 /* ---------- cierre: crea las órdenes de pago (Pago B) en Pagos y persiste el último cierre ---------- */
 function cmConfirmarCierre(){
-  if(!cmState.imputados.length && !cmState.salidas.length && !cmState.ajustes.length){
-    showToast("No hay retiros imputados, salidas ni ajustes registrados para cerrar", "warn");
+  if(!cmState.imputados.length && !cmState.salidas.length && !cmState.ajustes.length && !cmState.retirosOficina.length){
+    showToast("No hay retiros imputados, salidas, ajustes ni retiros a oficina registrados para cerrar", "warn");
     return;
   }
   const totalRetiros = cmState.imputados.reduce((s,r)=>s+r.monto,0);
   const totalSalidas = cmState.salidas.reduce((s,r)=>s+r.monto,0);
   const totalAjusteIngreso = cmState.ajustes.filter(a=>a.tipo==="ingreso").reduce((s,a)=>s+a.monto,0);
   const totalAjusteDiferencia = cmState.ajustes.filter(a=>a.tipo==="diferencia").reduce((s,a)=>s+a.monto,0);
-  const saldo = totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia;
+  const totalOficina = cmState.retirosOficina.reduce((s,r)=>s+r.monto,0);
+  const saldo = totalRetiros + totalAjusteIngreso - totalSalidas - totalAjusteDiferencia - totalOficina;
   const cantOrdenes = cmState.salidas.length + cmState.ajustes.filter(a=>a.tipo==="diferencia").length;
   const msg = "Vas a cerrar Caja Mayor:\n\n"+
     "• Retiros imputados: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+")\n"+
     "• Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+")\n"+
     (cmState.ajustes.length>0 ? "• Ajustes: "+cmState.ajustes.length+" — ingresos "+fmtMoney(totalAjusteIngreso)+", diferencias "+fmtMoney(totalAjusteDiferencia)+"\n" : "")+
+    (cmState.retirosOficina.length>0 ? "• Retiro a oficina: "+cmState.retirosOficina.length+" ("+fmtMoney(totalOficina)+") — movimiento interno, no genera orden de pago\n" : "")+
     "• Saldo final: "+fmtMoney(saldo)+"\n\n"+
     (cantOrdenes>0 ? "Esto va a crear "+cantOrdenes+" orden(es) de pago en Pagos.\n\n" : "")+
     "¿Confirmás el cierre?";
   if(!confirm(msg)) return;
-  cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, saldo);
+  cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo);
 }
-async function cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, saldo){
+async function cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo){
   const hoy = todayISO();
   const creadoPorId = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null;
   const creadoPorNombre = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.nombre : "—";
@@ -6550,7 +6662,7 @@ async function cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, 
   cmState.imputados.forEach(r=> cmState.historialKeys.push(r.key));
   cmState.ultimoCierreFecha = hoy;
   cmState.ultimoCierreMonto = saldo;
-  if(typeof logAudit==="function") logAudit("Cerró Caja Mayor", "Retiros: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+"), Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+"), Ajustes: "+cmState.ajustes.length+", Saldo: "+fmtMoney(saldo), "cajaMayor");
+  if(typeof logAudit==="function") logAudit("Cerró Caja Mayor", "Retiros: "+cmState.imputados.length+" ("+fmtMoney(totalRetiros)+"), Salidas: "+cmState.salidas.length+" ("+fmtMoney(totalSalidas)+"), Ajustes: "+cmState.ajustes.length+", Retiro a oficina: "+fmtMoney(totalOficina)+", Saldo: "+fmtMoney(saldo), "cajaMayor");
 
   const numero = cmState.historialCierres.length+1;
   cmState.historialCierres.unshift({
@@ -6558,7 +6670,8 @@ async function cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, 
     retirosImputados: cmState.imputados.map(cmSerializeRetiro),
     salidas: cmState.salidas.slice(),
     ajustes: cmState.ajustes.slice(),
-    totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, saldo,
+    retirosOficina: cmState.retirosOficina.slice(),
+    totalRetiros, totalSalidas, totalAjusteIngreso, totalAjusteDiferencia, totalOficina, saldo,
     ordenesCreadas: nuevasOrdenes.map(o=>o.id)
   });
 
@@ -6567,10 +6680,13 @@ async function cmEjecutarCierre(totalRetiros, totalSalidas, totalAjusteIngreso, 
   cmState.imputados = [];
   cmState.salidas = [];
   cmState.ajustes = [];
+  cmState.retirosOficina = [];
   cmState.nextSalidaNro = 1;
   cmState.nextAjusteNro = 1;
+  cmState.nextOficinaNro = 1;
   cmState.salidasToggle = "no";
   cmState.ajustesToggle = "no";
+  cmState.oficinaToggle = "no";
   cmState.desde = null; cmState.hasta = null;
   cmState.yaImputadosAntesCount = 0;
   cmState.diffs = []; cmState.otrosEgresos = [];
@@ -6598,10 +6714,13 @@ function cmSaveState(){
       imputados: cmState.imputados.map(cmSerializeRetiro),
       salidas: cmState.salidas,
       ajustes: cmState.ajustes,
+      retirosOficina: cmState.retirosOficina,
       nextSalidaNro: cmState.nextSalidaNro,
       nextAjusteNro: cmState.nextAjusteNro,
+      nextOficinaNro: cmState.nextOficinaNro,
       salidasToggle: cmState.salidasToggle,
       ajustesToggle: cmState.ajustesToggle,
+      oficinaToggle: cmState.oficinaToggle,
       yaImputadosAntesCount: cmState.yaImputadosAntesCount,
       diffs: cmState.diffs, otrosEgresos: cmState.otrosEgresos,
       historialKeys: cmState.historialKeys,
@@ -6623,10 +6742,13 @@ function cmLoadState(){
     cmState.imputados = (data.imputados||[]).map(cmDeserializeRetiro);
     cmState.salidas = data.salidas || [];
     cmState.ajustes = data.ajustes || [];
+    cmState.retirosOficina = data.retirosOficina || [];
     cmState.nextSalidaNro = data.nextSalidaNro || 1;
     cmState.nextAjusteNro = data.nextAjusteNro || 1;
+    cmState.nextOficinaNro = data.nextOficinaNro || 1;
     cmState.salidasToggle = data.salidasToggle || "no";
     cmState.ajustesToggle = data.ajustesToggle || "no";
+    cmState.oficinaToggle = data.oficinaToggle || "no";
     cmState.yaImputadosAntesCount = data.yaImputadosAntesCount || 0;
     cmState.diffs = data.diffs || [];
     cmState.otrosEgresos = data.otrosEgresos || [];
@@ -6648,6 +6770,7 @@ function cmBuildResumenFilas(cierre){
   (cierre.ajustes||[]).filter(a=>a.tipo==="ingreso").forEach(a=> filas.push({fecha:a.fechaAjusteISO, detalle:"Ajuste (ingreso) · "+a.observaciones, debe:0, haber:a.monto}));
   (cierre.salidas||[]).forEach(s=> filas.push({fecha:s.fechaSalidaISO, detalle:"Salida · "+s.proveedor+(s.obs?" ("+s.obs+")":""), debe:s.monto, haber:0}));
   (cierre.ajustes||[]).filter(a=>a.tipo==="diferencia").forEach(a=> filas.push({fecha:a.fechaAjusteISO, detalle:"Ajuste (diferencia) · "+a.observaciones, debe:a.monto, haber:0}));
+  (cierre.retirosOficina||[]).forEach(r=> filas.push({fecha:r.fechaMovISO, detalle:"Retiro a oficina"+(r.obs?" ("+r.obs+")":""), debe:r.monto, haber:0}));
   filas.sort((x,y)=> (x.fecha||"").localeCompare(y.fecha||""));
   return filas;
 }
@@ -6659,7 +6782,8 @@ function cmRenderResumenTable(cierre){
     return `<tr><td class="c-fecha">${isoToDMY(f.fecha)}</td><td>${f.detalle}</td><td class="c-monto">${f.debe?fmtMoney(f.debe):"—"}</td><td class="c-monto">${f.haber?fmtMoney(f.haber):"—"}</td></tr>`;
   }).join("") : `<tr><td colspan="4"><div class="cm-empty-mini">Este cierre no tiene movimientos.</div></td></tr>`;
   const saldo = acumHaber - acumDebe;
-  return `<div class="cm-resumen-head">Cierre #${cierre.numero} · ${isoToDMY(cierre.fecha)}</div>
+  const totalOficina = (cierre.retirosOficina||[]).reduce((s,r)=>s+r.monto,0);
+  return `<div class="cm-resumen-head">Cierre #${cierre.numero} · ${isoToDMY(cierre.fecha)}${totalOficina>0 ? " · Retiro a oficina: "+fmtMoney(totalOficina) : ""}</div>
     <table class="cm-table cm-resumen-table">
       <thead><tr><th>Fecha</th><th>Detalle</th><th>Debe</th><th>Haber</th></tr></thead>
       <tbody>${rowsHTML}</tbody>
@@ -6684,10 +6808,10 @@ function cmGoTab(tab){
 }
 function cmRenderHistorialTabla(){
   const tbl = document.getElementById("cmTablaHistorial");
-  const thead = "<thead><tr><th></th><th>Cierre</th><th>Fecha</th><th>Retiros</th><th>Salidas</th><th>Ajustes (neto)</th><th>Saldo</th><th></th></tr></thead>";
+  const thead = "<thead><tr><th></th><th>Cierre</th><th>Fecha</th><th>Retiros</th><th>Salidas</th><th>Ajustes (neto)</th><th>Retiro a oficina</th><th>Saldo</th><th></th></tr></thead>";
   let body;
   if(!cmState.historialCierres.length){
-    body = "<tbody><tr><td colspan=\"8\"><div class=\"cm-empty-mini\">Todavía no se registró ningún cierre.</div></td></tr></tbody>";
+    body = "<tbody><tr><td colspan=\"9\"><div class=\"cm-empty-mini\">Todavía no se registró ningún cierre.</div></td></tr></tbody>";
   } else {
     body = "<tbody>"+cmState.historialCierres.map(c=>{
       const neto = (c.totalAjusteIngreso||0) - (c.totalAjusteDiferencia||0);
@@ -6699,6 +6823,7 @@ function cmRenderHistorialTabla(){
         <td class="c-monto">${fmtMoney(c.totalRetiros)}</td>
         <td class="c-monto">${fmtMoney(c.totalSalidas)}</td>
         <td class="c-monto">${(neto>=0?"+":"−")+fmtMoney(Math.abs(neto))}</td>
+        <td class="c-monto">${fmtMoney(c.totalOficina||0)}</td>
         <td class="c-monto">${fmtMoney(c.saldo)}</td>
         <td><button type="button" class="cm-btn-imputar" onclick="cmVerDetalleCierre(${c.numero})">Ver</button></td>
       </tr>`;
@@ -6725,13 +6850,13 @@ function cmDescargarExcelCierres(){
   const seleccionados = cmState.historialCierres.filter(c=>cmHistorialSeleccion.has(c.numero)).sort((a,b)=>a.numero-b.numero);
   if(!seleccionados.length){ showToast("Elegí al menos un cierre para descargar", "warn"); return; }
 
-  const resumenAOA = [["Cierre","Fecha","Retiros imputados","Salidas","Ajustes (ingreso)","Ajustes (diferencia)","Saldo"]];
-  let accRetiros=0, accSalidas=0, accAjIn=0, accAjDif=0, accSaldo=0;
+  const resumenAOA = [["Cierre","Fecha","Retiros imputados","Salidas","Ajustes (ingreso)","Ajustes (diferencia)","Retiro a oficina","Saldo"]];
+  let accRetiros=0, accSalidas=0, accAjIn=0, accAjDif=0, accOficina=0, accSaldo=0;
   seleccionados.forEach(c=>{
-    resumenAOA.push(["#"+c.numero, isoToDMY(c.fecha), c.totalRetiros, c.totalSalidas, c.totalAjusteIngreso||0, c.totalAjusteDiferencia||0, c.saldo]);
-    accRetiros+=c.totalRetiros; accSalidas+=c.totalSalidas; accAjIn+=(c.totalAjusteIngreso||0); accAjDif+=(c.totalAjusteDiferencia||0); accSaldo+=c.saldo;
+    resumenAOA.push(["#"+c.numero, isoToDMY(c.fecha), c.totalRetiros, c.totalSalidas, c.totalAjusteIngreso||0, c.totalAjusteDiferencia||0, c.totalOficina||0, c.saldo]);
+    accRetiros+=c.totalRetiros; accSalidas+=c.totalSalidas; accAjIn+=(c.totalAjusteIngreso||0); accAjDif+=(c.totalAjusteDiferencia||0); accOficina+=(c.totalOficina||0); accSaldo+=c.saldo;
   });
-  resumenAOA.push(["TOTAL","", accRetiros, accSalidas, accAjIn, accAjDif, accSaldo]);
+  resumenAOA.push(["TOTAL","", accRetiros, accSalidas, accAjIn, accAjDif, accOficina, accSaldo]);
 
   const detalleAOA = [["Cierre","Fecha","Detalle","Debe","Haber"]];
   seleccionados.forEach(c=>{
@@ -6740,7 +6865,7 @@ function cmDescargarExcelCierres(){
 
   const wb = XLSX.utils.book_new();
   const wsResumen = XLSX.utils.aoa_to_sheet(resumenAOA);
-  wsResumen["!cols"] = [{wch:10},{wch:12},{wch:18},{wch:14},{wch:16},{wch:18},{wch:14}];
+  wsResumen["!cols"] = [{wch:10},{wch:12},{wch:18},{wch:14},{wch:16},{wch:18},{wch:16},{wch:14}];
   const wsDetalle = XLSX.utils.aoa_to_sheet(detalleAOA);
   wsDetalle["!cols"] = [{wch:10},{wch:12},{wch:40},{wch:14},{wch:14}];
   XLSX.utils.book_append_sheet(wb, wsResumen, "resumen");
@@ -6758,12 +6883,14 @@ function cmInit(){
   document.getElementById("cmDesde").value = cmState.desde || "";
   document.getElementById("cmHasta").value = cmState.hasta || "";
   checkCMReady();
-  if(cmState.pendientes.length || cmState.imputados.length || cmState.salidas.length || cmState.ajustes.length){
+  if(cmState.pendientes.length || cmState.imputados.length || cmState.salidas.length || cmState.ajustes.length || cmState.retirosOficina.length){
     document.getElementById("cmResultados").classList.remove("hidden");
     document.querySelectorAll("#cmSalidasChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===cmState.salidasToggle));
     document.getElementById("cmSalidasForm").classList.toggle("hidden", cmState.salidasToggle!=="si");
     document.querySelectorAll("#cmAjustesChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===cmState.ajustesToggle));
     document.getElementById("cmAjustesForm").classList.toggle("hidden", cmState.ajustesToggle!=="si");
+    document.querySelectorAll("#cmOficinaChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===cmState.oficinaToggle));
+    document.getElementById("cmOficinaForm").classList.toggle("hidden", cmState.oficinaToggle!=="si");
     if(cmState.salidasToggle==="si"){
       document.getElementById("cmSalidaFechaImp").value = isoToDMY(todayISO());
       document.getElementById("cmSalidaNro").value = "Pago "+cmState.nextSalidaNro;
@@ -6773,6 +6900,10 @@ function cmInit(){
       document.getElementById("cmAjusteFechaImp").value = isoToDMY(todayISO());
       document.getElementById("cmAjusteNro").value = "Ajuste "+cmState.nextAjusteNro;
       cmSetAjusteTipo(cmAjusteTipoActual);
+    }
+    if(cmState.oficinaToggle==="si"){
+      document.getElementById("cmOficinaFechaImp").value = isoToDMY(todayISO());
+      document.getElementById("cmOficinaNro").value = "Retiro oficina "+cmState.nextOficinaNro;
     }
     cmRenderChecks();
     cmRenderAll();
