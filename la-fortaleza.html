@@ -528,6 +528,7 @@
   .rec-toggle-btn{flex:1;text-align:center;padding:9px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);font-size:12.8px;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease;}
   .rec-toggle-btn.active{background:#fff;color:var(--navy);box-shadow:var(--shadow-sm);}
   .rec-toggle-btn:hover:not(.active){color:var(--text-1);}
+  .rec-sync-status{flex:1;font-size:12.5px;color:var(--text-2);line-height:1.5;min-width:220px;}
   .rec-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:18px;max-width:1040px;box-shadow:var(--shadow-sm);overflow:hidden;}
   .rec-item-block{border-bottom:1px solid var(--border);}
   .rec-item-block:last-child{border-bottom:none;}
@@ -1639,7 +1640,7 @@
               </div>
               <p class="config-hint" id="recHint">Los semi-elaborados son productos con su propia pre-elaboración (ej. bollo de pizza, salsa) que después se usan como insumo dentro de otras recetas. Acá se cargan y se les define su receta.</p>
               <div id="recListWrap"></div>
-              <div class="config-card" style="margin-top:14px;max-width:660px;"><div class="config-add-bar">
+              <div class="config-card" id="recAddBarSemi" style="margin-top:14px;max-width:660px;"><div class="config-add-bar">
                 <input type="text" id="recNewNombre" placeholder="Nombre…" autocomplete="off" style="flex:1;min-width:200px;">
                 <select id="recNewConcepto" style="max-width:220px;">
                   <option value="">Categoría…</option>
@@ -1648,6 +1649,10 @@
                   <option value="Servicio de padel">Servicio de padel</option>
                 </select>
                 <button onclick="recAddItem()" id="recAddBtn">+ Crear semi-elaborado</button>
+              </div></div>
+              <div class="config-card" id="recSyncBarArt" style="margin-top:14px;max-width:820px;display:none;"><div class="config-add-bar">
+                <div class="rec-sync-status" id="recSyncStatus">Los artículos se toman directamente del Índice de artículos (Ventas), excepto los de la categoría Caja.</div>
+                <button onclick="recSyncArticulosFromIndice()">Sincronizar con el Índice</button>
               </div></div>
             </div>
           </section>
@@ -7466,6 +7471,8 @@ async function initCosteo(){
   costeoShowProvList();
   costeoShowComprasList();
   renderRecList();
+  if(!ventasIndice) vTryLoadIndiceFromStorage().then(()=>recRenderSyncStatus());
+  else recRenderSyncStatus();
 }
 function goCosteoTab(pane){
   const scope = document.getElementById("costeoSubnav");
@@ -8010,10 +8017,12 @@ function recGoTipo(tipo){
   document.querySelectorAll("#recTipoToggle .rec-toggle-btn").forEach(b=>b.classList.toggle("active", b.dataset.rtipo===tipo));
   document.getElementById("recHint").textContent = tipo==="semielaborado"
     ? "Los semi-elaborados son productos con su propia pre-elaboración (ej. bollo de pizza, salsa) que después se usan como insumo dentro de otras recetas. Acá se cargan y se les define su receta."
-    : "Los artículos son los productos finales de venta. Su receta puede combinar insumos de compra y semi-elaborados ya cargados.";
-  document.getElementById("recAddBtn").textContent = tipo==="semielaborado" ? "+ Crear semi-elaborado" : "+ Crear artículo";
+    : "Los artículos son los productos finales de venta, tomados directamente del Índice de artículos de Ventas (se excluyen los de la categoría Caja). Acá se les define la receta.";
+  document.getElementById("recAddBarSemi").style.display = tipo==="semielaborado" ? "" : "none";
+  document.getElementById("recSyncBarArt").style.display = tipo==="articulo" ? "" : "none";
   recOpenId = null; recEditingItem = null; recEditingLinea = null;
   renderRecList();
+  if(tipo==="articulo") recSyncArticulosFromIndice({silent:true});
 }
 
 /* ---- Render ---- */
@@ -8022,15 +8031,21 @@ function renderRecList(){
   if(!wrap) return;
   const items = recItemsByTipo();
   const tipoLbl = recCurrentTipo==="semielaborado" ? "semi-elaborados" : "artículos";
-  if(!items.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay ${tipoLbl} cargados.</div>`; return; }
+  if(!items.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay ${tipoLbl} cargados.${recCurrentTipo==="articulo"?" Usá \"Sincronizar con el Índice\" para traerlos.":""}</div>`; return; }
+  // Los semi-elaborados siempre usan una de las 3 categorías de Costeo (se cargan a mano con ese
+  // select). Los artículos, al venir del Índice de artículos, pueden traer categorías propias del
+  // índice (Cat. 1/Cat. 2) que no son una de esas 3 — se agrupan igual, con las 3 conocidas primero.
+  const conceptosPresentes = Array.from(new Set(items.map(i=>i.concepto||"Sin categoría")));
+  const orden = [
+    ...COSTEO_CONCEPTOS.filter(c=>conceptosPresentes.includes(c)),
+    ...conceptosPresentes.filter(c=>!COSTEO_CONCEPTOS.includes(c)).sort((a,b)=>a.localeCompare(b,"es"))
+  ];
   let html = "";
-  COSTEO_CONCEPTOS.forEach(concepto=>{
-    const grp = items.filter(i=>i.concepto===concepto).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  orden.forEach(concepto=>{
+    const grp = items.filter(i=>(i.concepto||"Sin categoría")===concepto).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
     if(!grp.length) return;
     html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div><div class="rec-card">${grp.map(recRenderItem).join("")}</div>`;
   });
-  const otros = items.filter(i=>!COSTEO_CONCEPTOS.includes(i.concepto)).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
-  if(otros.length) html += `<div class="costeo-group-title">Sin categoría</div><div class="rec-card">${otros.map(recRenderItem).join("")}</div>`;
   wrap.innerHTML = html || `<div class="empty-mini">Todavía no hay ${tipoLbl} cargados.</div>`;
   if(recOpenId) recRefreshInsumoDatalist(recOpenId);
 }
@@ -8044,7 +8059,7 @@ function recRenderItem(it){
     head = `<div class="rec-item-head editing">
       <input class="edit-input" id="recEditNombre_${it.id}" value="${costeoEsc(it.nombre)}" style="flex:1;min-width:160px;">
       <select class="edit-select" id="recEditConcepto_${it.id}" style="max-width:210px;">
-        ${COSTEO_CONCEPTOS.map(c=>`<option value="${costeoEsc(c)}" ${c===it.concepto?"selected":""}>${costeoEsc(c)}</option>`).join("")}
+        ${(COSTEO_CONCEPTOS.includes(it.concepto) ? COSTEO_CONCEPTOS : [it.concepto, ...COSTEO_CONCEPTOS]).map(c=>`<option value="${costeoEsc(c)}" ${c===it.concepto?"selected":""}>${costeoEsc(c)}</option>`).join("")}
       </select>
       <div class="row-actions">
         <button class="icon-btn" onclick="recSaveItem('${it.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
@@ -8119,6 +8134,88 @@ function recRenderLinea(l){
       <button class="icon-btn del-btn" onclick="recRequestDeleteLinea('${l.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
     </div>
   </div>`;
+}
+
+/* ---- Sincronización de Artículos desde el Índice de artículos (Ventas) ----
+   Los "artículos" de Recetas no se cargan a mano: se traen directamente del
+   mismo Índice de artículos (xlsx) que se sube en Ventas > Resumen de ventas
+   (Cat. 1 / Cat. 2), excluyendo todo lo que sea de la categoría "Caja"
+   (movimientos internos de caja, no son productos de venta). El resto de las
+   categorías del índice sí entra: Cafetería y Bebidas, Servicio de cocina,
+   Accesorios y Equipamientos, y Alquileres de cancha/Clases de profesores/
+   Torneos (estos últimos, en general, van a quedar con una receta vacía —
+   son servicios sin materia prima — pero conviene tenerlos igual acá para
+   que después Precios de venta pueda listar el catálogo completo). */
+function recArticuloConceptoDesdeCats(cat1, cat2){
+  if(cat1==="Otros Servicios"){
+    if(cat2==="Cafeteria y Bebidas") return "Cafeteria y Bebidas";
+    if(cat2==="Servicio de cocina") return "Servicio de cocina";
+    if(cat2==="Accesorios y Equipamientos") return "Accesorios y Equipamientos";
+  }
+  if(cat1==="Alquileres de cancha"){
+    if(cat2==="Clases de profesores") return "Clases de profesores";
+    if(cat2==="Torneos") return "Torneos";
+    return "Alquileres de cancha";
+  }
+  return cat1 || "Sin categoría";
+}
+function recIndiceArticulosDisponibles(){
+  if(!ventasIndice || !ventasIndice.rows) return [];
+  const h = ventasIndice.header;
+  const iNombre = vFindColIndex(h, ["Nombre (*)","Nombre"]);
+  const iCat1 = vFindColIndex(h, ["Cat. 1","Cat.1","Cat 1"]);
+  const iCat2 = vFindColIndex(h, ["Cat. 2","Cat.2","Cat 2"]);
+  if([iNombre,iCat1,iCat2].includes(-1)) return [];
+  const seen = new Set(); const out = [];
+  ventasIndice.rows.forEach(r=>{
+    const nombre = (r[iNombre]||"").toString().trim();
+    const cat1 = (r[iCat1]||"").toString().trim();
+    const cat2 = (r[iCat2]||"").toString().trim();
+    if(!nombre || cat1==="Caja") return; // Caja: movimientos internos, no son artículos de venta
+    const key = nombre.toLowerCase();
+    if(seen.has(key)) return;
+    seen.add(key);
+    out.push({ nombre, concepto: recArticuloConceptoDesdeCats(cat1,cat2) });
+  });
+  return out;
+}
+function recRenderSyncStatus(){
+  const el = document.getElementById("recSyncStatus");
+  if(!el) return;
+  if(!ventasIndice){
+    el.textContent = "Todavía no hay un Índice de artículos cargado — subilo desde Ventas › Resumen de ventas.";
+    return;
+  }
+  const disponibles = recIndiceArticulosDisponibles();
+  const cargados = recetasItems.filter(r=>r.tipo==="articulo").length;
+  el.textContent = `Los artículos se toman del Índice de artículos (se excluye la categoría Caja) — ${disponibles.length} en el índice, ${cargados} ya cargados acá.${ventasIndice.fileName?(" Archivo: "+costeoEsc(ventasIndice.fileName)+"."):""}`;
+}
+async function recSyncArticulosFromIndice(opts){
+  opts = opts || {};
+  if(!ventasIndice) await vTryLoadIndiceFromStorage();
+  recRenderSyncStatus();
+  if(!ventasIndice){
+    if(!opts.silent) showToast("Todavía no hay un Índice de artículos cargado — subilo desde Ventas › Resumen de ventas.", "warn");
+    return;
+  }
+  const disponibles = recIndiceArticulosDisponibles();
+  if(!disponibles.length){
+    if(!opts.silent) showToast("El Índice de artículos no tiene las columnas esperadas, o no hay artículos fuera de la categoría Caja.", "warn");
+    return;
+  }
+  const existentesPorNombre = new Map(recetasItems.filter(r=>r.tipo==="articulo").map(r=>[r.nombre.toLowerCase(), r]));
+  const aInsertar = disponibles.filter(d=>!existentesPorNombre.has(d.nombre.toLowerCase()));
+  if(!aInsertar.length){
+    if(!opts.silent) showToast("Ya están todos los artículos del índice sincronizados acá");
+    return;
+  }
+  const payload = aInsertar.map(d=>({ tipo:"articulo", nombre:d.nombre, concepto:d.concepto, porciones:1, creado_por: currentPerfil?currentPerfil.id:null }));
+  const { error } = await sb.from("lf_recetas_items").insert(payload);
+  if(error){ showToast("No se pudieron sincronizar todos los artículos", "warn"); return; }
+  await loadRecetasItems();
+  renderRecList();
+  recRenderSyncStatus();
+  showToast(`${aInsertar.length} artículo(s) nuevo(s) sincronizado(s) desde el Índice`);
 }
 
 /* ---- Alta / edición de ítems (semi-elaborado o artículo) ---- */
