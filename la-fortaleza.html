@@ -23,7 +23,7 @@
   html,body{height:100%;}
   body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text-1);-webkit-font-smoothing:antialiased;}
   button,input,select,textarea{font-family:inherit;}
-  .shell{display:flex;height:100vh;overflow:hidden;}
+  .shell{display:flex;height:100%;overflow:hidden;}
 
   /* ---------- MODULE SIDEBAR (nivel club) ---------- */
   .module-sidebar{width:224px;flex-shrink:0;background:linear-gradient(180deg,var(--navy) 0%, #050f3d 100%);color:#fff;display:flex;flex-direction:column;padding:22px 14px;}
@@ -473,7 +473,14 @@
   .recon-bad{background:#FCE6E7;color:#B22A32;}
   .recon-pending{background:#EEEFF5;color:#6D7191;}
 
-  .ci-table-scroll{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:auto;max-width:100%;padding-bottom:2px;max-height:calc(100vh - 300px);}
+  .ci-table-scroll{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:auto;max-width:100%;padding-bottom:2px;}
+  /* La tabla de Carga de compras usa el alto real disponible en pantalla (flex), no "vh" —
+     "vh" no se recalcula con el control de zoom (CSS zoom no reescala unidades de viewport),
+     así que quedaba una franja vacía abajo al achicar el zoom en vez de aprovechar la pantalla. */
+  #costeoComprasItemsWrap{display:flex;flex-direction:column;height:100%;min-height:0;}
+  #costeoComprasItemsWrap .config-hint{flex:0 0 auto;}
+  #costeoComprasItemsWrap .ci-table-scroll{flex:1 1 auto;min-height:220px;}
+  #costeoComprasItemsWrap .ci-summary{flex:0 0 auto;}
   .ci-table{width:max-content;min-width:100%;}
   .ci-table{--ci-cols:190px 108px 64px 96px 360px 64px 84px 108px 84px 76px;}
   .ci-head-row, .ci-row{display:grid;grid-template-columns:var(--ci-cols);gap:8px;align-items:center;padding:10px 16px;}
@@ -515,6 +522,56 @@
   .factura-link{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--blue);text-decoration:none;cursor:pointer;flex-shrink:0;}
   .factura-link:hover{text-decoration:underline;}
   .factura-link svg{width:14px;height:14px;}
+
+  /* ---------- RECETAS (semi-elaborados y artículos) ---------- */
+  .rec-toggle{display:flex;gap:6px;margin-bottom:16px;background:#EEF0F9;border-radius:10px;padding:4px;max-width:360px;}
+  .rec-toggle-btn{flex:1;text-align:center;padding:9px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);font-size:12.8px;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease;}
+  .rec-toggle-btn.active{background:#fff;color:var(--navy);box-shadow:var(--shadow-sm);}
+  .rec-toggle-btn:hover:not(.active){color:var(--text-1);}
+  .rec-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:18px;max-width:1040px;box-shadow:var(--shadow-sm);overflow:hidden;}
+  .rec-item-block{border-bottom:1px solid var(--border);}
+  .rec-item-block:last-child{border-bottom:none;}
+  .rec-item-head{display:flex;align-items:center;gap:14px;padding:14px 18px;flex-wrap:wrap;}
+  .rec-item-head.editing{background:#FAFBFF;}
+  .rec-item-head .edit-input, .rec-item-head .edit-select{flex:1;min-width:140px;padding:7px 10px;border-radius:7px;border:1px solid var(--sky);font-size:12.8px;outline:none;}
+  .rec-item-head .ri-name{font-weight:800;color:var(--text-1);font-size:13.8px;flex:1;min-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rec-item-head .ri-concepto{font-size:10.5px;font-weight:800;color:var(--sky);background:#EAF0FF;border-radius:20px;padding:3px 10px;flex-shrink:0;white-space:nowrap;}
+  .rec-item-head .ri-porc{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2);font-weight:700;flex-shrink:0;text-transform:uppercase;letter-spacing:.02em;}
+  .rec-item-head .ri-porc input{width:52px;padding:5px 7px;border-radius:6px;border:1px solid var(--border);font-size:12.5px;text-align:center;outline:none;text-transform:none;letter-spacing:normal;}
+  .rec-item-head .ri-porc input:focus{border-color:var(--sky);}
+  .rec-item-head .ri-costo{font-size:10.5px;color:var(--text-2);font-weight:700;text-align:right;flex-shrink:0;min-width:92px;text-transform:uppercase;letter-spacing:.02em;}
+  .rec-item-head .ri-costo strong{display:block;font-size:14.5px;color:var(--navy);font-weight:800;font-variant-numeric:tabular-nums;text-transform:none;letter-spacing:normal;margin-top:1px;}
+  .rec-item-head .ri-toggle-btn{display:flex;align-items:center;gap:6px;background:#F1F2FA;color:var(--text-2);border:1px solid var(--border);padding:8px 13px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;transition:background .15s ease,color .15s ease;}
+  .rec-item-head .ri-toggle-btn:hover{background:#E7E9F7;}
+  .rec-item-head .ri-toggle-btn.open{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .rec-item-head .row-actions{display:flex;gap:4px;flex-shrink:0;}
+  .rec-item-head .icon-btn{width:26px;height:26px;border-radius:7px;border:none;background:transparent;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .rec-item-head .icon-btn:hover{background:#F1F2FA;color:var(--text-1);}
+  .rec-item-head .icon-btn.del-btn:hover{background:#FFF1F1;color:#C23434;}
+  .rec-item-head .icon-btn svg{width:14px;height:14px;}
+  .rec-detail{border-top:1px solid var(--border);background:#FAFBFF;padding:16px 18px 18px 18px;}
+  .rec-detail .config-hint{margin:0 0 12px 0;max-width:100%;}
+  .rl-table-scroll{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:auto;max-width:100%;}
+  .rl-table{width:max-content;min-width:100%;}
+  .rl-table{--rl-cols:280px 74px 72px 100px 100px 76px;}
+  .rl-head-row, .rl-row{display:grid;grid-template-columns:var(--rl-cols);gap:8px;align-items:center;padding:9px 12px;}
+  .rl-head-row{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);border-bottom:1px solid var(--border);background:#F7F8FD;}
+  .rl-row{border-bottom:1px solid var(--border);font-size:12.5px;}
+  .rl-row:last-child{border-bottom:none;}
+  .rl-row input, .rl-row select{width:100%;padding:6px 8px;border-radius:7px;border:1px solid var(--sky);font-size:12px;outline:none;box-sizing:border-box;}
+  .rl-row .icon-btn{width:26px;height:26px;border-radius:7px;border:none;background:transparent;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .rl-row .icon-btn:hover{background:#F1F2FA;color:var(--text-1);}
+  .rl-row .icon-btn.del-btn:hover{background:#FFF1F1;color:#C23434;}
+  .rl-row .icon-btn svg{width:14px;height:14px;}
+  .rl-actions{display:flex;gap:4px;justify-content:flex-end;}
+  .rl-add-row{background:#FAFBFF;}
+  .rl-auto{font-size:11.5px;color:var(--text-2);font-weight:700;font-variant-numeric:tabular-nums;}
+  .rl-costo{font-weight:800;color:var(--navy);}
+  .rl-warn{font-size:9.5px;color:#B22A32;font-weight:700;line-height:1.25;margin-top:2px;}
+  .rl-empty{padding:14px 12px;font-size:12px;color:var(--text-3);font-style:italic;}
+  .rl-add-btn{width:28px;height:28px;border-radius:8px;border:none;background:var(--blue);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .rl-add-btn:hover{filter:brightness(1.1);}
+  .rl-add-btn svg{width:14px;height:14px;}
 
   /* ---------- RESUMEN: barras apiladas por categoría ---------- */
   .stack-total-row{font-size:13px;color:var(--text-2);margin-bottom:10px;}
@@ -1570,12 +1627,28 @@
             </div>
           </section>
 
-          <!-- COSTEO > RECETAS (placeholder, próxima etapa) -->
+          <!-- COSTEO > RECETAS -->
           <section class="pagos-pane" id="ctpRecetas">
-            <div class="placeholder-card" style="margin:60px auto;">
-              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
-              <h2>Recetas</h2>
-              <p>Esta sección todavía no está desarrollada. Acá vamos a cargar, para cada producto de cocina, la cantidad de cada insumo por porción — para llevar el costo/un de los insumos cargados en Carga de compras al costo de cada producto elaborado.</p>
+            <div class="screen-header">
+              <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Recetas</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Semi-elaborados y artículos de venta, con su receta de insumos de compra y/o semi-elaborados</div></div>
+            </div>
+            <div class="screen-scroll">
+              <div class="rec-toggle" id="recTipoToggle">
+                <button type="button" class="rec-toggle-btn active" data-rtipo="semielaborado" onclick="recGoTipo('semielaborado')">Semi-elaborados</button>
+                <button type="button" class="rec-toggle-btn" data-rtipo="articulo" onclick="recGoTipo('articulo')">Artículos</button>
+              </div>
+              <p class="config-hint" id="recHint">Los semi-elaborados son productos con su propia pre-elaboración (ej. bollo de pizza, salsa) que después se usan como insumo dentro de otras recetas. Acá se cargan y se les define su receta.</p>
+              <div id="recListWrap"></div>
+              <div class="config-card" style="margin-top:14px;max-width:660px;"><div class="config-add-bar">
+                <input type="text" id="recNewNombre" placeholder="Nombre…" autocomplete="off" style="flex:1;min-width:200px;">
+                <select id="recNewConcepto" style="max-width:220px;">
+                  <option value="">Categoría…</option>
+                  <option value="Cafeteria y Bebidas">Cafetería y Bebidas</option>
+                  <option value="Servicio de cocina">Servicio de cocina</option>
+                  <option value="Servicio de padel">Servicio de padel</option>
+                </select>
+                <button onclick="recAddItem()" id="recAddBtn">+ Crear semi-elaborado</button>
+              </div></div>
             </div>
           </section>
 
@@ -1595,6 +1668,7 @@
       <option value="Unidad"></option><option value="Kg"></option><option value="Gramo"></option><option value="Litro"></option><option value="Ml"></option><option value="Docena"></option><option value="Caja"></option><option value="Paquete"></option><option value="Bolsa"></option><option value="Botella"></option><option value="Fardo"></option><option value="Atado"></option>
     </datalist>
     <datalist id="dlInsumosProveedor"></datalist>
+    <datalist id="dlRecetaInsumos"></datalist>
 
     <!-- ===================== MÓDULO: REPORTES (placeholder) ===================== -->
     <section class="module-screen" id="moduleReportes">
@@ -3271,6 +3345,19 @@ async function confirmDeleteAction(){
       await loadCosteoCompraItems();
       renderCosteoItemsList(); renderCosteoComprasList();
       showToast("Ítem eliminado");
+    } else if(pendingDelete.kind==="recetaitem"){
+      const { error } = await sb.from("lf_recetas_items").delete().eq("id", pendingDelete.id);
+      if(error){ showToast(error.code==="23503" ? "No se puede eliminar: este ítem se usa como insumo en otra receta. Quitalo de esa receta primero." : "No se pudo eliminar", "warn"); closeConfirm(); return; }
+      await Promise.all([loadRecetasItems(), loadRecetaLineas()]);
+      recOpenId = null;
+      renderRecList();
+      showToast("Eliminado correctamente");
+    } else if(pendingDelete.kind==="recetalinea"){
+      const { error } = await sb.from("lf_receta_lineas").delete().eq("id", pendingDelete.id);
+      if(error){ showToast("No se pudo eliminar", "warn"); closeConfirm(); return; }
+      await loadRecetaLineas();
+      renderRecList();
+      showToast("Insumo quitado de la receta");
     }
     closeConfirm();
     return;
@@ -7325,6 +7412,14 @@ let costeoEditingItem = null;
 let costeoNewItemImpuestos = [];   // impuestos del ítem que se está por agregar
 let costeoEditItemImpuestos = {};  // { [itemId]: [{tipo,valor}] } — mientras se edita ese ítem
 
+// ---- Recetas (semi-elaborados y artículos) ----
+let recetasItems = [];   // [{id, tipo:'semielaborado'|'articulo', nombre, concepto, porciones}]
+let recetaLineas = [];   // [{id, receta_id, insumo_tipo:'compra'|'semielaborado', insumo_compra_id, insumo_semielaborado_id, cantidad}]
+let recCurrentTipo = "semielaborado";
+let recOpenId = null;       // receta cuya receta está desplegada
+let recEditingItem = null;  // id de receta cuyo nombre/categoría se está editando
+let recEditingLinea = null; // id de línea cuya cantidad se está editando
+
 function costeoEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 // Acepta tanto "1500.50" (punto como separador decimal) como "1.500,50" (formato AR, punto de miles + coma decimal).
 // Si el texto tiene una coma, se asume formato AR y se descartan los puntos (miles). Si no tiene coma, el punto se
@@ -7367,9 +7462,10 @@ async function loadCosteoCompraItems(){
   costeoCompraItems = data || [];
 }
 async function initCosteo(){
-  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems()]);
+  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadRecetasItems(), loadRecetaLineas()]);
   costeoShowProvList();
   costeoShowComprasList();
+  renderRecList();
 }
 function goCosteoTab(pane){
   const scope = document.getElementById("costeoSubnav");
@@ -7802,6 +7898,351 @@ function costeoRequestDeleteItem(id){
   pendingDelete = {scope:"costeo", kind:"item", id};
   document.getElementById("confirmTitle").textContent = "¿Eliminar este ítem?";
   document.getElementById("confirmText").textContent = `Vas a eliminar "${it.nomenclatura}" de esta orden. Esta acción no se puede deshacer.`;
+  document.getElementById("confirmDeleteBtn").textContent = "Eliminar";
+  document.getElementById("confirmOverlay").classList.add("show");
+}
+
+/* =========================================================
+   RECETAS (semi-elaborados y artículos)
+   Comparten un mismo esquema (lf_recetas_items / lf_receta_lineas):
+   un "semi-elaborado" es un producto con pre-elaboración propia
+   (ej. bollo de pizza) que después puede usarse como insumo dentro
+   de la receta de otro semi-elaborado o de un artículo de venta.
+   Un "artículo" es el producto final de venta y no puede usarse
+   como insumo de ninguna otra receta.
+
+   Costeo de cada insumo dentro de una receta:
+   - insumo de compra: se toma el $/un. de la ÚLTIMA compra cargada
+     para ese insumo en Carga de compras (no hay todavía un precio
+     "de lista" único por insumo — se toma el más reciente como
+     referencia). Si el insumo nunca se compró, el costo figura "—".
+   - insumo semi-elaborado: se toma su propio $/porc., calculado
+     recursivamente a partir de su receta. Un semi-elaborado no puede
+     depender (ni directa ni indirectamente) de sí mismo.
+   ========================================================= */
+async function loadRecetasItems(){
+  const { data, error } = await sb.from("lf_recetas_items").select("*").order("nombre");
+  if(error){ showToast("No se pudieron cargar las recetas", "warn"); return; }
+  recetasItems = data || [];
+}
+async function loadRecetaLineas(){
+  const { data, error } = await sb.from("lf_receta_lineas").select("*");
+  if(error){ showToast("No se pudieron cargar las líneas de receta", "warn"); return; }
+  recetaLineas = data || [];
+}
+
+/* ---- Costeo recursivo ---- */
+function recInsumoPrecioUnitario(insumoId){
+  const compras = costeoCompraItems.filter(it=>it.insumo_id===insumoId);
+  if(!compras.length) return null;
+  const ultimo = compras.slice().sort((a,b)=> new Date(b.created_at||0) - new Date(a.created_at||0))[0];
+  return costeoComputeRow(ultimo).punit;
+}
+function recCostoPorcion(recetaId, visiting){
+  visiting = visiting ? new Set(visiting) : new Set();
+  if(visiting.has(recetaId)) return null; // ciclo — no calculable
+  visiting.add(recetaId);
+  const item = recetasItems.find(r=>r.id===recetaId);
+  if(!item) return null;
+  const lineas = recetaLineas.filter(l=>l.receta_id===recetaId);
+  if(!lineas.length) return null;
+  let total = 0;
+  for(const l of lineas){
+    let punit;
+    if(l.insumo_tipo==="compra") punit = recInsumoPrecioUnitario(l.insumo_compra_id);
+    else punit = recCostoPorcion(l.insumo_semielaborado_id, visiting);
+    if(punit==null) return null;
+    total += Number(l.cantidad||0)*punit;
+  }
+  const porciones = Number(item.porciones)||1;
+  return porciones>0 ? total/porciones : 0;
+}
+function recDependsOn(recetaId, targetId, visiting){
+  visiting = visiting ? new Set(visiting) : new Set();
+  if(recetaId===targetId) return true;
+  if(visiting.has(recetaId)) return false;
+  visiting.add(recetaId);
+  return recetaLineas.some(l=>l.receta_id===recetaId && l.insumo_tipo==="semielaborado" && recDependsOn(l.insumo_semielaborado_id, targetId, visiting));
+}
+function recWouldCreateCycle(recetaId, candidateSemiId){
+  if(candidateSemiId===recetaId) return true;
+  return recDependsOn(candidateSemiId, recetaId);
+}
+
+/* ---- Pool de insumos disponibles (compra + semi-elaborados) para el tipeado inteligente ---- */
+function recPool(excludeRecetaId){
+  const pool = [];
+  costeoInsumos.forEach(ins=>{
+    const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
+    pool.push({ tipo:"compra", id: ins.id, unidad: ins.unidad_medida||"—", label: `${ins.nomenclatura} (${prov?prov.nombre:"Proveedor"})` });
+  });
+  recetasItems.filter(r=>r.tipo==="semielaborado" && r.id!==excludeRecetaId).forEach(r=>{
+    pool.push({ tipo:"semielaborado", id:r.id, unidad:"Porción", label:`${r.nombre} (Semi-elaborado)` });
+  });
+  return pool;
+}
+function recFindInPool(label, excludeRecetaId){
+  const l = String(label||"").trim().toLowerCase();
+  if(!l) return null;
+  return recPool(excludeRecetaId).find(p=>p.label.toLowerCase()===l) || null;
+}
+function recRefreshInsumoDatalist(excludeRecetaId){
+  const dl = document.getElementById("dlRecetaInsumos");
+  if(dl) dl.innerHTML = recPool(excludeRecetaId).map(p=>`<option value="${costeoEsc(p.label)}">`).join("");
+}
+function recInsumoRef(l){
+  if(l.insumo_tipo==="compra"){
+    const ins = costeoInsumos.find(i=>i.id===l.insumo_compra_id);
+    if(!ins) return null;
+    const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
+    return { tipo:"compra", id:ins.id, unidad: ins.unidad_medida||"—", label:`${ins.nomenclatura} (${prov?prov.nombre:"Proveedor"})` };
+  }
+  const r = recetasItems.find(x=>x.id===l.insumo_semielaborado_id);
+  if(!r) return null;
+  return { tipo:"semielaborado", id:r.id, unidad:"Porción", label:`${r.nombre} (Semi-elaborado)` };
+}
+function recPunitFor(ref){ return ref.tipo==="compra" ? recInsumoPrecioUnitario(ref.id) : recCostoPorcion(ref.id); }
+
+/* ---- Navegación Semi-elaborados / Artículos ---- */
+function recItemsByTipo(){ return recetasItems.filter(r=>r.tipo===recCurrentTipo); }
+function recGoTipo(tipo){
+  recCurrentTipo = tipo;
+  document.querySelectorAll("#recTipoToggle .rec-toggle-btn").forEach(b=>b.classList.toggle("active", b.dataset.rtipo===tipo));
+  document.getElementById("recHint").textContent = tipo==="semielaborado"
+    ? "Los semi-elaborados son productos con su propia pre-elaboración (ej. bollo de pizza, salsa) que después se usan como insumo dentro de otras recetas. Acá se cargan y se les define su receta."
+    : "Los artículos son los productos finales de venta. Su receta puede combinar insumos de compra y semi-elaborados ya cargados.";
+  document.getElementById("recAddBtn").textContent = tipo==="semielaborado" ? "+ Crear semi-elaborado" : "+ Crear artículo";
+  recOpenId = null; recEditingItem = null; recEditingLinea = null;
+  renderRecList();
+}
+
+/* ---- Render ---- */
+function renderRecList(){
+  const wrap = document.getElementById("recListWrap");
+  if(!wrap) return;
+  const items = recItemsByTipo();
+  const tipoLbl = recCurrentTipo==="semielaborado" ? "semi-elaborados" : "artículos";
+  if(!items.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay ${tipoLbl} cargados.</div>`; return; }
+  let html = "";
+  COSTEO_CONCEPTOS.forEach(concepto=>{
+    const grp = items.filter(i=>i.concepto===concepto).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+    if(!grp.length) return;
+    html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div><div class="rec-card">${grp.map(recRenderItem).join("")}</div>`;
+  });
+  const otros = items.filter(i=>!COSTEO_CONCEPTOS.includes(i.concepto)).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  if(otros.length) html += `<div class="costeo-group-title">Sin categoría</div><div class="rec-card">${otros.map(recRenderItem).join("")}</div>`;
+  wrap.innerHTML = html || `<div class="empty-mini">Todavía no hay ${tipoLbl} cargados.</div>`;
+  if(recOpenId) recRefreshInsumoDatalist(recOpenId);
+}
+function recRenderItem(it){
+  const isOpen = recOpenId===it.id;
+  const editing = recEditingItem===it.id;
+  const costo = recCostoPorcion(it.id);
+  const costoTxt = costo==null ? "—" : fmtMoneyCosteo(costo);
+  let head;
+  if(editing){
+    head = `<div class="rec-item-head editing">
+      <input class="edit-input" id="recEditNombre_${it.id}" value="${costeoEsc(it.nombre)}" style="flex:1;min-width:160px;">
+      <select class="edit-select" id="recEditConcepto_${it.id}" style="max-width:210px;">
+        ${COSTEO_CONCEPTOS.map(c=>`<option value="${costeoEsc(c)}" ${c===it.concepto?"selected":""}>${costeoEsc(c)}</option>`).join("")}
+      </select>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="recSaveItem('${it.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="icon-btn" onclick="recCancelEditItem()" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>`;
+  } else {
+    head = `<div class="rec-item-head">
+      <span class="ri-name">${costeoEsc(it.nombre)}</span>
+      <span class="ri-concepto">${costeoEsc(it.concepto)}</span>
+      <span class="ri-porc">Porciones<input type="text" inputmode="decimal" value="${fmtNumCosteo(it.porciones)}" onchange="recUpdatePorciones('${it.id}', this.value)"></span>
+      <span class="ri-costo">$/porc.<strong>${costoTxt}</strong></span>
+      <button type="button" class="ri-toggle-btn ${isOpen?'open':''}" onclick="recToggleDetail('${it.id}')">${isOpen?'Ocultar receta':'Ver receta'}</button>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="recStartEditItem('${it.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
+        <button class="icon-btn del-btn" onclick="recRequestDeleteItem('${it.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+      </div>
+    </div>`;
+  }
+  return `<div class="rec-item-block">${head}${isOpen ? recRenderDetail(it) : ""}</div>`;
+}
+function recRenderDetail(it){
+  const lineas = recetaLineas.filter(l=>l.receta_id===it.id);
+  const rowsHtml = lineas.length ? lineas.map(recRenderLinea).join("") : `<div class="rl-empty">Todavía no cargaste insumos para esta receta.</div>`;
+  return `<div class="rec-detail">
+    <p class="config-hint">Escribí el nombre del insumo (de compra o semi-elaborado) — coincide con lo cargado en Proveedores o con otro semi-elaborado ya creado.</p>
+    <div class="rl-table-scroll"><div class="rl-table">
+      <div class="rl-head-row"><div>Insumo</div><div>#</div><div>[un.]</div><div>$/#</div><div>$/[un.]</div><div></div></div>
+      <div id="recLineasList_${it.id}">${rowsHtml}</div>
+      <div class="rl-row rl-add-row" id="recAddLineaRow_${it.id}">
+        <div class="ci-cell-item">
+          <input type="text" id="recNewLineaInsumo_${it.id}" placeholder="Insumo…" list="dlRecetaInsumos" autocomplete="off" oninput="recOnNewLineaInsumoInput('${it.id}')" onchange="recOnNewLineaInsumoInput('${it.id}')">
+          <div class="rl-warn" id="recNewLineaWarn_${it.id}" style="display:none;">No coincide con ningún insumo de compra ni semi-elaborado cargado</div>
+        </div>
+        <input type="text" id="recNewLineaCantidad_${it.id}" placeholder="0" inputmode="decimal" oninput="recRecalcNewLinea('${it.id}')">
+        <div class="rl-auto" id="recNewLineaUM_${it.id}">—</div>
+        <div class="rl-auto rl-costo" id="recNewLineaMonto_${it.id}">—</div>
+        <div class="rl-auto" id="recNewLineaPUnit_${it.id}">—</div>
+        <button type="button" class="rl-add-btn" onclick="recAddLinea('${it.id}')" title="Agregar insumo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </div></div>
+  </div>`;
+}
+function recRenderLinea(l){
+  const ref = recInsumoRef(l);
+  const punit = ref ? recPunitFor(ref) : null;
+  const monto = (ref && punit!=null) ? Number(l.cantidad||0)*punit : null;
+  const nombreTxt = ref ? costeoEsc(ref.label) : `<em>(insumo no encontrado)</em>`;
+  if(recEditingLinea===l.id){
+    return `<div class="rl-row">
+      <div>${nombreTxt}</div>
+      <input id="recEditCant_${l.id}" value="${l.cantidad}" inputmode="decimal" oninput="recRecalcEditLinea('${l.id}')">
+      <div class="rl-auto">${ref?costeoEsc(ref.unidad):"—"}</div>
+      <div class="rl-auto rl-costo" id="recEditMonto_${l.id}">${monto==null?"—":fmtMoneyCosteo(monto)}</div>
+      <div class="rl-auto">${punit==null?"—":fmtMoneyCosteo(punit)}</div>
+      <div class="rl-actions">
+        <button class="icon-btn" onclick="recSaveLinea('${l.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="icon-btn" onclick="recCancelEditLinea()" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>`;
+  }
+  return `<div class="rl-row">
+    <div>${nombreTxt}</div>
+    <div>${fmtNumCosteo(l.cantidad)}</div>
+    <div class="rl-auto">${ref?costeoEsc(ref.unidad):"—"}</div>
+    <div class="rl-auto rl-costo">${monto==null?"—":fmtMoneyCosteo(monto)}</div>
+    <div class="rl-auto">${punit==null?"—":fmtMoneyCosteo(punit)}</div>
+    <div class="rl-actions">
+      <button class="icon-btn" onclick="recStartEditLinea('${l.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
+      <button class="icon-btn del-btn" onclick="recRequestDeleteLinea('${l.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+    </div>
+  </div>`;
+}
+
+/* ---- Alta / edición de ítems (semi-elaborado o artículo) ---- */
+async function recAddItem(){
+  const nombre = document.getElementById("recNewNombre").value.trim();
+  const concepto = document.getElementById("recNewConcepto").value;
+  const tipoLbl = recCurrentTipo==="semielaborado" ? "semi-elaborado" : "artículo";
+  if(!nombre){ showToast("Escribí el nombre", "warn"); return; }
+  if(!concepto){ showToast("Elegí una categoría", "warn"); return; }
+  if(recetasItems.some(r=>r.tipo===recCurrentTipo && r.nombre.toLowerCase()===nombre.toLowerCase())){
+    showToast(`Ya existe un ${tipoLbl} con ese nombre`, "warn"); return;
+  }
+  const { error } = await sb.from("lf_recetas_items").insert({ tipo: recCurrentTipo, nombre, concepto, porciones: 1, creado_por: currentPerfil?currentPerfil.id:null });
+  if(error){ showToast(error.code==="23505" ? "Ya existe un ítem con ese nombre" : "No se pudo crear", "warn"); return; }
+  document.getElementById("recNewNombre").value = "";
+  document.getElementById("recNewConcepto").value = "";
+  await loadRecetasItems();
+  renderRecList();
+  logHistorialConfig(`Creó un ${tipoLbl} de receta`, nombre);
+  showToast(`${tipoLbl.charAt(0).toUpperCase()+tipoLbl.slice(1)} creado correctamente`);
+}
+async function recUpdatePorciones(id, val){
+  const porciones = parseDecimalCosteo(val);
+  if(!porciones){ showToast("Las porciones tienen que ser mayores a 0", "warn"); renderRecList(); return; }
+  const { error } = await sb.from("lf_recetas_items").update({ porciones, modificado_por: currentPerfil?currentPerfil.id:null, modificado_fecha: new Date().toISOString() }).eq("id", id);
+  if(error){ showToast("No se pudo actualizar las porciones", "warn"); return; }
+  await loadRecetasItems();
+  renderRecList();
+}
+function recStartEditItem(id){ recEditingItem = id; renderRecList(); }
+function recCancelEditItem(){ recEditingItem = null; renderRecList(); }
+async function recSaveItem(id){
+  const nombre = document.getElementById(`recEditNombre_${id}`).value.trim();
+  const concepto = document.getElementById(`recEditConcepto_${id}`).value;
+  if(!nombre){ showToast("El nombre no puede estar vacío", "warn"); return; }
+  const { error } = await sb.from("lf_recetas_items").update({ nombre, concepto, modificado_por: currentPerfil?currentPerfil.id:null, modificado_fecha: new Date().toISOString() }).eq("id", id);
+  if(error){ showToast(error.code==="23505" ? "Ya existe un ítem con ese nombre" : "No se pudo actualizar", "warn"); return; }
+  recEditingItem = null;
+  await loadRecetasItems();
+  renderRecList();
+  showToast("Actualizado correctamente");
+}
+function recToggleDetail(id){
+  recOpenId = recOpenId===id ? null : id;
+  recEditingLinea = null;
+  renderRecList();
+}
+function recRequestDeleteItem(id){
+  const it = recetasItems.find(x=>x.id===id);
+  if(!it) return;
+  const dependientes = recetaLineas.filter(l=>l.insumo_tipo==="semielaborado" && l.insumo_semielaborado_id===id);
+  pendingDelete = {scope:"costeo", kind:"recetaitem", id};
+  document.getElementById("confirmTitle").textContent = "¿Eliminar este ítem?";
+  document.getElementById("confirmText").textContent = dependientes.length
+    ? `"${it.nombre}" se usa como insumo en ${dependientes.length} otra(s) receta(s) — no se va a poder eliminar hasta que lo quites de ahí primero.`
+    : `Vas a eliminar "${it.nombre}" y su receta. Esta acción no se puede deshacer.`;
+  document.getElementById("confirmDeleteBtn").textContent = "Eliminar";
+  document.getElementById("confirmOverlay").classList.add("show");
+}
+
+/* ---- Alta / edición de líneas de receta (insumos) ---- */
+function recOnNewLineaInsumoInput(recetaId){
+  const val = document.getElementById(`recNewLineaInsumo_${recetaId}`).value;
+  const ref = recFindInPool(val, recetaId);
+  document.getElementById(`recNewLineaUM_${recetaId}`).textContent = ref ? ref.unidad : "—";
+  document.getElementById(`recNewLineaWarn_${recetaId}`).style.display = (val.trim() && !ref) ? "" : "none";
+  recRecalcNewLinea(recetaId);
+}
+function recRecalcNewLinea(recetaId){
+  const val = document.getElementById(`recNewLineaInsumo_${recetaId}`).value;
+  const ref = recFindInPool(val, recetaId);
+  const cantidad = parseDecimalCosteo(document.getElementById(`recNewLineaCantidad_${recetaId}`).value);
+  const punit = ref ? recPunitFor(ref) : null;
+  const monto = (ref && punit!=null) ? cantidad*punit : null;
+  document.getElementById(`recNewLineaMonto_${recetaId}`).textContent = monto==null ? "—" : fmtMoneyCosteo(monto);
+  document.getElementById(`recNewLineaPUnit_${recetaId}`).textContent = punit==null ? "—" : fmtMoneyCosteo(punit);
+}
+async function recAddLinea(recetaId){
+  const nombre = document.getElementById(`recNewLineaInsumo_${recetaId}`).value.trim();
+  const cantidad = parseDecimalCosteo(document.getElementById(`recNewLineaCantidad_${recetaId}`).value);
+  if(!nombre){ showToast("Escribí el insumo", "warn"); return; }
+  if(!cantidad){ showToast("Cargá la cantidad", "warn"); return; }
+  const ref = recFindInPool(nombre, recetaId);
+  if(!ref){ showToast("Ese insumo no coincide con ninguno cargado (de compra o semi-elaborado). Cargalo primero.", "warn"); return; }
+  if(ref.tipo==="semielaborado" && recWouldCreateCycle(recetaId, ref.id)){ showToast("Esa receta ya depende de este semi-elaborado — no se puede agregar (quedaría un ciclo).", "warn"); return; }
+  const payload = { receta_id: recetaId, insumo_tipo: ref.tipo, cantidad, creado_por: currentPerfil?currentPerfil.id:null };
+  if(ref.tipo==="compra") payload.insumo_compra_id = ref.id; else payload.insumo_semielaborado_id = ref.id;
+  const { error } = await sb.from("lf_receta_lineas").insert(payload);
+  if(error){ showToast("No se pudo agregar el insumo a la receta", "warn"); return; }
+  document.getElementById(`recNewLineaInsumo_${recetaId}`).value = "";
+  document.getElementById(`recNewLineaCantidad_${recetaId}`).value = "";
+  await loadRecetaLineas();
+  renderRecList();
+  showToast("Insumo agregado a la receta");
+}
+function recStartEditLinea(id){ recEditingLinea = id; renderRecList(); }
+function recCancelEditLinea(){ recEditingLinea = null; renderRecList(); }
+function recRecalcEditLinea(id){
+  const l = recetaLineas.find(x=>x.id===id);
+  if(!l) return;
+  const ref = recInsumoRef(l);
+  const punit = ref ? recPunitFor(ref) : null;
+  const cantidad = parseDecimalCosteo(document.getElementById(`recEditCant_${id}`).value);
+  const monto = punit==null ? null : cantidad*punit;
+  const montoEl = document.getElementById(`recEditMonto_${id}`);
+  if(montoEl) montoEl.textContent = monto==null?"—":fmtMoneyCosteo(monto);
+}
+async function recSaveLinea(id){
+  const cantidad = parseDecimalCosteo(document.getElementById(`recEditCant_${id}`).value);
+  if(!cantidad){ showToast("Cargá la cantidad", "warn"); return; }
+  const { error } = await sb.from("lf_receta_lineas").update({ cantidad }).eq("id", id);
+  if(error){ showToast("No se pudo actualizar la línea", "warn"); return; }
+  recEditingLinea = null;
+  await loadRecetaLineas();
+  renderRecList();
+  showToast("Receta actualizada");
+}
+function recRequestDeleteLinea(id){
+  const l = recetaLineas.find(x=>x.id===id);
+  if(!l) return;
+  const ref = recInsumoRef(l);
+  pendingDelete = {scope:"costeo", kind:"recetalinea", id};
+  document.getElementById("confirmTitle").textContent = "¿Quitar este insumo de la receta?";
+  document.getElementById("confirmText").textContent = `Vas a quitar "${ref?ref.label:'este insumo'}" de la receta. Esta acción no se puede deshacer.`;
   document.getElementById("confirmDeleteBtn").textContent = "Eliminar";
   document.getElementById("confirmOverlay").classList.add("show");
 }
