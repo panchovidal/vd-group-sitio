@@ -482,7 +482,7 @@
   #costeoComprasItemsWrap .ci-table-scroll{flex:1 1 auto;min-height:220px;}
   #costeoComprasItemsWrap .ci-summary{flex:0 0 auto;}
   .ci-table{width:max-content;min-width:100%;}
-  .ci-table{--ci-cols:190px 108px 64px 96px 360px 64px 84px 108px 84px 76px;}
+  .ci-table{--ci-cols:190px 108px 64px 96px 300px 260px 64px 84px 108px 84px 76px;}
   .ci-head-row, .ci-row{display:grid;grid-template-columns:var(--ci-cols);gap:8px;align-items:center;padding:10px 16px;}
   .ci-head-row{position:sticky;top:0;z-index:3;background:#F7F8FD;border-bottom:2px solid var(--border);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-2);}
   .ci-row{border-bottom:1px solid var(--border);font-size:12.8px;}
@@ -511,11 +511,19 @@
   .ci-tax-chip button{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:12px;line-height:1;padding:0;font-weight:800;}
   .ci-tax-chip button:hover{color:#C23434;}
   .ci-tax-chip-view{background:#F1F2FA;color:var(--text-2);}
-  .ci-tax-adder{display:flex;gap:4px;align-items:center;}
+  .ci-desc-chip{background:#E4F8ED;color:#137B44;}
+  .ci-desc-chip .ci-tax-monto{color:#3C8863;}
+  .ci-desc-chip.ci-tax-chip-view{background:#F1F2FA;color:var(--text-2);}
+  .ci-tax-adder{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
   .ci-tax-adder select, .ci-tax-adder input{padding:4px 6px;border-radius:6px;border:1px solid var(--border);font-size:10.5px;outline:none;width:64px;box-sizing:border-box;}
   .ci-tax-adder select:first-child{width:74px;}
   .ci-tax-add-btn{width:22px;height:22px;border-radius:6px;border:none;background:var(--blue);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-size:13px;line-height:1;}
   .ci-tax-add-btn:hover{filter:brightness(1.1);}
+  .ci-ajustes{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px;max-width:1180px;}
+  .ci-ajustes-col{flex:1 1 360px;min-width:300px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+  .ci-ajustes-title{font-size:12px;font-weight:800;color:var(--text-1);margin-bottom:4px;}
+  .ci-ajustes-hint{font-size:11px;color:var(--text-3);line-height:1.4;margin-bottom:10px;}
+  .ci-ajustes-col .ci-tax-chips{margin-bottom:8px;}
   .ci-summary{display:flex;align-items:center;gap:26px;max-width:1180px;margin-top:14px;padding:16px 18px;border-radius:12px;background:#F7F8FD;border:1px solid var(--border);flex-wrap:wrap;}
   .ci-summary .cis-item{font-size:12px;color:var(--text-2);font-weight:600;}
   .ci-summary .cis-item strong{display:block;font-size:16px;color:var(--navy);font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;}
@@ -1593,10 +1601,39 @@
               <div id="costeoComprasListWrap"></div>
               <div id="costeoComprasItemsWrap" style="display:none;">
                 <p class="config-hint">El insumo cargado tiene que coincidir con uno ya creado para este proveedor en la solapa Proveedores — de ahí se toman automáticamente su Cantidad y Unidad de medida.</p>
+                <div class="ci-ajustes">
+                  <div class="ci-ajustes-col">
+                    <div class="ci-ajustes-title">Impuestos generales de la factura</div>
+                    <div class="ci-ajustes-hint">Se calculan sobre el subtotal de ítems cargados e impactan el total de la factura (no el costo unitario de cada ítem). Ej.: percepción de IIBB.</div>
+                    <div class="ci-tax-chips" id="ciImpGenChips"></div>
+                    <div class="ci-tax-adder">
+                      <input type="text" id="ciImpGenNombre" placeholder="Nombre (ej. Percepción IIBB)" style="width:150px;">
+                      <select id="ciImpGenModo" onchange="costeoOnImpGenModoChange()">
+                        <option value="pct">%</option>
+                        <option value="monto">$</option>
+                      </select>
+                      <input type="text" id="ciImpGenVal" placeholder="%" inputmode="decimal">
+                      <button type="button" class="ci-tax-add-btn" onclick="costeoAddImpuestoGeneral()" title="Agregar impuesto general">+</button>
+                    </div>
+                  </div>
+                  <div class="ci-ajustes-col">
+                    <div class="ci-ajustes-title">Descuento de la factura</div>
+                    <div class="ci-ajustes-hint">Se prorratea proporcionalmente entre todos los ítems, reduciendo el costo unitario de cada uno.</div>
+                    <div id="ciDescFacturaChip"></div>
+                    <div class="ci-tax-adder" id="ciDescFacturaAdder">
+                      <select id="ciDescFacturaModo" onchange="costeoOnDescFacturaModoChange()">
+                        <option value="pct">%</option>
+                        <option value="monto">$</option>
+                      </select>
+                      <input type="text" id="ciDescFacturaVal" placeholder="%" inputmode="decimal">
+                      <button type="button" class="ci-tax-add-btn" onclick="costeoSetDescuentoFactura()" title="Aplicar descuento">✓</button>
+                    </div>
+                  </div>
+                </div>
                 <div class="ci-table-scroll">
                 <div class="ci-table">
                   <div class="ci-head-row">
-                    <div>Item</div><div>$ Lista</div><div>Bultos</div><div>$/Bulto</div><div>Impuestos</div><div>#/Bulto</div><div>[un]</div><div>$/[un]</div><div>[un]</div><div></div>
+                    <div>Item</div><div>$ Lista</div><div>Bultos</div><div>$/Bulto</div><div>Impuestos</div><div>Descuentos</div><div>#/Bulto</div><div>[un]</div><div>$/[un]</div><div>[un]</div><div></div>
                   </div>
                   <div id="costeoItemsList"></div>
                   <div class="ci-row ci-add-row" id="ciAddRow">
@@ -1608,6 +1645,7 @@
                     <input type="text" id="ciNewBultos" placeholder="1" inputmode="decimal" oninput="costeoRecalcNewRow()">
                     <div class="ci-auto" id="ciNewPrecioBulto">$0</div>
                     <div class="ci-tax-cell" id="ciTaxCellWrap_new"></div>
+                    <div class="ci-tax-cell" id="ciDescCellWrap_new"></div>
                     <div class="ci-auto" id="ciNewCantidadAuto">—</div>
                     <div class="ci-auto ci-um-lbl" id="ciNewUMAuto">—</div>
                     <div class="ci-auto ci-punit" id="ciNewPunit">$0</div>
@@ -1619,7 +1657,10 @@
                 </div>
                 </div>
                 <div class="ci-summary">
-                  <div class="cis-item">Suma de ítems cargados<strong id="ciSumaItems">$0</strong></div>
+                  <div class="cis-item">Suma de ítems<strong id="ciSumaItems">$0</strong></div>
+                  <div class="cis-item">+ Impuestos generales<strong id="ciImpGenMonto">$0</strong></div>
+                  <div class="cis-item">− Descuento de factura<strong id="ciDescGlobalMonto">$0</strong></div>
+                  <div class="cis-item">Total calculado<strong id="ciTotalCalculado">$0</strong></div>
                   <div class="cis-item">Total de la factura<strong id="ciTotalFactura">$0</strong></div>
                   <div class="cis-item">Diferencia<strong id="ciDiferencia">$0</strong></div>
                   <div id="ciReconBadge"></div>
@@ -7408,14 +7449,21 @@ function cmInit(){
    ========================================================= */
 const COSTEO_CONCEPTOS = ["Cafeteria y Bebidas","Servicio de cocina","Servicio de padel"]; // orden alfabético
 let costeoInsumos = [];       // [{id, proveedor_id, nomenclatura, cantidad, unidad_medida}]
-let costeoCompraItems = [];   // [{id, orden_id, insumo_id, nomenclatura, precio_lista, cantidad, unidad_medida, bultos, impuestos:[{tipo,valor}]}]
+// impuestos y descuentos: [{tipo|concepto, valor, modo:"pct"|"monto"}]. modo "pct" = % sobre precio_lista;
+// modo "monto" = un monto fijo en pesos (sin modo guardado, de antes de esto, se asume "pct").
+let costeoCompraItems = [];   // [{id, orden_id, insumo_id, nomenclatura, precio_lista, cantidad, unidad_medida, bultos, impuestos:[...], descuentos:[...]}]
 let costeoOpenProveedorId = null;
 let costeoOpenOrdenId = null;
 let costeoOpenOrdenProveedorId = null;
 let costeoEditingInsumo = null;
 let costeoEditingItem = null;
-let costeoNewItemImpuestos = [];   // impuestos del ítem que se está por agregar
-let costeoEditItemImpuestos = {};  // { [itemId]: [{tipo,valor}] } — mientras se edita ese ítem
+let costeoNewItemImpuestos = [];    // impuestos del ítem que se está por agregar
+let costeoEditItemImpuestos = {};   // { [itemId]: [{tipo,valor,modo}] } — mientras se edita ese ítem
+let costeoNewItemDescuentos = [];   // descuentos puntuales del ítem que se está por agregar
+let costeoEditItemDescuentos = {};  // { [itemId]: [{concepto,valor,modo}] } — mientras se edita ese ítem
+// Ajustes a nivel factura (por orden_id): impuestos generales (ej. percepción de IIBB, sobre el
+// subtotal de ítems) y un descuento único de la factura (se prorratea entre los ítems según su peso).
+let costeoOrdenAjustesMap = {}; // { [orden_id]: {impuestos_generales:[{nombre,valor,modo}], descuento_modo, descuento_valor} }
 
 // ---- Recetas (semi-elaborados y artículos) ----
 let recetasItems = [];   // [{id, tipo:'semielaborado'|'articulo', nombre, concepto, porciones}]
@@ -7440,19 +7488,61 @@ function fmtNumCosteo(n){ return Number(n||0).toLocaleString("es-AR",{maximumFra
 // A diferencia de fmtMoney (0 decimales, usado en Pagos/Sueldos/Caja), acá los montos son costos
 // unitarios y suelen tener centavos relevantes — siempre se muestran con 2 decimales.
 function fmtMoneyCosteo(n){ return "$" + Number(n||0).toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function costeoTaxFactor(list){ return (list||[]).reduce((f,t)=> f*(1+((Number(t.valor)||0)/100)), 1); }
-function costeoLineTotal(it){ return Number(it.precio_lista||0) * costeoTaxFactor(it.impuestos||[]); }
-function costeoComputeRow(it){
+// ---- Fórmulas de costeo de Carga de compras ----
+// Un "ajuste" (impuesto o descuento) puede ser % (modo:"pct", sobre una base) o un monto fijo en
+// pesos (modo:"monto"). Los datos guardados antes de este cambio no tienen "modo": se asumen "pct".
+function costeoAjusteMonto(entry, base){
+  if(!entry) return 0;
+  const modo = entry.modo==="monto" ? "monto" : "pct";
+  return modo==="monto" ? (Number(entry.valor)||0) : (Number(base||0) * ((Number(entry.valor)||0)/100));
+}
+function costeoSumaAjustes(list, base){ return (list||[]).reduce((s,e)=> s + costeoAjusteMonto(e, base), 0); }
+// Total de una línea con sus propios impuestos y descuentos puntuales (los cargados en esa fila),
+// todavía sin prorratear el descuento general de la factura.
+function costeoLineTotalPropio(it){
+  const base = Number(it.precio_lista||0);
+  return base + costeoSumaAjustes(it.impuestos, base) - costeoSumaAjustes(it.descuentos, base);
+}
+function costeoLineTotal(it){ return costeoLineTotalPropio(it); } // alias retrocompatible (usado también en Recetas)
+// Subtotal de una orden = suma de todos sus ítems ya con sus propios ajustes, antes de los impuestos
+// generales de la factura y de su descuento general.
+function costeoSubtotalItems(items){ return (items||[]).reduce((s,it)=>s+costeoLineTotalPropio(it),0); }
+function costeoMontoImpuestosGenerales(ajustes, subtotal){ return costeoSumaAjustes(ajustes && ajustes.impuestos_generales, subtotal); }
+function costeoMontoDescuentoGlobal(ajustes, subtotal){
+  if(!ajustes || ajustes.descuento_valor==null || ajustes.descuento_valor==="") return 0;
+  return costeoAjusteMonto({modo:ajustes.descuento_modo, valor:ajustes.descuento_valor}, subtotal);
+}
+// Total final calculado de la factura, para reconciliar contra el monto real cargado en Pagos.
+function costeoTotalFacturaCalculado(items, ajustes){
+  const subtotal = costeoSubtotalItems(items);
+  return subtotal + costeoMontoImpuestosGenerales(ajustes, subtotal) - costeoMontoDescuentoGlobal(ajustes, subtotal);
+}
+// $/un. de un ítem puntual: a su propio total (con impuestos/descuentos de línea) se le resta, a
+// prorrata según su peso dentro del subtotal, el descuento general de la factura. Los impuestos
+// generales (ej. percepción de IIBB) NO se prorratean acá — son un crédito/costo del comprador que no
+// encarece la mercadería, así que solo impactan el total de la factura, no el costo unitario de cada ítem.
+function costeoComputeRow(it, items, ajustes){
   const bultos = Number(it.bultos)||0;
   const cantidad = Number(it.cantidad)||0;
   const precioBulto = bultos>0 ? Number(it.precio_lista||0)/bultos : 0;
   const neto = cantidad>0 ? precioBulto/cantidad : 0;
-  const factor = costeoTaxFactor(it.impuestos||[]);
-  return { precioBulto, neto, factor, punit: neto*factor };
+  const totalPropio = costeoLineTotalPropio(it);
+  const listaItems = (items && items.length) ? items : [it];
+  const subtotal = costeoSubtotalItems(listaItems);
+  const descGlobal = costeoMontoDescuentoGlobal(ajustes, subtotal);
+  const shareDescuento = (descGlobal && subtotal>0) ? descGlobal * (totalPropio/subtotal) : 0;
+  const totalFinal = totalPropio - shareDescuento;
+  const totalUnidades = bultos*cantidad;
+  return { precioBulto, neto, totalPropio, totalFinal, punit: totalUnidades>0 ? totalFinal/totalUnidades : 0 };
 }
 
 function costeoOrdenesFiltradas(){ return ordenes.filter(o=>COSTEO_CONCEPTOS.includes(o.concepto)); }
 function costeoProveedoresList(){ return proveedoresConfig.filter(p=>COSTEO_CONCEPTOS.includes(p.concepto)); }
+function costeoAjustesDeOrden(ordenId){ return costeoOrdenAjustesMap[ordenId] || {impuestos_generales:[], descuento_modo:null, descuento_valor:null}; }
+function costeoEnsureAjustesDeOrden(ordenId){
+  if(!costeoOrdenAjustesMap[ordenId]) costeoOrdenAjustesMap[ordenId] = {impuestos_generales:[], descuento_modo:null, descuento_valor:null};
+  return costeoOrdenAjustesMap[ordenId];
+}
 
 async function loadCosteoInsumos(){
   const { data, error } = await sb.from("lf_costeo_insumos").select("*").order("nomenclatura");
@@ -7466,8 +7556,30 @@ async function loadCosteoCompraItems(){
   if(error){ showToast("No se pudieron cargar los ítems de compra", "warn"); return; }
   costeoCompraItems = data || [];
 }
+async function loadCosteoOrdenAjustes(){
+  const ids = costeoOrdenesFiltradas().map(o=>o.id);
+  if(!ids.length){ costeoOrdenAjustesMap = {}; return; }
+  const { data, error } = await sb.from("lf_costeo_orden_ajustes").select("*").in("orden_id", ids);
+  if(error){ showToast("No se pudieron cargar los ajustes de las facturas", "warn"); return; }
+  const map = {};
+  (data||[]).forEach(row=>{ map[row.orden_id] = { impuestos_generales: row.impuestos_generales||[], descuento_modo: row.descuento_modo||null, descuento_valor: row.descuento_valor!=null?row.descuento_valor:null }; });
+  costeoOrdenAjustesMap = map;
+}
+async function costeoSaveOrdenAjustes(ordenId){
+  const a = costeoAjustesDeOrden(ordenId);
+  const { error } = await sb.from("lf_costeo_orden_ajustes").upsert({
+    orden_id: ordenId,
+    impuestos_generales: a.impuestos_generales||[],
+    descuento_modo: a.descuento_modo||null,
+    descuento_valor: (a.descuento_valor!=null && a.descuento_valor!=="") ? a.descuento_valor : null,
+    modificado_por: currentPerfil?currentPerfil.id:null,
+    modificado_fecha: new Date().toISOString()
+  });
+  if(error){ showToast("No se pudieron guardar los ajustes de la factura", "warn"); return false; }
+  return true;
+}
 async function initCosteo(){
-  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadRecetasItems(), loadRecetaLineas()]);
+  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadCosteoOrdenAjustes(), loadRecetasItems(), loadRecetaLineas()]);
   costeoShowProvList();
   costeoShowComprasList();
   renderRecList();
@@ -7613,12 +7725,12 @@ function renderCosteoComprasList(){
     html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div>`;
     items.forEach(o=>{
       const itemsOrden = costeoCompraItems.filter(it=>it.orden_id===o.id);
-      const sumaItems = itemsOrden.reduce((s,it)=>s+costeoLineTotal(it),0);
+      const totalCalculado = costeoTotalFacturaCalculado(itemsOrden, costeoAjustesDeOrden(o.id));
       const totalFactura = Number(o.montoFactura||0);
       let badge;
       if(!itemsOrden.length) badge = `<span class="recon-badge recon-pending">Sin cargar</span>`;
-      else if(Math.abs(sumaItems-totalFactura) < 1) badge = `<span class="recon-badge recon-ok">✓ Coincide con la factura</span>`;
-      else badge = `<span class="recon-badge recon-bad">Dif. ${fmtMoneyCosteo(sumaItems-totalFactura)}</span>`;
+      else if(Math.abs(totalCalculado-totalFactura) < 1) badge = `<span class="recon-badge recon-ok">✓ Coincide con la factura</span>`;
+      else badge = `<span class="recon-badge recon-bad">Dif. ${fmtMoneyCosteo(totalCalculado-totalFactura)}</span>`;
       html += `<div class="costeo-orden-card">
         <div class="co-fecha">${isoToDMY(o.fechaOrden)}</div>
         <div class="co-main">
@@ -7659,7 +7771,10 @@ function costeoOpenOrden(id){
   document.getElementById("ciNewPrecio").value = "";
   document.getElementById("ciNewBultos").value = "";
   costeoNewItemImpuestos = [];
+  costeoNewItemDescuentos = [];
+  costeoEnsureAjustesDeOrden(id);
   costeoInitAddRowUI();
+  renderCiAjustes();
   renderCosteoItemsList();
 }
 async function costeoVerAdjuntoOrden(){
@@ -7671,18 +7786,32 @@ async function costeoVerAdjuntoOrden(){
 }
 function costeoItemsDeOrden(){ return costeoCompraItems.filter(it=>it.orden_id===costeoOpenOrdenId); }
 
-/* ---- Impuestos dinámicos (compartido entre la fila de alta "new" y las filas en edición por id) ----
-   Cada impuesto muestra, al lado del %, el monto que representa: {$ Lista} * {%}. */
+/* ---- Impuestos y descuentos dinámicos por ítem (compartido entre la fila de alta "new" y las filas en
+   edición por id). IVA siempre es %; IIBB e Internos se pueden cargar como % o como monto fijo — al
+   lado del valor se muestra el monto que representa cuando es %, ($ Lista} × {%}). ---- */
 function costeoRenderTaxChips(list, ctx, editable, precioLista){
   if(!(list||[]).length) return editable ? "" : `<span class="ci-um-lbl">—</span>`;
   return list.map((t,idx)=>{
-    const val = fmtNumCosteo(t.valor);
-    const monto = fmtMoneyCosteo(Number(precioLista||0) * ((Number(t.valor)||0)/100));
-    if(!editable) return `<span class="ci-tax-chip ci-tax-chip-view">${costeoEsc(t.tipo)} ${val}% <span class="ci-tax-monto">(${monto})</span></span>`;
-    return `<span class="ci-tax-chip">${costeoEsc(t.tipo)} ${val}% <span class="ci-tax-monto">(${monto})</span> <button type="button" onclick="costeoRemoveTax('${ctx}', ${idx})" title="Quitar">×</button></span>`;
+    const modo = t.modo==="monto" ? "monto" : "pct";
+    const label = modo==="monto" ? fmtMoneyCosteo(t.valor) : (fmtNumCosteo(t.valor)+"%");
+    const sub = modo==="monto" ? "" : ` <span class="ci-tax-monto">(${fmtMoneyCosteo(costeoAjusteMonto(t, precioLista))})</span>`;
+    if(!editable) return `<span class="ci-tax-chip ci-tax-chip-view">${costeoEsc(t.tipo)} ${label}${sub}</span>`;
+    return `<span class="ci-tax-chip">${costeoEsc(t.tipo)} ${label}${sub} <button type="button" onclick="costeoRemoveTax('${ctx}', ${idx})" title="Quitar">×</button></span>`;
+  }).join("");
+}
+function costeoRenderDescChips(list, ctx, editable, precioLista){
+  if(!(list||[]).length) return editable ? "" : `<span class="ci-um-lbl">—</span>`;
+  return list.map((d,idx)=>{
+    const modo = d.modo==="monto" ? "monto" : "pct";
+    const label = modo==="monto" ? fmtMoneyCosteo(d.valor) : (fmtNumCosteo(d.valor)+"%");
+    const sub = modo==="monto" ? "" : ` <span class="ci-tax-monto">(${fmtMoneyCosteo(costeoAjusteMonto(d, precioLista))})</span>`;
+    const nombre = costeoEsc(d.concepto || "Descuento");
+    if(!editable) return `<span class="ci-tax-chip ci-tax-chip-view ci-desc-chip">${nombre} ${label}${sub}</span>`;
+    return `<span class="ci-tax-chip ci-desc-chip">${nombre} ${label}${sub} <button type="button" onclick="costeoRemoveDesc('${ctx}', ${idx})" title="Quitar">×</button></span>`;
   }).join("");
 }
 function costeoGetTaxArrayByCtx(ctx){ return ctx==="new" ? costeoNewItemImpuestos : (costeoEditItemImpuestos[ctx] || (costeoEditItemImpuestos[ctx]=[])); }
+function costeoGetDescArrayByCtx(ctx){ return ctx==="new" ? costeoNewItemDescuentos : (costeoEditItemDescuentos[ctx] || (costeoEditItemDescuentos[ctx]=[])); }
 function costeoGetPrecioListaByCtx(ctx){
   const el = document.getElementById(ctx==="new" ? "ciNewPrecio" : `ei_pl_${ctx}`);
   return el ? parseDecimalCosteo(el.value) : 0;
@@ -7700,20 +7829,53 @@ function costeoTaxCellHTML(ctx){
         <option value="21">21%</option>
         <option value="10.5">10,5%</option>
       </select>
+      <select id="ciTaxModo_${ctx}" style="display:none;" onchange="costeoOnTaxModoChange('${ctx}')">
+        <option value="pct">%</option>
+        <option value="monto">$</option>
+      </select>
       <input type="text" id="ciTaxManualVal_${ctx}" placeholder="%" inputmode="decimal" style="display:none;">
       <button type="button" class="ci-tax-add-btn" onclick="costeoAddTax('${ctx}')" title="Agregar impuesto">+</button>
     </div>`;
 }
+function costeoDescCellHTML(ctx){
+  const list = costeoGetDescArrayByCtx(ctx);
+  return `<div class="ci-tax-chips" id="ciDescChips_${ctx}">${costeoRenderDescChips(list, ctx, true, costeoGetPrecioListaByCtx(ctx))}</div>
+    <div class="ci-tax-adder">
+      <input type="text" id="ciDescConcepto_${ctx}" placeholder="Concepto" style="width:80px;">
+      <select id="ciDescModo_${ctx}" onchange="costeoOnDescModoChange('${ctx}')">
+        <option value="pct">%</option>
+        <option value="monto">$</option>
+      </select>
+      <input type="text" id="ciDescVal_${ctx}" placeholder="%" inputmode="decimal">
+      <button type="button" class="ci-tax-add-btn" onclick="costeoAddDesc('${ctx}')" title="Agregar descuento">+</button>
+    </div>`;
+}
 function costeoOnTaxTipoChange(ctx){
   const tipo = document.getElementById(`ciTaxTipo_${ctx}`).value;
-  document.getElementById(`ciTaxIVAVal_${ctx}`).style.display = tipo==="IVA" ? "" : "none";
-  document.getElementById(`ciTaxManualVal_${ctx}`).style.display = tipo==="IVA" ? "none" : "";
+  const esIVA = tipo==="IVA";
+  document.getElementById(`ciTaxIVAVal_${ctx}`).style.display = esIVA ? "" : "none";
+  document.getElementById(`ciTaxModo_${ctx}`).style.display = esIVA ? "none" : "";
+  document.getElementById(`ciTaxManualVal_${ctx}`).style.display = esIVA ? "none" : "";
+  if(!esIVA) costeoOnTaxModoChange(ctx);
+}
+function costeoOnTaxModoChange(ctx){
+  const modo = document.getElementById(`ciTaxModo_${ctx}`).value;
+  document.getElementById(`ciTaxManualVal_${ctx}`).placeholder = modo==="monto" ? "$" : "%";
+}
+function costeoOnDescModoChange(ctx){
+  const modo = document.getElementById(`ciDescModo_${ctx}`).value;
+  document.getElementById(`ciDescVal_${ctx}`).placeholder = modo==="monto" ? "$" : "%";
 }
 function costeoAddTax(ctx){
   const tipo = document.getElementById(`ciTaxTipo_${ctx}`).value;
-  const valor = tipo==="IVA" ? Number(document.getElementById(`ciTaxIVAVal_${ctx}`).value) : parseDecimalCosteo(document.getElementById(`ciTaxManualVal_${ctx}`).value);
+  let modo = "pct", valor;
+  if(tipo==="IVA"){ valor = Number(document.getElementById(`ciTaxIVAVal_${ctx}`).value); }
+  else{
+    modo = document.getElementById(`ciTaxModo_${ctx}`).value;
+    valor = parseDecimalCosteo(document.getElementById(`ciTaxManualVal_${ctx}`).value);
+  }
   if(!valor && valor!==0){ showToast("Cargá el valor del impuesto", "warn"); return; }
-  costeoGetTaxArrayByCtx(ctx).push({ tipo, valor });
+  costeoGetTaxArrayByCtx(ctx).push({ tipo, valor, modo });
   const manualEl = document.getElementById(`ciTaxManualVal_${ctx}`);
   if(manualEl) manualEl.value = "";
   costeoRefreshTaxUI(ctx);
@@ -7724,9 +7886,124 @@ function costeoRemoveTax(ctx, idx){
   costeoRefreshTaxUI(ctx);
   if(ctx==="new") costeoRecalcNewRow(); else costeoRecalcEditRow(ctx);
 }
+function costeoAddDesc(ctx){
+  const concepto = document.getElementById(`ciDescConcepto_${ctx}`).value.trim();
+  const modo = document.getElementById(`ciDescModo_${ctx}`).value;
+  const valor = parseDecimalCosteo(document.getElementById(`ciDescVal_${ctx}`).value);
+  if(!valor){ showToast("Cargá el valor del descuento", "warn"); return; }
+  costeoGetDescArrayByCtx(ctx).push({ concepto: concepto||"Descuento", valor, modo });
+  document.getElementById(`ciDescConcepto_${ctx}`).value = "";
+  const valEl = document.getElementById(`ciDescVal_${ctx}`);
+  if(valEl) valEl.value = "";
+  costeoRefreshDescUI(ctx);
+  if(ctx==="new") costeoRecalcNewRow(); else costeoRecalcEditRow(ctx);
+}
+function costeoRemoveDesc(ctx, idx){
+  costeoGetDescArrayByCtx(ctx).splice(idx,1);
+  costeoRefreshDescUI(ctx);
+  if(ctx==="new") costeoRecalcNewRow(); else costeoRecalcEditRow(ctx);
+}
 function costeoRefreshTaxUI(ctx){
   const chipsEl = document.getElementById(`ciTaxChips_${ctx}`);
   if(chipsEl) chipsEl.innerHTML = costeoRenderTaxChips(costeoGetTaxArrayByCtx(ctx), ctx, true, costeoGetPrecioListaByCtx(ctx));
+}
+function costeoRefreshDescUI(ctx){
+  const chipsEl = document.getElementById(`ciDescChips_${ctx}`);
+  if(chipsEl) chipsEl.innerHTML = costeoRenderDescChips(costeoGetDescArrayByCtx(ctx), ctx, true, costeoGetPrecioListaByCtx(ctx));
+}
+
+/* ---- Ajustes de la factura: impuestos generales (sobre el subtotal de ítems, ej. percepción de IIBB)
+   y un descuento único de toda la factura (se prorratea entre los ítems según su peso, y reduce el
+   $/un. de cada uno proporcionalmente). Se guardan en lf_costeo_orden_ajustes, una fila por orden. ---- */
+function renderCiAjustes(){
+  const ordenId = costeoOpenOrdenId;
+  const ajustes = costeoAjustesDeOrden(ordenId);
+  const items = costeoItemsDeOrden();
+  const subtotal = costeoSubtotalItems(items);
+  const chipsEl = document.getElementById("ciImpGenChips");
+  if(chipsEl){
+    const list = ajustes.impuestos_generales||[];
+    chipsEl.innerHTML = list.length ? list.map((t,idx)=>{
+      const modo = t.modo==="monto" ? "monto" : "pct";
+      const label = modo==="monto" ? fmtMoneyCosteo(t.valor) : (fmtNumCosteo(t.valor)+"%");
+      const sub = modo==="monto" ? "" : ` <span class="ci-tax-monto">(${fmtMoneyCosteo(costeoAjusteMonto(t, subtotal))})</span>`;
+      return `<span class="ci-tax-chip">${costeoEsc(t.nombre)} ${label}${sub} <button type="button" onclick="costeoRemoveImpuestoGeneral(${idx})" title="Quitar">×</button></span>`;
+    }).join("") : "";
+  }
+  const descChipEl = document.getElementById("ciDescFacturaChip");
+  const descAdderEl = document.getElementById("ciDescFacturaAdder");
+  if(descChipEl && descAdderEl){
+    if(ajustes.descuento_valor!=null && ajustes.descuento_valor!==""){
+      const modo = ajustes.descuento_modo==="monto" ? "monto" : "pct";
+      const label = modo==="monto" ? fmtMoneyCosteo(ajustes.descuento_valor) : (fmtNumCosteo(ajustes.descuento_valor)+"%");
+      const sub = modo==="monto" ? "" : ` (${fmtMoneyCosteo(costeoAjusteMonto({modo, valor:ajustes.descuento_valor}, subtotal))})`;
+      descChipEl.innerHTML = `<span class="ci-tax-chip ci-desc-chip">Descuento ${label}${sub} <button type="button" onclick="costeoQuitarDescuentoFactura()" title="Quitar">×</button></span>`;
+      descAdderEl.style.display = "none";
+    } else {
+      descChipEl.innerHTML = "";
+      descAdderEl.style.display = "";
+    }
+  }
+}
+function costeoOnImpGenModoChange(){
+  const modo = document.getElementById("ciImpGenModo").value;
+  document.getElementById("ciImpGenVal").placeholder = modo==="monto" ? "$" : "%";
+}
+function costeoOnDescFacturaModoChange(){
+  const modo = document.getElementById("ciDescFacturaModo").value;
+  document.getElementById("ciDescFacturaVal").placeholder = modo==="monto" ? "$" : "%";
+}
+async function costeoAddImpuestoGeneral(){
+  const ordenId = costeoOpenOrdenId;
+  if(!ordenId) return;
+  const nombre = document.getElementById("ciImpGenNombre").value.trim();
+  const modo = document.getElementById("ciImpGenModo").value;
+  const valor = parseDecimalCosteo(document.getElementById("ciImpGenVal").value);
+  if(!nombre){ showToast("Escribí el nombre del impuesto", "warn"); return; }
+  if(!valor){ showToast("Cargá el valor del impuesto", "warn"); return; }
+  const ajustes = costeoEnsureAjustesDeOrden(ordenId);
+  ajustes.impuestos_generales.push({ nombre, modo, valor });
+  const ok = await costeoSaveOrdenAjustes(ordenId);
+  if(!ok) return;
+  document.getElementById("ciImpGenNombre").value = "";
+  document.getElementById("ciImpGenVal").value = "";
+  renderCiAjustes();
+  costeoUpdateSummary();
+}
+async function costeoRemoveImpuestoGeneral(idx){
+  const ordenId = costeoOpenOrdenId;
+  if(!ordenId) return;
+  costeoEnsureAjustesDeOrden(ordenId).impuestos_generales.splice(idx,1);
+  const ok = await costeoSaveOrdenAjustes(ordenId);
+  if(!ok) return;
+  renderCiAjustes();
+  costeoUpdateSummary();
+}
+async function costeoSetDescuentoFactura(){
+  const ordenId = costeoOpenOrdenId;
+  if(!ordenId) return;
+  const modo = document.getElementById("ciDescFacturaModo").value;
+  const valor = parseDecimalCosteo(document.getElementById("ciDescFacturaVal").value);
+  if(!valor){ showToast("Cargá el valor del descuento", "warn"); return; }
+  const ajustes = costeoEnsureAjustesDeOrden(ordenId);
+  ajustes.descuento_modo = modo;
+  ajustes.descuento_valor = valor;
+  const ok = await costeoSaveOrdenAjustes(ordenId);
+  if(!ok) return;
+  document.getElementById("ciDescFacturaVal").value = "";
+  renderCiAjustes();
+  renderCosteoItemsList(); // el descuento de factura se prorratea en el $/un. de cada ítem
+}
+async function costeoQuitarDescuentoFactura(){
+  const ordenId = costeoOpenOrdenId;
+  if(!ordenId) return;
+  const ajustes = costeoEnsureAjustesDeOrden(ordenId);
+  ajustes.descuento_modo = null;
+  ajustes.descuento_valor = null;
+  const ok = await costeoSaveOrdenAjustes(ordenId);
+  if(!ok) return;
+  renderCiAjustes();
+  renderCosteoItemsList();
 }
 
 /* ---- Fila de alta ("Agregar ítem") ---- */
@@ -7738,6 +8015,8 @@ function costeoNewItemMatch(){
 function costeoInitAddRowUI(){
   const wrap = document.getElementById("ciTaxCellWrap_new");
   if(wrap) wrap.innerHTML = costeoTaxCellHTML("new");
+  const descWrap = document.getElementById("ciDescCellWrap_new");
+  if(descWrap) descWrap.innerHTML = costeoDescCellHTML("new");
   costeoOnNewNomenclaturaInput();
 }
 function costeoOnNewNomenclaturaInput(){
@@ -7754,12 +8033,13 @@ function costeoRecalcNewRow(){
   const precio = parseDecimalCosteo(document.getElementById("ciNewPrecio").value);
   const bultos = parseDecimalCosteo(document.getElementById("ciNewBultos").value);
   const cantidad = match ? Number(match.cantidad)||0 : 0;
-  const precioBulto = bultos>0 ? precio/bultos : 0;
-  const neto = cantidad>0 ? precioBulto/cantidad : 0;
-  const punit = neto*costeoTaxFactor(costeoNewItemImpuestos);
-  document.getElementById("ciNewPrecioBulto").textContent = fmtMoneyCosteo(precioBulto);
-  document.getElementById("ciNewPunit").textContent = fmtMoneyCosteo(punit);
+  const hipotetico = { precio_lista: precio, bultos, cantidad, impuestos: costeoNewItemImpuestos, descuentos: costeoNewItemDescuentos };
+  const itemsConHipotetico = [...costeoItemsDeOrden(), hipotetico];
+  const row = costeoComputeRow(hipotetico, itemsConHipotetico, costeoAjustesDeOrden(costeoOpenOrdenId));
+  document.getElementById("ciNewPrecioBulto").textContent = fmtMoneyCosteo(row.precioBulto);
+  document.getElementById("ciNewPunit").textContent = fmtMoneyCosteo(row.punit);
   costeoRefreshTaxUI("new");
+  costeoRefreshDescUI("new");
 }
 async function costeoAddItem(){
   if(!costeoOpenOrdenId) return;
@@ -7774,7 +8054,7 @@ async function costeoAddItem(){
   const { error } = await sb.from("lf_costeo_compra_items").insert({
     orden_id: costeoOpenOrdenId, insumo_id: match.id, nomenclatura: match.nomenclatura,
     precio_lista: precio, cantidad: match.cantidad, unidad_medida: match.unidad_medida, bultos,
-    impuestos: costeoNewItemImpuestos,
+    impuestos: costeoNewItemImpuestos, descuentos: costeoNewItemDescuentos,
     creado_por: currentPerfil?currentPerfil.id:null
   });
   if(error){ showToast("No se pudo agregar el ítem", "warn"); return; }
@@ -7782,6 +8062,7 @@ async function costeoAddItem(){
   document.getElementById("ciNewPrecio").value = "";
   document.getElementById("ciNewBultos").value = "";
   costeoNewItemImpuestos = [];
+  costeoNewItemDescuentos = [];
   costeoInitAddRowUI();
   await loadCosteoCompraItems();
   renderCosteoItemsList();
@@ -7792,6 +8073,7 @@ async function costeoAddItem(){
 /* ---- Renderizado de la lista de ítems ya cargados ---- */
 function renderCosteoItemsList(){
   const list = costeoItemsDeOrden();
+  const ajustes = costeoAjustesDeOrden(costeoOpenOrdenId);
   const el = document.getElementById("costeoItemsList");
   if(!list.length){ el.innerHTML = `<div class="empty-mini" style="padding:16px;">Todavía no cargaste ítems para esta orden.</div>`; }
   else{
@@ -7806,6 +8088,7 @@ function renderCosteoItemsList(){
           <input id="ei_bu_${it.id}" value="${it.bultos}" inputmode="decimal" oninput="costeoRecalcEditRow('${it.id}')">
           <div class="ci-auto" id="ei_precioBulto_${it.id}">$0</div>
           <div class="ci-tax-cell" id="ciTaxCellWrap_${it.id}"></div>
+          <div class="ci-tax-cell" id="ciDescCellWrap_${it.id}"></div>
           <div class="ci-auto" id="ei_cantidad_${it.id}">—</div>
           <div class="ci-auto ci-um-lbl" id="ei_um_${it.id}">—</div>
           <div class="ci-auto ci-punit" id="ei_punit_${it.id}">$0</div>
@@ -7816,13 +8099,14 @@ function renderCosteoItemsList(){
           </div>
         </div>`;
       }
-      const r = costeoComputeRow(it);
+      const r = costeoComputeRow(it, list, ajustes);
       return `<div class="ci-row">
         <div>${costeoEsc(it.nomenclatura)}</div>
         <div>${fmtMoneyCosteo(it.precio_lista)}</div>
         <div>${fmtNumCosteo(it.bultos)}</div>
         <div class="ci-auto">${fmtMoneyCosteo(r.precioBulto)}</div>
         <div class="ci-tax-cell">${costeoRenderTaxChips(it.impuestos||[], it.id, false, it.precio_lista)}</div>
+        <div class="ci-tax-cell">${costeoRenderDescChips(it.descuentos||[], it.id, false, it.precio_lista)}</div>
         <div class="ci-auto">${fmtNumCosteo(it.cantidad)}</div>
         <div class="ci-auto ci-um-lbl">${costeoEsc(it.unidad_medida||"—")}</div>
         <div class="ci-auto ci-punit">${fmtMoneyCosteo(r.punit)}</div>
@@ -7833,13 +8117,16 @@ function renderCosteoItemsList(){
         </div>
       </div>`;
     }).join("");
-    // Inicializar la UI de impuestos + valores calculados de la fila en edición (si hay una)
+    // Inicializar la UI de impuestos/descuentos + valores calculados de la fila en edición (si hay una)
     if(costeoEditingItem){
       const it = list.find(x=>x.id===costeoEditingItem);
       if(it){
         costeoEditItemImpuestos[it.id] = JSON.parse(JSON.stringify(it.impuestos||[]));
+        costeoEditItemDescuentos[it.id] = JSON.parse(JSON.stringify(it.descuentos||[]));
         const wrap = document.getElementById(`ciTaxCellWrap_${it.id}`);
         if(wrap) wrap.innerHTML = costeoTaxCellHTML(it.id);
+        const descWrap = document.getElementById(`ciDescCellWrap_${it.id}`);
+        if(descWrap) descWrap.innerHTML = costeoDescCellHTML(it.id);
         costeoRecalcEditRow(it.id);
       }
     }
@@ -7852,26 +8139,34 @@ function costeoRecalcEditRow(id){
   const precio = parseDecimalCosteo(document.getElementById(`ei_pl_${id}`).value);
   const bultos = parseDecimalCosteo(document.getElementById(`ei_bu_${id}`).value);
   const cantidad = match ? Number(match.cantidad)||0 : 0;
-  const precioBulto = bultos>0 ? precio/bultos : 0;
-  const neto = cantidad>0 ? precioBulto/cantidad : 0;
-  const punit = neto*costeoTaxFactor(costeoEditItemImpuestos[id]||[]);
-  document.getElementById(`ei_precioBulto_${id}`).textContent = fmtMoneyCosteo(precioBulto);
+  const draft = { id, precio_lista: precio, bultos, cantidad, impuestos: costeoEditItemImpuestos[id]||[], descuentos: costeoEditItemDescuentos[id]||[] };
+  const itemsDraft = costeoItemsDeOrden().map(it=> it.id===id ? draft : it);
+  const row = costeoComputeRow(draft, itemsDraft, costeoAjustesDeOrden(costeoOpenOrdenId));
+  document.getElementById(`ei_precioBulto_${id}`).textContent = fmtMoneyCosteo(row.precioBulto);
   document.getElementById(`ei_cantidad_${id}`).textContent = match ? fmtNumCosteo(match.cantidad) : "—";
   document.getElementById(`ei_um_${id}`).textContent = match ? (match.unidad_medida||"—") : "—";
   document.getElementById(`ei_um2_${id}`).textContent = match ? (match.unidad_medida||"—") : "—";
-  document.getElementById(`ei_punit_${id}`).textContent = fmtMoneyCosteo(punit);
+  document.getElementById(`ei_punit_${id}`).textContent = fmtMoneyCosteo(row.punit);
   const warnEl = document.getElementById(`ei_warn_${id}`);
   if(warnEl) warnEl.style.display = (nombre && !match) ? "" : "none";
   costeoRefreshTaxUI(id);
+  costeoRefreshDescUI(id);
 }
 function costeoUpdateSummary(){
   const o = ordenes.find(x=>x.id===costeoOpenOrdenId);
   const list = costeoItemsDeOrden();
-  const suma = list.reduce((s,it)=>s+costeoLineTotal(it),0);
-  const total = o ? Number(o.montoFactura||0) : 0;
-  const dif = suma-total;
-  document.getElementById("ciSumaItems").textContent = fmtMoneyCosteo(suma);
-  document.getElementById("ciTotalFactura").textContent = fmtMoneyCosteo(total);
+  const ajustes = costeoAjustesDeOrden(costeoOpenOrdenId);
+  const subtotal = costeoSubtotalItems(list);
+  const impGen = costeoMontoImpuestosGenerales(ajustes, subtotal);
+  const descGlobal = costeoMontoDescuentoGlobal(ajustes, subtotal);
+  const totalCalculado = subtotal + impGen - descGlobal;
+  const totalFactura = o ? Number(o.montoFactura||0) : 0;
+  const dif = totalCalculado-totalFactura;
+  document.getElementById("ciSumaItems").textContent = fmtMoneyCosteo(subtotal);
+  document.getElementById("ciImpGenMonto").textContent = fmtMoneyCosteo(impGen);
+  document.getElementById("ciDescGlobalMonto").textContent = fmtMoneyCosteo(descGlobal);
+  document.getElementById("ciTotalCalculado").textContent = fmtMoneyCosteo(totalCalculado);
+  document.getElementById("ciTotalFactura").textContent = fmtMoneyCosteo(totalFactura);
   document.getElementById("ciDiferencia").textContent = fmtMoneyCosteo(dif);
   const badgeEl = document.getElementById("ciReconBadge");
   if(!list.length) badgeEl.innerHTML = `<span class="recon-badge recon-pending">Sin cargar</span>`;
@@ -7879,7 +8174,7 @@ function costeoUpdateSummary(){
   else badgeEl.innerHTML = `<span class="recon-badge recon-bad">No coincide con la factura</span>`;
 }
 function costeoStartEditItem(id){ costeoEditingItem = id; renderCosteoItemsList(); }
-function costeoCancelEditItem(){ if(costeoEditingItem) delete costeoEditItemImpuestos[costeoEditingItem]; costeoEditingItem = null; renderCosteoItemsList(); }
+function costeoCancelEditItem(){ if(costeoEditingItem){ delete costeoEditItemImpuestos[costeoEditingItem]; delete costeoEditItemDescuentos[costeoEditingItem]; } costeoEditingItem = null; renderCosteoItemsList(); }
 async function costeoSaveItem(id){
   const nombre = document.getElementById("ei_nom_"+id).value.trim();
   const precio = parseDecimalCosteo(document.getElementById("ei_pl_"+id).value);
@@ -7888,13 +8183,15 @@ async function costeoSaveItem(id){
   const match = costeoInsumos.find(i=>i.proveedor_id===costeoOpenOrdenProveedorId && i.nomenclatura.toLowerCase()===nombre.toLowerCase());
   if(!match){ showToast("Ese insumo no está cargado para este proveedor. Cargalo primero en la solapa Proveedores.", "warn"); return; }
   const impuestos = costeoEditItemImpuestos[id] || [];
+  const descuentos = costeoEditItemDescuentos[id] || [];
   const { error } = await sb.from("lf_costeo_compra_items").update({
-    nomenclatura: match.nomenclatura, insumo_id: match.id, precio_lista: precio, cantidad: match.cantidad, unidad_medida: match.unidad_medida, bultos, impuestos,
+    nomenclatura: match.nomenclatura, insumo_id: match.id, precio_lista: precio, cantidad: match.cantidad, unidad_medida: match.unidad_medida, bultos, impuestos, descuentos,
     modificado_por: currentPerfil?currentPerfil.id:null, modificado_fecha: new Date().toISOString()
   }).eq("id", id);
   if(error){ showToast("No se pudo actualizar el ítem", "warn"); return; }
   costeoEditingItem = null;
   delete costeoEditItemImpuestos[id];
+  delete costeoEditItemDescuentos[id];
   await loadCosteoCompraItems();
   renderCosteoItemsList();
   showToast("Ítem actualizado correctamente");
