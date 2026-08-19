@@ -7246,6 +7246,24 @@ function cmBuildResumenFilas(cierre){
   filas.sort((x,y)=> (x.fecha||"").localeCompare(y.fecha||""));
   return filas;
 }
+// Igual que cmBuildResumenFilas pero con el saldo acumulado (Debe/Haber corrido)
+// después de cada movimiento, arrancando del saldo del cierre anterior si lo tiene.
+function cmBuildResumenFilasConSaldo(cierre){
+  const filas = cmBuildResumenFilas(cierre);
+  const tieneSaldoInicial = cierre.saldoInicial!==undefined && cierre.saldoInicial!==null;
+  const saldoInicial = tieneSaldoInicial ? cierre.saldoInicial : 0;
+  let acumDebe = saldoInicial<0 ? Math.abs(saldoInicial) : 0;
+  let acumHaber = saldoInicial>0 ? saldoInicial : 0;
+  const out = [];
+  if(tieneSaldoInicial){
+    out.push({fecha:null, detalle:"Saldo anterior (cierre previo)", debe: saldoInicial<0?Math.abs(saldoInicial):0, haber: saldoInicial>0?saldoInicial:0, saldo: acumHaber-acumDebe});
+  }
+  filas.forEach(f=>{
+    acumDebe += f.debe; acumHaber += f.haber;
+    out.push({...f, saldo: acumHaber-acumDebe});
+  });
+  return out;
+}
 function cmRenderResumenTable(cierre){
   const filas = cmBuildResumenFilas(cierre);
   // "Saldo anterior" arranca la cuenta con el saldo del cierre previo (cuenta
@@ -7387,16 +7405,16 @@ function cmDescargarExcelCierres(){
   });
   resumenAOA.push(["TOTAL","", accRetiros, accSalidas, accAjIn, accAjDif, accOficina, accSaldo]);
 
-  const detalleAOA = [["Cierre","Fecha","Detalle","Debe","Haber"]];
+  const detalleAOA = [["Cierre","Fecha","Detalle","Debe","Haber","Saldo"]];
   seleccionados.forEach(c=>{
-    cmBuildResumenFilas(c).forEach(f=> detalleAOA.push(["#"+c.numero, isoToDMY(f.fecha), f.detalle, f.debe||0, f.haber||0]));
+    cmBuildResumenFilasConSaldo(c).forEach(f=> detalleAOA.push(["#"+c.numero, f.fecha?isoToDMY(f.fecha):"—", f.detalle, f.debe||0, f.haber||0, f.saldo]));
   });
 
   const wb = XLSX.utils.book_new();
   const wsResumen = XLSX.utils.aoa_to_sheet(resumenAOA);
   wsResumen["!cols"] = [{wch:10},{wch:12},{wch:18},{wch:14},{wch:16},{wch:18},{wch:16},{wch:14}];
   const wsDetalle = XLSX.utils.aoa_to_sheet(detalleAOA);
-  wsDetalle["!cols"] = [{wch:10},{wch:12},{wch:40},{wch:14},{wch:14}];
+  wsDetalle["!cols"] = [{wch:10},{wch:12},{wch:40},{wch:14},{wch:14},{wch:14}];
   XLSX.utils.book_append_sheet(wb, wsResumen, "resumen");
   XLSX.utils.book_append_sheet(wb, wsDetalle, "detalle");
   XLSX.writeFile(wb, `cierres_caja_mayor_lafortaleza_${todayISO()}.xlsx`);
