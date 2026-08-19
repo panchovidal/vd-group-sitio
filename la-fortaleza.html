@@ -6317,7 +6317,6 @@ loadEmpleados();
    crean órdenes de pago "Pago B" reales en Pagos (mismo patrón que
    usa Sueldos al liquidar).
    ========================================================= */
-const CM_LS_KEY = "lf_caja_mayor_estado_v1";
 let cmState = {
   file: null,
   desde: null, hasta: null,
@@ -7160,12 +7159,18 @@ async function cmEjecutarCierre(saldoInicial, totalRetiros, totalSalidas, totalA
   showToast("Caja Mayor cerrada correctamente"+(nuevasOrdenes.length?(" · "+nuevasOrdenes.length+" orden(es) de pago creada(s)"):""));
 }
 
-/* ---------- persistencia local + init del módulo ---------- */
+/* ---------- persistencia (Supabase: lf_caja_mayor_estado) + init del módulo ----------
+   Antes esto se guardaba en el localStorage de cada navegador ("lf_caja_mayor_estado_v1"):
+   el historial de cierres y los retiros ya imputados quedaban atrapados en la máquina de
+   quien hizo el cierre, y un usuario nuevo (u otro dispositivo) veía Caja Mayor vacía como
+   si nunca se hubiera cerrado nada. Ahora es una fila única compartida
+   en Supabase (id=1, mismo patrón que lf_ventas_indice) — mismo estado para todos los
+   que tengan el permiso de la sección, desde cualquier dispositivo. */
 function cmSerializeRetiro(r){ return {...r, dt: r.dt.toISOString()}; }
 function cmDeserializeRetiro(r){ return {...r, dt: new Date(r.dt)}; }
-function cmSaveState(){
+async function cmSaveState(){
   try{
-    localStorage.setItem(CM_LS_KEY, JSON.stringify({
+    const estado = {
       file: cmState.file, desde: cmState.desde, hasta: cmState.hasta,
       pendientes: cmState.pendientes.map(cmSerializeRetiro),
       imputados: cmState.imputados.map(cmSerializeRetiro),
@@ -7186,38 +7191,44 @@ function cmSaveState(){
       ultimoCierreFecha: cmState.ultimoCierreFecha,
       ultimoCierreMonto: cmState.ultimoCierreMonto,
       historialCierres: cmState.historialCierres.map(c=>({...c, retirosImputados: c.retirosImputados.map(cmSerializeRetiro)}))
-    }));
-  }catch(e){ console.warn("No se pudo guardar el estado de Caja Mayor en este navegador:", e); }
+    };
+    const { error } = await sb.from("lf_caja_mayor_estado").upsert({
+      id: 1, estado,
+      actualizado_por: (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null,
+      updated_at: new Date().toISOString()
+    });
+    if(error) showToast("No se pudo guardar el estado de Caja Mayor: "+error.message, "warn");
+  }catch(e){ showToast("No se pudo guardar el estado de Caja Mayor (revisá la conexión)", "warn"); }
 }
-function cmLoadState(){
+async function cmLoadState(){
   try{
-    const raw = localStorage.getItem(CM_LS_KEY);
-    if(!raw) return;
-    const data = JSON.parse(raw);
-    cmState.file = data.file || null;
-    cmState.desde = data.desde || null;
-    cmState.hasta = data.hasta || null;
-    cmState.pendientes = (data.pendientes||[]).map(cmDeserializeRetiro);
-    cmState.imputados = (data.imputados||[]).map(cmDeserializeRetiro);
-    cmState.salidas = data.salidas || [];
-    cmState.ajustes = data.ajustes || [];
-    cmState.retirosOficina = data.retirosOficina || [];
-    cmState.nextSalidaNro = data.nextSalidaNro || 1;
-    cmState.nextAjusteNro = data.nextAjusteNro || 1;
-    cmState.nextOficinaNro = data.nextOficinaNro || 1;
-    cmState.nextSeq = data.nextSeq || 1;
-    cmState.salidasToggle = data.salidasToggle || "no";
-    cmState.ajustesToggle = data.ajustesToggle || "no";
-    cmState.oficinaToggle = data.oficinaToggle || "no";
-    cmState.yaImputadosAntesCount = data.yaImputadosAntesCount || 0;
-    cmState.diffs = data.diffs || [];
-    cmState.otrosEgresos = data.otrosEgresos || [];
-    cmState.historialKeys = data.historialKeys || [];
-    cmState.descartadosKeys = data.descartadosKeys || [];
-    cmState.ultimoCierreFecha = data.ultimoCierreFecha || null;
-    cmState.ultimoCierreMonto = (data.ultimoCierreMonto===undefined) ? null : data.ultimoCierreMonto;
-    cmState.historialCierres = (data.historialCierres||[]).map(c=>({...c, retirosImputados:(c.retirosImputados||[]).map(cmDeserializeRetiro)}));
-  }catch(e){ console.warn("No se pudo leer el estado de Caja Mayor guardado en este navegador:", e); }
+    const { data, error } = await sb.from("lf_caja_mayor_estado").select("*").eq("id",1).maybeSingle();
+    if(error || !data || !data.estado) return;
+    const raw = data.estado;
+    cmState.file = raw.file || null;
+    cmState.desde = raw.desde || null;
+    cmState.hasta = raw.hasta || null;
+    cmState.pendientes = (raw.pendientes||[]).map(cmDeserializeRetiro);
+    cmState.imputados = (raw.imputados||[]).map(cmDeserializeRetiro);
+    cmState.salidas = raw.salidas || [];
+    cmState.ajustes = raw.ajustes || [];
+    cmState.retirosOficina = raw.retirosOficina || [];
+    cmState.nextSalidaNro = raw.nextSalidaNro || 1;
+    cmState.nextAjusteNro = raw.nextAjusteNro || 1;
+    cmState.nextOficinaNro = raw.nextOficinaNro || 1;
+    cmState.nextSeq = raw.nextSeq || 1;
+    cmState.salidasToggle = raw.salidasToggle || "no";
+    cmState.ajustesToggle = raw.ajustesToggle || "no";
+    cmState.oficinaToggle = raw.oficinaToggle || "no";
+    cmState.yaImputadosAntesCount = raw.yaImputadosAntesCount || 0;
+    cmState.diffs = raw.diffs || [];
+    cmState.otrosEgresos = raw.otrosEgresos || [];
+    cmState.historialKeys = raw.historialKeys || [];
+    cmState.descartadosKeys = raw.descartadosKeys || [];
+    cmState.ultimoCierreFecha = raw.ultimoCierreFecha || null;
+    cmState.ultimoCierreMonto = (raw.ultimoCierreMonto===undefined) ? null : raw.ultimoCierreMonto;
+    cmState.historialCierres = (raw.historialCierres||[]).map(c=>({...c, retirosImputados:(c.retirosImputados||[]).map(cmDeserializeRetiro)}));
+  }catch(e){ showToast("No se pudo cargar el estado de Caja Mayor (revisá la conexión)", "warn"); }
 }
 function cmRenderUltimoCierre(){
   document.getElementById("cmUltimaFecha").textContent = cmState.ultimoCierreFecha ? isoToDMY(cmState.ultimoCierreFecha) : "Todavía no se registró ningún cierre";
@@ -7392,8 +7403,8 @@ function cmDescargarExcelCierres(){
   showToast("Excel descargado correctamente");
 }
 
-function cmInit(){
-  cmLoadState();
+async function cmInit(){
+  await cmLoadState();
   cmRenderUltimoCierre();
   cmRenderResumenUltimoCierre();
   cmRenderHistorialTabla();
