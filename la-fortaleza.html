@@ -907,7 +907,7 @@
                   <button class="btn-ghost" onclick="clearSelection()">Cancelar</button>
                 </div>
                 <span class="active-filters-note" id="activeFiltersNote" style="display:none" onclick="clearAllColumnFilters()">Limpiar filtros de columna ✕</span>
-                <button class="btn-ghost" onclick="toggleReportPopover(event)" title="Descargá un Excel con las órdenes de un rango de fechas (por fecha de orden)">
+                <button class="btn-ghost" id="btnDescargarReporte" onclick="toggleReportPopover(event)" title="Descargá un Excel con las órdenes de un rango de fechas (por fecha de orden)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   Descargar reporte
                 </button>
@@ -2745,6 +2745,8 @@ function updateToolbar(){
   document.getElementById("selCount").textContent = n;
   document.getElementById("toolbarBulk").classList.toggle("show", n>0);
   document.getElementById("toolbarDefault").classList.toggle("hide", n>0);
+  document.getElementById("btnDescargarReporte").style.display = n>0 ? "none" : "";
+  if(n>0) closeReportPopover();
 }
 function handleRowClick(ev,id){ openPanel(id); }
 
