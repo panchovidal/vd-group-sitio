@@ -896,6 +896,10 @@
                 <div class="toolbar-default" id="toolbarDefault"><span id="filterLabel">Mostrando todas las órdenes</span></div>
                 <div class="toolbar-bulk" id="toolbarBulk">
                   <span class="bulk-count"><span id="selCount">0</span> seleccionada(s)</span>
+                  <button class="btn-ghost" onclick="exportSelectedOrdenesExcel()" title="Descarga un Excel con las órdenes seleccionadas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Descargar
+                  </button>
                   <button class="btn-ghost-danger" onclick="requestBulkDelete()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
                     Eliminar
@@ -903,6 +907,10 @@
                   <button class="btn-ghost" onclick="clearSelection()">Cancelar</button>
                 </div>
                 <span class="active-filters-note" id="activeFiltersNote" style="display:none" onclick="clearAllColumnFilters()">Limpiar filtros de columna ✕</span>
+                <button class="btn-ghost" onclick="toggleReportPopover(event)" title="Descargá un Excel con las órdenes de un rango de fechas (por fecha de orden)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Descargar reporte
+                </button>
                 <button class="btn-ghost" onclick="toggleColumnPicker(event)" title="Elegí, reordená y ajustá el ancho de las columnas">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
                   Columnas
@@ -1945,6 +1953,9 @@
 
 <!-- COLUMN PICKER POPOVER -->
 <div class="filter-popover col-picker" id="columnPickerPopover"></div>
+
+<!-- REPORTE POR RANGO DE FECHAS (descarga de Excel) -->
+<div class="filter-popover" id="reportPopover"></div>
 
 <!-- CALENDAR POPOVER (shared) -->
 <div class="cal-popover" id="calPopover">
@@ -4190,32 +4201,113 @@ function exportResumenExcel(){
   resumenAOA.push(["TOTAL","","", grandTotal, 100, rows.reduce((s,r)=>s+r.count,0)]);
 
   // Hoja "ordenes": TODAS las órdenes cargadas (sin aplicar los filtros del resumen),
-  // en el mismo orden de campos que el formulario de "Nueva orden de pago".
-  const ordenesAOA = [[
-    "ID","Fecha de orden","Tipo de comprobante","Fecha del comprobante","Nro. de comprobante",
-    "Proveedor","Concepto","Rubro","Monto de factura","Monto de retención","Monto a pagar",
-    "Método de pago","Estado","Observaciones","Fecha de vencimiento","Creado por","Modificado por","Última modificación"
-  ]];
-  ordenes.forEach(o=>{
-    ordenesAOA.push([
-      o.id, isoToDMY(o.fechaOrden), o.comprobanteTipo||"", isoToDMY(o.fechaComprobante)||"", o.comprobante||"",
-      o.proveedor, o.concepto, o.rubro||"", o.montoFactura||0, o.montoRetencion||0, o.monto||0,
-      o.metodo||"", o.estado, o.notas||"", isoToDMY(o.fechaVenc)||"", o.creadoPor||"", o.modificadoPor||"",
-      o.modificadoFecha ? fmtFechaHora(o.modificadoFecha) : ""
-    ]);
-  });
+  // con todos los campos propios de la orden de pago (helper compartido con la
+  // descarga de reporte de Pagos, ver ORDENES_REPORT_HEADER / buildOrdenesReportAOA).
+  const ordenesAOA = buildOrdenesReportAOA(ordenes);
 
   const wb = XLSX.utils.book_new();
   const wsResumen = XLSX.utils.aoa_to_sheet(resumenAOA);
   wsResumen["!cols"] = [{wch:22},{wch:22},{wch:26},{wch:16},{wch:14},{wch:18}];
   const wsOrdenes = XLSX.utils.aoa_to_sheet(ordenesAOA);
-  wsOrdenes["!cols"] = [{wch:10},{wch:12},{wch:14},{wch:16},{wch:20},{wch:22},{wch:16},{wch:18},{wch:14},{wch:14},{wch:14},{wch:14},{wch:11},{wch:32},{wch:16},{wch:16},{wch:16},{wch:20}];
+  wsOrdenes["!cols"] = ORDENES_REPORT_COL_WIDTHS;
   XLSX.utils.book_append_sheet(wb, wsResumen, "resumen");
   XLSX.utils.book_append_sheet(wb, wsOrdenes, "ordenes");
 
   XLSX.writeFile(wb, `resumen_compras_lafortaleza_${todayISO()}.xlsx`);
   showToast("Excel descargado correctamente");
 }
+
+/* =========================================================
+   DESCARGA DE REPORTE DE ÓRDENES (Lista de órdenes)
+   Dos formas de disparo, ambas comparten el mismo Excel de salida:
+   - Por selección manual (tildando el checkbox de cada fila) → exportSelectedOrdenesExcel()
+   - Por rango de fechas (Desde/Hasta, sobre "Fecha de orden") → popover reportPopover /
+     exportOrdenesPorRango()
+   El AOA de columnas (buildOrdenesReportAOA) es el mismo que usa la hoja "ordenes" del
+   Excel de "Resumen de cuentas", para no tener dos formatos de reporte distintos.
+   ========================================================= */
+const ORDENES_REPORT_HEADER = [
+  "ID","Fecha de orden","Tipo de comprobante","Fecha del comprobante","Nro. de comprobante",
+  "Proveedor","Concepto","Rubro","Monto de factura","Monto de retención","Monto a pagar",
+  "Método de pago","Estado","Fecha de vencimiento","Fecha de pago","Observaciones",
+  "Comprobante adjunto","Comprobante de pago adjunto","Creado por","Modificado por","Última modificación"
+];
+const ORDENES_REPORT_COL_WIDTHS = [
+  {wch:10},{wch:12},{wch:14},{wch:16},{wch:20},{wch:22},{wch:16},{wch:18},{wch:14},{wch:14},
+  {wch:14},{wch:14},{wch:11},{wch:16},{wch:16},{wch:32},{wch:22},{wch:22},{wch:16},{wch:16},{wch:20}
+];
+function buildOrdenesReportAOA(list){
+  const aoa = [ORDENES_REPORT_HEADER];
+  list.forEach(o=>{
+    aoa.push([
+      o.id, isoToDMY(o.fechaOrden), o.comprobanteTipo||"", isoToDMY(o.fechaComprobante)||"", o.comprobante||"",
+      o.proveedor, o.concepto, o.rubro||"", o.montoFactura||0, o.montoRetencion||0, o.monto||0,
+      o.metodo||"", o.estado, isoToDMY(o.fechaVenc)||"", isoToDMY(o.fechaPago)||"", o.notas||"",
+      o.adjunto ? o.adjunto.nombre : "—", o.adjuntoPago ? o.adjuntoPago.nombre : "—",
+      o.creadoPor||"", o.modificadoPor||"", o.modificadoFecha ? fmtFechaHora(o.modificadoFecha) : ""
+    ]);
+  });
+  return aoa;
+}
+function downloadOrdenesReportExcel(list, filenameSuffix){
+  if(typeof XLSX === "undefined"){ showToast("No se pudo cargar el módulo de Excel (revisá la conexión a internet)", "warn"); return; }
+  if(!list.length){ showToast("No hay órdenes para descargar con ese criterio", "warn"); return; }
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(buildOrdenesReportAOA(list));
+  ws["!cols"] = ORDENES_REPORT_COL_WIDTHS;
+  XLSX.utils.book_append_sheet(wb, ws, "ordenes");
+  XLSX.writeFile(wb, `ordenes_pago_lafortaleza_${filenameSuffix}.xlsx`);
+  showToast(list.length+" orden(es) descargada(s) en el Excel");
+}
+function exportSelectedOrdenesExcel(){
+  if(selected.size===0){ showToast("No hay órdenes seleccionadas", "warn"); return; }
+  const list = ordenes.filter(o=>selected.has(o.id));
+  downloadOrdenesReportExcel(list, `seleccion_${todayISO()}`);
+}
+function toggleReportPopover(ev){
+  ev.stopPropagation();
+  const pop = document.getElementById("reportPopover");
+  const wasOpen = pop.classList.contains("show");
+  closeFilterPopover(); closeColumnPicker();
+  if(wasOpen){ pop.classList.remove("show"); return; }
+  renderReportPopover();
+  pop.classList.add("show");
+  const btn = ev.currentTarget;
+  const r = btn.getBoundingClientRect();
+  pop.style.top = (r.bottom+8)+"px";
+  let left = r.right-238;
+  if(left<12) left=12;
+  pop.style.left = left+"px";
+}
+function closeReportPopover(){ document.getElementById("reportPopover").classList.remove("show"); }
+function renderReportPopover(){
+  const pop = document.getElementById("reportPopover");
+  pop.innerHTML = `<h4>Descargar reporte por fecha</h4>
+    <label style="font-size:11px;color:var(--text-3);font-weight:700;">Desde</label>
+    <input type="date" id="repDesde">
+    <label style="font-size:11px;color:var(--text-3);font-weight:700;">Hasta</label>
+    <input type="date" id="repHasta">
+    <div style="font-size:11px;color:var(--text-3);margin:-2px 0 8px 0;">Se filtra por Fecha de orden.</div>
+    <div class="filter-actions"><button class="fa-clear" onclick="closeReportPopover()">Cancelar</button><button class="fa-apply" onclick="exportOrdenesPorRango()">Descargar</button></div>`;
+}
+function exportOrdenesPorRango(){
+  const desde = document.getElementById("repDesde").value;
+  const hasta = document.getElementById("repHasta").value;
+  if(!desde && !hasta){ showToast("Elegí al menos una fecha (Desde y/o Hasta)", "warn"); return; }
+  if(desde && hasta && desde>hasta){ showToast("La fecha 'Desde' no puede ser posterior a 'Hasta'", "warn"); return; }
+  const list = ordenes.filter(o=>{
+    if(desde && o.fechaOrden<desde) return false;
+    if(hasta && o.fechaOrden>hasta) return false;
+    return true;
+  }).slice().sort((a,b)=> a.fechaOrden<b.fechaOrden ? -1 : a.fechaOrden>b.fechaOrden ? 1 : 0);
+  const suf = (desde?isoToDMY(desde).replace(/\//g,"-"):"inicio")+"_a_"+(hasta?isoToDMY(hasta).replace(/\//g,"-"):todayISO());
+  downloadOrdenesReportExcel(list, suf);
+  closeReportPopover();
+}
+document.addEventListener("click",(e)=>{
+  const pop = document.getElementById("reportPopover");
+  if(pop.classList.contains("show") && !pop.contains(e.target) && !e.target.closest("[onclick=\"toggleReportPopover(event)\"]")) closeReportPopover();
+});
 function renderStackCard(containerId, rows){
   const el = document.getElementById(containerId);
   if(!rows.length){ el.innerHTML = `<div class="empty-mini">Sin comprobantes en este rango / filtro.</div>`; return; }
