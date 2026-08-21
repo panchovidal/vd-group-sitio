@@ -332,6 +332,14 @@
   .config-add-bar input:focus, .config-add-bar select:focus{border-color:var(--sky);}
   .config-add-bar button{flex-shrink:0;background:var(--blue);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:12.8px;font-weight:700;cursor:pointer;}
   .config-add-bar button:hover{filter:brightness(1.1);}
+  /* Factor de conversión de insumos (pedido de Pancho, 21/08/2026): la unidad en la que compramos
+     (unidad_medida) puede no ser la que se usa en las recetas — ej. se compra "1 bol" (bolsa) de papa
+     pero en las recetas se necesita en Kg. Estos campos guardan la equivalencia (1 bol = 30 Kg). */
+  .config-conv-fields{display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%;}
+  .config-conv-fields input{max-width:110px;}
+  .config-conv-fields select{max-width:150px;}
+  .config-conv-hint{font-size:10.5px;color:var(--text-3);font-weight:600;width:100%;}
+  .ins-conv-badge{font-size:10.5px;font-weight:700;color:#137B44;background:#E4F8ED;border-radius:20px;padding:2px 8px;white-space:nowrap;}
   .config-hint{font-size:12.5px;color:var(--text-2);margin:0 0 14px 0;max-width:620px;line-height:1.5;}
   .concepto-group-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--sky);padding:12px 18px 6px 18px;background:#FAFBFF;border-bottom:1px solid var(--border);}
   .empty-mini{padding:14px 18px;font-size:12.5px;color:var(--text-3);font-style:italic;}
@@ -496,13 +504,20 @@
   .ci-row .icon-btn.del-btn:hover{background:#FFF1F1;color:#C23434;}
   .ci-row .icon-btn svg{width:14px;height:14px;}
   .ci-add-row{background:#FAFBFF;}
-  .ci-cell-item{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .ci-cell-item{display:flex;align-items:flex-start;gap:6px;min-width:0;}
+  .ci-cell-item-inputs{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
   .ci-auto{font-size:12px;color:var(--text-2);font-weight:700;font-variant-numeric:tabular-nums;}
   .ci-punit{font-weight:800;color:var(--navy);font-size:13px;}
   .ci-warn{font-size:9.5px;color:#B22A32;font-weight:700;line-height:1.25;}
   .ci-add-btn{width:30px;height:30px;border-radius:8px;border:none;background:var(--blue);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .ci-add-btn:hover{filter:brightness(1.1);}
   .ci-add-btn svg{width:16px;height:16px;}
+  /* Botón de confirmar duplicado al principio de la fila (pedido de Pancho, 21/08/2026): a veces es
+     más cómodo cargar el ítem y confirmar desde el lado izquierdo, sin tener que llegar hasta el final
+     de la fila. Mismo onclick que el botón de siempre, solo que en miniatura al lado del insumo. */
+  .ci-add-btn-mini{width:24px;height:24px;border-radius:7px;border:none;background:var(--blue);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .ci-add-btn-mini:hover{filter:brightness(1.1);}
+  .ci-add-btn-mini svg{width:13px;height:13px;}
   .ci-tax-cell{display:flex;flex-direction:column;gap:4px;}
   .ci-tax-chips{display:flex;flex-wrap:wrap;gap:4px;}
   .ci-tax-chips:empty{display:none;}
@@ -1588,7 +1603,16 @@
                 <div class="config-card" style="margin-top:14px;max-width:760px;"><div class="config-add-bar">
                   <input type="text" id="costeoNewInsumoNombre" placeholder="Nombre del insumo (tal cual figura en la factura)" autocomplete="off" style="flex:1;min-width:220px;">
                   <input type="text" id="costeoNewInsumoCantidad" placeholder="Cantidad (ej. 1, 6, 0.5)" inputmode="decimal" style="max-width:150px;">
-                  <input type="text" id="costeoNewInsumoUM" placeholder="Unidad de medida (ej. Kg, Unidad, Litro)" list="dlUnidadesMedida" style="max-width:220px;">
+                  <input type="text" id="costeoNewInsumoUM" placeholder="Unidad de medida (ej. Kg, Unidad, Litro)" list="dlUnidadesMedida" style="max-width:220px;" oninput="costeoOnNewInsumoConvChange()">
+                  <select id="costeoNewInsumoConv" onchange="costeoOnNewInsumoConvChange()" style="max-width:170px;" title="¿Necesita conversión?">
+                    <option value="no">¿Necesita conversión? No</option>
+                    <option value="si">¿Necesita conversión? Sí</option>
+                  </select>
+                  <div class="config-conv-fields" id="costeoNewInsumoConvFields" style="display:none;">
+                    <input type="text" id="costeoNewInsumoConvCant" placeholder="Cant. (ej. 30)" inputmode="decimal">
+                    <input type="text" id="costeoNewInsumoConvUM" placeholder="Unidad convertida (ej. Kg)" list="dlUnidadesMedida">
+                    <div class="config-conv-hint" id="costeoNewInsumoConvHint">Equivalencia: 1 unidad de compra = [cant.] [unidad convertida]. Esa es la unidad y el precio que van a aparecer al usar este insumo en Recetas.</div>
+                  </div>
                   <button onclick="costeoAddInsumo()">+ Agregar insumo</button>
                 </div></div>
               </div>
@@ -1646,8 +1670,13 @@
                   <div id="costeoItemsList"></div>
                   <div class="ci-row ci-add-row" id="ciAddRow">
                     <div class="ci-cell-item">
-                      <input type="text" id="ciNewNomenclatura" placeholder="Insumo…" list="dlInsumosProveedor" autocomplete="off" oninput="costeoOnNewNomenclaturaInput()" onchange="costeoOnNewNomenclaturaInput()">
-                      <div class="ci-warn" id="ciNewNomenclaturaWarn" style="display:none;">No coincide con ningún insumo cargado para este proveedor</div>
+                      <button type="button" class="ci-add-btn-mini" onclick="costeoAddItem()" title="Agregar ítem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </button>
+                      <div class="ci-cell-item-inputs">
+                        <input type="text" id="ciNewNomenclatura" placeholder="Insumo…" list="dlInsumosProveedor" autocomplete="off" oninput="costeoOnNewNomenclaturaInput()" onchange="costeoOnNewNomenclaturaInput()">
+                        <div class="ci-warn" id="ciNewNomenclaturaWarn" style="display:none;">No coincide con ningún insumo cargado para este proveedor</div>
+                      </div>
                     </div>
                     <input type="text" id="ciNewPrecio" placeholder="$" inputmode="decimal" oninput="costeoRecalcNewRow()">
                     <input type="text" id="ciNewBultos" placeholder="1" inputmode="decimal" oninput="costeoRecalcNewRow()">
@@ -1718,9 +1747,10 @@
         </div>
       </div>
     </section>
-    <datalist id="dlUnidadesMedida">
-      <option value="Unidad"></option><option value="Kg"></option><option value="Gramo"></option><option value="Litro"></option><option value="Ml"></option><option value="Docena"></option><option value="Caja"></option><option value="Paquete"></option><option value="Bolsa"></option><option value="Botella"></option><option value="Fardo"></option><option value="Atado"></option>
-    </datalist>
+    <!-- Se completa dinámicamente (costeoRenderUnidadesDatalist) solo con las unidades que ya se
+         usaron en algún insumo, más las que el usuario vaya escribiendo — no trae unidades
+         predefinidas (pedido de Pancho, 21/08/2026). -->
+    <datalist id="dlUnidadesMedida"></datalist>
     <datalist id="dlInsumosProveedor"></datalist>
     <datalist id="dlRecetaInsumos"></datalist>
 
@@ -7675,6 +7705,28 @@ async function loadCosteoInsumos(){
   const { data, error } = await sb.from("lf_costeo_insumos").select("*").order("nomenclatura");
   if(error){ showToast("No se pudieron cargar los insumos de proveedores", "warn"); return; }
   costeoInsumos = data || [];
+  costeoRenderUnidadesDatalist();
+}
+// Unidades de medida sugeridas al cargar/editar un insumo: solo las que ya se usaron en algún
+// insumo (unidad de compra o unidad convertida) más lo que el usuario vaya escribiendo — no trae
+// unidades predefinidas (pedido de Pancho, 21/08/2026). El <input list="dlUnidadesMedida"> nunca
+// restringe la carga a esta lista, solo la sugiere.
+function costeoRenderUnidadesDatalist(){
+  const set = new Set();
+  costeoInsumos.forEach(ins=>{
+    if(ins.unidad_medida) set.add(String(ins.unidad_medida).trim());
+    if(ins.necesita_conversion && ins.conversion_unidad) set.add(String(ins.conversion_unidad).trim());
+  });
+  const units = Array.from(set).filter(Boolean).sort((a,b)=>a.localeCompare(b,"es",{sensitivity:"base"}));
+  const dl = document.getElementById("dlUnidadesMedida");
+  if(dl) dl.innerHTML = units.map(u=>`<option value="${costeoEsc(u)}"></option>`).join("");
+}
+// Unidad "efectiva" de un insumo: si tiene factor de conversión cargado, es la unidad convertida
+// (la que se usa en Recetas); si no, es la unidad de compra tal cual (la que se usa en Carga de
+// compras). Ver recInsumoPrecioUnitario para el precio correspondiente a esta unidad.
+function costeoInsumoUnidadEfectiva(ins){
+  if(!ins) return "—";
+  return (ins.necesita_conversion && ins.conversion_unidad) ? ins.conversion_unidad : (ins.unidad_medida||"—");
 }
 async function loadCosteoCompraItems(){
   const ids = costeoOrdenesFiltradas().map(o=>o.id);
@@ -7764,7 +7816,24 @@ function costeoOpenProveedor(id){
   document.getElementById("costeoNewInsumoNombre").value = "";
   document.getElementById("costeoNewInsumoCantidad").value = "";
   document.getElementById("costeoNewInsumoUM").value = "";
+  document.getElementById("costeoNewInsumoConv").value = "no";
+  document.getElementById("costeoNewInsumoConvCant").value = "";
+  document.getElementById("costeoNewInsumoConvUM").value = "";
+  document.getElementById("costeoNewInsumoConvFields").style.display = "none";
   renderCosteoInsumosList();
+}
+// Muestra/oculta los campos de equivalencia (cant./unidad convertida) según el select "¿Necesita
+// conversión?" del formulario de alta, y actualiza el hint con la unidad de compra tipeada.
+function costeoOnNewInsumoConvChange(){
+  const si = document.getElementById("costeoNewInsumoConv").value==="si";
+  document.getElementById("costeoNewInsumoConvFields").style.display = si ? "" : "none";
+  const um = document.getElementById("costeoNewInsumoUM").value.trim();
+  document.getElementById("costeoNewInsumoConvHint").textContent =
+    `Equivalencia: 1 ${um||"unidad de compra"} = [cant.] [unidad convertida]. Esa es la unidad y el precio que van a aparecer al usar este insumo en Recetas.`;
+}
+function costeoOnEditInsumoConvChange(id){
+  const si = document.getElementById("editInsConv_"+id).value==="si";
+  document.getElementById("editInsConvFields_"+id).style.display = si ? "" : "none";
 }
 function renderCosteoInsumosList(){
   const list = costeoInsumos.filter(i=>i.proveedor_id===costeoOpenProveedorId).sort((a,b)=>a.nomenclatura.localeCompare(b.nomenclatura,"es"));
@@ -7772,18 +7841,31 @@ function renderCosteoInsumosList(){
   if(!list.length){ el.innerHTML = `<div class="empty-mini">Todavía no hay insumos cargados para este proveedor.</div>`; return; }
   el.innerHTML = list.map(ins=>{
     if(costeoEditingInsumo===ins.id){
+      const conv = !!ins.necesita_conversion;
       return `<div class="config-list-row editing">
         <input class="edit-input" id="editInsNombre_${ins.id}" value="${costeoEsc(ins.nomenclatura)}" style="flex:1;min-width:160px;">
         <input class="edit-input" id="editInsCantidad_${ins.id}" value="${ins.cantidad!=null?ins.cantidad:1}" inputmode="decimal" placeholder="Cantidad" style="max-width:110px;">
         <input class="edit-input" id="editInsUM_${ins.id}" value="${costeoEsc(ins.unidad_medida||"")}" list="dlUnidadesMedida" style="max-width:150px;">
+        <select class="edit-select" id="editInsConv_${ins.id}" onchange="costeoOnEditInsumoConvChange('${ins.id}')" style="max-width:170px;" title="¿Necesita conversión?">
+          <option value="no" ${!conv?"selected":""}>¿Necesita conversión? No</option>
+          <option value="si" ${conv?"selected":""}>¿Necesita conversión? Sí</option>
+        </select>
+        <div class="config-conv-fields" id="editInsConvFields_${ins.id}" style="display:${conv?"":"none"};">
+          <input class="edit-input" id="editInsConvCant_${ins.id}" value="${ins.conversion_cantidad!=null?ins.conversion_cantidad:""}" inputmode="decimal" placeholder="Cant. (ej. 30)">
+          <input class="edit-input" id="editInsConvUM_${ins.id}" value="${costeoEsc(ins.conversion_unidad||"")}" list="dlUnidadesMedida" placeholder="Unidad convertida (ej. Kg)">
+          <div class="config-conv-hint">Equivalencia: 1 ${costeoEsc(ins.unidad_medida||"unidad de compra")} = [cant.] [unidad convertida].</div>
+        </div>
         <div class="row-actions">
           <button class="icon-btn" onclick="costeoSaveInsumo('${ins.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
           <button class="icon-btn" onclick="costeoCancelEditInsumo()" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div></div>`;
     }
+    const convBadge = (ins.necesita_conversion && ins.conversion_unidad)
+      ? ` <span class="ins-conv-badge">→ ${fmtNumCosteo(ins.conversion_cantidad)} ${costeoEsc(ins.conversion_unidad)}</span>`
+      : "";
     return `<div class="config-list-row">
       <span class="main-txt">${costeoEsc(ins.nomenclatura)}</span>
-      <span class="sub-txt">${fmtNumCosteo(ins.cantidad!=null?ins.cantidad:1)} ${costeoEsc(ins.unidad_medida||"—")}</span>
+      <span class="sub-txt">${fmtNumCosteo(ins.cantidad!=null?ins.cantidad:1)} ${costeoEsc(ins.unidad_medida||"—")}${convBadge}</span>
       <div class="row-actions">
         <button class="icon-btn" onclick="costeoStartEditInsumo('${ins.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
         <button class="icon-btn del-btn" onclick="costeoRequestDeleteInsumo('${ins.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
@@ -7797,14 +7879,26 @@ async function costeoAddInsumo(){
   const nombre = document.getElementById("costeoNewInsumoNombre").value.trim();
   const cantidad = parseDecimalCosteo(document.getElementById("costeoNewInsumoCantidad").value);
   const um = document.getElementById("costeoNewInsumoUM").value.trim();
+  const necesitaConv = document.getElementById("costeoNewInsumoConv").value==="si";
+  const convCant = necesitaConv ? parseDecimalCosteo(document.getElementById("costeoNewInsumoConvCant").value) : null;
+  const convUM = necesitaConv ? document.getElementById("costeoNewInsumoConvUM").value.trim() : null;
   if(!nombre){ showToast("Escribí el nombre del insumo", "warn"); return; }
   if(!cantidad){ showToast("Cargá la cantidad del insumo", "warn"); return; }
+  if(necesitaConv && (!convCant || !convUM)){ showToast("Completá la cantidad y la unidad de la conversión, o marcá 'No' si este insumo no necesita conversión", "warn"); return; }
   if(costeoInsumos.some(i=>i.proveedor_id===costeoOpenProveedorId && i.nomenclatura.toLowerCase()===nombre.toLowerCase())){ showToast("Ese insumo ya está cargado para este proveedor", "warn"); return; }
-  const { error } = await sb.from("lf_costeo_insumos").insert({ proveedor_id: costeoOpenProveedorId, nomenclatura: nombre, cantidad, unidad_medida: um||null, creado_por: currentPerfil?currentPerfil.id:null });
+  const { error } = await sb.from("lf_costeo_insumos").insert({
+    proveedor_id: costeoOpenProveedorId, nomenclatura: nombre, cantidad, unidad_medida: um||null,
+    necesita_conversion: necesitaConv, conversion_cantidad: convCant, conversion_unidad: convUM||null,
+    creado_por: currentPerfil?currentPerfil.id:null
+  });
   if(error){ showToast(error.code==="23505" ? "Ese insumo ya está cargado para este proveedor" : "No se pudo agregar el insumo", "warn"); return; }
   document.getElementById("costeoNewInsumoNombre").value = "";
   document.getElementById("costeoNewInsumoCantidad").value = "";
   document.getElementById("costeoNewInsumoUM").value = "";
+  document.getElementById("costeoNewInsumoConv").value = "no";
+  document.getElementById("costeoNewInsumoConvCant").value = "";
+  document.getElementById("costeoNewInsumoConvUM").value = "";
+  document.getElementById("costeoNewInsumoConvFields").style.display = "none";
   await loadCosteoInsumos();
   renderCosteoInsumosList(); renderCosteoProvList();
   logHistorialConfig("Agregó un insumo de costeo", `"${nombre}" (${(proveedoresConfig.find(p=>p.id===costeoOpenProveedorId)||{}).nombre||""})`);
@@ -7814,9 +7908,16 @@ async function costeoSaveInsumo(id){
   const nombre = document.getElementById("editInsNombre_"+id).value.trim();
   const cantidad = parseDecimalCosteo(document.getElementById("editInsCantidad_"+id).value);
   const um = document.getElementById("editInsUM_"+id).value.trim();
+  const necesitaConv = document.getElementById("editInsConv_"+id).value==="si";
+  const convCant = necesitaConv ? parseDecimalCosteo(document.getElementById("editInsConvCant_"+id).value) : null;
+  const convUM = necesitaConv ? document.getElementById("editInsConvUM_"+id).value.trim() : null;
   if(!nombre){ showToast("El nombre no puede estar vacío", "warn"); return; }
   if(!cantidad){ showToast("Cargá la cantidad del insumo", "warn"); return; }
-  const { error } = await sb.from("lf_costeo_insumos").update({ nomenclatura: nombre, cantidad, unidad_medida: um||null }).eq("id", id);
+  if(necesitaConv && (!convCant || !convUM)){ showToast("Completá la cantidad y la unidad de la conversión, o marcá 'No' si este insumo no necesita conversión", "warn"); return; }
+  const { error } = await sb.from("lf_costeo_insumos").update({
+    nomenclatura: nombre, cantidad, unidad_medida: um||null,
+    necesita_conversion: necesitaConv, conversion_cantidad: convCant, conversion_unidad: convUM||null
+  }).eq("id", id);
   if(error){ showToast(error.code==="23505" ? "Ya existe un insumo con ese nombre para este proveedor" : "No se pudo actualizar el insumo", "warn"); return; }
   costeoEditingInsumo = null;
   await loadCosteoInsumos();
@@ -8208,8 +8309,13 @@ function renderCosteoItemsList(){
       if(costeoEditingItem===it.id){
         return `<div class="ci-row ci-row-editing">
           <div class="ci-cell-item">
-            <input id="ei_nom_${it.id}" value="${costeoEsc(it.nomenclatura)}" list="dlInsumosProveedor" oninput="costeoRecalcEditRow('${it.id}')" onchange="costeoRecalcEditRow('${it.id}')">
-            <div class="ci-warn" id="ei_warn_${it.id}" style="display:none;">No coincide con ningún insumo de este proveedor</div>
+            <button type="button" class="ci-add-btn-mini" onclick="costeoSaveItem('${it.id}')" title="Guardar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <div class="ci-cell-item-inputs">
+              <input id="ei_nom_${it.id}" value="${costeoEsc(it.nomenclatura)}" list="dlInsumosProveedor" oninput="costeoRecalcEditRow('${it.id}')" onchange="costeoRecalcEditRow('${it.id}')">
+              <div class="ci-warn" id="ei_warn_${it.id}" style="display:none;">No coincide con ningún insumo de este proveedor</div>
+            </div>
           </div>
           <input id="ei_pl_${it.id}" value="${it.precio_lista}" inputmode="decimal" oninput="costeoRecalcEditRow('${it.id}')">
           <input id="ei_bu_${it.id}" value="${it.bultos}" inputmode="decimal" oninput="costeoRecalcEditRow('${it.id}')">
@@ -8363,11 +8469,21 @@ async function loadRecetaLineas(){
 }
 
 /* ---- Costeo recursivo ---- */
+// Precio por unidad "efectiva" del insumo (ver costeoInsumoUnidadEfectiva): si el insumo tiene
+// factor de conversión cargado (ej. se compra "1 bol" pero se usa en Kg dentro de las recetas), el
+// precio de la última compra —que está en la unidad de compra, ej. $/bol— se divide por la cantidad
+// de conversión para devolver el precio en la unidad convertida (ej. $/Kg). Si no tiene conversión,
+// es el mismo precio de siempre. Pedido de Pancho, 21/08/2026.
 function recInsumoPrecioUnitario(insumoId){
   const compras = costeoCompraItems.filter(it=>it.insumo_id===insumoId);
   if(!compras.length) return null;
   const ultimo = compras.slice().sort((a,b)=> new Date(b.created_at||0) - new Date(a.created_at||0))[0];
-  return costeoComputeRow(ultimo).punit;
+  const punitCompra = costeoComputeRow(ultimo).punit;
+  const ins = costeoInsumos.find(i=>i.id===insumoId);
+  if(ins && ins.necesita_conversion && Number(ins.conversion_cantidad)>0){
+    return punitCompra / Number(ins.conversion_cantidad);
+  }
+  return punitCompra;
 }
 function recCostoPorcion(recetaId, visiting){
   visiting = visiting ? new Set(visiting) : new Set();
@@ -8405,7 +8521,7 @@ function recPool(excludeRecetaId){
   const pool = [];
   costeoInsumos.forEach(ins=>{
     const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
-    pool.push({ tipo:"compra", id: ins.id, unidad: ins.unidad_medida||"—", label: `${ins.nomenclatura} (${prov?prov.nombre:"Proveedor"})` });
+    pool.push({ tipo:"compra", id: ins.id, unidad: costeoInsumoUnidadEfectiva(ins), label: `${ins.nomenclatura} (${prov?prov.nombre:"Proveedor"})` });
   });
   recetasItems.filter(r=>r.tipo==="semielaborado" && r.id!==excludeRecetaId).forEach(r=>{
     pool.push({ tipo:"semielaborado", id:r.id, unidad:"Porción", label:`${r.nombre} (Semi-elaborado)` });
@@ -8426,7 +8542,7 @@ function recInsumoRef(l){
     const ins = costeoInsumos.find(i=>i.id===l.insumo_compra_id);
     if(!ins) return null;
     const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
-    return { tipo:"compra", id:ins.id, unidad: ins.unidad_medida||"—", label:`${ins.nomenclatura} (${prov?prov.nombre:"Proveedor"})` };
+    return { tipo:"compra", id:ins.id, unidad: costeoInsumoUnidadEfectiva(ins), label:`${ins.nomenclatura} (${prov?prov.nombre:"Proveedor"})` };
   }
   const r = recetasItems.find(x=>x.id===l.insumo_semielaborado_id);
   if(!r) return null;
