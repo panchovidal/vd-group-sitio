@@ -2341,6 +2341,10 @@ const ESTADOS_FIJOS = ["Pendiente","Pagado","Vencido","Anulado"];
    ========================================================= */
 function fmtMoney(n){ return "$" + Number(n||0).toLocaleString("es-AR",{minimumFractionDigits:0,maximumFractionDigits:0}); }
 function fmtMoneyStrict(n){ return "$" + Math.max(Number(n||0),0).toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2}) + ".-"; }
+// Igual que fmtMoney pero muestra hasta 2 decimales cuando el monto los tiene
+// (sin decimales "de más": 9500 -> "$9.500", 9500.5 -> "$9.500,5", 9500.55 -> "$9.500,55").
+// Usada en la columna "Monto a pagar" de la grilla de Lista de órdenes (pedido de Pancho, 21/08/2026).
+function fmtMoney2(n){ return "$" + Number(n||0).toLocaleString("es-AR",{minimumFractionDigits:0,maximumFractionDigits:2}); }
 function pad2(n){ return String(n).padStart(2,"0"); }
 function isoToDMY(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; }
 function isoToDMY2(iso){ if(!iso) return "—"; const [y,m,d]=iso.split("-"); return `${d}/${m}/${y.slice(2)}`; }
@@ -2766,7 +2770,7 @@ const GRID_COLUMNS = [
   { id:"comprobante", label:"Nro. comprob.", sortField:"comprobante", filterCol:"comprobante", defaultWidth:146, minWidth:90, maxWidth:280,
     cell:o=>`<div class="cell c-comprobante">${o.comprobante||"—"}</div>` },
   { id:"monto", label:"Monto a pagar", sortField:"monto", filterCol:"monto", defaultWidth:158, minWidth:100, maxWidth:260,
-    cell:o=>`<div class="cell c-monto">${fmtMoney(o.monto)}</div>` },
+    cell:o=>`<div class="cell c-monto">${fmtMoney2(o.monto)}</div>` },
   { id:"estado", label:"Estado", sortField:"estado", filterCol:"estado", defaultWidth:108, minWidth:90, maxWidth:180,
     cell:o=>`<div class="cell"><span class="badge badge-${o.estado}">${o.estado}</span></div>` },
   { id:"fechaPago", label:"Fecha de pago", sortField:"fechaPago", filterCol:null, defaultWidth:120, minWidth:90, maxWidth:180,
