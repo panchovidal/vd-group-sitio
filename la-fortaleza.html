@@ -4489,21 +4489,25 @@ function vReadWorkbook(file){
 }
 
 /* ---- Lectura automática desde Supabase (ingesta diaria vía webhook de ATC) ----
-   ATC manda por webhook un delta de un solo día por tipo de reporte (confirmado:
-   no se superpone con envíos anteriores), que queda guardado tal cual en
-   lf_ventas_ingestas. Esta función junta los envíos "ok" de un tipo dentro del
-   rango pedido (con un colchón de días para no perder registros por husos
-   horarios) y devuelve un {header, rows} combinado, listo para usar con la
-   misma lógica que ya procesa el archivo subido a mano (vJornadaFecha, etc.).
-   La usan tanto Ventas > Resumen de ventas como Caja Mayor. */
-async function vFetchIngestaRango(tipo, desdeISO, hastaISO){
-  const desdeBuf = new Date(desdeISO+"T00:00:00"); desdeBuf.setDate(desdeBuf.getDate()-2);
-  const hastaBuf = new Date(hastaISO+"T00:00:00"); hastaBuf.setDate(hastaBuf.getDate()+3);
+   Trae TODO el historial "ok" de un tipo (sin filtrar por rango acá) y arma un
+   {header, rows} combinado. El filtrado por el rango de fechas elegido lo hace
+   la misma lógica que ya procesa el archivo subido a mano más abajo
+   (vJornadaFecha + vInRange sobre la columna "Fecha de movimiento" real de
+   cada fila) — no acá.
+   Importante: NO se filtra por "recibido_at" (cuándo llegó el archivo a
+   Supabase). Se probó filtrar así al principio, pensando que un envío diario
+   de ATC iba a llegar más o menos el mismo día que las fechas que contiene, y
+   se rompió apenas alguien subió (a mano, para probar) un archivo con meses de
+   historial en un solo envío: el archivo quedó guardado con recibido_at de
+   HOY, pero contiene datos de julio, así que filtrar por recibido_at lo
+   dejaba afuera de cualquier rango que no incluyera el día de hoy. Traer todo
+   el historial y filtrar por la fecha real de cada fila es la única forma
+   correcta, y para el volumen de datos de este club (documentado en
+   ventas-integracion-atc.md) no representa un problema de performance. */
+async function vFetchIngestaRango(tipo){
   const { data, error } = await sb.from("lf_ventas_ingestas")
     .select("header,rows,recibido_at,nombre_archivo")
     .eq("tipo", tipo).eq("estado", "ok")
-    .gte("recibido_at", desdeBuf.toISOString())
-    .lte("recibido_at", hastaBuf.toISOString())
     .order("recibido_at", {ascending:true});
   if (error) throw new Error(error.message);
   if (!data || !data.length) return null;
@@ -4664,24 +4668,41 @@ function toggleVentasManual(){
   document.getElementById("btnVentasManualToggle").textContent = ventasManualOverride ? "Ocultar carga manual" : "Cargar manualmente";
   checkVentasReady();
 }
+// Cuenta cuántas filas de un archivo {header, rows} caen dentro de [from, to]
+// según su "Fecha de movimiento" (con el corte de jornada de las 5am). Sirve
+// solo para mostrarle al usuario un número honesto en el cartel de estado —
+// el cálculo real de Ventas/Caja Mayor hace su propio filtrado más abajo.
+function vContarEnRango(archivo, from, to){
+  if(!archivo) return null;
+  const cFecha = vFindColIndex(archivo.header, ["Fecha de movimiento"]);
+  if(cFecha===-1) return null;
+  const cHora = vFindColIndex(archivo.header, ["Hora de movimiento"]);
+  let n = 0;
+  archivo.rows.forEach(r => { if(vInRange(vJornadaFecha(r[cFecha], cHora===-1?null:r[cHora]), from, to)) n++; });
+  return n;
+}
 async function vTryAutoLoadFromSupabase(){
   const desde = document.getElementById("vDesde").value;
   const hasta = document.getElementById("vHasta").value;
   const statusEl = document.getElementById("ventasAutoStatus");
   if(!desde || !hasta) return;
-  statusEl.textContent = "Buscando los reportes de ATC para el rango elegido…";
+  statusEl.textContent = "Buscando los reportes de ATC…";
   try{
     const [caja, ventas] = await Promise.all([
-      vFetchIngestaRango("movimientos_caja", desde, hasta),
-      vFetchIngestaRango("compras_ventas", desde, hasta)
+      vFetchIngestaRango("movimientos_caja"),
+      vFetchIngestaRango("compras_ventas")
     ]);
     if(caja && ventas){
       ventasFiles.caja = {header:caja.header, rows:caja.rows, fileName:"Movimientos de caja (ATC, automático)"};
       ventasFiles.ventas = {header:ventas.header, rows:ventas.rows, fileName:"Compras-Ventas (ATC, automático)"};
-      statusEl.innerHTML = "✓ Datos cargados automáticamente desde ATC · "+caja.rows.length+" mov. de caja, "+ventas.rows.length+" filas de compras-ventas.";
+      const from = vFromISO(desde), to = vFromISO(hasta);
+      const nCaja = vContarEnRango(ventasFiles.caja, from, to);
+      const nVentas = vContarEnRango(ventasFiles.ventas, from, to);
+      statusEl.innerHTML = "✓ ATC: "+caja.rows.length+" mov. de caja y "+ventas.rows.length+" filas de compras-ventas recibidas en total · "
+        +(nCaja===null?"?":nCaja)+" y "+(nVentas===null?"?":nVentas)+" respectivamente caen en el rango elegido ("+isoToDMY(desde)+" – "+isoToDMY(hasta)+").";
     } else {
       ventasFiles.caja = null; ventasFiles.ventas = null;
-      statusEl.innerHTML = "Todavía no hay datos automáticos de ATC para este rango. Cargalos manualmente mientras tanto.";
+      statusEl.innerHTML = "Todavía no llegó ningún envío automático de ATC (falta Movimientos de caja y/o Compras-Ventas). Cargalos manualmente mientras tanto.";
       if(!ventasManualOverride) toggleVentasManual();
     }
   }catch(err){
@@ -6804,15 +6825,17 @@ async function cmTryAutoLoadFromSupabase(){
   const hasta = document.getElementById("cmHasta").value;
   const statusEl = document.getElementById("cmAutoStatus");
   if(!desde || !hasta) return;
-  statusEl.textContent = "Buscando los movimientos de caja de ATC para el rango elegido…";
+  statusEl.textContent = "Buscando los movimientos de caja de ATC…";
   try{
-    const caja = await vFetchIngestaRango("movimientos_caja", desde, hasta);
+    const caja = await vFetchIngestaRango("movimientos_caja");
     if(caja){
       cmState.file = {header:caja.header, rows:caja.rows, fileName:"Movimientos de caja (ATC, automático)"};
-      statusEl.innerHTML = "✓ Datos cargados automáticamente desde ATC · "+caja.rows.length+" filas.";
+      const from = vFromISO(desde), to = vFromISO(hasta);
+      const nCaja = vContarEnRango(cmState.file, from, to);
+      statusEl.innerHTML = "✓ ATC: "+caja.rows.length+" filas recibidas en total · "+(nCaja===null?"?":nCaja)+" caen en el rango elegido ("+isoToDMY(desde)+" – "+isoToDMY(hasta)+").";
     } else {
       cmState.file = null;
-      statusEl.innerHTML = "Todavía no hay datos automáticos de ATC para este rango. Cargalos manualmente mientras tanto.";
+      statusEl.innerHTML = "Todavía no llegó ningún envío automático de ATC de Movimientos de caja. Cargalo manualmente mientras tanto.";
       if(!cmManualOverride) toggleCMManual();
     }
   }catch(err){
