@@ -628,17 +628,17 @@
   .stack-item-row-simple:last-child{border-bottom:none;}
 
   /* ---------- VENTAS: panel discreto de config. (índice de artículos + origen ATC), arriba a la derecha ---------- */
-  .ventas-side-config{display:flex;flex-direction:column;gap:7px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:240px;max-width:320px;flex-shrink:0;}
+  .ventas-side-config{display:flex;flex-direction:column;gap:7px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:260px;max-width:380px;flex-shrink:0;}
   .ventas-side-config .vcfg-row{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-2);border-radius:6px;transition:background .12s ease;}
   .ventas-side-config .vcfg-row.dragover{background:#F1F5FF;}
   .ventas-side-config .vcfg-dot{width:7px;height:7px;border-radius:50%;background:var(--gray);flex-shrink:0;}
   .ventas-side-config .vcfg-dot.ok{background:var(--lime);}
   .ventas-side-config .vcfg-dot.warn{background:#F0C868;}
   .ventas-side-config .vcfg-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .ventas-side-config .vcfg-link{background:none;border:none;padding:0;font-size:11px;font-weight:700;color:var(--sky);cursor:pointer;flex-shrink:0;}
+  .ventas-side-config .vcfg-link{background:none;border:none;padding:0;font-size:10.5px;font-weight:700;color:var(--sky);cursor:pointer;flex-shrink:0;white-space:nowrap;}
   .ventas-side-config .vcfg-link:hover{text-decoration:underline;}
   .ventas-side-config .vcfg-link:disabled{opacity:.4;cursor:not-allowed;text-decoration:none;}
-  .ventas-side-config .vcfg-foot{display:flex;justify-content:flex-end;border-top:1px solid var(--border);padding-top:6px;margin-top:1px;gap:10px;}
+  .ventas-side-config .vcfg-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;border-top:1px solid var(--border);padding-top:6px;margin-top:1px;column-gap:10px;row-gap:5px;}
 
   /* ---------- VENTAS: pastillas de rango rápido ---------- */
   .ventas-presets-row{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 18px 0;}
@@ -4805,7 +4805,14 @@ async function setVentasPreset(preset){
   const t = new Date(todayISO()+"T00:00:00");
   let desde, hasta;
   if(preset==="ayer"){ const ayer=new Date(t); ayer.setDate(ayer.getDate()-1); desde=ayer; hasta=ayer; }
-  else if(preset==="semana"){ desde=new Date(t); desde.setDate(desde.getDate()-6); hasta=t; }
+  else if(preset==="semana"){
+    // Semana calendario (lunes a domingo) completa más reciente, sin incluir la semana en curso.
+    const dow = t.getDay(); // 0=domingo..6=sábado
+    const diffToMonday = dow===0 ? 6 : dow-1;
+    const estaSemanaLunes = new Date(t); estaSemanaLunes.setDate(t.getDate()-diffToMonday);
+    desde = new Date(estaSemanaLunes); desde.setDate(estaSemanaLunes.getDate()-7);
+    hasta = new Date(estaSemanaLunes); hasta.setDate(estaSemanaLunes.getDate()-1);
+  }
   else { desde=new Date(t.getFullYear(),t.getMonth(),1); hasta=t; } // "mes"
   document.getElementById("vDesde").value = `${desde.getFullYear()}-${pad2(desde.getMonth()+1)}-${pad2(desde.getDate())}`;
   document.getElementById("vHasta").value = `${hasta.getFullYear()}-${pad2(hasta.getMonth()+1)}-${pad2(hasta.getDate())}`;
