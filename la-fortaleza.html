@@ -1110,8 +1110,12 @@
             </div>
             <div class="screen-scroll">
 
-              <div class="form-section-title" style="margin-top:0;">Reportes de ATC (arrastrá el archivo o hacé clic — carga manual por ahora)</div>
-              <div class="ventas-datasource-grid">
+              <div class="form-section-title" style="margin-top:0;">Reportes de ATC</div>
+              <div id="ventasDatasourceAuto" style="display:flex;align-items:center;justify-content:space-between;gap:14px;background:#F4F8FF;border:1px solid #D8E4FA;border-radius:10px;padding:12px 16px;margin-bottom:14px;">
+                <div id="ventasAutoStatus" style="font-size:13px;color:var(--text-2);">Elegí un rango de fechas para buscar los reportes de ATC.</div>
+                <button type="button" class="btn-ghost" id="btnVentasManualToggle" style="font-size:12px;flex:0 0 auto;" onclick="toggleVentasManual()">Cargar manualmente</button>
+              </div>
+              <div class="ventas-datasource-grid hidden" id="ventasDatasourceGrid">
                 <div class="attach-zone" id="vzoneCajaAttachZone" onclick="ventasZoneClick('caja')"></div>
                 <div class="attach-zone" id="vzoneVentasAttachZone" onclick="ventasZoneClick('ventas')"></div>
               </div>
@@ -1189,14 +1193,18 @@
               <div class="cm-carga-grid">
                 <div>
                   <div class="form-section-title" style="margin-top:0;">Movimientos de caja</div>
-                  <div class="attach-zone" id="cmAttachZone" onclick="cmZoneClick()">
+                  <div id="cmDatasourceAuto" style="display:flex;align-items:center;justify-content:space-between;gap:14px;background:#F4F8FF;border:1px solid #D8E4FA;border-radius:10px;padding:12px 16px;margin-bottom:14px;">
+                    <div id="cmAutoStatus" style="font-size:13px;color:var(--text-2);">Elegí un rango de fechas para buscar los movimientos de ATC.</div>
+                    <button type="button" class="btn-ghost" id="btnCMManualToggle" style="font-size:12px;flex:0 0 auto;" onclick="toggleCMManual()">Cargar manualmente</button>
+                  </div>
+                  <div class="attach-zone hidden" id="cmAttachZone" onclick="cmZoneClick()">
                     <input type="file" id="cmFileInput" accept=".xlsx,.xls" style="display:none">
                   </div>
 
                   <div class="form-section-title">Rango de fechas</div>
                   <div class="resumen-filters">
-                    <div class="f"><label>Desde</label><input type="date" id="cmDesde" onchange="checkCMReady()"></div>
-                    <div class="f"><label>Hasta</label><input type="date" id="cmHasta" onchange="checkCMReady()"></div>
+                    <div class="f"><label>Desde</label><input type="date" id="cmDesde" onchange="cmTryAutoLoadFromSupabase()"></div>
+                    <div class="f"><label>Hasta</label><input type="date" id="cmHasta" onchange="cmTryAutoLoadFromSupabase()"></div>
                   </div>
 
                   <div class="continue-row-ventas">
@@ -4480,6 +4488,43 @@ function vReadWorkbook(file){
   });
 }
 
+/* ---- Lectura automática desde Supabase (ingesta diaria vía webhook de ATC) ----
+   ATC manda por webhook un delta de un solo día por tipo de reporte (confirmado:
+   no se superpone con envíos anteriores), que queda guardado tal cual en
+   lf_ventas_ingestas. Esta función junta los envíos "ok" de un tipo dentro del
+   rango pedido (con un colchón de días para no perder registros por husos
+   horarios) y devuelve un {header, rows} combinado, listo para usar con la
+   misma lógica que ya procesa el archivo subido a mano (vJornadaFecha, etc.).
+   La usan tanto Ventas > Resumen de ventas como Caja Mayor. */
+async function vFetchIngestaRango(tipo, desdeISO, hastaISO){
+  const desdeBuf = new Date(desdeISO+"T00:00:00"); desdeBuf.setDate(desdeBuf.getDate()-2);
+  const hastaBuf = new Date(hastaISO+"T00:00:00"); hastaBuf.setDate(hastaBuf.getDate()+3);
+  const { data, error } = await sb.from("lf_ventas_ingestas")
+    .select("header,rows,recibido_at,nombre_archivo")
+    .eq("tipo", tipo).eq("estado", "ok")
+    .gte("recibido_at", desdeBuf.toISOString())
+    .lte("recibido_at", hastaBuf.toISOString())
+    .order("recibido_at", {ascending:true});
+  if (error) throw new Error(error.message);
+  if (!data || !data.length) return null;
+  // Columnas "canónicas": las de la ingesta más reciente. Cada fila se remapea
+  // por nombre de columna (no por posición) para blindarse ante un
+  // reordenamiento de columnas entre envíos de ATC.
+  const headerCanon = data[data.length-1].header || [];
+  const rowsOut = [];
+  data.forEach(ing => {
+    const h = ing.header || [];
+    const mismoOrden = h.length===headerCanon.length && h.every((c,i)=> (c||"").toString().trim()===((headerCanon[i]||"").toString().trim()));
+    if (mismoOrden){
+      (ing.rows||[]).forEach(r => rowsOut.push(r));
+    } else {
+      const idxMap = headerCanon.map(c => h.findIndex(hc => (hc||"").toString().trim().toLowerCase()===(c||"").toString().trim().toLowerCase()));
+      (ing.rows||[]).forEach(r => rowsOut.push(idxMap.map(i => i===-1 ? null : r[i])));
+    }
+  });
+  return {header: headerCanon, rows: rowsOut};
+}
+
 /* ---- Dropzones "arrastrar y soltar" para los 2 reportes de ATC (reutiliza el
    componente .attach-zone ya usado para adjuntar comprobantes en Pagos) ---- */
 const VENTAS_ZONE_LABEL = {
@@ -4608,6 +4653,47 @@ function checkVentasReady(){
     : "Cargá los 2 reportes de ATC, el índice de artículos y elegí un rango de fechas para continuar.";
 }
 
+/* ---- Carga automática de Movimientos de caja + Compras-Ventas desde Supabase.
+   Reemplaza la carga manual como flujo principal; la carga manual (drag&drop)
+   sigue disponible detrás de "Cargar manualmente" como respaldo, por si algún
+   día falta o falla el envío automático de ATC para el rango elegido. ---- */
+let ventasManualOverride = false;
+function toggleVentasManual(){
+  ventasManualOverride = !ventasManualOverride;
+  document.getElementById("ventasDatasourceGrid").classList.toggle("hidden", !ventasManualOverride);
+  document.getElementById("btnVentasManualToggle").textContent = ventasManualOverride ? "Ocultar carga manual" : "Cargar manualmente";
+  checkVentasReady();
+}
+async function vTryAutoLoadFromSupabase(){
+  const desde = document.getElementById("vDesde").value;
+  const hasta = document.getElementById("vHasta").value;
+  const statusEl = document.getElementById("ventasAutoStatus");
+  if(!desde || !hasta) return;
+  statusEl.textContent = "Buscando los reportes de ATC para el rango elegido…";
+  try{
+    const [caja, ventas] = await Promise.all([
+      vFetchIngestaRango("movimientos_caja", desde, hasta),
+      vFetchIngestaRango("compras_ventas", desde, hasta)
+    ]);
+    if(caja && ventas){
+      ventasFiles.caja = {header:caja.header, rows:caja.rows, fileName:"Movimientos de caja (ATC, automático)"};
+      ventasFiles.ventas = {header:ventas.header, rows:ventas.rows, fileName:"Compras-Ventas (ATC, automático)"};
+      statusEl.innerHTML = "✓ Datos cargados automáticamente desde ATC · "+caja.rows.length+" mov. de caja, "+ventas.rows.length+" filas de compras-ventas.";
+    } else {
+      ventasFiles.caja = null; ventasFiles.ventas = null;
+      statusEl.innerHTML = "Todavía no hay datos automáticos de ATC para este rango. Cargalos manualmente mientras tanto.";
+      if(!ventasManualOverride) toggleVentasManual();
+    }
+  }catch(err){
+    ventasFiles.caja = null; ventasFiles.ventas = null;
+    statusEl.innerHTML = "No se pudo conectar con Supabase para traer los datos automáticos ("+err.message+"). Cargalos manualmente mientras tanto.";
+    if(!ventasManualOverride) toggleVentasManual();
+  }
+  renderVentasZone("caja");
+  renderVentasZone("ventas");
+  checkVentasReady();
+}
+
 let ventasZonesWired = false;
 async function initVentasResumen(){
   if(!ventasZonesWired){
@@ -4618,7 +4704,7 @@ async function initVentasResumen(){
   }
   await vTryLoadIndiceFromStorage();
   if(!document.getElementById("vDesde").value){ setVentasPreset("mes"); }
-  checkVentasReady();
+  else { checkVentasReady(); await vTryAutoLoadFromSupabase(); }
 }
 function wireIndiceBoxDrop(){
   const box = document.getElementById("indiceBox");
@@ -4647,10 +4733,12 @@ function setVentasPreset(preset){
   document.getElementById("vDesde").value = `${desde.getFullYear()}-${pad2(desde.getMonth()+1)}-${pad2(desde.getDate())}`;
   document.getElementById("vHasta").value = `${hasta.getFullYear()}-${pad2(hasta.getMonth()+1)}-${pad2(hasta.getDate())}`;
   checkVentasReady();
+  vTryAutoLoadFromSupabase();
 }
 function onVentasDateChange(){
   document.querySelectorAll("[data-vpreset]").forEach(p=>p.classList.remove("active"));
   checkVentasReady();
+  vTryAutoLoadFromSupabase();
 }
 
 const VENTAS_ALIAS_ALQUILER = new Set(["Turno","Cancha 1 - Turno completo","Seña de turno fijo","Retención de seña"]);
@@ -6701,6 +6789,41 @@ async function setCMFile(file){
   checkCMReady();
   cmSaveState();
 }
+/* ---- Carga automática de Movimientos de caja desde Supabase (mismo criterio
+   que Ventas > Resumen de ventas: automático por defecto, con "Cargar
+   manualmente" como respaldo). ---- */
+let cmManualOverride = false;
+function toggleCMManual(){
+  cmManualOverride = !cmManualOverride;
+  document.getElementById("cmAttachZone").classList.toggle("hidden", !cmManualOverride);
+  document.getElementById("btnCMManualToggle").textContent = cmManualOverride ? "Ocultar carga manual" : "Cargar manualmente";
+  checkCMReady();
+}
+async function cmTryAutoLoadFromSupabase(){
+  const desde = document.getElementById("cmDesde").value;
+  const hasta = document.getElementById("cmHasta").value;
+  const statusEl = document.getElementById("cmAutoStatus");
+  if(!desde || !hasta) return;
+  statusEl.textContent = "Buscando los movimientos de caja de ATC para el rango elegido…";
+  try{
+    const caja = await vFetchIngestaRango("movimientos_caja", desde, hasta);
+    if(caja){
+      cmState.file = {header:caja.header, rows:caja.rows, fileName:"Movimientos de caja (ATC, automático)"};
+      statusEl.innerHTML = "✓ Datos cargados automáticamente desde ATC · "+caja.rows.length+" filas.";
+    } else {
+      cmState.file = null;
+      statusEl.innerHTML = "Todavía no hay datos automáticos de ATC para este rango. Cargalos manualmente mientras tanto.";
+      if(!cmManualOverride) toggleCMManual();
+    }
+  }catch(err){
+    cmState.file = null;
+    statusEl.innerHTML = "No se pudo conectar con Supabase para traer los datos automáticos ("+err.message+"). Cargalos manualmente mientras tanto.";
+    if(!cmManualOverride) toggleCMManual();
+  }
+  renderCMZone();
+  checkCMReady();
+  cmSaveState();
+}
 function checkCMReady(){
   const desde = document.getElementById("cmDesde").value;
   const hasta = document.getElementById("cmHasta").value;
@@ -7558,6 +7681,7 @@ async function cmInit(){
   document.getElementById("cmDesde").value = cmState.desde || "";
   document.getElementById("cmHasta").value = cmState.hasta || "";
   checkCMReady();
+  if(cmState.desde && cmState.hasta) await cmTryAutoLoadFromSupabase();
   if(cmState.pendientes.length || cmState.imputados.length || cmState.salidas.length || cmState.ajustes.length || cmState.retirosOficina.length){
     document.getElementById("cmResultados").classList.remove("hidden");
     document.querySelectorAll("#cmSalidasChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===cmState.salidasToggle));
