@@ -4443,7 +4443,14 @@ let ventasIndice = null; // {header, rows, savedAt, fileName}
 
 function vParseFlexDate(val){
   if (val === undefined || val === null) return null;
-  if (val instanceof Date) return new Date(val.getFullYear(), val.getMonth(), val.getDate());
+  // Ojo con las celdas de fecha "de verdad" (no texto): SheetJS las arma como
+  // Date en UTC (medianoche UTC del día que corresponde). Si acá se leyeran
+  // con getFullYear/getMonth/getDate (hora LOCAL del navegador), en Argentina
+  // (UTC-3) medianoche UTC del 19/08 pasa a ser 18/08 21:00 hora local y la
+  // fecha queda mal por un día — se vio en Caja Mayor (25/08/2026): un turno
+  // entero se corría de jornada y generaba diferencias de caja inventadas.
+  // Por eso siempre se leen los componentes en UTC acá.
+  if (val instanceof Date) return new Date(val.getUTCFullYear(), val.getUTCMonth(), val.getUTCDate());
   let str = String(val).trim();
   if (!str || str === "-") return null;
   str = str.split(" ")[0].split("T")[0];
@@ -4466,7 +4473,7 @@ function vInRange(date, from, to){ return date && date >= from && date <= to; }
 // caja" que recién marca formalmente el cierre pasada la medianoche).
 function vParseHoraHour(val){
   if (val===undefined || val===null) return 0;
-  if (val instanceof Date) return val.getHours();
+  if (val instanceof Date) return val.getUTCHours(); // mismo motivo UTC que vParseFlexDate
   const s = String(val).trim();
   if (!s || s==="-") return 0;
   const h = parseInt(s.split(":")[0], 10);
@@ -4537,17 +4544,44 @@ async function vFetchIngestaRango(tipo){
   // por nombre de columna (no por posición) para blindarse ante un
   // reordenamiento de columnas entre envíos de ATC.
   const headerCanon = data[data.length-1].header || [];
+  const idxFechaCanon = vFindColIndex(headerCanon, ["Fecha de movimiento"]);
+  // Dedup por día real (25/08/2026, reporte de Pancho: Caja Mayor mostraba
+  // retiros duplicados y diferencias de caja inventadas para el 18-25/08).
+  // Causa: acá se juntan TODAS las ingestas "ok" de un tipo, y puede haber más
+  // de una que cubra el mismo día real (ej. una carga de prueba con ~2 meses
+  // de historial + los envíos automáticos diarios reales de ATC para esas
+  // mismas fechas — ver ventas-integracion-atc.md). Se recorren las ingestas
+  // de la MÁS reciente a la más vieja y, por cada día calendario (columna
+  // "Fecha de movimiento"), se usan únicamente las filas de la ingesta más
+  // reciente que lo cubra — se descartan las de ese mismo día en ingestas más
+  // viejas, para no duplicar ni mezclar dos versiones de un mismo día. Si el
+  // tipo de reporte no tiene columna "Fecha de movimiento" (idxFechaCanon===-1)
+  // esto no aplica y se listan todas las filas de todas las ingestas, como
+  // antes.
+  const diasYaCubiertos = new Set();
   const rowsOut = [];
-  data.forEach(ing => {
+  for (let i = data.length - 1; i >= 0; i--){
+    const ing = data[i];
     const h = ing.header || [];
-    const mismoOrden = h.length===headerCanon.length && h.every((c,i)=> (c||"").toString().trim()===((headerCanon[i]||"").toString().trim()));
-    if (mismoOrden){
-      (ing.rows||[]).forEach(r => rowsOut.push(r));
-    } else {
-      const idxMap = headerCanon.map(c => h.findIndex(hc => (hc||"").toString().trim().toLowerCase()===(c||"").toString().trim().toLowerCase()));
-      (ing.rows||[]).forEach(r => rowsOut.push(idxMap.map(i => i===-1 ? null : r[i])));
-    }
-  });
+    const mismoOrden = h.length===headerCanon.length && h.every((c,ci)=> (c||"").toString().trim()===((headerCanon[ci]||"").toString().trim()));
+    const idxMap = mismoOrden ? null : headerCanon.map(c => h.findIndex(hc => (hc||"").toString().trim().toLowerCase()===(c||"").toString().trim().toLowerCase()));
+    const idxFechaIng = mismoOrden ? idxFechaCanon : vFindColIndex(h, ["Fecha de movimiento"]);
+    (ing.rows||[]).forEach(r => {
+      if (idxFechaCanon !== -1 && idxFechaIng !== -1){
+        const fecha = vParseFlexDate(r[idxFechaIng]);
+        if (fecha){
+          const diaKey = vToISODate(fecha);
+          if (diasYaCubiertos.has(diaKey)) return; // ya lo trajo una ingesta más reciente
+          diasYaCubiertos.add(diaKey);
+        }
+      }
+      rowsOut.push(mismoOrden ? r : idxMap.map(ci => ci===-1 ? null : r[ci]));
+    });
+  }
+  // Se recorrió de la ingesta más nueva a la más vieja (para que el dedup de
+  // arriba priorice lo más reciente); se da vuelta al final para devolver las
+  // filas en el mismo orden "más vieja primero" que ya devolvía esta función.
+  rowsOut.reverse();
   return {header: headerCanon, rows: rowsOut};
 }
 
@@ -6696,7 +6730,7 @@ function cmFmtDT(dt){ return pad2(dt.getDate())+"/"+pad2(dt.getMonth()+1)+" "+pa
 function cmTagClass(label){ return label==="TM" ? "cm-tag-tm" : "cm-tag-tt"; }
 function cmParseHora(val){
   if(val===undefined || val===null) return {h:0,m:0};
-  if(val instanceof Date) return {h:val.getHours(), m:val.getMinutes()};
+  if(val instanceof Date) return {h:val.getUTCHours(), m:val.getUTCMinutes()}; // mismo motivo UTC que vParseFlexDate
   const s = String(val).trim();
   if(!s || s==="-") return {h:0,m:0};
   const parts = s.split(":");
