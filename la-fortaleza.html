@@ -1680,7 +1680,7 @@
                   </div>
                   <div class="ci-ajustes-col">
                     <div class="ci-ajustes-title">Descuento de la factura</div>
-                    <div class="ci-ajustes-hint">Se prorratea proporcionalmente entre todos los ítems, reduciendo el costo unitario de cada uno.</div>
+                    <div class="ci-ajustes-hint">Se calcula sobre el precio de lista (sin impuestos) y se prorratea proporcionalmente entre todos los ítems. Se aplica antes que el IVA/IIBB/Internos de cada ítem — reduce el precio de lista y después se calculan los impuestos sobre ese valor ya descontado.</div>
                     <div id="ciDescFacturaChip"></div>
                     <div class="ci-tax-adder" id="ciDescFacturaAdder">
                       <select id="ciDescFacturaModo" onchange="costeoOnDescFacturaModoChange()">
@@ -1724,9 +1724,9 @@
                 </div>
                 </div>
                 <div class="ci-summary">
-                  <div class="cis-item">Suma de ítems<strong id="ciSumaItems">$0</strong></div>
+                  <div class="cis-item" title="Calculado sobre el precio de lista de los ítems, sin impuestos">Descuento de factura aplicado<strong id="ciDescGlobalMonto">$0</strong></div>
+                  <div class="cis-item" title="Precio de lista ya neto del descuento de factura, más los impuestos/descuentos propios de cada ítem (IVA, IIBB, Internos)">Suma de ítems (neta, con impuestos)<strong id="ciSumaItems">$0</strong></div>
                   <div class="cis-item">+ Impuestos generales<strong id="ciImpGenMonto">$0</strong></div>
-                  <div class="cis-item">− Descuento de factura<strong id="ciDescGlobalMonto">$0</strong></div>
                   <div class="cis-item">Total calculado<strong id="ciTotalCalculado">$0</strong></div>
                   <div class="cis-item">Total de la factura<strong id="ciTotalFactura">$0</strong></div>
                   <div class="cis-item">Diferencia<strong id="ciDiferencia">$0</strong></div>
@@ -7942,43 +7942,63 @@ function costeoAjusteMonto(entry, base){
   return modo==="monto" ? (Number(entry.valor)||0) : (Number(base||0) * ((Number(entry.valor)||0)/100));
 }
 function costeoSumaAjustes(list, base){ return (list||[]).reduce((s,e)=> s + costeoAjusteMonto(e, base), 0); }
+// Suma de los precios de lista "puros" (sin impuestos ni descuentos) de un conjunto de ítems — es la
+// base sobre la que se calcula y se prorratea el descuento general de la factura, ver
+// costeoBaseNetaDescuentoFactura.
+function costeoSumaListaItems(items){ return (items||[]).reduce((s,it)=>s+Number(it.precio_lista||0),0); }
+// Precio de lista de un ítem puntual, neto del descuento general de la factura (prorrateado según su
+// peso dentro de la suma de precios de lista de todos los ítems de la orden) — todavía SIN sus propios
+// impuestos/descuentos de línea. El descuento de factura se calcula sobre el precio de lista puro (sin
+// IVA) y se aplica antes que los impuestos de línea, para que el IVA/IIBB/Internos de cada ítem se
+// calculen sobre el valor ya descontado — pedido de Pancho, 25/08/2026 (antes el descuento se
+// prorrateaba sobre el subtotal CON impuestos de línea ya incluidos, lo que terminaba aplicando el %
+// de descuento también sobre el IVA, cuando el descuento del proveedor es siempre sobre el precio de
+// lista, sin considerar impuestos).
+function costeoBaseNetaDescuentoFactura(it, items, ajustes){
+  const sumaLista = costeoSumaListaItems(items);
+  const descGlobal = costeoMontoDescuentoGlobal(ajustes, sumaLista);
+  const listaItem = Number(it.precio_lista||0);
+  const shareDescuento = (descGlobal && sumaLista>0) ? descGlobal * (listaItem/sumaLista) : 0;
+  return listaItem - shareDescuento;
+}
 // Total de una línea con sus propios impuestos y descuentos puntuales (los cargados en esa fila),
-// todavía sin prorratear el descuento general de la factura.
-function costeoLineTotalPropio(it){
-  const base = Number(it.precio_lista||0);
+// calculados sobre el precio de lista ya neto del descuento general de la factura (no sobre el precio
+// de lista crudo) — ver costeoBaseNetaDescuentoFactura.
+function costeoLineTotalPropio(it, items, ajustes){
+  const base = costeoBaseNetaDescuentoFactura(it, (items && items.length) ? items : [it], ajustes);
   return base + costeoSumaAjustes(it.impuestos, base) - costeoSumaAjustes(it.descuentos, base);
 }
-function costeoLineTotal(it){ return costeoLineTotalPropio(it); } // alias retrocompatible (usado también en Recetas)
-// Subtotal de una orden = suma de todos sus ítems ya con sus propios ajustes, antes de los impuestos
-// generales de la factura y de su descuento general.
-function costeoSubtotalItems(items){ return (items||[]).reduce((s,it)=>s+costeoLineTotalPropio(it),0); }
+function costeoLineTotal(it){ return costeoLineTotalPropio(it, [it], null); } // alias retrocompatible (usado también en Recetas)
+// Subtotal de una orden = suma de todos sus ítems ya con el descuento de factura netado (antes de sus
+// impuestos de línea) y sus propios impuestos/descuentos de línea aplicados — antes de los impuestos
+// generales de la factura.
+function costeoSubtotalItems(items, ajustes){ return (items||[]).reduce((s,it)=>s+costeoLineTotalPropio(it, items, ajustes),0); }
 function costeoMontoImpuestosGenerales(ajustes, subtotal){ return costeoSumaAjustes(ajustes && ajustes.impuestos_generales, subtotal); }
-function costeoMontoDescuentoGlobal(ajustes, subtotal){
+function costeoMontoDescuentoGlobal(ajustes, base){
   if(!ajustes || ajustes.descuento_valor==null || ajustes.descuento_valor==="") return 0;
-  return costeoAjusteMonto({modo:ajustes.descuento_modo, valor:ajustes.descuento_valor}, subtotal);
+  return costeoAjusteMonto({modo:ajustes.descuento_modo, valor:ajustes.descuento_valor}, base);
 }
-// Total final calculado de la factura, para reconciliar contra el monto real cargado en Pagos.
+// Total final calculado de la factura, para reconciliar contra el monto real cargado en Pagos. El
+// descuento general de la factura YA está descontado dentro de "subtotal" (se aplicó por ítem, antes
+// de sus impuestos de línea — ver costeoLineTotalPropio), por eso acá no se resta de nuevo.
 function costeoTotalFacturaCalculado(items, ajustes){
-  const subtotal = costeoSubtotalItems(items);
-  return subtotal + costeoMontoImpuestosGenerales(ajustes, subtotal) - costeoMontoDescuentoGlobal(ajustes, subtotal);
+  const subtotal = costeoSubtotalItems(items, ajustes);
+  return subtotal + costeoMontoImpuestosGenerales(ajustes, subtotal);
 }
-// $/un. de un ítem puntual: a su propio total (con impuestos/descuentos de línea) se le resta, a
-// prorrata según su peso dentro del subtotal, el descuento general de la factura. Los impuestos
-// generales (ej. percepción de IIBB) NO se prorratean acá — son un crédito/costo del comprador que no
-// encarece la mercadería, así que solo impactan el total de la factura, no el costo unitario de cada ítem.
+// $/un. de un ítem puntual = su total propio (precio de lista ya neto del descuento de factura, más
+// sus propios impuestos/descuentos de línea calculados sobre ese neto) ÷ (Bultos × Cantidad). Los
+// impuestos generales (ej. percepción de IIBB) NO entran acá — son un crédito/costo del comprador que
+// no encarece la mercadería, así que solo impactan el total de la factura, no el costo unitario de
+// cada ítem.
 function costeoComputeRow(it, items, ajustes){
   const bultos = Number(it.bultos)||0;
   const cantidad = Number(it.cantidad)||0;
   const precioBulto = bultos>0 ? Number(it.precio_lista||0)/bultos : 0;
   const neto = cantidad>0 ? precioBulto/cantidad : 0;
-  const totalPropio = costeoLineTotalPropio(it);
   const listaItems = (items && items.length) ? items : [it];
-  const subtotal = costeoSubtotalItems(listaItems);
-  const descGlobal = costeoMontoDescuentoGlobal(ajustes, subtotal);
-  const shareDescuento = (descGlobal && subtotal>0) ? descGlobal * (totalPropio/subtotal) : 0;
-  const totalFinal = totalPropio - shareDescuento;
+  const totalPropio = costeoLineTotalPropio(it, listaItems, ajustes);
   const totalUnidades = bultos*cantidad;
-  return { precioBulto, neto, totalPropio, totalFinal, punit: totalUnidades>0 ? totalFinal/totalUnidades : 0 };
+  return { precioBulto, neto, totalPropio, totalFinal: totalPropio, punit: totalUnidades>0 ? totalPropio/totalUnidades : 0 };
 }
 
 function costeoOrdenesFiltradas(){ return ordenes.filter(o=>COSTEO_CONCEPTOS.includes(o.concepto)); }
@@ -8332,9 +8352,22 @@ function costeoGetPrecioListaByCtx(ctx){
   const el = document.getElementById(ctx==="new" ? "ciNewPrecio" : `ei_pl_${ctx}`);
   return el ? parseDecimalCosteo(el.value) : 0;
 }
+// Base efectiva (precio de lista ya neto del descuento de factura, prorrateado) contra la que se
+// calculan los montos que se muestran al lado de cada chip de impuesto/descuento de línea mientras se
+// está cargando o editando un ítem — tiene que ser la MISMA base que usa costeoComputeRow, si no el
+// monto que se ve en el chip no coincide con el que termina impactando el $/un. real (pedido de
+// Pancho, 25/08/2026: el descuento de factura se aplica antes que el IVA/IIBB/Internos).
+function costeoGetBaseNetaByCtx(ctx){
+  const precioLista = costeoGetPrecioListaByCtx(ctx);
+  const draft = { precio_lista: precioLista };
+  const items = ctx==="new"
+    ? [...costeoItemsDeOrden(), draft]
+    : costeoItemsDeOrden().map(it=> it.id===ctx ? draft : it);
+  return costeoBaseNetaDescuentoFactura(draft, items, costeoAjustesDeOrden(costeoOpenOrdenId));
+}
 function costeoTaxCellHTML(ctx){
   const list = costeoGetTaxArrayByCtx(ctx);
-  return `<div class="ci-tax-chips" id="ciTaxChips_${ctx}">${costeoRenderTaxChips(list, ctx, true, costeoGetPrecioListaByCtx(ctx))}</div>
+  return `<div class="ci-tax-chips" id="ciTaxChips_${ctx}">${costeoRenderTaxChips(list, ctx, true, costeoGetBaseNetaByCtx(ctx))}</div>
     <div class="ci-tax-adder">
       <select id="ciTaxTipo_${ctx}" onchange="costeoOnTaxTipoChange('${ctx}')">
         <option value="IVA">IVA</option>
@@ -8355,7 +8388,7 @@ function costeoTaxCellHTML(ctx){
 }
 function costeoDescCellHTML(ctx){
   const list = costeoGetDescArrayByCtx(ctx);
-  return `<div class="ci-tax-chips" id="ciDescChips_${ctx}">${costeoRenderDescChips(list, ctx, true, costeoGetPrecioListaByCtx(ctx))}</div>
+  return `<div class="ci-tax-chips" id="ciDescChips_${ctx}">${costeoRenderDescChips(list, ctx, true, costeoGetBaseNetaByCtx(ctx))}</div>
     <div class="ci-tax-adder">
       <input type="text" id="ciDescConcepto_${ctx}" placeholder="Concepto" style="width:80px;">
       <select id="ciDescModo_${ctx}" onchange="costeoOnDescModoChange('${ctx}')">
@@ -8421,11 +8454,11 @@ function costeoRemoveDesc(ctx, idx){
 }
 function costeoRefreshTaxUI(ctx){
   const chipsEl = document.getElementById(`ciTaxChips_${ctx}`);
-  if(chipsEl) chipsEl.innerHTML = costeoRenderTaxChips(costeoGetTaxArrayByCtx(ctx), ctx, true, costeoGetPrecioListaByCtx(ctx));
+  if(chipsEl) chipsEl.innerHTML = costeoRenderTaxChips(costeoGetTaxArrayByCtx(ctx), ctx, true, costeoGetBaseNetaByCtx(ctx));
 }
 function costeoRefreshDescUI(ctx){
   const chipsEl = document.getElementById(`ciDescChips_${ctx}`);
-  if(chipsEl) chipsEl.innerHTML = costeoRenderDescChips(costeoGetDescArrayByCtx(ctx), ctx, true, costeoGetPrecioListaByCtx(ctx));
+  if(chipsEl) chipsEl.innerHTML = costeoRenderDescChips(costeoGetDescArrayByCtx(ctx), ctx, true, costeoGetBaseNetaByCtx(ctx));
 }
 
 /* ---- Ajustes de la factura: impuestos generales (sobre el subtotal de ítems, ej. percepción de IIBB)
@@ -8435,7 +8468,8 @@ function renderCiAjustes(){
   const ordenId = costeoOpenOrdenId;
   const ajustes = costeoAjustesDeOrden(ordenId);
   const items = costeoItemsDeOrden();
-  const subtotal = costeoSubtotalItems(items);
+  const subtotal = costeoSubtotalItems(items, ajustes);
+  const sumaLista = costeoSumaListaItems(items);
   const chipsEl = document.getElementById("ciImpGenChips");
   if(chipsEl){
     const list = ajustes.impuestos_generales||[];
@@ -8452,7 +8486,7 @@ function renderCiAjustes(){
     if(ajustes.descuento_valor!=null && ajustes.descuento_valor!==""){
       const modo = ajustes.descuento_modo==="monto" ? "monto" : "pct";
       const label = modo==="monto" ? fmtMoneyCosteo(ajustes.descuento_valor) : (fmtNumCosteo(ajustes.descuento_valor)+"%");
-      const sub = modo==="monto" ? "" : ` (${fmtMoneyCosteo(costeoAjusteMonto({modo, valor:ajustes.descuento_valor}, subtotal))})`;
+      const sub = modo==="monto" ? "" : ` (${fmtMoneyCosteo(costeoAjusteMonto({modo, valor:ajustes.descuento_valor}, sumaLista))})`;
       descChipEl.innerHTML = `<span class="ci-tax-chip ci-desc-chip">Descuento ${label}${sub} <button type="button" onclick="costeoQuitarDescuentoFactura()" title="Quitar">×</button></span>`;
       descAdderEl.style.display = "none";
     } else {
@@ -8621,13 +8655,14 @@ function renderCosteoItemsList(){
         </div>`;
       }
       const r = costeoComputeRow(it, list, ajustes);
+      const baseNeta = costeoBaseNetaDescuentoFactura(it, list, ajustes);
       return `<div class="ci-row">
         <div>${costeoEsc(it.nomenclatura)}</div>
         <div>${fmtMoneyCosteo(it.precio_lista)}</div>
         <div>${fmtNumCosteo(it.bultos)}</div>
         <div class="ci-auto">${fmtMoneyCosteo(r.precioBulto)}</div>
-        <div class="ci-tax-cell">${costeoRenderTaxChips(it.impuestos||[], it.id, false, it.precio_lista)}</div>
-        <div class="ci-tax-cell">${costeoRenderDescChips(it.descuentos||[], it.id, false, it.precio_lista)}</div>
+        <div class="ci-tax-cell">${costeoRenderTaxChips(it.impuestos||[], it.id, false, baseNeta)}</div>
+        <div class="ci-tax-cell">${costeoRenderDescChips(it.descuentos||[], it.id, false, baseNeta)}</div>
         <div class="ci-auto">${fmtNumCosteo(it.cantidad)}</div>
         <div class="ci-auto ci-um-lbl">${costeoEsc(it.unidad_medida||"—")}</div>
         <div class="ci-auto ci-punit">${fmtMoneyCosteo(r.punit)}</div>
@@ -8677,10 +8712,13 @@ function costeoUpdateSummary(){
   const o = ordenes.find(x=>x.id===costeoOpenOrdenId);
   const list = costeoItemsDeOrden();
   const ajustes = costeoAjustesDeOrden(costeoOpenOrdenId);
-  const subtotal = costeoSubtotalItems(list);
+  const sumaLista = costeoSumaListaItems(list);
+  const descGlobal = costeoMontoDescuentoGlobal(ajustes, sumaLista);
+  // "subtotal" ya viene neto del descuento de factura (aplicado por ítem, antes de sus impuestos de
+  // línea — ver costeoLineTotalPropio), por eso el descuento no se resta de nuevo acá.
+  const subtotal = costeoSubtotalItems(list, ajustes);
   const impGen = costeoMontoImpuestosGenerales(ajustes, subtotal);
-  const descGlobal = costeoMontoDescuentoGlobal(ajustes, subtotal);
-  const totalCalculado = subtotal + impGen - descGlobal;
+  const totalCalculado = subtotal + impGen;
   const totalFactura = o ? Number(o.montoFactura||0) : 0;
   const dif = totalCalculado-totalFactura;
   document.getElementById("ciSumaItems").textContent = fmtMoneyCosteo(subtotal);
