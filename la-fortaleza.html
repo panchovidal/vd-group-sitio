@@ -480,6 +480,7 @@
   .recon-ok{background:#E4F8ED;color:#137B44;}
   .recon-bad{background:#FCE6E7;color:#B22A32;}
   .recon-pending{background:#EEEFF5;color:#6D7191;}
+  .recon-info{background:#EAF1FE;color:#2B5FC7;}
 
   .ci-table-scroll{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:auto;max-width:100%;padding-bottom:2px;}
   /* La tabla de Carga de compras usa el alto real disponible en pantalla (flex), no "vh" —
@@ -1691,6 +1692,20 @@
                       <button type="button" class="ci-tax-add-btn" onclick="costeoSetDescuentoFactura()" title="Aplicar descuento">✓</button>
                     </div>
                   </div>
+                  <div class="ci-ajustes-col">
+                    <div class="ci-ajustes-title">Justificativo de diferencia</div>
+                    <div class="ci-ajustes-hint">Si cargaste algún valor distinto al real de la factura (ej. porque el proveedor bonificó productos y necesitás que el costo unitario de la receta quede actualizado igual), dejá aclarado el motivo acá. Sirve para distinguir, en el listado de facturas, cuáles diferencias son reales y cuáles son por este tipo de ajuste intencional.</div>
+                    <div id="ciJustifChip"></div>
+                    <div class="ci-tax-adder" id="ciJustifAdder" style="flex-wrap:wrap;">
+                      <select id="ciJustifTipo" onchange="costeoOnJustifTipoChange()">
+                        <option value="">Motivo…</option>
+                        <option value="bonificados">Artículos bonificados</option>
+                        <option value="otro">Otro</option>
+                      </select>
+                      <input type="text" id="ciJustifNota" placeholder="Detalle (opcional)" style="flex:1;min-width:140px;">
+                      <button type="button" class="ci-tax-add-btn" onclick="costeoSetJustificativo()" title="Guardar justificativo">✓</button>
+                    </div>
+                  </div>
                 </div>
                 <div class="ci-table-scroll">
                 <div class="ci-table">
@@ -1747,6 +1762,10 @@
                 <button type="button" class="rec-toggle-btn" data-rtipo="articulo" onclick="recGoTipo('articulo')">Artículos</button>
               </div>
               <p class="config-hint" id="recHint">Los semi-elaborados son productos con su propia pre-elaboración (ej. bollo de pizza, salsa) que después se usan como insumo dentro de otras recetas. Acá se cargan y se les define su receta.</p>
+              <div class="search-wrap" style="max-width:420px;margin-bottom:12px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="recSearchInput" placeholder="Buscar por nombre…" oninput="recOnSearchInput(this.value)">
+              </div>
               <div id="recListWrap"></div>
               <div class="config-card" id="recAddBarSemi" style="margin-top:14px;max-width:660px;"><div class="config-add-bar">
                 <input type="text" id="recNewNombre" placeholder="Nombre…" autocomplete="off" style="flex:1;min-width:200px;">
@@ -7917,6 +7936,7 @@ let recCurrentTipo = "semielaborado";
 let recOpenId = null;       // receta cuya receta está desplegada
 let recEditingItem = null;  // id de receta cuyo nombre/categoría se está editando
 let recEditingLinea = null; // id de línea cuya cantidad se está editando
+let recSearchQuery = "";    // filtro de nombre sobre la lista de semi-elaborados/artículos (evita scrollear)
 
 function costeoEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 // Acepta tanto "1500.50" (punto como separador decimal) como "1.500,50" (formato AR, punto de miles + coma decimal).
@@ -8018,9 +8038,10 @@ function costeoComputeRow(it, items, ajustes){
 
 function costeoOrdenesFiltradas(){ return ordenes.filter(o=>COSTEO_CONCEPTOS.includes(o.concepto)); }
 function costeoProveedoresList(){ return proveedoresConfig.filter(p=>COSTEO_CONCEPTOS.includes(p.concepto)); }
-function costeoAjustesDeOrden(ordenId){ return costeoOrdenAjustesMap[ordenId] || {impuestos_generales:[], descuento_modo:null, descuento_valor:null}; }
+function costeoAjustesDeOrdenDefault(){ return {impuestos_generales:[], descuento_modo:null, descuento_valor:null, justificativo_tipo:null, justificativo_nota:null}; }
+function costeoAjustesDeOrden(ordenId){ return costeoOrdenAjustesMap[ordenId] || costeoAjustesDeOrdenDefault(); }
 function costeoEnsureAjustesDeOrden(ordenId){
-  if(!costeoOrdenAjustesMap[ordenId]) costeoOrdenAjustesMap[ordenId] = {impuestos_generales:[], descuento_modo:null, descuento_valor:null};
+  if(!costeoOrdenAjustesMap[ordenId]) costeoOrdenAjustesMap[ordenId] = costeoAjustesDeOrdenDefault();
   return costeoOrdenAjustesMap[ordenId];
 }
 
@@ -8064,7 +8085,13 @@ async function loadCosteoOrdenAjustes(){
   const { data, error } = await sb.from("lf_costeo_orden_ajustes").select("*").in("orden_id", ids);
   if(error){ showToast("No se pudieron cargar los ajustes de las facturas", "warn"); return; }
   const map = {};
-  (data||[]).forEach(row=>{ map[row.orden_id] = { impuestos_generales: row.impuestos_generales||[], descuento_modo: row.descuento_modo||null, descuento_valor: row.descuento_valor!=null?row.descuento_valor:null }; });
+  (data||[]).forEach(row=>{ map[row.orden_id] = {
+    impuestos_generales: row.impuestos_generales||[],
+    descuento_modo: row.descuento_modo||null,
+    descuento_valor: row.descuento_valor!=null?row.descuento_valor:null,
+    justificativo_tipo: row.justificativo_tipo||null,
+    justificativo_nota: row.justificativo_nota||null
+  }; });
   costeoOrdenAjustesMap = map;
 }
 async function costeoSaveOrdenAjustes(ordenId){
@@ -8074,6 +8101,8 @@ async function costeoSaveOrdenAjustes(ordenId){
     impuestos_generales: a.impuestos_generales||[],
     descuento_modo: a.descuento_modo||null,
     descuento_valor: (a.descuento_valor!=null && a.descuento_valor!=="") ? a.descuento_valor : null,
+    justificativo_tipo: a.justificativo_tipo||null,
+    justificativo_nota: (a.justificativo_nota && a.justificativo_nota.trim()) ? a.justificativo_nota.trim() : null,
     modificado_por: currentPerfil?currentPerfil.id:null,
     modificado_fecha: new Date().toISOString()
   });
@@ -8276,11 +8305,16 @@ function renderCosteoComprasList(){
     html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div>`;
     items.forEach(o=>{
       const itemsOrden = costeoCompraItems.filter(it=>it.orden_id===o.id);
-      const totalCalculado = costeoTotalFacturaCalculado(itemsOrden, costeoAjustesDeOrden(o.id));
+      const ajustesOrden = costeoAjustesDeOrden(o.id);
+      const totalCalculado = costeoTotalFacturaCalculado(itemsOrden, ajustesOrden);
       const totalFactura = Number(o.montoFactura||0);
       let badge;
       if(!itemsOrden.length) badge = `<span class="recon-badge recon-pending">Sin cargar</span>`;
       else if(Math.abs(totalCalculado-totalFactura) < 1) badge = `<span class="recon-badge recon-ok">✓ Coincide con la factura</span>`;
+      else if(ajustesOrden.justificativo_tipo){
+        const motivo = costeoJustifLabel(ajustesOrden.justificativo_tipo);
+        badge = `<span class="recon-badge recon-info" title="${costeoEsc(motivo)}${ajustesOrden.justificativo_nota?(' — '+costeoEsc(ajustesOrden.justificativo_nota)):''}">Dif. justificada (${fmtMoneyCosteo(totalCalculado-totalFactura)})</span>`;
+      }
       else badge = `<span class="recon-badge recon-bad">Dif. ${fmtMoneyCosteo(totalCalculado-totalFactura)}</span>`;
       html += `<div class="costeo-orden-card">
         <div class="co-fecha">${isoToDMY(o.fechaOrden)}</div>
@@ -8521,7 +8555,21 @@ function renderCiAjustes(){
       descAdderEl.style.display = "";
     }
   }
+  const justifChipEl = document.getElementById("ciJustifChip");
+  const justifAdderEl = document.getElementById("ciJustifAdder");
+  if(justifChipEl && justifAdderEl){
+    if(ajustes.justificativo_tipo){
+      const label = costeoJustifLabel(ajustes.justificativo_tipo);
+      const nota = ajustes.justificativo_nota ? ` — ${costeoEsc(ajustes.justificativo_nota)}` : "";
+      justifChipEl.innerHTML = `<span class="ci-tax-chip ci-desc-chip">${costeoEsc(label)}${nota} <button type="button" onclick="costeoQuitarJustificativo()" title="Quitar">×</button></span>`;
+      justifAdderEl.style.display = "none";
+    } else {
+      justifChipEl.innerHTML = "";
+      justifAdderEl.style.display = "";
+    }
+  }
 }
+function costeoJustifLabel(tipo){ return tipo==="bonificados" ? "Artículos bonificados" : (tipo==="otro" ? "Otro motivo" : ""); }
 function costeoOnImpGenModoChange(){
   const modo = document.getElementById("ciImpGenModo").value;
   document.getElementById("ciImpGenVal").placeholder = modo==="monto" ? "$" : "%";
@@ -8581,6 +8629,44 @@ async function costeoQuitarDescuentoFactura(){
   if(!ok) return;
   renderCiAjustes();
   renderCosteoItemsList();
+}
+function costeoOnJustifTipoChange(){
+  const tipo = document.getElementById("ciJustifTipo").value;
+  document.getElementById("ciJustifNota").placeholder = tipo==="otro" ? "Detalle del motivo" : "Detalle (opcional)";
+}
+// El "justificativo de diferencia" no impacta ningún cálculo — es solo informativo, para poder
+// distinguir en el listado de facturas las diferencias reales de las que son por cargar valores
+// intencionalmente distintos a la factura real (ej. artículos bonificados por el proveedor, cargados
+// con un precio para que el costo unitario de la receta quede actualizado) — pedido de Pancho,
+// 28/08/2026.
+async function costeoSetJustificativo(){
+  const ordenId = costeoOpenOrdenId;
+  if(!ordenId) return;
+  const tipo = document.getElementById("ciJustifTipo").value;
+  const nota = document.getElementById("ciJustifNota").value.trim();
+  if(!tipo){ showToast("Elegí un motivo", "warn"); return; }
+  const ajustes = costeoEnsureAjustesDeOrden(ordenId);
+  ajustes.justificativo_tipo = tipo;
+  ajustes.justificativo_nota = nota || null;
+  const ok = await costeoSaveOrdenAjustes(ordenId);
+  if(!ok) return;
+  document.getElementById("ciJustifNota").value = "";
+  document.getElementById("ciJustifTipo").value = "";
+  renderCiAjustes();
+  costeoUpdateSummary(); // el badge de reconciliación de esta orden usa el justificativo
+  renderCosteoComprasList(); // idem el badge del listado de facturas
+}
+async function costeoQuitarJustificativo(){
+  const ordenId = costeoOpenOrdenId;
+  if(!ordenId) return;
+  const ajustes = costeoEnsureAjustesDeOrden(ordenId);
+  ajustes.justificativo_tipo = null;
+  ajustes.justificativo_nota = null;
+  const ok = await costeoSaveOrdenAjustes(ordenId);
+  if(!ok) return;
+  renderCiAjustes();
+  costeoUpdateSummary();
+  renderCosteoComprasList();
 }
 
 /* ---- Fila de alta ("Agregar ítem") ---- */
@@ -8758,6 +8844,10 @@ function costeoUpdateSummary(){
   const badgeEl = document.getElementById("ciReconBadge");
   if(!list.length) badgeEl.innerHTML = `<span class="recon-badge recon-pending">Sin cargar</span>`;
   else if(Math.abs(dif) < 1) badgeEl.innerHTML = `<span class="recon-badge recon-ok">✓ Coincide con la factura</span>`;
+  else if(ajustes.justificativo_tipo){
+    const motivo = costeoJustifLabel(ajustes.justificativo_tipo);
+    badgeEl.innerHTML = `<span class="recon-badge recon-info" title="${costeoEsc(motivo)}${ajustes.justificativo_nota?(' — '+costeoEsc(ajustes.justificativo_nota)):''}">Diferencia justificada: ${costeoEsc(motivo)}</span>`;
+  }
   else badgeEl.innerHTML = `<span class="recon-badge recon-bad">No coincide con la factura</span>`;
 }
 function costeoStartEditItem(id){ costeoEditingItem = id; renderCosteoItemsList(); }
@@ -8905,7 +8995,19 @@ function recInsumoRef(l){
 function recPunitFor(ref){ return ref.tipo==="compra" ? recInsumoPrecioUnitario(ref.id) : recCostoPorcion(ref.id); }
 
 /* ---- Navegación Semi-elaborados / Artículos ---- */
-function recItemsByTipo(){ return recetasItems.filter(r=>r.tipo===recCurrentTipo); }
+// Filtra por el texto de recSearchQuery (sin distinguir mayúsculas/acentos) — buscador para no tener
+// que scrollear la lista completa cuando hay muchos ítems cargados (pedido de Pancho, 28/08/2026).
+function recNormalizaTexto(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,""); }
+function recItemsByTipo(){
+  const base = recetasItems.filter(r=>r.tipo===recCurrentTipo);
+  const q = recNormalizaTexto(recSearchQuery.trim());
+  if(!q) return base;
+  return base.filter(r=>recNormalizaTexto(r.nombre).includes(q));
+}
+function recOnSearchInput(value){
+  recSearchQuery = value || "";
+  renderRecList();
+}
 function recGoTipo(tipo){
   recCurrentTipo = tipo;
   document.querySelectorAll("#recTipoToggle .rec-toggle-btn").forEach(b=>b.classList.toggle("active", b.dataset.rtipo===tipo));
@@ -8915,6 +9017,9 @@ function recGoTipo(tipo){
   document.getElementById("recAddBarSemi").style.display = tipo==="semielaborado" ? "" : "none";
   document.getElementById("recSyncBarArt").style.display = tipo==="articulo" ? "" : "none";
   recOpenId = null; recEditingItem = null; recEditingLinea = null;
+  recSearchQuery = "";
+  const searchEl = document.getElementById("recSearchInput");
+  if(searchEl) searchEl.value = "";
   renderRecList();
   if(tipo==="articulo") recSyncArticulosFromIndice({silent:true});
 }
@@ -8925,7 +9030,13 @@ function renderRecList(){
   if(!wrap) return;
   const items = recItemsByTipo();
   const tipoLbl = recCurrentTipo==="semielaborado" ? "semi-elaborados" : "artículos";
-  if(!items.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay ${tipoLbl} cargados.${recCurrentTipo==="articulo"?" Usá \"Sincronizar con el Índice\" para traerlos.":""}</div>`; return; }
+  if(!items.length){
+    const hayBusqueda = recSearchQuery.trim().length>0;
+    wrap.innerHTML = hayBusqueda
+      ? `<div class="empty-mini">No hay ${tipoLbl} que coincidan con "${costeoEsc(recSearchQuery.trim())}".</div>`
+      : `<div class="empty-mini">Todavía no hay ${tipoLbl} cargados.${recCurrentTipo==="articulo"?" Usá \"Sincronizar con el Índice\" para traerlos.":""}</div>`;
+    return;
+  }
   // Los semi-elaborados siempre usan una de las 3 categorías de Costeo (se cargan a mano con ese
   // select). Los artículos, al venir del Índice de artículos, pueden traer categorías propias del
   // índice (Cat. 1/Cat. 2) que no son una de esas 3 — se agrupan igual, con las 3 conocidas primero.
