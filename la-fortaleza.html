@@ -8970,12 +8970,49 @@ function recWouldCreateCycle(recetaId, candidateSemiId){
 }
 
 /* ---- Pool de insumos disponibles (compra + semi-elaborados) para el tipeado inteligente ---- */
+// Fecha de la última compra cargada de un insumo (mismo criterio que recInsumoPrecioUnitario:
+// el created_at del ítem de compra más reciente) — se usa para desambiguar, en el buscador de
+// Recetas, cuando el mismo nombre de insumo está cargado con más de un proveedor: se destaca el
+// que tuvo la compra más reciente, que es el que efectivamente fija el precio de esa receta
+// (pedido de Pancho, 28/08/2026).
+function recInsumoUltimaCompraTs(insumoId){
+  const compras = costeoCompraItems.filter(it=>it.insumo_id===insumoId);
+  if(!compras.length) return null;
+  return compras.reduce((max,it)=>Math.max(max, new Date(it.created_at||0).getTime()), 0);
+}
 function recPool(excludeRecetaId){
-  const pool = [];
-  costeoInsumos.forEach(ins=>{
+  const compraEntries = costeoInsumos.map(ins=>{
     const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
-    pool.push({ tipo:"compra", id: ins.id, unidad: costeoInsumoUnidadEfectiva(ins), label: `${ins.nomenclatura} (${prov?prov.nombre:"Proveedor"})` });
+    return {
+      id: ins.id,
+      unidad: costeoInsumoUnidadEfectiva(ins),
+      nombreBase: ins.nomenclatura,
+      proveedorNombre: prov ? prov.nombre : "Proveedor",
+      ultimaCompraTs: recInsumoUltimaCompraTs(ins.id)
+    };
   });
+  // Agrupa por nombre normalizado (sin distinguir may./acentos) para detectar duplicados entre
+  // proveedores; dentro de cada grupo de 2+ el de compra más reciente queda primero y marcado.
+  const porNombre = {};
+  compraEntries.forEach(e=>{
+    const k = recNormalizaTexto(e.nombreBase);
+    if(!porNombre[k]) porNombre[k] = [];
+    porNombre[k].push(e);
+  });
+  Object.values(porNombre).forEach(grupo=>{
+    if(grupo.length<2) return;
+    const masReciente = grupo.reduce((a,b)=> (b.ultimaCompraTs||0) > (a.ultimaCompraTs||0) ? b : a);
+    masReciente.esUltimaCompra = true;
+  });
+  compraEntries.sort((a,b)=>{
+    const byName = recNormalizaTexto(a.nombreBase).localeCompare(recNormalizaTexto(b.nombreBase));
+    if(byName!==0) return byName;
+    return (b.esUltimaCompra?1:0) - (a.esUltimaCompra?1:0);
+  });
+  const pool = compraEntries.map(e=>({
+    tipo:"compra", id:e.id, unidad:e.unidad,
+    label: `${e.nombreBase} (${e.proveedorNombre})${e.esUltimaCompra ? " · Última compra" : ""}`
+  }));
   recetasItems.filter(r=>r.tipo==="semielaborado" && r.id!==excludeRecetaId).forEach(r=>{
     pool.push({ tipo:"semielaborado", id:r.id, unidad:"Porción", label:`${r.nombre} (Semi-elaborado)` });
   });
