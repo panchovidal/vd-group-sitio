@@ -461,13 +461,19 @@
   .costeo-group-title{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--sky);margin:22px 0 10px 0;}
   .costeo-group-title:first-child{margin-top:0;}
   .costeo-prov-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);max-width:760px;overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:18px;}
-  .costeo-prov-row{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s ease;}
+  .costeo-prov-row{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border);transition:background .12s ease;}
   .costeo-prov-row:last-child{border-bottom:none;}
   .costeo-prov-row:hover{background:#FAFBFF;}
+  .costeo-prov-row .cp-clickzone{display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer;}
   .costeo-prov-row .cp-name{font-weight:700;color:var(--text-1);flex:1;min-width:0;}
   .costeo-prov-row .cp-rubro{font-size:11px;font-weight:700;color:var(--text-3);}
   .costeo-prov-row .cp-count{font-size:11px;font-weight:800;color:var(--sky);background:#EAF0FF;border-radius:20px;padding:3px 10px;flex-shrink:0;}
   .costeo-prov-row .cp-arrow{width:16px;height:16px;color:var(--text-3);flex-shrink:0;}
+  .cp-extra-badge{font-size:9.5px;font-weight:800;color:var(--amber,#B8860B);background:#FFF3D6;border-radius:20px;padding:2px 8px;margin-left:6px;text-transform:uppercase;letter-spacing:.3px;}
+  .costeo-prov-row .icon-btn{width:26px;height:26px;border-radius:7px;border:none;background:transparent;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .costeo-prov-row .icon-btn:hover{background:#F1F2FA;color:var(--text-1);}
+  .costeo-prov-row .icon-btn.del-btn:hover{background:#FFF1F1;color:#C23434;}
+  .costeo-prov-row .icon-btn svg{width:14px;height:14px;}
 
   .costeo-orden-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;gap:16px;margin-bottom:10px;max-width:980px;box-shadow:var(--shadow-sm);}
   .costeo-orden-card .co-fecha{font-size:12px;font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;width:78px;flex-shrink:0;}
@@ -476,6 +482,46 @@
   .costeo-orden-card .co-sub{font-size:11.5px;color:var(--text-3);font-weight:600;margin-top:2px;}
   .costeo-orden-card .co-monto{font-weight:800;color:var(--text-1);font-variant-numeric:tabular-nums;width:118px;text-align:right;flex-shrink:0;}
   .costeo-orden-card .co-recon{width:150px;flex-shrink:0;text-align:center;}
+  .bf-card{cursor:pointer;align-items:flex-start;transition:background .12s ease,border-color .12s ease;}
+  .bf-card:hover{background:#FAFBFF;border-color:var(--sky);}
+  .bf-items{margin-top:8px;display:flex;flex-direction:column;gap:4px;}
+  .bf-item-row{display:flex;align-items:center;gap:10px;font-size:11.5px;background:#F6F7FB;border-radius:8px;padding:5px 10px;}
+  .bf-item-nombre{font-weight:700;color:var(--text-1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bf-item-cant{color:var(--text-3);font-weight:600;flex-shrink:0;}
+  .bf-item-punit{color:var(--sky);font-weight:800;flex-shrink:0;font-variant-numeric:tabular-nums;}
+
+  /* ---- Precios de venta ---- */
+  .pv-table-scroll{overflow-x:auto;max-width:100%;}
+  .pv-table{width:max-content;min-width:100%;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:18px;}
+  .pv-head-row,.pv-row{display:grid;grid-template-columns:280px 130px 100px 100px 130px 60px;gap:10px;align-items:center;padding:10px 16px;}
+  .pv-table.ajuste .pv-head-row,.pv-table.ajuste .pv-row{grid-template-columns:220px 110px 90px 90px 76px 90px 130px 76px 110px;}
+  .pv-head-row{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);border-bottom:1px solid var(--border);background:#F7F8FD;}
+  .pv-row{border-bottom:1px solid var(--border);font-size:12.5px;}
+  .pv-row:last-child{border-bottom:none;}
+  .pv-nombre{font-weight:700;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pv-num{font-variant-numeric:tabular-nums;color:var(--text-2);font-weight:600;}
+  .pv-inc-badge{display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11.5px;padding:4px 10px;border-radius:20px;min-width:52px;}
+  .pv-inc-red{background:#FCE6E7;color:#B22A32;}
+  .pv-inc-yellow{background:#FFF3D6;color:#9A6B00;}
+  .pv-inc-green{background:#E4F8ED;color:#137B44;}
+  .pv-inc-na{background:#F1F2FA;color:var(--text-3);}
+  .pv-var-up{color:#B22A32;font-weight:700;font-variant-numeric:tabular-nums;}
+  .pv-var-down{color:#137B44;font-weight:700;font-variant-numeric:tabular-nums;}
+  .pv-move{display:flex;flex-direction:column;gap:2px;}
+  .pv-move button{width:22px;height:17px;border:none;background:#F1F2FA;color:var(--text-3);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+  .pv-move button:hover{background:#E4E6F5;color:var(--text-1);}
+  .pv-move button:disabled{opacity:.35;cursor:default;}
+  .pv-move button svg{width:11px;height:11px;}
+  .pv-precio-input{width:110px;padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-size:12.5px;font-variant-numeric:tabular-nums;}
+  .pv-hint{font-size:9.5px;color:var(--text-3);margin-top:3px;}
+  .pv-ajuste-footer{flex-shrink:0;background:#fff;border-top:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:14px;box-shadow:0 -4px 14px rgba(20,25,50,.06);}
+  .pv-hist-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:10px;max-width:900px;}
+  .pv-hist-head{display:flex;align-items:center;gap:12px;}
+  .pv-hist-fecha{font-weight:700;color:var(--text-1);flex:1;font-size:12.5px;}
+  .pv-hist-anulada{font-size:10.5px;font-weight:800;color:#B22A32;}
+  .pv-hist-detalle{margin-top:10px;font-size:12px;color:var(--text-2);}
+  .pv-hist-detalle div{padding:5px 0;border-top:1px dashed var(--border);}
+  .pv-hist-detalle div:first-child{border-top:none;}
   .recon-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:20px;white-space:nowrap;}
   .recon-ok{background:#E4F8ED;color:#137B44;}
   .recon-bad{background:#FCE6E7;color:#B22A32;}
@@ -1620,7 +1666,14 @@
           <!-- COSTEO > PROVEEDORES -->
           <section class="pagos-pane active" id="ctpProveedores">
             <div class="screen-header" id="costeoProvHeaderList">
-              <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Proveedores</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Proveedores de Servicio de cocina, Servicio de padel y Cafetería y bebidas — extraídos de Pagos, agrupados y ordenados alfabéticamente</div></div>
+              <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Proveedores</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Proveedores de Servicio de cocina, Servicio de padel y Cafetería y bebidas — extraídos de Pagos, agrupados y ordenados alfabéticamente. También podés agregar a mano cualquier otro proveedor de Pagos que impacte en tus recetas.</div></div>
+              <button type="button" class="btn-primary" id="costeoBtnAbrirProvExtra" style="white-space:nowrap;" onclick="costeoAbrirBuscadorProveedorExtra()">+ Agregar proveedor</button>
+              <div id="costeoBuscadorProvExtra" style="display:none;align-items:center;gap:8px;">
+                <input type="text" id="costeoInputProvExtra" list="dlProveedoresExtra" placeholder="Nombre del proveedor (de Pagos)" autocomplete="off" style="min-width:240px;" onkeydown="if(event.key==='Enter'){event.preventDefault();costeoConfirmarProveedorExtra();} if(event.key==='Escape'){costeoCerrarBuscadorProveedorExtra();}">
+                <datalist id="dlProveedoresExtra"></datalist>
+                <button type="button" class="btn-primary" onclick="costeoConfirmarProveedorExtra()">Agregar</button>
+                <button type="button" class="btn-primary secondary" onclick="costeoCerrarBuscadorProveedorExtra()">Cancelar</button>
+              </div>
             </div>
             <div class="screen-header" id="costeoProvHeaderInsumos" style="display:none;">
               <div class="back-btn" onclick="costeoShowProvList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
@@ -1661,6 +1714,11 @@
               <a class="factura-link" id="costeoOrdenAdjuntoLink" style="display:none;" onclick="costeoVerAdjuntoOrden()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>Ver factura / presupuesto</a>
             </div>
             <div class="screen-scroll">
+              <div class="search-wrap" id="costeoBuscadorFacturasWrap" style="max-width:520px;margin-bottom:12px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="costeoBuscadorFacturasInput" list="dlBuscadorFacturas" placeholder="Buscar por proveedor o artículo…" autocomplete="off" oninput="costeoBuscarFacturas(this.value)">
+                <datalist id="dlBuscadorFacturas"></datalist>
+              </div>
               <div id="costeoComprasListWrap"></div>
               <div id="costeoComprasItemsWrap" style="display:none;">
                 <p class="config-hint">El insumo cargado tiene que coincidir con uno ya creado para este proveedor en la solapa Proveedores — de ahí se toman automáticamente su Cantidad y Unidad de medida.</p>
@@ -1775,6 +1833,10 @@
                   <option value="Servicio de cocina">Servicio de cocina</option>
                   <option value="Servicio de padel">Servicio de padel</option>
                 </select>
+                <select id="recNewPorcionesUnidad" title="¿Cómo se define la receta?" style="max-width:170px;">
+                  <option value="Porción">Por porciones ($/porc.)</option>
+                  <option value="Kg">Por peso ($/Kg)</option>
+                </select>
                 <button onclick="recAddItem()" id="recAddBtn">+ Crear semi-elaborado</button>
               </div></div>
               <div class="config-card" id="recSyncBarArt" style="margin-top:14px;max-width:820px;display:none;"><div class="config-add-bar">
@@ -1784,12 +1846,21 @@
             </div>
           </section>
 
-          <!-- COSTEO > PRECIOS DE VENTA (placeholder, próxima etapa) -->
+          <!-- COSTEO > PRECIOS DE VENTA -->
           <section class="pagos-pane" id="ctpPrecios">
-            <div class="placeholder-card" style="margin:60px auto;">
-              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-              <h2>Precios de venta</h2>
-              <p>Esta sección todavía no está desarrollada. Acá vamos a comparar el precio de venta actual de cada producto del Índice de artículos contra su costo de materia prima, para definir el margen.</p>
+            <div class="screen-header" id="pvHeaderMain">
+              <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Precios de venta</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Revisión periódica del precio de cada artículo contra su costo de materia prima, por rubro. Rojo: incidencia del costo ≥45%. Amarillo: 30%–45%. Verde: &lt;30%.</div></div>
+              <button type="button" class="btn-ghost" id="pvBtnHistorial" onclick="pvToggleHistorial()">Ver historial</button>
+              <button type="button" class="btn-primary" id="pvBtnAjuste" onclick="pvIniciarAjuste()">Realizar nuevo ajuste</button>
+            </div>
+            <div class="screen-scroll">
+              <div id="pvHistorialWrap" style="display:none;"></div>
+              <div id="pvTableWrap"></div>
+            </div>
+            <div class="pv-ajuste-footer" id="pvAjusteFooter" style="display:none;">
+              <div id="pvAjusteFooterInfo" style="flex:1;font-size:12.5px;color:var(--text-2);font-weight:600;">Completá el precio nuevo de los artículos que quieras actualizar.</div>
+              <button type="button" class="btn-primary secondary" onclick="pvCancelarAjuste()">Cancelar</button>
+              <button type="button" class="btn-primary" id="pvBtnConfirmarAjuste" onclick="pvConfirmarAjuste()" disabled>Confirmar ajustes</button>
             </div>
           </section>
 
@@ -7937,15 +8008,28 @@ let costeoEditItemDescuentos = {};  // { [itemId]: [{concepto,valor,modo}] } —
 // Ajustes a nivel factura (por orden_id): impuestos generales (ej. percepción de IIBB, sobre el
 // subtotal de ítems) y un descuento único de la factura (se prorratea entre los ítems según su peso).
 let costeoOrdenAjustesMap = {}; // { [orden_id]: {impuestos_generales:[{nombre,valor,modo}], descuento_modo, descuento_valor} }
+// Proveedores de Pagos agregados a mano a Costeo aunque su concepto no sea uno de los 3 de
+// COSTEO_CONCEPTOS (ej. "Papelera") — pedido de Pancho, 02/09/2026. Se filtran junto con
+// COSTEO_CONCEPTOS en costeoProveedoresList/costeoOrdenesFiltradas.
+let costeoProveedoresExtraIds = new Set();
+let costeoBuscadorQuery = "";  // buscador de facturas por proveedor/artículo en Carga de compras
 
 // ---- Recetas (semi-elaborados y artículos) ----
-let recetasItems = [];   // [{id, tipo:'semielaborado'|'articulo', nombre, concepto, porciones}]
+let recetasItems = [];   // [{id, tipo:'semielaborado'|'articulo', nombre, concepto, porciones, porciones_unidad}]
 let recetaLineas = [];   // [{id, receta_id, insumo_tipo:'compra'|'semielaborado', insumo_compra_id, insumo_semielaborado_id, cantidad}]
 let recCurrentTipo = "semielaborado";
 let recOpenId = null;       // receta cuya receta está desplegada
 let recEditingItem = null;  // id de receta cuyo nombre/categoría se está editando
 let recEditingLinea = null; // id de línea cuya cantidad se está editando
 let recSearchQuery = "";    // filtro de nombre sobre la lista de semi-elaborados/artículos (evita scrollear)
+
+// ---- Precios de venta ----
+let preciosVentaItems = {};   // { [articulo_id]: {costo_actual, precio_actual, fecha_actualizacion, orden_manual} }
+let preciosVentaAjustes = []; // historial de lf_precios_venta_ajustes, más nuevo primero
+let pvModoAjuste = false;     // true mientras la tabla está expandida cargando un nuevo ajuste
+let pvPendientes = {};        // { [articulo_id]: {costoNuevo, precioNuevo} } — mientras se completa el ajuste en curso
+let pvVentaSemanalCache = {}; // { [articulo_id]: numero } — venta promedio semanal, calculada al entrar en modo ajuste
+let pvViendoHistorial = false;
 
 function costeoEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 // Acepta tanto "1500.50" (punto como separador decimal) como "1.500,50" (formato AR, punto de miles + coma decimal).
@@ -8045,8 +8129,73 @@ function costeoComputeRow(it, items, ajustes){
   return { precioBulto, neto, totalPropio, totalFinal: totalPropio, punit: totalUnidades>0 ? totalPropio/totalUnidades : 0 };
 }
 
-function costeoOrdenesFiltradas(){ return ordenes.filter(o=>COSTEO_CONCEPTOS.includes(o.concepto)); }
-function costeoProveedoresList(){ return proveedoresConfig.filter(p=>COSTEO_CONCEPTOS.includes(p.concepto)); }
+// Proveedores incluidos en Costeo: los 3 conceptos de siempre + los agregados a mano vía
+// lf_costeo_proveedores_extra (pedido de Pancho, 02/09/2026 — ej. "Papelera").
+function costeoProveedoresList(){ return proveedoresConfig.filter(p=>COSTEO_CONCEPTOS.includes(p.concepto) || costeoProveedoresExtraIds.has(p.id)); }
+// Las órdenes de Pagos no guardan proveedor_id (solo el nombre, tal como estaba al crear la
+// orden) — para incluir las de un proveedor "extra" se matchea por nombre contra la lista de
+// proveedores incluidos, mismo criterio que ya usa costeoRefreshInsumosDatalist.
+function costeoOrdenesFiltradas(){
+  const nombresIncluidos = new Set(costeoProveedoresList().map(p=>p.nombre));
+  return ordenes.filter(o=>COSTEO_CONCEPTOS.includes(o.concepto) || nombresIncluidos.has(o.proveedor));
+}
+// Concepto "real" (de Pagos) de cada proveedor incluido en Costeo, para agrupar listas más allá
+// de los 3 de COSTEO_CONCEPTOS cuando hay proveedores extra con otro concepto.
+function costeoConceptosPresentes(){
+  const set = new Set(costeoProveedoresList().map(p=>p.concepto).filter(Boolean));
+  return [...COSTEO_CONCEPTOS.filter(c=>set.has(c)), ...[...set].filter(c=>!COSTEO_CONCEPTOS.includes(c)).sort((a,b)=>a.localeCompare(b,"es"))];
+}
+async function loadCosteoProveedoresExtra(){
+  const { data, error } = await sb.from("lf_costeo_proveedores_extra").select("proveedor_id");
+  if(error){ showToast("No se pudieron cargar los proveedores agregados a Costeo", "warn"); return; }
+  costeoProveedoresExtraIds = new Set((data||[]).map(r=>r.proveedor_id));
+}
+async function costeoAgregarProveedorExtra(proveedorId){
+  if(!proveedorId) return;
+  const { error } = await sb.from("lf_costeo_proveedores_extra").insert({ proveedor_id: proveedorId, agregado_por: currentPerfil?currentPerfil.id:null });
+  if(error){ showToast(error.code==="23505" ? "Ese proveedor ya está agregado" : "No se pudo agregar el proveedor", "warn"); return; }
+  await loadCosteoProveedoresExtra();
+  await Promise.all([loadCosteoCompraItems(), loadCosteoOrdenAjustes()]);
+  const p = proveedoresConfig.find(x=>x.id===proveedorId);
+  logHistorialConfig("Agregó un proveedor a Costeo", p?p.nombre:"");
+  showToast("Proveedor agregado a Costeo");
+  costeoCerrarBuscadorProveedorExtra();
+  renderCosteoProvList();
+}
+async function costeoQuitarProveedorExtra(proveedorId){
+  if(costeoInsumos.some(i=>i.proveedor_id===proveedorId)){
+    showToast("Este proveedor tiene insumos cargados en Costeo — borralos primero para poder quitarlo", "warn");
+    return;
+  }
+  const { error } = await sb.from("lf_costeo_proveedores_extra").delete().eq("proveedor_id", proveedorId);
+  if(error){ showToast("No se pudo quitar el proveedor", "warn"); return; }
+  await loadCosteoProveedoresExtra();
+  await Promise.all([loadCosteoCompraItems(), loadCosteoOrdenAjustes()]);
+  renderCosteoProvList();
+  showToast("Proveedor quitado de Costeo");
+}
+function costeoAbrirBuscadorProveedorExtra(){
+  document.getElementById("costeoBuscadorProvExtra").style.display = "flex";
+  document.getElementById("costeoBtnAbrirProvExtra").style.display = "none";
+  const input = document.getElementById("costeoInputProvExtra");
+  input.value = "";
+  const yaIncluidos = new Set(costeoProveedoresList().map(p=>p.id));
+  const disponibles = proveedoresConfig.filter(p=>!yaIncluidos.has(p.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  document.getElementById("dlProveedoresExtra").innerHTML = disponibles.map(p=>`<option value="${costeoEsc(p.nombre)}">${costeoEsc(p.concepto)}</option>`).join("");
+  input.focus();
+}
+function costeoCerrarBuscadorProveedorExtra(){
+  document.getElementById("costeoBuscadorProvExtra").style.display = "none";
+  document.getElementById("costeoBtnAbrirProvExtra").style.display = "";
+}
+function costeoConfirmarProveedorExtra(){
+  const nombre = document.getElementById("costeoInputProvExtra").value.trim().toLowerCase();
+  if(!nombre) return;
+  const yaIncluidos = new Set(costeoProveedoresList().map(p=>p.id));
+  const p = proveedoresConfig.find(x=>!yaIncluidos.has(x.id) && x.nombre.toLowerCase()===nombre);
+  if(!p){ showToast("Elegí un proveedor de la lista", "warn"); return; }
+  costeoAgregarProveedorExtra(p.id);
+}
 function costeoAjustesDeOrdenDefault(){ return {impuestos_generales:[], descuento_modo:null, descuento_valor:null, justificativo_tipo:null, justificativo_nota:null}; }
 function costeoAjustesDeOrden(ordenId){ return costeoOrdenAjustesMap[ordenId] || costeoAjustesDeOrdenDefault(); }
 function costeoEnsureAjustesDeOrden(ordenId){
@@ -8119,10 +8268,14 @@ async function costeoSaveOrdenAjustes(ordenId){
   return true;
 }
 async function initCosteo(){
-  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadCosteoOrdenAjustes(), loadRecetasItems(), loadRecetaLineas()]);
+  // Los proveedores "extra" se cargan primero: costeoOrdenesFiltradas() los necesita para saber
+  // qué órdenes traer, y de eso dependen loadCosteoCompraItems/loadCosteoOrdenAjustes.
+  await loadCosteoProveedoresExtra();
+  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadCosteoOrdenAjustes(), loadRecetasItems(), loadRecetaLineas(), loadPreciosVentaItems(), loadPreciosVentaAjustes()]);
   costeoShowProvList();
   costeoShowComprasList();
   renderRecList();
+  renderPreciosVenta();
   if(!ventasIndice) vTryLoadIndiceFromStorage().then(()=>recRenderSyncStatus());
   else recRenderSyncStatus();
 }
@@ -8138,18 +8291,22 @@ function costeoInsumosCount(proveedorId){ return costeoInsumos.filter(i=>i.prove
 function renderCosteoProvList(){
   const provs = costeoProveedoresList();
   const wrap = document.getElementById("costeoProvListWrap");
-  if(!provs.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay proveedores cargados en Pagos para Servicio de cocina, Servicio de padel o Cafetería y Bebidas.</div>`; return; }
+  if(!provs.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay proveedores cargados en Pagos para Servicio de cocina, Servicio de padel o Cafetería y Bebidas. Podés agregar cualquier otro proveedor de Pagos con el botón de arriba.</div>`; return; }
   let html = "";
-  COSTEO_CONCEPTOS.forEach(concepto=>{
+  costeoConceptosPresentes().forEach(concepto=>{
     const items = provs.filter(p=>p.concepto===concepto).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
     if(!items.length) return;
     html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div><div class="costeo-prov-card">`;
     items.forEach(p=>{
-      html += `<div class="costeo-prov-row" onclick="costeoOpenProveedor('${p.id}')">
-        <span class="cp-name">${costeoEsc(p.nombre)}</span>
-        <span class="cp-rubro">${costeoEsc(p.rubro||"")}</span>
-        <span class="cp-count">${costeoInsumosCount(p.id)} insumo(s)</span>
-        <svg class="cp-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      const esExtra = costeoProveedoresExtraIds.has(p.id);
+      html += `<div class="costeo-prov-row">
+        <div class="cp-clickzone" onclick="costeoOpenProveedor('${p.id}')">
+          <span class="cp-name">${costeoEsc(p.nombre)}${esExtra?' <span class="cp-extra-badge" title="Agregado a mano a Costeo">extra</span>':''}</span>
+          <span class="cp-rubro">${costeoEsc(p.rubro||"")}</span>
+          <span class="cp-count">${costeoInsumosCount(p.id)} insumo(s)</span>
+          <svg class="cp-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        ${esExtra?`<button type="button" class="icon-btn del-btn" title="Quitar de Costeo" onclick="costeoQuitarProveedorExtra('${p.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}
       </div>`;
     });
     html += `</div>`;
@@ -8303,12 +8460,70 @@ function costeoRefreshInsumosDatalist(proveedorNombre){
   dl.innerHTML = opciones.map(i=>`<option value="${costeoEsc(i.nomenclatura)}">`).join("");
   return prov;
 }
+// ---- Buscador de facturas por proveedor o artículo (Feature 3/4, pedido de Pancho) ----
+// Permite tipear el nombre de un proveedor o de un ítem de factura (con lectura anticipada vía
+// datalist) y devuelve, sin tener que entrar factura por factura, todas las órdenes donde aparece
+// — con las líneas de ítem que matchearon, para poder rastrear rápido el costo de un insumo.
+function costeoRefreshBuscadorFacturasDatalist(){
+  const dl = document.getElementById("dlBuscadorFacturas");
+  if(!dl) return;
+  const todas = costeoOrdenesFiltradas();
+  const idsOrdenes = new Set(todas.map(o=>o.id));
+  const nombres = new Set(todas.map(o=>o.proveedor).filter(Boolean));
+  costeoCompraItems.filter(it=>idsOrdenes.has(it.orden_id)).forEach(it=>{ if(it.nomenclatura) nombres.add(it.nomenclatura); });
+  dl.innerHTML = [...nombres].sort((a,b)=>a.localeCompare(b,"es")).map(n=>`<option value="${costeoEsc(n)}">`).join("");
+}
+function costeoBuscarFacturas(query){
+  costeoBuscadorQuery = query || "";
+  renderCosteoComprasList();
+}
+function costeoBuscadorResultados(query){
+  const q = recNormalizaTexto(query.trim());
+  const todas = costeoOrdenesFiltradas();
+  const resultados = [];
+  todas.forEach(o=>{
+    const matchProv = recNormalizaTexto(o.proveedor||"").includes(q);
+    const itemsOrden = costeoCompraItems.filter(it=>it.orden_id===o.id);
+    const itemsMatch = itemsOrden.filter(it=>recNormalizaTexto(it.nomenclatura||"").includes(q));
+    if(matchProv || itemsMatch.length){
+      resultados.push({ orden:o, itemsMatch: matchProv && !itemsMatch.length ? itemsOrden : itemsMatch, matchProv });
+    }
+  });
+  resultados.sort((a,b)=>(b.orden.fechaOrden||"").localeCompare(a.orden.fechaOrden||""));
+  return resultados;
+}
+function renderCosteoBuscadorFacturasResultados(query){
+  const wrap = document.getElementById("costeoComprasListWrap");
+  const resultados = costeoBuscadorResultados(query);
+  if(!resultados.length){
+    wrap.innerHTML = `<div class="empty-mini">No se encontraron facturas para "${costeoEsc(query.trim())}".</div>`;
+    return;
+  }
+  let html = `<div class="costeo-group-title">${resultados.length} factura(s) encontrada(s) para "${costeoEsc(query.trim())}"</div>`;
+  resultados.forEach(({orden:o, itemsMatch})=>{
+    const filasItems = itemsMatch.length ? itemsMatch.map(it=>{
+      const punit = costeoComputeRow(it).punit;
+      return `<div class="bf-item-row"><span class="bf-item-nombre">${costeoEsc(it.nomenclatura)}</span><span class="bf-item-cant">${fmtNumCosteo(it.cantidad)} ${costeoEsc(it.unidad_medida||"")}</span><span class="bf-item-punit">${fmtMoneyCosteo(punit)}/un.</span></div>`;
+    }).join("") : `<div class="bf-item-row"><em>Sin ítems cargados todavía</em></div>`;
+    html += `<div class="costeo-orden-card bf-card" onclick="costeoOpenOrden('${o.id}')">
+      <div class="co-fecha">${isoToDMY(o.fechaOrden)}</div>
+      <div class="co-main">
+        <div class="co-prov">${costeoEsc(o.proveedor)}</div>
+        <div class="co-sub">${costeoEsc(o.concepto||"")} · ${costeoEsc(o.comprobanteTipo||"")}${o.comprobante?(" N° "+costeoEsc(o.comprobante)):""}</div>
+        <div class="bf-items">${filasItems}</div>
+      </div>
+      <div class="co-monto">${fmtMoneyCosteo(o.montoFactura)}</div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+}
 function renderCosteoComprasList(){
   const wrap = document.getElementById("costeoComprasListWrap");
+  if(costeoBuscadorQuery && costeoBuscadorQuery.trim()){ renderCosteoBuscadorFacturasResultados(costeoBuscadorQuery); return; }
   const todas = costeoOrdenesFiltradas();
   if(!todas.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay órdenes de pago cargadas en Pagos para estos rubros.</div>`; return; }
   let html = "";
-  COSTEO_CONCEPTOS.forEach(concepto=>{
+  costeoConceptosPresentes().forEach(concepto=>{
     const items = todas.filter(o=>o.concepto===concepto).sort((a,b)=>(b.fechaOrden||"").localeCompare(a.fechaOrden||""));
     if(!items.length) return;
     html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div>`;
@@ -8345,6 +8560,7 @@ function costeoShowComprasList(){
   document.getElementById("costeoComprasListWrap").style.display = "";
   document.getElementById("costeoComprasItemsWrap").style.display = "none";
   costeoOpenOrdenId = null; costeoEditingItem = null;
+  costeoRefreshBuscadorFacturasDatalist();
   renderCosteoComprasList();
 }
 function costeoOpenOrden(id){
@@ -9014,7 +9230,7 @@ function recPool(excludeRecetaId){
     label: `${e.nombreBase} (${e.proveedorNombre})${e.esUltimaCompra ? " · Última compra" : ""}`
   }));
   recetasItems.filter(r=>r.tipo==="semielaborado" && r.id!==excludeRecetaId).forEach(r=>{
-    pool.push({ tipo:"semielaborado", id:r.id, unidad:"Porción", label:`${r.nombre} (Semi-elaborado)` });
+    pool.push({ tipo:"semielaborado", id:r.id, unidad:(r.porciones_unidad==="Kg"?"Kg":"Porción"), label:`${r.nombre} (Semi-elaborado)` });
   });
   return pool;
 }
@@ -9036,7 +9252,7 @@ function recInsumoRef(l){
   }
   const r = recetasItems.find(x=>x.id===l.insumo_semielaborado_id);
   if(!r) return null;
-  return { tipo:"semielaborado", id:r.id, unidad:"Porción", label:`${r.nombre} (Semi-elaborado)` };
+  return { tipo:"semielaborado", id:r.id, unidad:(r.porciones_unidad==="Kg"?"Kg":"Porción"), label:`${r.nombre} (Semi-elaborado)` };
 }
 function recPunitFor(ref){ return ref.tipo==="compra" ? recInsumoPrecioUnitario(ref.id) : recCostoPorcion(ref.id); }
 
@@ -9106,12 +9322,17 @@ function recRenderItem(it){
   const costo = recCostoPorcion(it.id);
   const costoTxt = costo==null ? "—" : fmtMoneyCosteo(costo);
   let head;
+  const esKg = it.porciones_unidad==="Kg";
   if(editing){
     head = `<div class="rec-item-head editing">
       <input class="edit-input" id="recEditNombre_${it.id}" value="${costeoEsc(it.nombre)}" style="flex:1;min-width:160px;">
       <select class="edit-select" id="recEditConcepto_${it.id}" style="max-width:210px;">
         ${(COSTEO_CONCEPTOS.includes(it.concepto) ? COSTEO_CONCEPTOS : [it.concepto, ...COSTEO_CONCEPTOS]).map(c=>`<option value="${costeoEsc(c)}" ${c===it.concepto?"selected":""}>${costeoEsc(c)}</option>`).join("")}
       </select>
+      ${it.tipo==="semielaborado" ? `<select class="edit-select" id="recEditPorcionesUnidad_${it.id}" title="¿Cómo se define la receta?" style="max-width:170px;">
+        <option value="Porción" ${!esKg?"selected":""}>Por porciones ($/porc.)</option>
+        <option value="Kg" ${esKg?"selected":""}>Por peso ($/Kg)</option>
+      </select>` : ""}
       <div class="row-actions">
         <button class="icon-btn" onclick="recSaveItem('${it.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
         <button class="icon-btn" onclick="recCancelEditItem()" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -9121,8 +9342,8 @@ function recRenderItem(it){
     head = `<div class="rec-item-head">
       <span class="ri-name">${costeoEsc(it.nombre)}</span>
       <span class="ri-concepto">${costeoEsc(it.concepto)}</span>
-      <span class="ri-porc">Porciones<input type="text" inputmode="decimal" value="${fmtNumCosteo(it.porciones)}" onchange="recUpdatePorciones('${it.id}', this.value)"></span>
-      <span class="ri-costo">$/porc.<strong>${costoTxt}</strong></span>
+      <span class="ri-porc">${esKg?"Peso total (Kg)":"Porciones"}<input type="text" inputmode="decimal" value="${fmtNumCosteo(it.porciones)}" onchange="recUpdatePorciones('${it.id}', this.value)"></span>
+      <span class="ri-costo">${esKg?"$/Kg":"$/porc."}<strong>${costoTxt}</strong></span>
       <button type="button" class="ri-toggle-btn ${isOpen?'open':''}" onclick="recToggleDetail('${it.id}')">${isOpen?'Ocultar receta':'Ver receta'}</button>
       <div class="row-actions">
         <button class="icon-btn" onclick="recStartEditItem('${it.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
@@ -9279,10 +9500,13 @@ async function recAddItem(){
   if(recetasItems.some(r=>r.tipo===recCurrentTipo && r.nombre.toLowerCase()===nombre.toLowerCase())){
     showToast(`Ya existe un ${tipoLbl} con ese nombre`, "warn"); return;
   }
-  const { error } = await sb.from("lf_recetas_items").insert({ tipo: recCurrentTipo, nombre, concepto, porciones: 1, creado_por: currentPerfil?currentPerfil.id:null });
+  const selUnidad = document.getElementById("recNewPorcionesUnidad");
+  const porciones_unidad = (recCurrentTipo==="semielaborado" && selUnidad && selUnidad.value==="Kg") ? "Kg" : "Porción";
+  const { error } = await sb.from("lf_recetas_items").insert({ tipo: recCurrentTipo, nombre, concepto, porciones: 1, porciones_unidad, creado_por: currentPerfil?currentPerfil.id:null });
   if(error){ showToast(error.code==="23505" ? "Ya existe un ítem con ese nombre" : "No se pudo crear", "warn"); return; }
   document.getElementById("recNewNombre").value = "";
   document.getElementById("recNewConcepto").value = "";
+  if(selUnidad) selUnidad.value = "Porción";
   await loadRecetasItems();
   renderRecList();
   logHistorialConfig(`Creó un ${tipoLbl} de receta`, nombre);
@@ -9302,7 +9526,10 @@ async function recSaveItem(id){
   const nombre = document.getElementById(`recEditNombre_${id}`).value.trim();
   const concepto = document.getElementById(`recEditConcepto_${id}`).value;
   if(!nombre){ showToast("El nombre no puede estar vacío", "warn"); return; }
-  const { error } = await sb.from("lf_recetas_items").update({ nombre, concepto, modificado_por: currentPerfil?currentPerfil.id:null, modificado_fecha: new Date().toISOString() }).eq("id", id);
+  const selUnidad = document.getElementById(`recEditPorcionesUnidad_${id}`);
+  const patch = { nombre, concepto, modificado_por: currentPerfil?currentPerfil.id:null, modificado_fecha: new Date().toISOString() };
+  if(selUnidad) patch.porciones_unidad = selUnidad.value==="Kg" ? "Kg" : "Porción";
+  const { error } = await sb.from("lf_recetas_items").update(patch).eq("id", id);
   if(error){ showToast(error.code==="23505" ? "Ya existe un ítem con ese nombre" : "No se pudo actualizar", "warn"); return; }
   recEditingItem = null;
   await loadRecetasItems();
@@ -9393,6 +9620,408 @@ function recRequestDeleteLinea(id){
   document.getElementById("confirmText").textContent = `Vas a quitar "${ref?ref.label:'este insumo'}" de la receta. Esta acción no se puede deshacer.`;
   document.getElementById("confirmDeleteBtn").textContent = "Eliminar";
   document.getElementById("confirmOverlay").classList.add("show");
+}
+
+/* =========================================================
+   PRECIOS DE VENTA (Costeo)
+   Revisión periódica (bimestral/trimestral) del precio de cada artículo
+   contra su costo de materia prima, análoga a los cierres de Caja Mayor:
+   una tabla de estado actual por rubro (última actualización, costo,
+   precio, % de incidencia del costo con semáforo), un modo "nuevo ajuste"
+   que además muestra la venta promedio semanal (de Compras-Ventas, ATC) y
+   costo/precio anterior vs. nuevo, doble confirmación para guardar, y un
+   historial navegable con opción de deshacer el último ajuste.
+   Pedido de Pancho, 31/08/2026.
+
+   Supuestos propios (no confirmados con Pancho, hay que avisarle):
+   - "Venta promedio semanal" = Cantidad (columna de Compras-Ventas) sumada
+     desde la fecha de la última actualización de ESE artículo hasta hoy,
+     dividido las semanas transcurridas. Si el artículo nunca se actualizó,
+     se usan como referencia las últimas 8 semanas (PV_FALLBACK_SEMANAS).
+   - El "Precio unitario" más reciente de Compras-Ventas se muestra como
+     dato de referencia (Ref. últ. venta) al lado del campo de precio nuevo,
+     nunca se pre-completa solo — el precio nuevo lo escribe Pancho a mano.
+   - Sólo se guardan (y quedan en el historial) los artículos a los que se
+     les cargó un precio nuevo en la ronda de ajuste; el resto conserva su
+     último costo/precio/fecha tal cual estaban.
+   ========================================================= */
+const PV_FALLBACK_SEMANAS = 8;
+let pvComprasVentasCache = null; // [{concepto, fecha:Date, cantidad, punit}] — se carga al entrar en modo ajuste
+let pvHistorialAbierto = null;   // id del lote de lf_precios_venta_ajustes expandido en el historial
+
+async function loadPreciosVentaItems(){
+  const { data, error } = await sb.from("lf_precios_venta_items").select("*");
+  if(error){ showToast("No se pudieron cargar los precios de venta", "warn"); return; }
+  preciosVentaItems = {};
+  (data||[]).forEach(r=>{ preciosVentaItems[r.articulo_id] = r; });
+}
+async function loadPreciosVentaAjustes(){
+  const { data, error } = await sb.from("lf_precios_venta_ajustes").select("*").order("fecha", {ascending:false});
+  if(error){ showToast("No se pudo cargar el historial de ajustes de precios", "warn"); return; }
+  preciosVentaAjustes = data || [];
+}
+
+/* ---- Artículos / agrupación por rubro (mismo criterio de orden que Costeo/Proveedores) ---- */
+function pvArticulos(){ return recetasItems.filter(r=>r.tipo==="articulo"); }
+function pvConceptosPresentes(){
+  const set = new Set(pvArticulos().map(a=>a.concepto).filter(Boolean));
+  return [...COSTEO_CONCEPTOS.filter(c=>set.has(c)), ...[...set].filter(c=>!COSTEO_CONCEPTOS.includes(c)).sort((a,b)=>a.localeCompare(b,"es"))];
+}
+function pvOrdenEfectivo(articulo){
+  const pv = preciosVentaItems[articulo.id];
+  return (pv && pv.orden_manual!=null) ? pv.orden_manual : 999999;
+}
+function pvGrupoOrdenado(concepto){
+  return pvArticulos().filter(a=>a.concepto===concepto).sort((a,b)=>{
+    const oa = pvOrdenEfectivo(a), ob = pvOrdenEfectivo(b);
+    if(oa!==ob) return oa-ob;
+    return a.nombre.localeCompare(b.nombre,"es");
+  });
+}
+function pvIncidencia(costo, precio){
+  if(costo==null || precio==null || !precio) return null;
+  return (Number(costo)/Number(precio))*100;
+}
+function pvIncidenciaClase(pct){
+  if(pct==null) return "pv-inc-na";
+  if(pct>=45) return "pv-inc-red";
+  if(pct>=30) return "pv-inc-yellow";
+  return "pv-inc-green";
+}
+function pvFmtPct(pct){ return pct==null ? "—" : pct.toLocaleString("es-AR",{maximumFractionDigits:1})+"%"; }
+function pvVar(anterior, nuevo){
+  if(anterior==null || !anterior || nuevo==null) return null;
+  return ((Number(nuevo)-Number(anterior))/Number(anterior))*100;
+}
+function pvApplyVarSpan(el, pct){
+  if(!el) return;
+  if(pct==null){ el.className="pv-num"; el.textContent="—"; return; }
+  el.className = pct>0 ? "pv-var-up" : (pct<0 ? "pv-var-down" : "pv-num");
+  el.textContent = (pct>0?"+":"") + pct.toLocaleString("es-AR",{maximumFractionDigits:1}) + "%";
+}
+function pvApplyIncBadge(el, pct){
+  if(!el) return;
+  el.className = "pv-inc-badge " + pvIncidenciaClase(pct);
+  el.textContent = pvFmtPct(pct);
+}
+
+/* ---- Reordenar a mano dentro de un rubro ("posibilidad de personalización del orden") ---- */
+async function pvMover(articuloId, dir){
+  const a = recetasItems.find(x=>x.id===articuloId);
+  if(!a) return;
+  const grupo = pvGrupoOrdenado(a.concepto);
+  const idx = grupo.findIndex(x=>x.id===articuloId);
+  const j = idx+dir;
+  if(j<0 || j>=grupo.length) return;
+  // Renumera TODO el grupo según el orden que tenía hasta ahora (así los que
+  // nunca se movieron, con el orden_manual "default", también quedan con un
+  // valor explícito) y recién ahí intercambia las dos posiciones pedidas.
+  const updates = grupo.map((it,i)=>({ articulo_id: it.id, orden_manual: i }));
+  const iIdx = updates.findIndex(u=>u.articulo_id===articuloId);
+  const jIdx = updates.findIndex(u=>u.articulo_id===grupo[j].id);
+  const tmp = updates[iIdx].orden_manual;
+  updates[iIdx].orden_manual = updates[jIdx].orden_manual;
+  updates[jIdx].orden_manual = tmp;
+  for(const u of updates){
+    const { error } = await sb.from("lf_precios_venta_items").upsert(
+      { articulo_id: u.articulo_id, orden_manual: u.orden_manual },
+      { onConflict:"articulo_id" }
+    );
+    if(error){ showToast("No se pudo reordenar", "warn"); return; }
+  }
+  await loadPreciosVentaItems();
+  renderPreciosVenta();
+}
+
+/* ---- Venta promedio semanal + referencia de último precio de venta, desde Compras-Ventas (ATC) ---- */
+async function pvCargarVentaSemanalCache(){
+  try{
+    const ing = await vFetchIngestaRango("compras_ventas");
+    if(!ing){ pvComprasVentasCache = []; return; }
+    const iConcepto = vFindColIndex(ing.header, ["Concepto"]);
+    const iFecha = vFindColIndex(ing.header, ["Fecha de movimiento"]);
+    const iHora = vFindColIndex(ing.header, ["Hora de movimiento"]);
+    const iCantidad = vFindColIndex(ing.header, ["Cantidad"]);
+    const iPunit = vFindColIndex(ing.header, ["Precio unitario"]);
+    if([iConcepto,iFecha,iCantidad].includes(-1)){ pvComprasVentasCache = []; return; }
+    pvComprasVentasCache = (ing.rows||[]).map(r=>{
+      const fecha = vJornadaFecha(r[iFecha], iHora!==-1 ? r[iHora] : null);
+      const cantRaw = r[iCantidad];
+      const cantidad = (cantRaw==="-"||cantRaw==null||cantRaw==="") ? 0 : (Number(cantRaw)||0);
+      const punitRaw = iPunit!==-1 ? r[iPunit] : null;
+      const punit = (punitRaw==="-"||punitRaw==null||punitRaw==="") ? null : (Number(punitRaw)||null);
+      return { concepto:(r[iConcepto]||"").toString().trim(), fecha, cantidad, punit };
+    }).filter(r=>r.fecha && r.concepto);
+  }catch(e){
+    console.warn("No se pudo cargar Compras-Ventas para Precios de venta", e);
+    pvComprasVentasCache = [];
+  }
+}
+function pvVentaSemanalYHint(articulo){
+  if(!pvComprasVentasCache || !pvComprasVentasCache.length) return { promedioSemanal:null, hintPrecio:null };
+  const nombre = articulo.nombre.trim();
+  const filas = pvComprasVentasCache.filter(r=>r.concepto===nombre);
+  if(!filas.length) return { promedioSemanal:null, hintPrecio:null };
+  const pv = preciosVentaItems[articulo.id];
+  let desde;
+  if(pv && pv.fecha_actualizacion) desde = new Date(pv.fecha_actualizacion);
+  else { desde = new Date(); desde.setDate(desde.getDate() - PV_FALLBACK_SEMANAS*7); }
+  const hasta = new Date();
+  const enRango = filas.filter(r=>r.fecha>=desde && r.fecha<=hasta);
+  const totalCantidad = enRango.reduce((s,r)=>s+r.cantidad,0);
+  const semanas = Math.max(1, (hasta-desde)/(1000*60*60*24*7));
+  const promedioSemanal = totalCantidad/semanas;
+  const conPrecio = filas.filter(r=>r.punit!=null).sort((a,b)=>b.fecha-a.fecha);
+  const hintPrecio = conPrecio.length ? conPrecio[0].punit : null;
+  return { promedioSemanal, hintPrecio };
+}
+
+/* ---- Modo "nuevo ajuste" ---- */
+async function pvIniciarAjuste(){
+  pvModoAjuste = true;
+  pvPendientes = {};
+  pvViendoHistorial = false;
+  const histWrap = document.getElementById("pvHistorialWrap");
+  if(histWrap) histWrap.style.display = "none";
+  document.getElementById("pvTableWrap").style.display = "";
+  showToast("Cargando ventas de referencia…");
+  await pvCargarVentaSemanalCache();
+  renderPreciosVenta();
+}
+function pvCancelarAjuste(){
+  pvModoAjuste = false;
+  pvPendientes = {};
+  renderPreciosVenta();
+}
+function pvOnPrecioInput(articuloId, val){
+  const n = parseDecimalCosteo(val);
+  if(!pvPendientes[articuloId]) pvPendientes[articuloId] = {};
+  pvPendientes[articuloId].precioNuevo = val.trim()==="" ? null : (n||null);
+  const a = recetasItems.find(x=>x.id===articuloId);
+  if(!a) return;
+  const pv = preciosVentaItems[articuloId];
+  const precioAnterior = pv ? pv.precio_actual : null;
+  const costoNuevo = recCostoPorcion(articuloId);
+  const precioNuevoNum = pvPendientes[articuloId].precioNuevo;
+  const varPrecio = precioNuevoNum!=null ? pvVar(precioAnterior, precioNuevoNum) : null;
+  const incidenciaNueva = pvIncidencia(costoNuevo, precioNuevoNum!=null ? precioNuevoNum : precioAnterior);
+  pvApplyVarSpan(document.getElementById(`pvVarPrecio_${articuloId}`), varPrecio);
+  pvApplyIncBadge(document.getElementById(`pvInc_${articuloId}`), incidenciaNueva);
+  pvActualizarFooter();
+}
+function pvActualizarFooter(){
+  const n = Object.values(pvPendientes).filter(p=>p && p.precioNuevo!=null).length;
+  const info = document.getElementById("pvAjusteFooterInfo");
+  if(info) info.textContent = n ? `${n} artículo(s) con precio nuevo cargado.` : "Completá el precio nuevo de los artículos que quieras actualizar.";
+  const btn = document.getElementById("pvBtnConfirmarAjuste");
+  if(btn) btn.disabled = n===0;
+}
+
+/* ---- Render ---- */
+function renderPreciosVenta(){
+  const wrap = document.getElementById("pvTableWrap");
+  const conceptos = pvConceptosPresentes();
+  const btnAjuste = document.getElementById("pvBtnAjuste");
+  btnAjuste.textContent = pvModoAjuste ? "Cancelar ajuste" : "Realizar nuevo ajuste";
+  btnAjuste.onclick = pvModoAjuste ? pvCancelarAjuste : pvIniciarAjuste;
+  document.getElementById("pvBtnHistorial").style.display = pvModoAjuste ? "none" : "";
+  document.getElementById("pvAjusteFooter").style.display = pvModoAjuste ? "" : "none";
+  if(pvModoAjuste) pvActualizarFooter();
+  if(!conceptos.length){
+    wrap.innerHTML = `<div class="empty-mini">Todavía no hay artículos cargados en Recetas para poder revisar precios. Sincronizalos primero desde Recetas › Artículos.</div>`;
+    return;
+  }
+  let html = "";
+  conceptos.forEach(concepto=>{
+    const grupo = pvGrupoOrdenado(concepto);
+    if(!grupo.length) return;
+    html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div>`;
+    html += `<div class="pv-table-scroll"><div class="pv-table${pvModoAjuste?' ajuste':''}">`;
+    html += pvModoAjuste ? pvHeadRowAjuste() : pvHeadRow();
+    grupo.forEach((a,i)=>{ html += pvModoAjuste ? pvRenderRowAjuste(a) : pvRenderRow(a, grupo, i); });
+    html += `</div></div>`;
+  });
+  wrap.innerHTML = html || `<div class="empty-mini">No hay artículos para mostrar.</div>`;
+}
+function pvHeadRow(){
+  return `<div class="pv-head-row"><div>Artículo</div><div>Últ. actualización</div><div>Costo</div><div>Precio</div><div>% incidencia</div><div></div></div>`;
+}
+function pvRenderRow(a, grupo, i){
+  const pv = preciosVentaItems[a.id];
+  const costo = pv ? pv.costo_actual : null;
+  const precio = pv ? pv.precio_actual : null;
+  const pct = pvIncidencia(costo, precio);
+  return `<div class="pv-row">
+    <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
+    <div class="pv-num">${pv && pv.fecha_actualizacion ? fmtFechaHora(pv.fecha_actualizacion).split(" ")[0] : "— (nunca)"}</div>
+    <div class="pv-num">${costo==null?"—":fmtMoneyCosteo(costo)}</div>
+    <div class="pv-num">${precio==null?"—":fmtMoneyCosteo(precio)}</div>
+    <div><span class="pv-inc-badge ${pvIncidenciaClase(pct)}">${pvFmtPct(pct)}</span></div>
+    <div class="pv-move">
+      <button type="button" ${i===0?"disabled":""} onclick="pvMover('${a.id}',-1)" title="Subir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button>
+      <button type="button" ${i===grupo.length-1?"disabled":""} onclick="pvMover('${a.id}',1)" title="Bajar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+  </div>`;
+}
+function pvHeadRowAjuste(){
+  return `<div class="pv-head-row"><div>Artículo</div><div>Venta prom. semanal</div><div>Costo anterior</div><div>Costo nuevo</div><div>Var. costo</div><div>Precio anterior</div><div>Precio nuevo</div><div>Var. precio</div><div>Incidencia</div></div>`;
+}
+function pvRenderRowAjuste(a){
+  const pv = preciosVentaItems[a.id];
+  const costoAnterior = pv ? pv.costo_actual : null;
+  const precioAnterior = pv ? pv.precio_actual : null;
+  const costoNuevo = recCostoPorcion(a.id);
+  const { promedioSemanal, hintPrecio } = pvVentaSemanalYHint(a);
+  const pend = pvPendientes[a.id] || {};
+  const precioNuevoVal = pend.precioNuevo!=null ? pend.precioNuevo : "";
+  const varCosto = pvVar(costoAnterior, costoNuevo);
+  const precioNuevoNum = pend.precioNuevo!=null ? Number(pend.precioNuevo) : null;
+  const varPrecio = precioNuevoNum!=null ? pvVar(precioAnterior, precioNuevoNum) : null;
+  const incidenciaNueva = pvIncidencia(costoNuevo, precioNuevoNum!=null ? precioNuevoNum : precioAnterior);
+  return `<div class="pv-row" id="pvRow_${a.id}">
+    <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
+    <div class="pv-num">${promedioSemanal==null?"—":promedioSemanal.toLocaleString("es-AR",{maximumFractionDigits:1})+"/sem."}</div>
+    <div class="pv-num">${costoAnterior==null?"—":fmtMoneyCosteo(costoAnterior)}</div>
+    <div class="pv-num">${costoNuevo==null?"—":fmtMoneyCosteo(costoNuevo)}</div>
+    <div id="pvVarCosto_${a.id}" class="${varCosto==null?'pv-num':(varCosto>0?'pv-var-up':(varCosto<0?'pv-var-down':'pv-num'))}">${varCosto==null?"—":((varCosto>0?"+":"")+varCosto.toLocaleString("es-AR",{maximumFractionDigits:1})+"%")}</div>
+    <div class="pv-num">${precioAnterior==null?"—":fmtMoneyCosteo(precioAnterior)}</div>
+    <div>
+      <input type="text" class="pv-precio-input" inputmode="decimal" placeholder="${precioAnterior==null?'Precio…':fmtMoneyCosteo(precioAnterior)}" value="${precioNuevoVal}" oninput="pvOnPrecioInput('${a.id}', this.value)">
+      ${hintPrecio!=null ? `<div class="pv-hint">Ref. últ. venta: ${fmtMoneyCosteo(hintPrecio)}</div>` : ""}
+    </div>
+    <div id="pvVarPrecio_${a.id}" class="${varPrecio==null?'pv-num':(varPrecio>0?'pv-var-up':(varPrecio<0?'pv-var-down':'pv-num'))}">${varPrecio==null?"—":((varPrecio>0?"+":"")+varPrecio.toLocaleString("es-AR",{maximumFractionDigits:1})+"%")}</div>
+    <div><span id="pvInc_${a.id}" class="pv-inc-badge ${pvIncidenciaClase(incidenciaNueva)}">${pvFmtPct(incidenciaNueva)}</span></div>
+  </div>`;
+}
+
+/* ---- Confirmar el ajuste (doble confirmación) ---- */
+async function pvConfirmarAjuste(){
+  const cambios = Object.entries(pvPendientes).filter(([id,p])=>p && p.precioNuevo!=null);
+  if(!cambios.length){ showToast("No cargaste ningún precio nuevo todavía", "warn"); return; }
+  const resumen = cambios.map(([id,p])=>{
+    const a = recetasItems.find(x=>x.id===id);
+    const pv = preciosVentaItems[id];
+    const precioAnterior = pv ? pv.precio_actual : null;
+    return `${a?a.nombre:id}: ${precioAnterior==null?'—':fmtMoneyCosteo(precioAnterior)} → ${fmtMoneyCosteo(p.precioNuevo)}`;
+  }).join("\n");
+  if(!confirm(`Vas a actualizar el precio de ${cambios.length} artículo(s):\n\n${resumen}\n\n¿Revisaste que estén todos correctos?`)) return;
+  if(!confirm(`Última confirmación: se van a guardar estos ${cambios.length} precio(s) nuevo(s) y va a quedar registrado en el historial de Precios de venta. ¿Confirmás?`)) return;
+
+  const fechaAjuste = new Date().toISOString();
+  const detalleLote = [];
+  for(const [articuloId, p] of cambios){
+    const a = recetasItems.find(x=>x.id===articuloId);
+    const pvPrevio = preciosVentaItems[articuloId] || null;
+    const costoNuevo = recCostoPorcion(articuloId);
+    const precioNuevo = p.precioNuevo;
+    const { error } = await sb.from("lf_precios_venta_items").upsert({
+      articulo_id: articuloId,
+      costo_actual: costoNuevo,
+      precio_actual: precioNuevo,
+      fecha_actualizacion: fechaAjuste,
+      orden_manual: pvPrevio ? pvPrevio.orden_manual : 999999,
+      modificado_por: currentPerfil?currentPerfil.id:null,
+      modificado_fecha: fechaAjuste
+    }, { onConflict:"articulo_id" });
+    if(error){ showToast(`No se pudo actualizar el precio de ${a?a.nombre:articuloId}`, "warn"); continue; }
+    detalleLote.push({
+      articulo_id: articuloId,
+      nombre: a ? a.nombre : articuloId,
+      costo_previo: pvPrevio ? pvPrevio.costo_actual : null,
+      precio_previo: pvPrevio ? pvPrevio.precio_actual : null,
+      fecha_actualizacion_previa: pvPrevio ? pvPrevio.fecha_actualizacion : null,
+      costo_nuevo: costoNuevo,
+      precio_nuevo: precioNuevo
+    });
+    logHistorialConfig("Actualizó el precio de venta", `${a?a.nombre:articuloId}: ${pvPrevio&&pvPrevio.precio_actual!=null?fmtMoneyCosteo(pvPrevio.precio_actual):'—'} → ${fmtMoneyCosteo(precioNuevo)}`);
+  }
+  if(detalleLote.length){
+    await sb.from("lf_precios_venta_ajustes").insert({
+      fecha: fechaAjuste,
+      usuario_id: currentPerfil?currentPerfil.id:null,
+      usuario_nombre: currentPerfil?currentPerfil.nombre:"—",
+      detalle: detalleLote
+    });
+  }
+  pvModoAjuste = false;
+  pvPendientes = {};
+  await Promise.all([loadPreciosVentaItems(), loadPreciosVentaAjustes()]);
+  renderPreciosVenta();
+  showToast(`${detalleLote.length} precio(s) actualizado(s) correctamente`);
+}
+
+/* ---- Historial (análogo al de Caja Mayor) + deshacer el último ajuste (análogo a Sueldos) ---- */
+function pvUltimaAjusteActiva(){ return preciosVentaAjustes.find(l=>!l.anulada) || null; }
+function pvToggleHistorial(){
+  pvViendoHistorial = !pvViendoHistorial;
+  const wrap = document.getElementById("pvHistorialWrap");
+  const tableWrap = document.getElementById("pvTableWrap");
+  document.getElementById("pvBtnHistorial").textContent = pvViendoHistorial ? "Ocultar historial" : "Ver historial";
+  if(pvViendoHistorial){
+    wrap.style.display = "";
+    tableWrap.style.display = "none";
+    renderPvHistorial();
+  } else {
+    wrap.style.display = "none";
+    tableWrap.style.display = "";
+  }
+}
+function pvToggleDetalleHistorial(id){
+  pvHistorialAbierto = pvHistorialAbierto===id ? null : id;
+  renderPvHistorial();
+}
+function renderPvHistorial(){
+  const wrap = document.getElementById("pvHistorialWrap");
+  if(!preciosVentaAjustes.length){
+    wrap.innerHTML = `<div class="empty-mini">Todavía no se registró ningún ajuste de precios.</div>`;
+    return;
+  }
+  const ultimaActiva = pvUltimaAjusteActiva();
+  wrap.innerHTML = preciosVentaAjustes.map(lote=>{
+    const n = (lote.detalle||[]).length;
+    const esUltimaActiva = ultimaActiva && lote.id===ultimaActiva.id;
+    const abierto = pvHistorialAbierto===lote.id;
+    const estadoTxt = lote.anulada ? `<span class="pv-hist-anulada">Anulado${lote.anulada_en?(' el '+fmtFechaHora(lote.anulada_en)):''}${lote.anulada_por_nombre?(' por '+costeoEsc(lote.anulada_por_nombre)):''}</span>` : "";
+    const detalle = abierto ? `<div class="pv-hist-detalle">${(lote.detalle||[]).map(d=>`<div>${costeoEsc(d.nombre)}: costo ${d.costo_previo==null?'—':fmtMoneyCosteo(d.costo_previo)} → ${d.costo_nuevo==null?'—':fmtMoneyCosteo(d.costo_nuevo)} · precio ${d.precio_previo==null?'—':fmtMoneyCosteo(d.precio_previo)} → ${d.precio_nuevo==null?'—':fmtMoneyCosteo(d.precio_nuevo)}</div>`).join("")}</div>` : "";
+    return `<div class="pv-hist-card">
+      <div class="pv-hist-head">
+        <div class="pv-hist-fecha">${fmtFechaHora(lote.fecha)} · ${costeoEsc(lote.usuario_nombre||"—")} · ${n} artículo(s)${estadoTxt?(' · '+estadoTxt):''}</div>
+        <button type="button" class="btn-ghost" onclick="pvToggleDetalleHistorial('${lote.id}')">${abierto?'Ocultar detalle':'Ver detalle'}</button>
+        ${esUltimaActiva ? `<button type="button" class="btn-primary secondary" onclick="pvDeshacerUltimoAjuste()">Deshacer</button>` : ""}
+      </div>
+      ${detalle}
+    </div>`;
+  }).join("");
+}
+async function pvDeshacerUltimoAjuste(){
+  const lote = pvUltimaAjusteActiva();
+  if(!lote){ showToast("No hay ningún ajuste de precios reciente para deshacer", "warn"); return; }
+  const detalle = lote.detalle || [];
+  const resumen = detalle.map(d=>`${d.nombre}: ${d.precio_nuevo!=null?fmtMoneyCosteo(d.precio_nuevo):'—'} → ${d.precio_previo!=null?fmtMoneyCosteo(d.precio_previo):'—'}`).join("\n");
+  if(!confirm(`Vas a deshacer el ajuste de precios del ${fmtFechaHora(lote.fecha)}, que afectó a ${detalle.length} artículo(s):\n\n${resumen}\n\n¿Confirmás?`)) return;
+
+  for(const d of detalle){
+    const { error } = await sb.from("lf_precios_venta_items").upsert({
+      articulo_id: d.articulo_id,
+      costo_actual: d.costo_previo,
+      precio_actual: d.precio_previo,
+      fecha_actualizacion: d.fecha_actualizacion_previa
+    }, { onConflict:"articulo_id" });
+    if(error){ showToast(`No se pudo deshacer el precio de ${d.nombre}`, "warn"); continue; }
+  }
+  const { error: errAjuste } = await sb.from("lf_precios_venta_ajustes").update({
+    anulada: true,
+    anulada_en: new Date().toISOString(),
+    anulada_por: currentPerfil?currentPerfil.id:null,
+    anulada_por_nombre: currentPerfil?currentPerfil.nombre:"—"
+  }).eq("id", lote.id);
+  if(errAjuste) showToast("No se pudo registrar la anulación", "warn");
+
+  logHistorialConfig("Deshizo un ajuste de precios de venta", `Ajuste del ${fmtFechaHora(lote.fecha)} (${detalle.length} artículo(s))`);
+  await Promise.all([loadPreciosVentaItems(), loadPreciosVentaAjustes()]);
+  renderPvHistorial();
+  renderPreciosVenta();
+  showToast("Ajuste deshecho correctamente");
 }
 </script>
 </body>
