@@ -4585,17 +4585,26 @@ async function vFetchIngestaRango(tipo){
     const mismoOrden = h.length===headerCanon.length && h.every((c,ci)=> (c||"").toString().trim()===((headerCanon[ci]||"").toString().trim()));
     const idxMap = mismoOrden ? null : headerCanon.map(c => h.findIndex(hc => (hc||"").toString().trim().toLowerCase()===(c||"").toString().trim().toLowerCase()));
     const idxFechaIng = mismoOrden ? idxFechaCanon : vFindColIndex(h, ["Fecha de movimiento"]);
+    // Los días que cubre ESTA ingesta se van juntando acá aparte y recién se
+    // suman a diasYaCubiertos al terminar de procesarla entera (no fila por
+    // fila): si se sumaran de a una fila, la primera fila de un día "tapaba"
+    // a las demás filas de ESE MISMO día dentro de la MISMA ingesta más
+    // reciente (bug encontrado el 01/09/2026: Caja Mayor decía "no se
+    // registraron salidas" para un período con retiros reales, porque de
+    // cada día sobrevivía una sola fila de las decenas que tenía).
+    const diasDeEstaIngesta = new Set();
     (ing.rows||[]).forEach(r => {
       if (idxFechaCanon !== -1 && idxFechaIng !== -1){
         const fecha = vParseFlexDate(r[idxFechaIng]);
         if (fecha){
           const diaKey = vToISODate(fecha);
           if (diasYaCubiertos.has(diaKey)) return; // ya lo trajo una ingesta más reciente
-          diasYaCubiertos.add(diaKey);
+          diasDeEstaIngesta.add(diaKey);
         }
       }
       rowsOut.push(mismoOrden ? r : idxMap.map(ci => ci===-1 ? null : r[ci]));
     });
+    diasDeEstaIngesta.forEach(d => diasYaCubiertos.add(d));
   }
   // Se recorrió de la ingesta más nueva a la más vieja (para que el dedup de
   // arriba priorice lo más reciente); se da vuelta al final para devolver las
