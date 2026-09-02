@@ -9143,11 +9143,32 @@ async function loadRecetaLineas(){
 // precio de la última compra —que está en la unidad de compra, ej. $/bol— se divide por la cantidad
 // de conversión para devolver el precio en la unidad convertida (ej. $/Kg). Si no tiene conversión,
 // es el mismo precio de siempre. Pedido de Pancho, 21/08/2026.
-function recInsumoPrecioUnitario(insumoId){
+// Precio "vigente" de un insumo, trabajado mensualmente (pedido de Pancho, 02/09/2026): dentro del
+// mismo mes calendario, se toma el más ALTO entre todas las compras de ese mes (no simplemente la
+// última) — para no subestimar el costo de una receta por una compra puntual más barata en medio del
+// mes (ej. una promo) cuando el precio "normal" del mes fue más alto. Recién cuando arranca un mes
+// nuevo (todavía sin compras propias) se vuelve a partir de cero, tomando la compra más reciente
+// disponible (de cualquier mes) como referencia — sin arrastrar el máximo del mes anterior.
+function recInsumoPrecioUnitarioVigente(insumoId){
   const compras = costeoCompraItems.filter(it=>it.insumo_id===insumoId);
   if(!compras.length) return null;
-  const ultimo = compras.slice().sort((a,b)=> new Date(b.created_at||0) - new Date(a.created_at||0))[0];
-  const punitCompra = costeoComputeRow(ultimo).punit;
+  const conFecha = compras.map(it=>({ it, ts: new Date(it.created_at||0) }));
+  const ahora = new Date();
+  const mesActual = ahora.getFullYear()+"-"+String(ahora.getMonth()+1).padStart(2,"0");
+  const deEsteMes = conFecha.filter(c=> (c.ts.getFullYear()+"-"+String(c.ts.getMonth()+1).padStart(2,"0"))===mesActual );
+  if(deEsteMes.length){
+    return deEsteMes.reduce((max,c)=>{
+      const punit = costeoComputeRow(c.it).punit;
+      return punit>max ? punit : max;
+    }, -Infinity);
+  }
+  // Sin compras este mes todavía: se arranca de cero con la más reciente disponible (de cualquier mes).
+  const ultimo = conFecha.sort((a,b)=>b.ts-a.ts)[0];
+  return costeoComputeRow(ultimo.it).punit;
+}
+function recInsumoPrecioUnitario(insumoId){
+  const punitCompra = recInsumoPrecioUnitarioVigente(insumoId);
+  if(punitCompra==null) return null;
   const ins = costeoInsumos.find(i=>i.id===insumoId);
   if(ins && ins.necesita_conversion && Number(ins.conversion_cantidad)>0){
     return punitCompra / Number(ins.conversion_cantidad);
@@ -9579,6 +9600,13 @@ async function recAddLinea(recetaId){
   const ref = recFindInPool(nombre, recetaId);
   if(!ref){ showToast("Ese insumo no coincide con ninguno cargado (de compra o semi-elaborado). Cargalo primero.", "warn"); return; }
   if(ref.tipo==="semielaborado" && recWouldCreateCycle(recetaId, ref.id)){ showToast("Esa receta ya depende de este semi-elaborado — no se puede agregar (quedaría un ciclo).", "warn"); return; }
+  // Insumo ya existente en esta receta (pedido de Pancho, 02/09/2026, tras encontrar líneas
+  // duplicadas cargadas dos veces por error): se avisa y se deja elegir si de verdad se quiere
+  // agregar una segunda línea del mismo insumo (ej. para sumarlo en dos cantidades distintas) o si
+  // fue sin querer.
+  const yaExiste = recetaLineas.some(l=> l.receta_id===recetaId && l.insumo_tipo===ref.tipo &&
+    (ref.tipo==="compra" ? l.insumo_compra_id===ref.id : l.insumo_semielaborado_id===ref.id));
+  if(yaExiste && !confirm(`"${ref.label}" ya está agregado a esta receta. ¿Agregar de todos modos?`)) return;
   const payload = { receta_id: recetaId, insumo_tipo: ref.tipo, cantidad, creado_por: currentPerfil?currentPerfil.id:null };
   if(ref.tipo==="compra") payload.insumo_compra_id = ref.id; else payload.insumo_semielaborado_id = ref.id;
   const { error } = await sb.from("lf_receta_lineas").insert(payload);
