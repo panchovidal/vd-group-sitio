@@ -1841,7 +1841,7 @@
               </div></div>
               <div class="config-card" id="recSyncBarArt" style="margin-top:14px;max-width:820px;display:none;"><div class="config-add-bar">
                 <div class="rec-sync-status" id="recSyncStatus">Los artículos se toman directamente del Índice de artículos (Ventas), excepto los de la categoría Caja.</div>
-                <button onclick="recSyncArticulosFromIndice()">Sincronizar con el Índice</button>
+                <button onclick="recSyncArticulosFromIndice()" title="Agrega los artículos nuevos del índice y, con confirmación previa, elimina los que ya no figuran en él">Sincronizar con el Índice</button>
               </div></div>
             </div>
           </section>
@@ -9314,7 +9314,7 @@ function recGoTipo(tipo){
   document.querySelectorAll("#recTipoToggle .rec-toggle-btn").forEach(b=>b.classList.toggle("active", b.dataset.rtipo===tipo));
   document.getElementById("recHint").textContent = tipo==="semielaborado"
     ? "Los semi-elaborados son productos con su propia pre-elaboración (ej. bollo de pizza, salsa) que después se usan como insumo dentro de otras recetas. Acá se cargan y se les define su receta."
-    : "Los artículos son los productos finales de venta, tomados directamente del Índice de artículos de Ventas (se excluyen los de la categoría Caja). Acá se les define la receta.";
+    : "Los artículos son los productos finales de venta, tomados directamente del Índice de artículos de Ventas (se excluyen los de la categoría Caja). Acá se les define la receta. \"Sincronizar con el Índice\" agrega los que son nuevos y, con confirmación previa, elimina los que ya no figuran en el índice.";
   document.getElementById("recAddBarSemi").style.display = tipo==="semielaborado" ? "" : "none";
   document.getElementById("recSyncBarArt").style.display = tipo==="articulo" ? "" : "none";
   recOpenId = null; recEditingItem = null; recEditingLinea = null;
@@ -9514,19 +9514,56 @@ async function recSyncArticulosFromIndice(opts){
     if(!opts.silent) showToast("El Índice de artículos no tiene las columnas esperadas, o no hay artículos fuera de la categoría Caja.", "warn");
     return;
   }
+  const nombresIndice = new Set(disponibles.map(d=>d.nombre.toLowerCase()));
   const existentesPorNombre = new Map(recetasItems.filter(r=>r.tipo==="articulo").map(r=>[r.nombre.toLowerCase(), r]));
   const aInsertar = disponibles.filter(d=>!existentesPorNombre.has(d.nombre.toLowerCase()));
-  if(!aInsertar.length){
-    if(!opts.silent) showToast("Ya están todos los artículos del índice sincronizados acá");
+  // Artículos cargados acá que ya NO figuran en el Índice (se dieron de baja del punto de venta,
+  // se renombraron, etc.) — pedido de Pancho, 03/09/2026: la sincronización tiene que reflejar el
+  // Índice tanto para lo que se agrega como para lo que ya no está.
+  const aEliminar = opts.silent ? [] : recetasItems.filter(r=>r.tipo==="articulo" && !nombresIndice.has(r.nombre.toLowerCase()));
+  // La baja automática solo corre cuando Pancho la dispara a propósito (botón "Sincronizar con el
+  // Índice"), nunca en la sincronización silenciosa que se dispara sola al abrir la pestaña — borrar
+  // recetas/historial de precio sin que nadie lo pida no es aceptable, aunque sea "lo que dice el
+  // índice". Por eso, si hay algo para eliminar, se pide confirmación explícita antes de tocar nada.
+  if(!aInsertar.length && !aEliminar.length){
+    if(!opts.silent) showToast("Ya está todo sincronizado con el índice");
     return;
   }
+  if(aEliminar.length){
+    const nombres = aEliminar.map(r=>r.nombre).join(", ");
+    const ok = confirm(`${aEliminar.length} artículo(s) ya no están en el Índice: ${nombres}.\n\nSi confirmás, se van a eliminar del recetario junto con su receta y su historial de precio de venta (acción irreversible). Si alguno se usa como ingrediente en otra receta, no se va a poder eliminar hasta que lo saques de ahí primero.\n\n¿Eliminarlos?`);
+    if(!ok){
+      // Se cancela la baja, pero igual se agregan los nuevos (son dos operaciones independientes).
+      if(aInsertar.length) await recSyncInsertarArticulos(aInsertar);
+      showToast(aInsertar.length ? `${aInsertar.length} artículo(s) nuevo(s) sincronizado(s) — no se eliminó nada` : "No se eliminó nada");
+      return;
+    }
+  }
+  if(aInsertar.length) await recSyncInsertarArticulos(aInsertar);
+  let eliminados = 0; const bloqueados = [];
+  for(const r of aEliminar){
+    const { error } = await sb.from("lf_recetas_items").delete().eq("id", r.id);
+    if(error) bloqueados.push(r.nombre); else eliminados++;
+  }
+  if(eliminados || bloqueados.length){
+    await loadRecetaLineas();
+    await loadRecetasItems();
+    renderRecList();
+    recRenderSyncStatus();
+  }
+  const partes = [];
+  if(aInsertar.length) partes.push(`${aInsertar.length} nuevo(s)`);
+  if(eliminados) partes.push(`${eliminados} eliminado(s)`);
+  if(bloqueados.length) partes.push(`${bloqueados.length} no se pudo eliminar (se usan como ingrediente en otra receta): ${bloqueados.join(", ")}`);
+  showToast(partes.length ? `Sincronizado: ${partes.join(", ")}` : "Ya está todo sincronizado con el índice", bloqueados.length ? "warn" : undefined);
+}
+async function recSyncInsertarArticulos(aInsertar){
   const payload = aInsertar.map(d=>({ tipo:"articulo", nombre:d.nombre, concepto:d.concepto, porciones:1, creado_por: currentPerfil?currentPerfil.id:null }));
   const { error } = await sb.from("lf_recetas_items").insert(payload);
-  if(error){ showToast("No se pudieron sincronizar todos los artículos", "warn"); return; }
+  if(error){ showToast("No se pudieron sincronizar todos los artículos nuevos", "warn"); }
   await loadRecetasItems();
   renderRecList();
   recRenderSyncStatus();
-  showToast(`${aInsertar.length} artículo(s) nuevo(s) sincronizado(s) desde el Índice`);
 }
 
 /* ---- Alta / edición de ítems (semi-elaborado o artículo) ---- */
