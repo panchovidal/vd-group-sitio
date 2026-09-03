@@ -9253,6 +9253,21 @@ function recPool(excludeRecetaId){
   recetasItems.filter(r=>r.tipo==="semielaborado" && r.id!==excludeRecetaId).forEach(r=>{
     pool.push({ tipo:"semielaborado", id:r.id, unidad:(r.porciones_unidad==="Kg"?"Kg":"Porción"), label:`${r.nombre} (Semi-elaborado)` });
   });
+  // Un artículo puede usar OTRO artículo como ingrediente de su receta (ej. "Menú del día" que
+  // incluye una bebida embotellada; o una porción que sale de un artículo entero) — pedido de
+  // Pancho, 03/09/2026. Se habilita solo para recetas de artículos (no para semi-elaborados, que
+  // siguen sin poder llevar artículos), y solo mientras se está editando esa receta puntual
+  // (recPool recibe siempre el id de la receta abierta como excludeRecetaId). Se reutiliza el
+  // mismo insumo_tipo="semielaborado"/insumo_semielaborado_id de siempre (esa FK ya apunta de forma
+  // genérica a lf_recetas_items sin importar el tipo de la fila referenciada) — no hace falta
+  // ninguna columna ni valor de tipo nuevo; recCostoPorcion/recDependsOn ya son agnósticos al tipo
+  // del ítem referenciado, así que el costeo y el chequeo de ciclos funcionan sin tocarlos.
+  const recetaAbierta = recetasItems.find(r=>r.id===excludeRecetaId);
+  if(recetaAbierta && recetaAbierta.tipo==="articulo"){
+    recetasItems.filter(r=>r.tipo==="articulo" && r.id!==excludeRecetaId).forEach(r=>{
+      pool.push({ tipo:"semielaborado", id:r.id, unidad:(r.porciones_unidad==="Kg"?"Kg":"Porción"), label:`${r.nombre} (Artículo)` });
+    });
+  }
   return pool;
 }
 function recFindInPool(label, excludeRecetaId){
@@ -9273,7 +9288,10 @@ function recInsumoRef(l){
   }
   const r = recetasItems.find(x=>x.id===l.insumo_semielaborado_id);
   if(!r) return null;
-  return { tipo:"semielaborado", id:r.id, unidad:(r.porciones_unidad==="Kg"?"Kg":"Porción"), label:`${r.nombre} (Semi-elaborado)` };
+  // La etiqueta se arma según el tipo real del ítem referenciado (no siempre es un semi-elaborado
+  // — ver nota en recPool sobre artículos usados como ingrediente de otro artículo).
+  const etiquetaTipo = r.tipo==="articulo" ? "Artículo" : "Semi-elaborado";
+  return { tipo:"semielaborado", id:r.id, unidad:(r.porciones_unidad==="Kg"?"Kg":"Porción"), label:`${r.nombre} (${etiquetaTipo})` };
 }
 function recPunitFor(ref){ return ref.tipo==="compra" ? recInsumoPrecioUnitario(ref.id) : recCostoPorcion(ref.id); }
 
