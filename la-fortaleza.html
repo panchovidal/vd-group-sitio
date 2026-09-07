@@ -6107,19 +6107,22 @@ function liqRenderZone(){
 function liqEscapeHtml(s){
   return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
+// NOTA (07/09): antes esta zona se bloqueaba por completo mientras el mes EN PANTALLA estaba
+// liquidado (ej. Julio), lo que impedía incluso abrir el selector de archivo para subir el reporte
+// de un mes nuevo (ej. Agosto) — quedaba "trabado" sin forma de avanzar. El chequeo correcto es
+// sobre el mes que detecta el archivo recién subido, no sobre el mes que se está mirando ahora;
+// ese chequeo se hace más abajo, dentro de liqProcesarArchivo, una vez detectado el mes del archivo.
 function liqZoneClick(){
-  if(liqState.liquidado){ showToast("Este mes ya fue liquidado. No se puede reemplazar el reporte.", "warn"); return; }
   document.getElementById("liqFileInput").click();
 }
 function liqWireZoneEvents(){
   var input = document.getElementById("liqFileInput");
   var zone = document.getElementById("liqAttachZone");
   input.addEventListener("change", function(e){ var f=e.target.files[0]; if(f) liqOnFileSelected(f); });
-  zone.addEventListener("dragover", function(e){ e.preventDefault(); if(!liqState.liquidado) zone.classList.add("dragover"); });
+  zone.addEventListener("dragover", function(e){ e.preventDefault(); zone.classList.add("dragover"); });
   zone.addEventListener("dragleave", function(){ zone.classList.remove("dragover"); });
   zone.addEventListener("drop", function(e){
     e.preventDefault(); zone.classList.remove("dragover");
-    if(liqState.liquidado){ showToast("Este mes ya fue liquidado. No se puede reemplazar el reporte.", "warn"); return; }
     var f = e.dataTransfer.files[0]; if(f) liqOnFileSelected(f);
   });
 }
@@ -6151,38 +6154,41 @@ async function liqProcesarArchivo(parsed, fileName){
   if(!mesDetectado){ showToast("No se pudieron detectar jornadas válidas en el archivo.", "warn"); return; }
   var mesISO = mesDetectado+"-01";
 
+  // Se busca ANTES de tocar liqState: si el mes que detectó el archivo ya está liquidado (ej. se
+  // subió por error el reporte de un mes ya cerrado), se avisa y se corta sin pisar nada de lo que
+  // había en pantalla (07/09 — corrige el bloqueo que impedía subir el reporte de un mes nuevo).
+  var filaExistente = null;
+  try{
+    var chk = await sb.from("lf_liquidaciones").select("*").eq("mes", mesISO).maybeSingle();
+    if(!chk.error && chk.data) filaExistente = chk.data;
+  }catch(e){ console.warn("No se pudo verificar si el mes ya tenía datos guardados", e); }
+  if(filaExistente && filaExistente.liquidado){
+    showToast("La liquidación de "+liqMesNombre(mesISO)+" ya fue confirmada. Para modificarla, hacelo desde Pagos.", "warn");
+    return;
+  }
+
   var presentismo = {};
   Object.keys(LIQ_EXPECTED_HOURS).forEach(function(key){
     presentismo[key] = liqProcesarEmpleado(key, grupos[key] || {});
   });
 
+  // Si ya existía un draft guardado para este mes (mismo archivo re-subido, o se había arrancado a
+  // completar feriados/montos antes), se funde encima; si no, todo arranca en blanco/cero.
   liqState.mes = mesISO;
   liqState.marcacionesHeader = parsed.header;
   liqState.marcacionesRows = parsed.rows;
   liqState.fileName = fileName;
   liqState.presentismo = presentismo;
-  liqState.feriados = [];
-  liqState.montoA = {};
-  liqState.pagoBManual = {};
-  liqState.liquidado = false;
-  liqState.liquidacionId = null;
-  liqState.ordenAId = null;
-  liqState.ordenBId = null;
-
-  // Si ya existe un draft (o una liquidación ya cerrada) guardado para este mes, se funde encima
-  // (para no perder feriados/montos ya ingresados si se vuelve a subir el mismo archivo).
-  try{
-    var res = await sb.from("lf_liquidaciones").select("*").eq("mes", mesISO).maybeSingle();
-    if(!res.error && res.data){
-      liqState.liquidacionId = res.data.id;
-      liqState.feriados = res.data.feriados || [];
-      liqState.montoA = res.data.montos_a || {};
-      liqState.pagoBManual = res.data.pagos_b || {};
-      liqState.liquidado = !!res.data.liquidado;
-      liqState.ordenAId = res.data.orden_a_id;
-      liqState.ordenBId = res.data.orden_b_id;
-    }
-  }catch(e){ console.warn("No se pudo verificar si el mes ya tenía datos guardados", e); }
+  liqState.feriados = filaExistente ? (filaExistente.feriados || []) : [];
+  liqState.montoA = filaExistente ? (filaExistente.montos_a || {}) : {};
+  liqState.pagoBManual = filaExistente ? (filaExistente.pagos_b || {}) : {};
+  liqState.horasExtraManual = filaExistente ? (filaExistente.horas_extra_manual || {}) : {};
+  liqState.feriadosManual = filaExistente ? (filaExistente.feriados_manual || {}) : {};
+  liqState.ausenciasManual = filaExistente ? (filaExistente.ausencias_manual || {}) : {};
+  liqState.liquidado = false; // el caso liquidado=true ya se descartó arriba
+  liqState.liquidacionId = filaExistente ? filaExistente.id : null;
+  liqState.ordenAId = filaExistente ? filaExistente.orden_a_id : null;
+  liqState.ordenBId = filaExistente ? filaExistente.orden_b_id : null;
 
   liqRenderZone();
   liqRenderTodo();
