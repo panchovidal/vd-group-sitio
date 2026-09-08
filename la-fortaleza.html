@@ -493,11 +493,13 @@
   /* ---- Precios de venta ---- */
   .pv-table-scroll{overflow-x:auto;max-width:100%;}
   .pv-table{width:max-content;min-width:100%;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:18px;}
-  .pv-head-row,.pv-row{display:grid;grid-template-columns:280px 130px 100px 100px 130px 60px;gap:10px;align-items:center;padding:10px 16px;}
-  .pv-table.ajuste .pv-head-row,.pv-table.ajuste .pv-row{grid-template-columns:220px 110px 90px 90px 76px 90px 130px 76px 110px;}
+  .pv-head-row,.pv-row{display:grid;grid-template-columns:200px 96px 84px 84px 70px 84px 84px 70px 90px 74px;gap:10px;align-items:center;padding:10px 16px;}
+  .pv-table.ajuste .pv-head-row,.pv-table.ajuste .pv-row{grid-template-columns:190px 96px 84px 84px 70px 84px 130px 70px 100px 74px;}
   .pv-head-row{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);border-bottom:1px solid var(--border);background:#F7F8FD;}
-  .pv-row{border-bottom:1px solid var(--border);font-size:12.5px;}
+  .pv-row{border-bottom:1px solid var(--border);font-size:12.5px;transition:background .12s;}
   .pv-row:last-child{border-bottom:none;}
+  .pv-row.pv-drop-target{background:#EEF2FF;}
+  .pv-row.pv-dragging{opacity:.4;}
   .pv-nombre{font-weight:700;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .pv-num{font-variant-numeric:tabular-nums;color:var(--text-2);font-weight:600;}
   .pv-inc-badge{display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11.5px;padding:4px 10px;border-radius:20px;min-width:52px;}
@@ -507,11 +509,10 @@
   .pv-inc-na{background:#F1F2FA;color:var(--text-3);}
   .pv-var-up{color:#B22A32;font-weight:700;font-variant-numeric:tabular-nums;}
   .pv-var-down{color:#137B44;font-weight:700;font-variant-numeric:tabular-nums;}
-  .pv-move{display:flex;flex-direction:column;gap:2px;}
-  .pv-move button{width:22px;height:17px;border:none;background:#F1F2FA;color:var(--text-3);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
-  .pv-move button:hover{background:#E4E6F5;color:var(--text-1);}
-  .pv-move button:disabled{opacity:.35;cursor:default;}
-  .pv-move button svg{width:11px;height:11px;}
+  .pv-move{display:flex;align-items:center;gap:6px;}
+  .pv-grip{cursor:grab;user-select:none;font-size:15px;line-height:1;color:var(--text-3);letter-spacing:-2px;padding:2px 1px;}
+  .pv-grip:active{cursor:grabbing;}
+  .pv-mover-select{width:44px;padding:3px 2px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-variant-numeric:tabular-nums;background:#F7F8FD;color:var(--text-2);}
   .pv-precio-input{width:110px;padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-size:12.5px;font-variant-numeric:tabular-nums;}
   .pv-hint{font-size:9.5px;color:var(--text-3);margin-top:3px;}
   .pv-ajuste-footer{flex-shrink:0;background:#fff;border-top:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:14px;box-shadow:0 -4px 14px rgba(20,25,50,.06);}
@@ -1053,7 +1054,8 @@
                 <div class="form-section-title">Proveedor</div>
                 <div class="field" id="fld-nProveedor">
                   <label>Proveedor</label>
-                  <select id="nProveedor" onchange="onProveedorChange()"><option value="">Seleccionar proveedor…</option></select>
+                  <input type="text" id="nProveedor" list="dlProveedoresPago" autocomplete="off" placeholder="Escribí para buscar…" oninput="onProveedorChange()" onchange="onProveedorChange()">
+                  <div class="rl-warn" id="nProveedorWarn" style="display:none;">No coincide con ningún proveedor cargado</div>
                 </div>
                 <label class="check-inline">
                   <input type="checkbox" id="nSinProveedor" onchange="onSinProveedorToggle()">
@@ -1336,7 +1338,8 @@
                       </div>
                       <div class="field" id="fld-cmSalidaProveedor">
                         <label>Proveedor</label>
-                        <select id="cmSalidaProveedor" onchange="onCMProveedorChange()"><option value="">Seleccionar proveedor…</option></select>
+                        <input type="text" id="cmSalidaProveedor" list="dlProveedoresPago" autocomplete="off" placeholder="Escribí para buscar…" oninput="onCMProveedorChange()" onchange="onCMProveedorChange()">
+                        <div class="rl-warn" id="cmSalidaProveedorWarn" style="display:none;">No coincide con ningún proveedor cargado</div>
                       </div>
                       <label class="check-inline">
                         <input type="checkbox" id="cmSalidaSinProveedor" onchange="onCMSinProveedorToggle()">
@@ -1850,6 +1853,17 @@
           <section class="pagos-pane" id="ctpPrecios">
             <div class="screen-header" id="pvHeaderMain">
               <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Precios de venta</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Revisión periódica del precio de cada artículo contra su costo de materia prima, por rubro. Rojo: incidencia del costo ≥45%. Amarillo: 30%–45%. Verde: &lt;30%.</div></div>
+              <div class="ventas-side-config" id="pvListadoBox" style="min-width:220px;">
+                <div class="vcfg-row">
+                  <span class="vcfg-dot" id="pvListadoDot"></span>
+                  <span class="vcfg-text" id="pvListadoStatus">Listado de artículos: sin cargar</span>
+                </div>
+                <div class="vcfg-foot">
+                  <button type="button" class="vcfg-link" id="btnDescargarListado" onclick="pvDescargarListadoExcel()" disabled>Descargar Excel</button>
+                  <button type="button" class="vcfg-link" onclick="document.getElementById('inputListadoArticulos').click()">Actualizar listado</button>
+                  <input type="file" id="inputListadoArticulos" accept=".xlsx,.xls" style="display:none" onchange="onListadoArticulosChange(event)">
+                </div>
+              </div>
               <button type="button" class="btn-ghost" id="pvBtnHistorial" onclick="pvToggleHistorial()">Ver historial</button>
               <button type="button" class="btn-primary" id="pvBtnAjuste" onclick="pvIniciarAjuste()">Realizar nuevo ajuste</button>
             </div>
@@ -1873,6 +1887,10 @@
     <datalist id="dlUnidadesMedida"></datalist>
     <datalist id="dlInsumosProveedor"></datalist>
     <datalist id="dlRecetaInsumos"></datalist>
+    <!-- Búsqueda inteligente de proveedores en Pagos (Cargar orden) y Caja Mayor (Salida de efectivo),
+         análoga a la de Recetas (input de texto libre + datalist en vez de <select> con optgroups) —
+         pedido de Pancho, 07/09/2026: con el <select> agrupado no se podía tipear para filtrar. -->
+    <datalist id="dlProveedoresPago"></datalist>
 
     <!-- ===================== MÓDULO: REPORTES (placeholder) ===================== -->
     <section class="module-screen" id="moduleReportes">
@@ -2540,6 +2558,20 @@ function populateProveedorSelectGrouped(sel, placeholder){
     sel.appendChild(og);
   });
   if(proveedoresConfig.some(p=>p.nombre===current)) sel.value = current;
+}
+// Búsqueda inteligente de proveedores (07/09/2026): reemplaza el <select> agrupado de arriba en los
+// dos lugares donde Pancho pidió poder tipear para filtrar — Cargar orden de pago (nProveedor) y
+// Caja Mayor > Salida de efectivo (cmSalidaProveedor) — por un <input list="dlProveedoresPago">,
+// mismo patrón ya usado en Recetas para buscar insumos: datalist con filtrado nativo del navegador
+// a medida que se escribe (a diferencia del <select>, que solo salta a la opción que empieza con la
+// letra tipeada). El value de cada <option> es el nombre EXACTO del proveedor (necesario porque se
+// guarda tal cual en lf_ordenes.proveedor); el texto visible al lado ayuda a desambiguar cuando hay
+// nombres parecidos, mostrando su Concepto — Rubro.
+function refreshProveedoresPagoDatalist(){
+  const dl = document.getElementById("dlProveedoresPago");
+  if(!dl) return;
+  const ordenados = proveedoresConfig.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  dl.innerHTML = ordenados.map(p=>`<option value="${costeoEsc(p.nombre)}">${costeoEsc((p.concepto||"Sin concepto")+" — "+(p.rubro||"Sin rubro"))}</option>`).join("");
 }
 function showToast(msg, type){
   const t=document.getElementById("toast");
@@ -3636,10 +3668,12 @@ function onComprobanteTipoChange(){
   markFieldError("fld-nComprobanteNro", false);
 }
 function onProveedorChange(){
-  const nombre = document.getElementById("nProveedor").value;
+  const nombre = document.getElementById("nProveedor").value.trim();
   const p = proveedoresConfig.find(x=>x.nombre===nombre);
   document.getElementById("nConcepto").value = p ? p.concepto : "";
   document.getElementById("nRubro").value = p ? p.rubro : "";
+  document.getElementById("nProveedorWarn").style.display = (nombre && !p) ? "" : "none";
+  markFieldError("fld-nProveedor", false);
 }
 function onSinProveedorToggle(){
   const sin = document.getElementById("nSinProveedor").checked;
@@ -3651,6 +3685,7 @@ function onSinProveedorToggle(){
   markFieldError("fld-nRubroWrap", false);
   if(sin){
     provSelect.value = "";
+    document.getElementById("nProveedorWarn").style.display = "none";
     rubroInput.style.display = "none";
     rubroSelect.style.display = "";
     document.getElementById("nRubroHint").textContent = "(elegí manualmente)";
@@ -3680,8 +3715,9 @@ function resetNuevaOrdenForm(){
   document.getElementById("nFechaComprobante").value = "";
   document.getElementById("nComprobanteNro").value = "";
   onComprobanteTipoChange();
-  populateProveedorSelectGrouped(document.getElementById("nProveedor"), "Seleccionar proveedor…");
+  refreshProveedoresPagoDatalist();
   document.getElementById("nProveedor").value = "";
+  document.getElementById("nProveedorWarn").style.display = "none";
   document.getElementById("nConcepto").value = "";
   document.getElementById("nRubro").value = "";
   document.getElementById("nSinProveedor").checked = false;
@@ -3736,7 +3772,11 @@ async function saveNuevaOrden(){
   if(sinProveedor){
     markFieldError("fld-nRubroWrap", !rubro); if(!rubro) ok=false;
   } else {
-    markFieldError("fld-nProveedor", !proveedor); if(!proveedor) ok=false;
+    // El campo ahora es de texto libre (búsqueda tipo Recetas) — además de no estar vacío, tiene
+    // que coincidir EXACTO con un proveedor cargado (si no, quedaría una orden con un proveedor
+    // "fantasma" que no matchea nada en Config/Costeo/Liquidación).
+    const proveedorValido = !!proveedor && proveedoresConfig.some(p=>p.nombre===proveedor);
+    markFieldError("fld-nProveedor", !proveedorValido); if(!proveedorValido) ok=false;
   }
   markFieldError("fld-nMontoFactura", montoFactura<=0); if(montoFactura<=0) ok=false;
   markFieldError("fld-nMetodo", !metodo); if(!metodo) ok=false;
@@ -5787,7 +5827,7 @@ var LIQ_EXPECTED_HOURS = {
   Dari: { horasEsperadas: 10, horario: "cortado" },
   Karen: { horasEsperadas: 8, horario: "intermedio" },
   Leo: { horasEsperadas: 12, horario: "intermedio" },
-  Cele: { horasEsperadas: 8, horario: "manana" },
+  Cele: { horasEsperadas: 8.5, horario: "manana" }, // 8:00 a 16:30 (actualizado 07/09/2026, antes 8h)
   Lizak: { horasEsperadas: 8, horario: "manana" },
   Liz: { horasEsperadas: 8, horario: "manana" },
   Martu: { horasEsperadas: 8, horario: "tarde" }
@@ -7471,8 +7511,9 @@ function cmResetSalidaForm(){
   document.getElementById("cmSalidaFechaImp").value = isoToDMY(todayISO());
   document.getElementById("cmSalidaNro").value = "Pago "+cmState.nextSalidaNro;
   document.getElementById("cmSalidaFecha").value = "";
-  populateProveedorSelectGrouped(document.getElementById("cmSalidaProveedor"), "Seleccionar proveedor…");
+  refreshProveedoresPagoDatalist();
   document.getElementById("cmSalidaProveedor").value = "";
+  document.getElementById("cmSalidaProveedorWarn").style.display = "none";
   document.getElementById("cmSalidaConcepto").value = "";
   document.getElementById("cmSalidaRubro").value = "";
   document.getElementById("cmSalidaSinProveedor").checked = false;
@@ -7482,10 +7523,12 @@ function cmResetSalidaForm(){
   document.querySelectorAll("#cmSalidasForm .field").forEach(f=>f.classList.remove("error"));
 }
 function onCMProveedorChange(){
-  const nombre = document.getElementById("cmSalidaProveedor").value;
+  const nombre = document.getElementById("cmSalidaProveedor").value.trim();
   const p = proveedoresConfig.find(x=>x.nombre===nombre);
   document.getElementById("cmSalidaConcepto").value = p ? p.concepto : "";
   document.getElementById("cmSalidaRubro").value = p ? p.rubro : "";
+  document.getElementById("cmSalidaProveedorWarn").style.display = (nombre && !p) ? "" : "none";
+  markFieldError("fld-cmSalidaProveedor", false);
 }
 function onCMSinProveedorToggle(){
   const sin = document.getElementById("cmSalidaSinProveedor").checked;
@@ -7496,6 +7539,7 @@ function onCMSinProveedorToggle(){
   markFieldError("fld-cmSalidaProveedor", false);
   markFieldError("fld-cmSalidaRubroWrap", false);
   if(sin){
+    document.getElementById("cmSalidaProveedorWarn").style.display = "none";
     provSelect.value = "";
     rubroInput.style.display = "none";
     rubroSelect.style.display = "";
@@ -7539,7 +7583,10 @@ function cmAddSalida(){
   markFieldError("fld-cmSalidaRubroWrap", false);
   if(!fechaSalidaISO) ok = false;
   if(sinProveedor){ if(!rubro){ markFieldError("fld-cmSalidaRubroWrap", true); ok=false; } }
-  else { if(!proveedor){ markFieldError("fld-cmSalidaProveedor", true); ok=false; } }
+  else {
+    const proveedorValido = !!proveedor && proveedoresConfig.some(p=>p.nombre===proveedor);
+    if(!proveedorValido){ markFieldError("fld-cmSalidaProveedor", true); ok=false; }
+  }
   if(monto<=0) ok = false;
   if(!ok){ showToast("Completá la fecha, el proveedor/rubro y el monto de la salida", "warn"); return; }
 
@@ -7962,7 +8009,7 @@ async function cmInit(){
     if(cmState.salidasToggle==="si"){
       document.getElementById("cmSalidaFechaImp").value = isoToDMY(todayISO());
       document.getElementById("cmSalidaNro").value = "Pago "+cmState.nextSalidaNro;
-      populateProveedorSelectGrouped(document.getElementById("cmSalidaProveedor"), "Seleccionar proveedor…");
+      refreshProveedoresPagoDatalist();
     }
     if(cmState.ajustesToggle==="si"){
       document.getElementById("cmAjusteFechaImp").value = isoToDMY(todayISO());
@@ -8277,13 +8324,19 @@ async function initCosteo(){
   // Los proveedores "extra" se cargan primero: costeoOrdenesFiltradas() los necesita para saber
   // qué órdenes traer, y de eso dependen loadCosteoCompraItems/loadCosteoOrdenAjustes.
   await loadCosteoProveedoresExtra();
-  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadCosteoOrdenAjustes(), loadRecetasItems(), loadRecetaLineas(), loadPreciosVentaItems(), loadPreciosVentaAjustes()]);
+  // pvCargarVentaSemanalCache (Compras-Ventas/ATC) se precarga acá y no solo al entrar en modo
+  // ajuste (como antes) porque desde el 07/09/2026 la tabla de lectura de Precios de venta también
+  // muestra, siempre, la referencia de "Precio nuevo" (última venta real) — sin esto quedaría en
+  // "—" hasta la primera vez que se abre un ajuste.
+  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadCosteoOrdenAjustes(), loadRecetasItems(), loadRecetaLineas(), loadPreciosVentaItems(), loadPreciosVentaAjustes(), pvCargarVentaSemanalCache()]);
   costeoShowProvList();
   costeoShowComprasList();
   renderRecList();
   renderPreciosVenta();
   if(!ventasIndice) vTryLoadIndiceFromStorage().then(()=>recRenderSyncStatus());
   else recRenderSyncStatus();
+  if(!listadoArticulos) pvTryLoadListadoFromStorage();
+  else pvRenderListadoBox(listadoArticulos.savedAt, listadoArticulos.fileName);
 }
 function goCosteoTab(pane){
   const scope = document.getElementById("costeoSubnav");
@@ -9750,6 +9803,90 @@ async function loadPreciosVentaAjustes(){
   preciosVentaAjustes = data || [];
 }
 
+/* ---- Listado de artículos (archivo del software de gestión, con Código, Precio de compra,
+   Tipo, Stock, Activo, Id, etc.) — pedido de Pancho, 07/09/2026: poder exportar un Excel de
+   Precios de venta con el mismo formato que este listado, para volver a cargarlo en el sistema
+   de gestión. Se guarda el archivo completo (header + filas) tal cual se sube, mismo patrón que
+   el "Índice de artículos" de Ventas (lf_ventas_indice) — así el Código y demás columnas quedan
+   disponibles la próxima vez que se exporte, sin tener que volver a subir el archivo cada vez.
+   Al exportar, la columna de precio de venta se pisa con el precio_actual vigente en Precios de
+   venta (matcheando por Nombre); el resto de las columnas se copian tal cual. */
+let listadoArticulos = null; // {header, rows, savedAt, fileName}
+async function pvTryLoadListadoFromStorage(){
+  try{
+    const { data, error } = await sb.from("lf_listado_articulos").select("*").eq("id",1).maybeSingle();
+    if(error || !data) return;
+    listadoArticulos = {header:data.header, rows:data.rows, savedAt:data.updated_at, fileName:data.file_name};
+    pvRenderListadoBox(data.updated_at, data.file_name);
+  }catch(err){ /* sin conexión: se deja listadoArticulos sin cargar (estado "no cargado") */ }
+}
+async function pvSaveListadoToStorage(parsed, fileName){
+  const savedAt = new Date().toISOString();
+  const payload = {header:parsed.header, rows:parsed.rows, savedAt, fileName};
+  try{
+    const { error } = await sb.from("lf_listado_articulos").upsert({
+      id: 1, header: parsed.header, rows: parsed.rows, file_name: fileName,
+      actualizado_por: currentPerfil ? currentPerfil.id : null,
+      updated_at: savedAt
+    });
+    if(error){ listadoArticulos = payload; pvRenderListadoBox(savedAt, fileName, true); return; }
+    listadoArticulos = payload;
+    pvRenderListadoBox(savedAt, fileName);
+  }catch(err){
+    listadoArticulos = payload;
+    pvRenderListadoBox(savedAt, fileName, true);
+  }
+}
+function pvRenderListadoBox(savedAtISO, fileName, storageFailed){
+  const statusEl = document.getElementById("pvListadoStatus");
+  const dot = document.getElementById("pvListadoDot");
+  if(!statusEl || !dot) return;
+  dot.classList.remove("warn","ok"); dot.classList.add(storageFailed ? "warn" : "ok");
+  const d = new Date(savedAtISO);
+  const fecha = pad2(d.getDate())+"/"+pad2(d.getMonth()+1)+"/"+d.getFullYear();
+  statusEl.textContent = "Listado de artículos: actualizado " + fecha + (storageFailed ? " (sin guardar en este navegador)" : "");
+  statusEl.title = "Última actualización: " + fecha + (fileName ? " · " + fileName : "")
+    + (storageFailed ? " · No se pudo guardar en este navegador (vista previa); al abrirlo localmente sí va a quedar guardado." : "");
+  document.getElementById("btnDescargarListado").disabled = false;
+}
+async function onListadoArticulosChange(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  try{
+    const parsed = await vReadWorkbook(file);
+    await pvSaveListadoToStorage(parsed, file.name);
+    showToast("Listado de artículos actualizado correctamente");
+  }catch(err){
+    showToast("Error al leer el listado de artículos: "+err.message, "warn");
+  }
+  ev.target.value = "";
+}
+function pvDescargarListadoExcel(){
+  if(!listadoArticulos){ showToast("Todavía no hay un Listado de artículos cargado — subilo con \"Actualizar listado\"", "warn"); return; }
+  const h = listadoArticulos.header;
+  const iNombre = vFindColIndex(h, ["Nombre (*)","Nombre"]);
+  const iPrecioVenta = vFindColIndex(h, ["Precio de Venta","Precio de venta","Precio Venta","PrecioVenta"]);
+  if(iNombre===-1 || iPrecioVenta===-1){
+    showToast("El Listado de artículos no tiene las columnas \"Nombre\" y \"Precio de Venta\" esperadas", "warn");
+    return;
+  }
+  const porNombre = new Map(pvArticulos().map(a=>[a.nombre.trim().toLowerCase(), a]));
+  let actualizados = 0;
+  const rows = listadoArticulos.rows.map(r=>{
+    const fila = r.slice();
+    const nombre = (fila[iNombre]||"").toString().trim().toLowerCase();
+    const a = porNombre.get(nombre);
+    const pv = a ? preciosVentaItems[a.id] : null;
+    if(pv && pv.precio_actual!=null){ fila[iPrecioVenta] = pv.precio_actual; actualizados++; }
+    return fila;
+  });
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([h, ...rows]);
+  XLSX.utils.book_append_sheet(wb, ws, "Artículos");
+  XLSX.writeFile(wb, "precios_venta_lafortaleza_"+todayISO()+".xlsx");
+  showToast(`Excel generado — ${actualizados} de ${rows.length} artículo(s) con precio actualizado`);
+}
+
 /* ---- Artículos / agrupación por rubro (mismo criterio de orden que Costeo/Proveedores) ---- */
 function pvArticulos(){ return recetasItems.filter(r=>r.tipo==="articulo"); }
 function pvConceptosPresentes(){
@@ -9788,29 +9925,73 @@ function pvApplyVarSpan(el, pct){
   el.className = pct>0 ? "pv-var-up" : (pct<0 ? "pv-var-down" : "pv-num");
   el.textContent = (pct>0?"+":"") + pct.toLocaleString("es-AR",{maximumFractionDigits:1}) + "%";
 }
+// Mismo formato que pvApplyVarSpan pero como string de HTML, para tablas armadas de una vez (no
+// actualizadas después vía DOM) — usado en la tabla de lectura, siempre visible (07/09/2026).
+function pvFmtVarHtml(pct){
+  if(pct==null) return `<div class="pv-num">—</div>`;
+  const cls = pct>0 ? "pv-var-up" : (pct<0 ? "pv-var-down" : "pv-num");
+  return `<div class="${cls}">${(pct>0?"+":"")}${pct.toLocaleString("es-AR",{maximumFractionDigits:1})}%</div>`;
+}
 function pvApplyIncBadge(el, pct){
   if(!el) return;
   el.className = "pv-inc-badge " + pvIncidenciaClase(pct);
   el.textContent = pvFmtPct(pct);
 }
 
-/* ---- Reordenar a mano dentro de un rubro ("posibilidad de personalización del orden") ---- */
-async function pvMover(articuloId, dir){
+/* ---- Reordenar a mano dentro de un rubro ("posibilidad de personalización del orden") ----
+   Pedido de Pancho, 07/09/2026: poder reubicar los artículos arrastrando, o desde un menú
+   desplegable con la posición exacta — reemplaza las flechas subir/bajar de a un paso. Disponible
+   tanto en la tabla de lectura como en "Realizar nuevo ajuste" (mismo orden_manual para las dos).
+   Arrastrar/soltar solo tiene efecto dentro del mismo rubro (cada bloque de tabla es un rubro
+   distinto, así que ya queda acotado solo con eso; igual se valida el concepto por las dudas). */
+let pvDragArticuloId = null;
+function pvDragStart(ev, articuloId){
+  pvDragArticuloId = articuloId;
+  ev.dataTransfer.effectAllowed = "move";
+  try{ ev.dataTransfer.setData("text/plain", articuloId); }catch(e){}
+  const row = ev.currentTarget.closest(".pv-row");
+  if(row) row.classList.add("pv-dragging");
+}
+function pvDragEnd(ev){
+  const row = ev.currentTarget.closest(".pv-row");
+  if(row) row.classList.remove("pv-dragging");
+  document.querySelectorAll(".pv-row.pv-drop-target").forEach(r=>r.classList.remove("pv-drop-target"));
+}
+function pvDragOver(ev){ ev.preventDefault(); ev.dataTransfer.dropEffect = "move"; }
+async function pvDrop(ev, targetArticuloId){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove("pv-drop-target");
+  const origenId = pvDragArticuloId;
+  pvDragArticuloId = null;
+  if(!origenId || origenId===targetArticuloId) return;
+  const a = recetasItems.find(x=>x.id===origenId);
+  const b = recetasItems.find(x=>x.id===targetArticuloId);
+  if(!a || !b || a.concepto!==b.concepto) return; // solo se puede reordenar dentro del mismo rubro
+  const grupo = pvGrupoOrdenado(a.concepto);
+  const ids = grupo.map(x=>x.id);
+  const from = ids.indexOf(origenId), to = ids.indexOf(targetArticuloId);
+  if(from===-1 || to===-1) return;
+  ids.splice(from,1);
+  ids.splice(to,0,origenId);
+  await pvReordenarGrupo(ids);
+}
+function pvMoverAPosicion(articuloId, nuevaPosStr){
   const a = recetasItems.find(x=>x.id===articuloId);
   if(!a) return;
   const grupo = pvGrupoOrdenado(a.concepto);
-  const idx = grupo.findIndex(x=>x.id===articuloId);
-  const j = idx+dir;
-  if(j<0 || j>=grupo.length) return;
-  // Renumera TODO el grupo según el orden que tenía hasta ahora (así los que
-  // nunca se movieron, con el orden_manual "default", también quedan con un
-  // valor explícito) y recién ahí intercambia las dos posiciones pedidas.
-  const updates = grupo.map((it,i)=>({ articulo_id: it.id, orden_manual: i }));
-  const iIdx = updates.findIndex(u=>u.articulo_id===articuloId);
-  const jIdx = updates.findIndex(u=>u.articulo_id===grupo[j].id);
-  const tmp = updates[iIdx].orden_manual;
-  updates[iIdx].orden_manual = updates[jIdx].orden_manual;
-  updates[jIdx].orden_manual = tmp;
+  const ids = grupo.map(x=>x.id);
+  const idxActual = ids.indexOf(articuloId);
+  const nuevaPos = Math.max(0, Math.min(grupo.length-1, Number(nuevaPosStr)-1));
+  if(nuevaPos===idxActual) return;
+  ids.splice(idxActual,1);
+  ids.splice(nuevaPos,0,articuloId);
+  pvReordenarGrupo(ids);
+}
+// Renumera TODO el grupo según el orden final pedido (`ids`, ya en el nuevo orden) — así los
+// artículos que nunca se movieron, con el orden_manual "default", también quedan con un valor
+// explícito, y no solo el par que se intercambió.
+async function pvReordenarGrupo(ids){
+  const updates = ids.map((id,i)=>({ articulo_id:id, orden_manual:i }));
   for(const u of updates){
     const { error } = await sb.from("lf_precios_venta_items").upsert(
       { articulo_id: u.articulo_id, orden_manual: u.orden_manual },
@@ -9927,35 +10108,58 @@ function renderPreciosVenta(){
     html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div>`;
     html += `<div class="pv-table-scroll"><div class="pv-table${pvModoAjuste?' ajuste':''}">`;
     html += pvModoAjuste ? pvHeadRowAjuste() : pvHeadRow();
-    grupo.forEach((a,i)=>{ html += pvModoAjuste ? pvRenderRowAjuste(a) : pvRenderRow(a, grupo, i); });
+    grupo.forEach((a,i)=>{ html += pvModoAjuste ? pvRenderRowAjuste(a, grupo, i) : pvRenderRow(a, grupo, i); });
     html += `</div></div>`;
   });
   wrap.innerHTML = html || `<div class="empty-mini">No hay artículos para mostrar.</div>`;
 }
-function pvHeadRow(){
-  return `<div class="pv-head-row"><div>Artículo</div><div>Últ. actualización</div><div>Costo</div><div>Precio</div><div>% incidencia</div><div></div></div>`;
+// Celda de "mover" compartida entre la tabla de lectura y la de ajuste: grip para arrastrar +
+// desplegable con la posición exacta dentro del rubro (07/09/2026, reemplaza las flechas de a un paso).
+function pvMoverCellHtml(articulo, grupo, i){
+  const opciones = grupo.map((x,idx)=>`<option value="${idx+1}"${idx===i?" selected":""}>${idx+1}</option>`).join("");
+  return `<div class="pv-move">
+      <span class="pv-grip" draggable="true" ondragstart="pvDragStart(event,'${articulo.id}')" ondragend="pvDragEnd(event)" title="Arrastrar para reordenar dentro del rubro">⠿</span>
+      <select class="pv-mover-select" onclick="event.stopPropagation()" onchange="pvMoverAPosicion('${articulo.id}', this.value)" title="Mover a la posición…">${opciones}</select>
+    </div>`;
 }
+function pvRowDragAttrs(articuloId){
+  return `ondragover="pvDragOver(event)" ondragenter="this.classList.add('pv-drop-target')" ondragleave="this.classList.remove('pv-drop-target')" ondrop="pvDrop(event,'${articuloId}')"`;
+}
+function pvHeadRow(){
+  return `<div class="pv-head-row"><div>Artículo</div><div>Últ. actualización</div><div>Costo anterior</div><div>Costo nuevo</div><div>Dif. %</div><div>Precio anterior</div><div>Precio nuevo</div><div>Dif. %</div><div>% incidencia</div><div></div></div>`;
+}
+// Tabla de lectura, siempre visible (07/09/2026, antes solo mostraba el snapshot guardado): además
+// del snapshot ("anterior"), calcula en vivo el costo actual de la receta ("nuevo", misma fórmula
+// que usa el modo ajuste) y, como referencia de precio "nuevo", la última venta real registrada en
+// Compras-Ventas/ATC (`pvVentaSemanalYHint` — mismo dato que ya se usaba solo dentro del modo
+// ajuste) — así se ve de un vistazo si el costo de la receta o el precio real de venta se
+// despegaron del último valor guardado, sin tener que entrar a "Realizar nuevo ajuste".
 function pvRenderRow(a, grupo, i){
   const pv = preciosVentaItems[a.id];
-  const costo = pv ? pv.costo_actual : null;
-  const precio = pv ? pv.precio_actual : null;
-  const pct = pvIncidencia(costo, precio);
-  return `<div class="pv-row">
+  const costoAnterior = pv ? pv.costo_actual : null;
+  const precioAnterior = pv ? pv.precio_actual : null;
+  const costoNuevo = recCostoPorcion(a.id);
+  const { hintPrecio } = pvVentaSemanalYHint(a);
+  const varCosto = pvVar(costoAnterior, costoNuevo);
+  const varPrecio = pvVar(precioAnterior, hintPrecio);
+  const pct = pvIncidencia(costoAnterior, precioAnterior);
+  return `<div class="pv-row" ${pvRowDragAttrs(a.id)}>
     <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
     <div class="pv-num">${pv && pv.fecha_actualizacion ? fmtFechaHora(pv.fecha_actualizacion).split(" ")[0] : "— (nunca)"}</div>
-    <div class="pv-num">${costo==null?"—":fmtMoneyCosteo(costo)}</div>
-    <div class="pv-num">${precio==null?"—":fmtMoneyCosteo(precio)}</div>
+    <div class="pv-num">${costoAnterior==null?"—":fmtMoneyCosteo(costoAnterior)}</div>
+    <div class="pv-num">${costoNuevo==null?"—":fmtMoneyCosteo(costoNuevo)}</div>
+    ${pvFmtVarHtml(varCosto)}
+    <div class="pv-num">${precioAnterior==null?"—":fmtMoneyCosteo(precioAnterior)}</div>
+    <div class="pv-num" title="${hintPrecio!=null?'Referencia: última venta real registrada en Compras-Ventas':''}">${hintPrecio==null?"—":fmtMoneyCosteo(hintPrecio)}</div>
+    ${pvFmtVarHtml(varPrecio)}
     <div><span class="pv-inc-badge ${pvIncidenciaClase(pct)}">${pvFmtPct(pct)}</span></div>
-    <div class="pv-move">
-      <button type="button" ${i===0?"disabled":""} onclick="pvMover('${a.id}',-1)" title="Subir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button>
-      <button type="button" ${i===grupo.length-1?"disabled":""} onclick="pvMover('${a.id}',1)" title="Bajar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-    </div>
+    ${pvMoverCellHtml(a, grupo, i)}
   </div>`;
 }
 function pvHeadRowAjuste(){
-  return `<div class="pv-head-row"><div>Artículo</div><div>Venta prom. semanal</div><div>Costo anterior</div><div>Costo nuevo</div><div>Var. costo</div><div>Precio anterior</div><div>Precio nuevo</div><div>Var. precio</div><div>Incidencia</div></div>`;
+  return `<div class="pv-head-row"><div>Artículo</div><div>Venta prom. semanal</div><div>Costo anterior</div><div>Costo nuevo</div><div>Var. costo</div><div>Precio anterior</div><div>Precio nuevo</div><div>Var. precio</div><div>Incidencia</div><div></div></div>`;
 }
-function pvRenderRowAjuste(a){
+function pvRenderRowAjuste(a, grupo, i){
   const pv = preciosVentaItems[a.id];
   const costoAnterior = pv ? pv.costo_actual : null;
   const precioAnterior = pv ? pv.precio_actual : null;
@@ -9967,7 +10171,7 @@ function pvRenderRowAjuste(a){
   const precioNuevoNum = pend.precioNuevo!=null ? Number(pend.precioNuevo) : null;
   const varPrecio = precioNuevoNum!=null ? pvVar(precioAnterior, precioNuevoNum) : null;
   const incidenciaNueva = pvIncidencia(costoNuevo, precioNuevoNum!=null ? precioNuevoNum : precioAnterior);
-  return `<div class="pv-row" id="pvRow_${a.id}">
+  return `<div class="pv-row" id="pvRow_${a.id}" ${pvRowDragAttrs(a.id)}>
     <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
     <div class="pv-num">${promedioSemanal==null?"—":promedioSemanal.toLocaleString("es-AR",{maximumFractionDigits:1})+"/sem."}</div>
     <div class="pv-num">${costoAnterior==null?"—":fmtMoneyCosteo(costoAnterior)}</div>
@@ -9980,6 +10184,7 @@ function pvRenderRowAjuste(a){
     </div>
     <div id="pvVarPrecio_${a.id}" class="${varPrecio==null?'pv-num':(varPrecio>0?'pv-var-up':(varPrecio<0?'pv-var-down':'pv-num'))}">${varPrecio==null?"—":((varPrecio>0?"+":"")+varPrecio.toLocaleString("es-AR",{maximumFractionDigits:1})+"%")}</div>
     <div><span id="pvInc_${a.id}" class="pv-inc-badge ${pvIncidenciaClase(incidenciaNueva)}">${pvFmtPct(incidenciaNueva)}</span></div>
+    ${pvMoverCellHtml(a, grupo, i)}
   </div>`;
 }
 
