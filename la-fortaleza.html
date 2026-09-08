@@ -10137,20 +10137,25 @@ function pvHeadRow(){
 function pvRenderRow(a, grupo, i){
   const pv = preciosVentaItems[a.id];
   const costoAnterior = pv ? pv.costo_actual : null;
-  const precioAnterior = pv ? pv.precio_actual : null;
+  // precio_actual es el precio VIGENTE cargado en el sistema (el último confirmado en un ajuste) —
+  // es el dato más "nuevo" de los dos. La referencia de última venta real (ATC) puede quedar
+  // desactualizada si ya se hizo un ajuste después de esa venta, así que va como "anterior" — al
+  // revés de como había quedado al principio (corregido 08/09/2026, pedido de Pancho: "los precios
+  // nuevos aparecen como viejos, y viceversa").
+  const precioVigente = pv ? pv.precio_actual : null;
   const costoNuevo = recCostoPorcion(a.id);
   const { hintPrecio } = pvVentaSemanalYHint(a);
   const varCosto = pvVar(costoAnterior, costoNuevo);
-  const varPrecio = pvVar(precioAnterior, hintPrecio);
-  const pct = pvIncidencia(costoAnterior, precioAnterior);
+  const varPrecio = pvVar(hintPrecio, precioVigente);
+  const pct = pvIncidencia(costoAnterior, precioVigente);
   return `<div class="pv-row" ${pvRowDragAttrs(a.id)}>
     <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
     <div class="pv-num">${pv && pv.fecha_actualizacion ? fmtFechaHora(pv.fecha_actualizacion).split(" ")[0] : "— (nunca)"}</div>
     <div class="pv-num">${costoAnterior==null?"—":fmtMoneyCosteo(costoAnterior)}</div>
     <div class="pv-num">${costoNuevo==null?"—":fmtMoneyCosteo(costoNuevo)}</div>
     ${pvFmtVarHtml(varCosto)}
-    <div class="pv-num">${precioAnterior==null?"—":fmtMoneyCosteo(precioAnterior)}</div>
     <div class="pv-num" title="${hintPrecio!=null?'Referencia: última venta real registrada en Compras-Ventas':''}">${hintPrecio==null?"—":fmtMoneyCosteo(hintPrecio)}</div>
+    <div class="pv-num">${precioVigente==null?"—":fmtMoneyCosteo(precioVigente)}</div>
     ${pvFmtVarHtml(varPrecio)}
     <div><span class="pv-inc-badge ${pvIncidenciaClase(pct)}">${pvFmtPct(pct)}</span></div>
     ${pvMoverCellHtml(a, grupo, i)}
