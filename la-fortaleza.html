@@ -216,6 +216,12 @@
   .cp-handle{color:var(--text-3);font-size:13px;flex-shrink:0;letter-spacing:-1px;}
   .colpick-row label{display:flex;align-items:center;gap:8px;font-size:12.8px;font-weight:600;color:var(--text-1);cursor:pointer;flex:1;min-width:0;}
   .colpick-row label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* "Filas" (Precios de venta): mismo patrón que el selector de columnas de arriba, reutilizando
+     .colpick-list/.colpick-row/.cp-handle — pedido de Pancho, 08/09/2026, para reemplazar el
+     arrastre/dropdown dentro de la tabla (poco confiable) por un popover análogo al de Pagos. */
+  .filter-popover.filas-picker{width:340px;}
+  .pv-filas-group-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);padding:9px 6px 3px;}
+  .pv-filas-group:first-child .pv-filas-group-title{padding-top:2px;}
 
   /* ---------- DETAIL PANEL ---------- */
   .overlay{position:fixed;inset:0;background:rgba(2,11,45,0.32);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:40;}
@@ -493,15 +499,17 @@
   /* ---- Precios de venta ---- */
   .pv-table-scroll{overflow-x:auto;max-width:100%;}
   .pv-table{width:max-content;min-width:100%;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:18px;}
-  .pv-head-row,.pv-row{display:grid;grid-template-columns:200px 96px 84px 84px 70px 84px 84px 70px 90px 74px;gap:10px;align-items:center;padding:10px 16px;}
-  .pv-table.ajuste .pv-head-row,.pv-table.ajuste .pv-row{grid-template-columns:190px 96px 84px 84px 70px 84px 130px 70px 100px 74px;}
+  /* Anchos de columna editables a mano (arrastrando el borde del encabezado, ver pvInitColumnResize)
+     — pedido de Pancho, 08/09/2026, para poder ver el nombre completo del artículo. Mismas variables
+     para la tabla de lectura y la de ajuste, así el ancho elegido se mantiene en las dos. */
+  .pv-head-row,.pv-row{display:grid;grid-template-columns:var(--pv-cw-nombre,200px) var(--pv-cw-c2,96px) var(--pv-cw-costoant,84px) var(--pv-cw-costonue,84px) var(--pv-cw-difcosto,70px) var(--pv-cw-precioant,84px) var(--pv-cw-precionue,120px) var(--pv-cw-difprecio,70px) var(--pv-cw-inc,90px);gap:10px;align-items:center;padding:10px 16px;}
   .pv-head-row{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);border-bottom:1px solid var(--border);background:#F7F8FD;}
+  .pv-head-cell{position:relative;min-width:0;padding-right:6px;}
+  .pv-head-cell .pv-head-lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
   .pv-row{border-bottom:1px solid var(--border);font-size:12.5px;transition:background .12s;}
   .pv-row:last-child{border-bottom:none;}
-  .pv-row.pv-drop-target{background:#EEF2FF;}
-  .pv-row.pv-dragging{opacity:.4;}
   .pv-nombre{font-weight:700;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .pv-num{font-variant-numeric:tabular-nums;color:var(--text-2);font-weight:600;}
+  .pv-num{font-variant-numeric:tabular-nums;color:var(--text-2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .pv-inc-badge{display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11.5px;padding:4px 10px;border-radius:20px;min-width:52px;}
   .pv-inc-red{background:#FCE6E7;color:#B22A32;}
   .pv-inc-yellow{background:#FFF3D6;color:#9A6B00;}
@@ -509,11 +517,7 @@
   .pv-inc-na{background:#F1F2FA;color:var(--text-3);}
   .pv-var-up{color:#B22A32;font-weight:700;font-variant-numeric:tabular-nums;}
   .pv-var-down{color:#137B44;font-weight:700;font-variant-numeric:tabular-nums;}
-  .pv-move{display:flex;align-items:center;gap:6px;}
-  .pv-grip{cursor:grab;user-select:none;font-size:15px;line-height:1;color:var(--text-3);letter-spacing:-2px;padding:2px 1px;}
-  .pv-grip:active{cursor:grabbing;}
-  .pv-mover-select{width:44px;padding:3px 2px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-variant-numeric:tabular-nums;background:#F7F8FD;color:var(--text-2);}
-  .pv-precio-input{width:110px;padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-size:12.5px;font-variant-numeric:tabular-nums;}
+  .pv-precio-input{width:100%;max-width:160px;box-sizing:border-box;padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-size:12.5px;font-variant-numeric:tabular-nums;}
   .pv-hint{font-size:9.5px;color:var(--text-3);margin-top:3px;}
   .pv-ajuste-footer{flex-shrink:0;background:#fff;border-top:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:14px;box-shadow:0 -4px 14px rgba(20,25,50,.06);}
   .pv-hist-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:10px;max-width:900px;}
@@ -1864,6 +1868,7 @@
                   <input type="file" id="inputListadoArticulos" accept=".xlsx,.xls" style="display:none" onchange="onListadoArticulosChange(event)">
                 </div>
               </div>
+              <button type="button" class="btn-ghost" onclick="pvToggleFilasPicker(event)" title="Elegí el orden en que aparecen los artículos, arrastrando cada uno dentro de su rubro">Filas</button>
               <button type="button" class="btn-ghost" id="pvBtnHistorial" onclick="pvToggleHistorial()">Ver historial</button>
               <button type="button" class="btn-primary" id="pvBtnAjuste" onclick="pvIniciarAjuste()">Realizar nuevo ajuste</button>
             </div>
@@ -2121,6 +2126,7 @@
 
 <!-- COLUMN PICKER POPOVER -->
 <div class="filter-popover col-picker" id="columnPickerPopover"></div>
+<div class="filter-popover col-picker filas-picker" id="pvFilasPopover"></div>
 
 <!-- REPORTE POR RANGO DE FECHAS (descarga de Excel) -->
 <div class="filter-popover" id="reportPopover"></div>
@@ -8321,6 +8327,7 @@ async function costeoSaveOrdenAjustes(ordenId){
   return true;
 }
 async function initCosteo(){
+  pvLoadColWidths();
   // Los proveedores "extra" se cargan primero: costeoOrdenesFiltradas() los necesita para saber
   // qué órdenes traer, y de eso dependen loadCosteoCompraItems/loadCosteoOrdenAjustes.
   await loadCosteoProveedoresExtra();
@@ -9939,68 +9946,160 @@ function pvApplyIncBadge(el, pct){
 }
 
 /* ---- Reordenar a mano dentro de un rubro ("posibilidad de personalización del orden") ----
-   Pedido de Pancho, 07/09/2026: poder reubicar los artículos arrastrando, o desde un menú
-   desplegable con la posición exacta — reemplaza las flechas subir/bajar de a un paso. Disponible
-   tanto en la tabla de lectura como en "Realizar nuevo ajuste" (mismo orden_manual para las dos).
-   Arrastrar/soltar solo tiene efecto dentro del mismo rubro (cada bloque de tabla es un rubro
-   distinto, así que ya queda acotado solo con eso; igual se valida el concepto por las dudas). */
-let pvDragArticuloId = null;
-function pvDragStart(ev, articuloId){
-  pvDragArticuloId = articuloId;
+   Pedido de Pancho, 07/09/2026: poder reubicar los artículos. Primera versión (grip + dropdown
+   dentro de cada fila de la tabla) reemplazada el 08/09/2026 por un popover dedicado ("Filas",
+   ver más abajo) — Pancho reportó que el grip no siempre detectaba el arrastre dentro de la fila
+   (muy angosto, rodeado de otros elementos interactivos) y que el dropdown de posición exacta era
+   poco práctico. El popover reutiliza el mismo patrón (y las mismas clases CSS) que el selector de
+   columnas de Pagos, que ya viene funcionando bien.
+   Renumera TODO el grupo según el orden final pedido (`ids`, ya en el nuevo orden) — así los
+   artículos que nunca se movieron, con el orden_manual "default", también quedan con un valor
+   explícito, y no solo el par que se intercambió. Un solo upsert en lote (antes eran N upserts
+   secuenciales, uno por artículo del rubro — la causa real de la demora reportada por Pancho). ---- */
+async function pvReordenarGrupo(ids){
+  const updates = ids.map((id,i)=>({ articulo_id:id, orden_manual:i }));
+  const { error } = await sb.from("lf_precios_venta_items").upsert(updates, { onConflict:"articulo_id" });
+  if(error){ showToast("No se pudo reordenar", "warn"); return; }
+  await loadPreciosVentaItems();
+  renderPreciosVenta();
+}
+
+/* ---- Popover "Filas": reordenar arrastrando, agrupado por rubro (mismo patrón que el selector de
+   columnas de Pagos — .colpick-list/.colpick-row/.cp-handle, ver esas funciones). Arrastrar solo
+   tiene efecto dentro del mismo rubro (cada sección del popover es un rubro distinto). ---- */
+let pvFilasDragId = null;
+let pvFilasDragConcepto = null;
+function pvToggleFilasPicker(ev){
+  ev.stopPropagation();
+  const pop = document.getElementById("pvFilasPopover");
+  const wasOpen = pop.classList.contains("show");
+  if(typeof closeColumnPicker==="function") closeColumnPicker();
+  if(typeof closeFilterPopover==="function") closeFilterPopover();
+  if(wasOpen){ pop.classList.remove("show"); return; }
+  pvRenderFilasPicker();
+  pop.classList.add("show");
+  const btn = ev.currentTarget;
+  const r = btn.getBoundingClientRect();
+  pop.style.top = (r.bottom+8)+"px";
+  let left = r.right-340;
+  if(left<12) left=12;
+  pop.style.left = left+"px";
+}
+function closePvFilasPicker(){ document.getElementById("pvFilasPopover").classList.remove("show"); }
+function pvRenderFilasPicker(){
+  const pop = document.getElementById("pvFilasPopover");
+  const conceptos = pvConceptosPresentes();
+  if(!conceptos.length){
+    pop.innerHTML = `<h4>Orden de los artículos</h4><div class="empty-mini" style="padding:10px 0;">No hay artículos cargados todavía.</div>`;
+    return;
+  }
+  const sections = conceptos.map(concepto=>{
+    const grupo = pvGrupoOrdenado(concepto);
+    if(!grupo.length) return "";
+    const rows = grupo.map(a=>`<div class="colpick-row" draggable="true" data-id="${a.id}" data-concepto="${costeoEsc(concepto)}" ondragstart="pvFilasDragStart(event)" ondragover="pvFilasDragOver(event)" ondragleave="pvFilasDragLeave(event)" ondrop="pvFilasDrop(event)" ondragend="pvFilasDragEnd(event)">
+        <span class="cp-handle" title="Arrastrá para reordenar">⠿⠿</span>
+        <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.8px;font-weight:600;color:var(--text-1);">${costeoEsc(a.nombre)}</span>
+      </div>`).join("");
+    return `<div class="pv-filas-group"><div class="pv-filas-group-title">${costeoEsc(concepto)}</div>${rows}</div>`;
+  }).join("");
+  pop.innerHTML = `<h4>Orden de los artículos</h4>
+    <div class="colpick-list" style="max-height:380px;">${sections}</div>
+    <div class="filter-actions"><button class="fa-apply" onclick="closePvFilasPicker()">Cerrar</button></div>`;
+}
+function pvFilasDragStart(ev){
+  pvFilasDragId = ev.currentTarget.dataset.id;
+  pvFilasDragConcepto = ev.currentTarget.dataset.concepto;
+  ev.currentTarget.classList.add("dragging");
   ev.dataTransfer.effectAllowed = "move";
-  try{ ev.dataTransfer.setData("text/plain", articuloId); }catch(e){}
-  const row = ev.currentTarget.closest(".pv-row");
-  if(row) row.classList.add("pv-dragging");
 }
-function pvDragEnd(ev){
-  const row = ev.currentTarget.closest(".pv-row");
-  if(row) row.classList.remove("pv-dragging");
-  document.querySelectorAll(".pv-row.pv-drop-target").forEach(r=>r.classList.remove("pv-drop-target"));
-}
-function pvDragOver(ev){ ev.preventDefault(); ev.dataTransfer.dropEffect = "move"; }
-async function pvDrop(ev, targetArticuloId){
+function pvFilasDragOver(ev){
+  if(ev.currentTarget.dataset.concepto !== pvFilasDragConcepto) return; // solo dentro del mismo rubro
   ev.preventDefault();
-  ev.currentTarget.classList.remove("pv-drop-target");
-  const origenId = pvDragArticuloId;
-  pvDragArticuloId = null;
-  if(!origenId || origenId===targetArticuloId) return;
-  const a = recetasItems.find(x=>x.id===origenId);
-  const b = recetasItems.find(x=>x.id===targetArticuloId);
-  if(!a || !b || a.concepto!==b.concepto) return; // solo se puede reordenar dentro del mismo rubro
-  const grupo = pvGrupoOrdenado(a.concepto);
+  ev.currentTarget.classList.add("drag-over");
+}
+function pvFilasDragLeave(ev){ ev.currentTarget.classList.remove("drag-over"); }
+async function pvFilasDrop(ev){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove("drag-over");
+  const targetId = ev.currentTarget.dataset.id;
+  const targetConcepto = ev.currentTarget.dataset.concepto;
+  const origenId = pvFilasDragId;
+  const origenConcepto = pvFilasDragConcepto;
+  pvFilasDragId = null; pvFilasDragConcepto = null;
+  if(!origenId || origenId===targetId || targetConcepto!==origenConcepto) return;
+  const grupo = pvGrupoOrdenado(origenConcepto);
   const ids = grupo.map(x=>x.id);
-  const from = ids.indexOf(origenId), to = ids.indexOf(targetArticuloId);
+  const from = ids.indexOf(origenId), to = ids.indexOf(targetId);
   if(from===-1 || to===-1) return;
   ids.splice(from,1);
   ids.splice(to,0,origenId);
   await pvReordenarGrupo(ids);
+  pvRenderFilasPicker();
 }
-function pvMoverAPosicion(articuloId, nuevaPosStr){
-  const a = recetasItems.find(x=>x.id===articuloId);
-  if(!a) return;
-  const grupo = pvGrupoOrdenado(a.concepto);
-  const ids = grupo.map(x=>x.id);
-  const idxActual = ids.indexOf(articuloId);
-  const nuevaPos = Math.max(0, Math.min(grupo.length-1, Number(nuevaPosStr)-1));
-  if(nuevaPos===idxActual) return;
-  ids.splice(idxActual,1);
-  ids.splice(nuevaPos,0,articuloId);
-  pvReordenarGrupo(ids);
+function pvFilasDragEnd(ev){
+  ev.currentTarget.classList.remove("dragging");
+  document.querySelectorAll("#pvFilasPopover .colpick-row.drag-over").forEach(r=>r.classList.remove("drag-over"));
+  pvFilasDragId = null; pvFilasDragConcepto = null;
 }
-// Renumera TODO el grupo según el orden final pedido (`ids`, ya en el nuevo orden) — así los
-// artículos que nunca se movieron, con el orden_manual "default", también quedan con un valor
-// explícito, y no solo el par que se intercambió.
-async function pvReordenarGrupo(ids){
-  const updates = ids.map((id,i)=>({ articulo_id:id, orden_manual:i }));
-  for(const u of updates){
-    const { error } = await sb.from("lf_precios_venta_items").upsert(
-      { articulo_id: u.articulo_id, orden_manual: u.orden_manual },
-      { onConflict:"articulo_id" }
-    );
-    if(error){ showToast("No se pudo reordenar", "warn"); return; }
-  }
-  await loadPreciosVentaItems();
-  renderPreciosVenta();
+document.addEventListener("click", function(e){
+  const pop = document.getElementById("pvFilasPopover");
+  if(pop && pop.classList.contains("show") && !pop.contains(e.target) && !e.target.closest("[onclick^=\"pvToggleFilasPicker\"]")) closePvFilasPicker();
+});
+
+/* ---- Anchos de columna editables a mano (arrastrar el borde del encabezado) — pedido de Pancho,
+   08/09/2026, para poder leer el nombre completo del artículo. Mismo patrón que initColumnResize
+   (Pagos), reutilizando la clase CSS .col-resize ya definida ahí. Persistido en localStorage; se
+   aplica vía variables CSS en :root para que la tabla de lectura y la de ajuste compartan el mismo
+   ancho elegido. */
+const PV_COLW_KEY = "lf_pv_col_widths_v1";
+const PV_COLW_DEFAULT = { nombre:200, c2:96, costoant:84, costonue:84, difcosto:70, precioant:84, precionue:120, difprecio:70, inc:90 };
+const PV_COLW_MIN = { nombre:120, c2:70, costoant:60, costonue:60, difcosto:50, precioant:60, precionue:90, difprecio:50, inc:60 };
+const PV_COLW_MAX = { nombre:480, c2:170, costoant:170, costonue:170, difcosto:120, precioant:170, precionue:230, difprecio:120, inc:170 };
+let pvColWidths = Object.assign({}, PV_COLW_DEFAULT);
+function pvApplyColWidths(){
+  Object.keys(pvColWidths).forEach(id=>{
+    document.documentElement.style.setProperty(`--pv-cw-${id}`, pvColWidths[id]+"px");
+  });
+}
+function pvLoadColWidths(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(PV_COLW_KEY)||"null");
+    pvColWidths = saved ? Object.assign({}, PV_COLW_DEFAULT, saved) : Object.assign({}, PV_COLW_DEFAULT);
+  }catch(e){ pvColWidths = Object.assign({}, PV_COLW_DEFAULT); }
+  pvApplyColWidths();
+}
+function pvPersistColWidths(){
+  try{ localStorage.setItem(PV_COLW_KEY, JSON.stringify(pvColWidths)); }catch(e){}
+}
+function pvInitColumnResize(){
+  document.querySelectorAll(".pv-head-cell .col-resize").forEach(handle=>{
+    handle.addEventListener("click", e=>e.stopPropagation());
+    handle.addEventListener("mousedown", (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      const id = handle.dataset.col;
+      const cell = handle.closest(".pv-head-cell");
+      const startX = e.clientX;
+      const startWidth = cell.getBoundingClientRect().width;
+      handle.classList.add("active");
+      document.body.classList.add("col-resizing");
+      function onMove(ev){
+        const raw = Math.round(startWidth + (ev.clientX-startX));
+        const clamped = Math.max(PV_COLW_MIN[id]||50, Math.min(PV_COLW_MAX[id]||400, raw));
+        document.documentElement.style.setProperty(`--pv-cw-${id}`, clamped+"px");
+      }
+      function onUp(){
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.classList.remove("col-resizing");
+        handle.classList.remove("active");
+        const cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue(`--pv-cw-${id}`)) || PV_COLW_DEFAULT[id];
+        pvColWidths[id] = cur;
+        pvPersistColWidths();
+      }
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  });
 }
 
 /* ---- Venta promedio semanal + referencia de último precio de venta, desde Compras-Ventas (ATC) ---- */
@@ -10108,25 +10207,19 @@ function renderPreciosVenta(){
     html += `<div class="costeo-group-title">${costeoEsc(concepto)}</div>`;
     html += `<div class="pv-table-scroll"><div class="pv-table${pvModoAjuste?' ajuste':''}">`;
     html += pvModoAjuste ? pvHeadRowAjuste() : pvHeadRow();
-    grupo.forEach((a,i)=>{ html += pvModoAjuste ? pvRenderRowAjuste(a, grupo, i) : pvRenderRow(a, grupo, i); });
+    grupo.forEach(a=>{ html += pvModoAjuste ? pvRenderRowAjuste(a) : pvRenderRow(a); });
     html += `</div></div>`;
   });
   wrap.innerHTML = html || `<div class="empty-mini">No hay artículos para mostrar.</div>`;
+  pvInitColumnResize();
 }
-// Celda de "mover" compartida entre la tabla de lectura y la de ajuste: grip para arrastrar +
-// desplegable con la posición exacta dentro del rubro (07/09/2026, reemplaza las flechas de a un paso).
-function pvMoverCellHtml(articulo, grupo, i){
-  const opciones = grupo.map((x,idx)=>`<option value="${idx+1}"${idx===i?" selected":""}>${idx+1}</option>`).join("");
-  return `<div class="pv-move">
-      <span class="pv-grip" draggable="true" ondragstart="pvDragStart(event,'${articulo.id}')" ondragend="pvDragEnd(event)" title="Arrastrar para reordenar dentro del rubro">⠿</span>
-      <select class="pv-mover-select" onclick="event.stopPropagation()" onchange="pvMoverAPosicion('${articulo.id}', this.value)" title="Mover a la posición…">${opciones}</select>
-    </div>`;
-}
-function pvRowDragAttrs(articuloId){
-  return `ondragover="pvDragOver(event)" ondragenter="this.classList.add('pv-drop-target')" ondragleave="this.classList.remove('pv-drop-target')" ondrop="pvDrop(event,'${articuloId}')"`;
+// Celda de encabezado con handle de resize (arrastrar el borde derecho) — pedido de Pancho,
+// 08/09/2026, ver pvInitColumnResize/pvColWidths más arriba.
+function pvHeadCell(label, colId){
+  return `<div class="pv-head-cell"><span class="pv-head-lbl">${label}</span><div class="col-resize" data-col="${colId}"></div></div>`;
 }
 function pvHeadRow(){
-  return `<div class="pv-head-row"><div>Artículo</div><div>Últ. actualización</div><div>Costo anterior</div><div>Costo nuevo</div><div>Dif. %</div><div>Precio anterior</div><div>Precio nuevo</div><div>Dif. %</div><div>% incidencia</div><div></div></div>`;
+  return `<div class="pv-head-row">${pvHeadCell("Artículo","nombre")}${pvHeadCell("Últ. actualización","c2")}${pvHeadCell("Costo anterior","costoant")}${pvHeadCell("Costo nuevo","costonue")}${pvHeadCell("Dif. %","difcosto")}${pvHeadCell("Precio anterior","precioant")}${pvHeadCell("Precio nuevo","precionue")}${pvHeadCell("Dif. %","difprecio")}${pvHeadCell("% incidencia","inc")}</div>`;
 }
 // Tabla de lectura, siempre visible (07/09/2026, antes solo mostraba el snapshot guardado): además
 // del snapshot ("anterior"), calcula en vivo el costo actual de la receta ("nuevo", misma fórmula
@@ -10134,7 +10227,7 @@ function pvHeadRow(){
 // Compras-Ventas/ATC (`pvVentaSemanalYHint` — mismo dato que ya se usaba solo dentro del modo
 // ajuste) — así se ve de un vistazo si el costo de la receta o el precio real de venta se
 // despegaron del último valor guardado, sin tener que entrar a "Realizar nuevo ajuste".
-function pvRenderRow(a, grupo, i){
+function pvRenderRow(a){
   const pv = preciosVentaItems[a.id];
   const costoAnterior = pv ? pv.costo_actual : null;
   // precio_actual es el precio VIGENTE cargado en el sistema (el último confirmado en un ajuste) —
@@ -10148,7 +10241,7 @@ function pvRenderRow(a, grupo, i){
   const varCosto = pvVar(costoAnterior, costoNuevo);
   const varPrecio = pvVar(hintPrecio, precioVigente);
   const pct = pvIncidencia(costoAnterior, precioVigente);
-  return `<div class="pv-row" ${pvRowDragAttrs(a.id)}>
+  return `<div class="pv-row">
     <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
     <div class="pv-num">${pv && pv.fecha_actualizacion ? fmtFechaHora(pv.fecha_actualizacion).split(" ")[0] : "— (nunca)"}</div>
     <div class="pv-num">${costoAnterior==null?"—":fmtMoneyCosteo(costoAnterior)}</div>
@@ -10158,13 +10251,12 @@ function pvRenderRow(a, grupo, i){
     <div class="pv-num">${precioVigente==null?"—":fmtMoneyCosteo(precioVigente)}</div>
     ${pvFmtVarHtml(varPrecio)}
     <div><span class="pv-inc-badge ${pvIncidenciaClase(pct)}">${pvFmtPct(pct)}</span></div>
-    ${pvMoverCellHtml(a, grupo, i)}
   </div>`;
 }
 function pvHeadRowAjuste(){
-  return `<div class="pv-head-row"><div>Artículo</div><div>Venta prom. semanal</div><div>Costo anterior</div><div>Costo nuevo</div><div>Var. costo</div><div>Precio anterior</div><div>Precio nuevo</div><div>Var. precio</div><div>Incidencia</div><div></div></div>`;
+  return `<div class="pv-head-row">${pvHeadCell("Artículo","nombre")}${pvHeadCell("Venta prom. semanal","c2")}${pvHeadCell("Costo anterior","costoant")}${pvHeadCell("Costo nuevo","costonue")}${pvHeadCell("Var. costo","difcosto")}${pvHeadCell("Precio anterior","precioant")}${pvHeadCell("Precio nuevo","precionue")}${pvHeadCell("Var. precio","difprecio")}${pvHeadCell("Incidencia","inc")}</div>`;
 }
-function pvRenderRowAjuste(a, grupo, i){
+function pvRenderRowAjuste(a){
   const pv = preciosVentaItems[a.id];
   const costoAnterior = pv ? pv.costo_actual : null;
   const precioAnterior = pv ? pv.precio_actual : null;
@@ -10176,7 +10268,7 @@ function pvRenderRowAjuste(a, grupo, i){
   const precioNuevoNum = pend.precioNuevo!=null ? Number(pend.precioNuevo) : null;
   const varPrecio = precioNuevoNum!=null ? pvVar(precioAnterior, precioNuevoNum) : null;
   const incidenciaNueva = pvIncidencia(costoNuevo, precioNuevoNum!=null ? precioNuevoNum : precioAnterior);
-  return `<div class="pv-row" id="pvRow_${a.id}" ${pvRowDragAttrs(a.id)}>
+  return `<div class="pv-row" id="pvRow_${a.id}">
     <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
     <div class="pv-num">${promedioSemanal==null?"—":promedioSemanal.toLocaleString("es-AR",{maximumFractionDigits:1})+"/sem."}</div>
     <div class="pv-num">${costoAnterior==null?"—":fmtMoneyCosteo(costoAnterior)}</div>
@@ -10189,7 +10281,6 @@ function pvRenderRowAjuste(a, grupo, i){
     </div>
     <div id="pvVarPrecio_${a.id}" class="${varPrecio==null?'pv-num':(varPrecio>0?'pv-var-up':(varPrecio<0?'pv-var-down':'pv-num'))}">${varPrecio==null?"—":((varPrecio>0?"+":"")+varPrecio.toLocaleString("es-AR",{maximumFractionDigits:1})+"%")}</div>
     <div><span id="pvInc_${a.id}" class="pv-inc-badge ${pvIncidenciaClase(incidenciaNueva)}">${pvFmtPct(incidenciaNueva)}</span></div>
-    ${pvMoverCellHtml(a, grupo, i)}
   </div>`;
 }
 
