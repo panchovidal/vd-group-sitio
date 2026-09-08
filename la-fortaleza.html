@@ -10298,13 +10298,24 @@ async function pvConfirmarAjuste(){
   if(!confirm(`Última confirmación: se van a guardar estos ${cambios.length} precio(s) nuevo(s) y va a quedar registrado en el historial de Precios de venta. ¿Confirmás?`)) return;
 
   const fechaAjuste = new Date().toISOString();
+  // Antes esto hacía un upsert por artículo, uno atrás de otro (await secuencial dentro del for), y
+  // recién al final —si todo lo anterior había terminado— insertaba el renglón de historial en
+  // lf_precios_venta_ajustes. Si la sesión se interrumpía a mitad de camino (se cerró/recargó la
+  // pestaña, se cortó la conexión) quedaban guardados solo los artículos ya procesados hasta ese
+  // punto, ninguno de los siguientes, y el ajuste NUNCA quedaba registrado en el historial —exacto lo
+  // que le pasó a Pancho el 07/09/2026: dos tandas (53 y 12 artículos) se guardaron a medias, sin
+  // ningún renglón de historial, y 20 artículos nuevos que había cargado no llegaron a guardarse.
+  // Ahora se arma todo el lote en memoria primero y se manda en dos llamadas (una para los precios,
+  // otra para el historial), igual que se corrigió antes en pvReordenarGrupo — mucho más rápido y sin
+  // el riesgo de quedar a mitad de camino (08/09/2026).
+  const filasUpsert = [];
   const detalleLote = [];
   for(const [articuloId, p] of cambios){
     const a = recetasItems.find(x=>x.id===articuloId);
     const pvPrevio = preciosVentaItems[articuloId] || null;
     const costoNuevo = recCostoPorcion(articuloId);
     const precioNuevo = p.precioNuevo;
-    const { error } = await sb.from("lf_precios_venta_items").upsert({
+    filasUpsert.push({
       articulo_id: articuloId,
       costo_actual: costoNuevo,
       precio_actual: precioNuevo,
@@ -10312,8 +10323,7 @@ async function pvConfirmarAjuste(){
       orden_manual: pvPrevio ? pvPrevio.orden_manual : 999999,
       modificado_por: currentPerfil?currentPerfil.id:null,
       modificado_fecha: fechaAjuste
-    }, { onConflict:"articulo_id" });
-    if(error){ showToast(`No se pudo actualizar el precio de ${a?a.nombre:articuloId}`, "warn"); continue; }
+    });
     detalleLote.push({
       articulo_id: articuloId,
       nombre: a ? a.nombre : articuloId,
@@ -10323,16 +10333,18 @@ async function pvConfirmarAjuste(){
       costo_nuevo: costoNuevo,
       precio_nuevo: precioNuevo
     });
-    logHistorialConfig("Actualizó el precio de venta", `${a?a.nombre:articuloId}: ${pvPrevio&&pvPrevio.precio_actual!=null?fmtMoneyCosteo(pvPrevio.precio_actual):'—'} → ${fmtMoneyCosteo(precioNuevo)}`);
   }
-  if(detalleLote.length){
-    await sb.from("lf_precios_venta_ajustes").insert({
-      fecha: fechaAjuste,
-      usuario_id: currentPerfil?currentPerfil.id:null,
-      usuario_nombre: currentPerfil?currentPerfil.nombre:"—",
-      detalle: detalleLote
-    });
-  }
+  const { error } = await sb.from("lf_precios_venta_items").upsert(filasUpsert, { onConflict:"articulo_id" });
+  if(error){ showToast("No se pudieron guardar los precios nuevos. Probá de nuevo.", "warn"); return; }
+  await sb.from("lf_precios_venta_ajustes").insert({
+    fecha: fechaAjuste,
+    usuario_id: currentPerfil?currentPerfil.id:null,
+    usuario_nombre: currentPerfil?currentPerfil.nombre:"—",
+    detalle: detalleLote
+  });
+  detalleLote.forEach(d=>{
+    logHistorialConfig("Actualizó el precio de venta", `${d.nombre}: ${d.precio_previo!=null?fmtMoneyCosteo(d.precio_previo):'—'} → ${fmtMoneyCosteo(d.precio_nuevo)}`);
+  });
   pvModoAjuste = false;
   pvPendientes = {};
   await Promise.all([loadPreciosVentaItems(), loadPreciosVentaAjustes()]);
