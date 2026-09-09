@@ -1873,6 +1873,10 @@
               <button type="button" class="btn-primary" id="pvBtnAjuste" onclick="pvIniciarAjuste()">Realizar nuevo ajuste</button>
             </div>
             <div class="screen-scroll">
+              <div class="search-wrap" id="pvSearchWrap" style="max-width:420px;margin-bottom:12px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="pvSearchInput" placeholder="Buscar artículo por nombre…" oninput="pvOnSearchInput(this.value)">
+              </div>
               <div id="pvHistorialWrap" style="display:none;"></div>
               <div id="pvTableWrap"></div>
             </div>
@@ -8089,6 +8093,12 @@ let pvModoAjuste = false;     // true mientras la tabla está expandida cargando
 let pvPendientes = {};        // { [articulo_id]: {costoNuevo, precioNuevo} } — mientras se completa el ajuste en curso
 let pvVentaSemanalCache = {}; // { [articulo_id]: numero } — venta promedio semanal, calculada al entrar en modo ajuste
 let pvViendoHistorial = false;
+// Buscador por nombre en Precios de venta (09/09/2026, pedido de Pancho) — filtra las filas
+// mostradas en la tabla (lectura y modo ajuste), igual que el buscador de Recetas
+// (reutiliza recNormalizaTexto, sin distinguir mayúsculas/acentos). NO afecta a pvArticulos()
+// tal cual (ver pvArticulosFiltrados más abajo): la exportación a Excel y el resto de usos que
+// necesitan el catálogo completo siguen viendo todos los artículos, se busque lo que se busque.
+let pvSearchQuery = "";
 
 function costeoEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 // Acepta tanto "1500.50" (punto como separador decimal) como "1.500,50" (formato AR, punto de miles + coma decimal).
@@ -9896,8 +9906,22 @@ function pvDescargarListadoExcel(){
 
 /* ---- Artículos / agrupación por rubro (mismo criterio de orden que Costeo/Proveedores) ---- */
 function pvArticulos(){ return recetasItems.filter(r=>r.tipo==="articulo"); }
+// Catálogo completo filtrado por el buscador (pvSearchQuery) — usar SOLO para decidir qué mostrar
+// en la tabla (pvConceptosPresentes/pvGrupoOrdenado). pvArticulos() sin filtrar sigue usándose tal
+// cual para todo lo que necesita el catálogo completo sin importar la búsqueda en curso (ej. la
+// exportación a Excel de más arriba).
+function pvArticulosFiltrados(){
+  const base = pvArticulos();
+  const q = recNormalizaTexto(pvSearchQuery.trim());
+  if(!q) return base;
+  return base.filter(a=>recNormalizaTexto(a.nombre).includes(q));
+}
+function pvOnSearchInput(value){
+  pvSearchQuery = value || "";
+  renderPreciosVenta();
+}
 function pvConceptosPresentes(){
-  const set = new Set(pvArticulos().map(a=>a.concepto).filter(Boolean));
+  const set = new Set(pvArticulosFiltrados().map(a=>a.concepto).filter(Boolean));
   return [...COSTEO_CONCEPTOS.filter(c=>set.has(c)), ...[...set].filter(c=>!COSTEO_CONCEPTOS.includes(c)).sort((a,b)=>a.localeCompare(b,"es"))];
 }
 function pvOrdenEfectivo(articulo){
@@ -9905,7 +9929,7 @@ function pvOrdenEfectivo(articulo){
   return (pv && pv.orden_manual!=null) ? pv.orden_manual : 999999;
 }
 function pvGrupoOrdenado(concepto){
-  return pvArticulos().filter(a=>a.concepto===concepto).sort((a,b)=>{
+  return pvArticulosFiltrados().filter(a=>a.concepto===concepto).sort((a,b)=>{
     const oa = pvOrdenEfectivo(a), ob = pvOrdenEfectivo(b);
     if(oa!==ob) return oa-ob;
     return a.nombre.localeCompare(b.nombre,"es");
@@ -10197,7 +10221,9 @@ function renderPreciosVenta(){
   document.getElementById("pvAjusteFooter").style.display = pvModoAjuste ? "" : "none";
   if(pvModoAjuste) pvActualizarFooter();
   if(!conceptos.length){
-    wrap.innerHTML = `<div class="empty-mini">Todavía no hay artículos cargados en Recetas para poder revisar precios. Sincronizalos primero desde Recetas › Artículos.</div>`;
+    wrap.innerHTML = pvSearchQuery.trim()
+      ? `<div class="empty-mini">No hay artículos que coincidan con "${costeoEsc(pvSearchQuery.trim())}".</div>`
+      : `<div class="empty-mini">Todavía no hay artículos cargados en Recetas para poder revisar precios. Sincronizalos primero desde Recetas › Artículos.</div>`;
     return;
   }
   let html = "";
@@ -10358,14 +10384,17 @@ function pvToggleHistorial(){
   pvViendoHistorial = !pvViendoHistorial;
   const wrap = document.getElementById("pvHistorialWrap");
   const tableWrap = document.getElementById("pvTableWrap");
+  const searchWrap = document.getElementById("pvSearchWrap");
   document.getElementById("pvBtnHistorial").textContent = pvViendoHistorial ? "Ocultar historial" : "Ver historial";
   if(pvViendoHistorial){
     wrap.style.display = "";
     tableWrap.style.display = "none";
+    if(searchWrap) searchWrap.style.display = "none";
     renderPvHistorial();
   } else {
     wrap.style.display = "none";
     tableWrap.style.display = "";
+    if(searchWrap) searchWrap.style.display = "";
   }
 }
 function pvToggleDetalleHistorial(id){
