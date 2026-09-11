@@ -533,6 +533,40 @@
   .recon-pending{background:#EEEFF5;color:#6D7191;}
   .recon-info{background:#EAF1FE;color:#2B5FC7;}
 
+  /* ---- Stock ---- */
+  .stk-scope-note{background:#EAF1FE;border:1px solid #C9DBFA;color:#2B5FC7;border-radius:12px;padding:10px 16px;font-size:12px;font-weight:600;margin-bottom:14px;max-width:900px;line-height:1.5;}
+  .stk-summary{display:flex;align-items:center;gap:26px;max-width:1180px;margin-bottom:14px;padding:14px 18px;border-radius:12px;background:#F7F8FD;border:1px solid var(--border);flex-wrap:wrap;}
+  .stk-summary .stks-item{font-size:12px;color:var(--text-2);font-weight:600;}
+  .stk-summary .stks-item strong{display:block;font-size:17px;color:var(--navy);font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .stk-table-scroll{overflow-x:auto;max-width:100%;}
+  .stk-table{width:max-content;min-width:100%;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:16px;}
+  .stk-table{--stk-cols:230px 92px 92px 92px 100px 84px 84px 84px 92px 100px 116px;}
+  .stk-head-row,.stk-row{display:grid;grid-template-columns:var(--stk-cols);gap:8px;align-items:center;padding:9px 16px;}
+  .stk-head-row{position:sticky;top:0;z-index:2;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);border-bottom:1px solid var(--border);background:#F7F8FD;}
+  .stk-row{border-bottom:1px solid var(--border);font-size:12.3px;}
+  .stk-row:last-child{border-bottom:none;}
+  .stk-row.stk-row-new{background:#FAFBFF;}
+  .stk-nombre{font-weight:700;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .stk-nombre .stk-prov{display:block;font-size:10px;font-weight:600;color:var(--text-3);}
+  .stk-num{font-variant-numeric:tabular-nums;color:var(--text-2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .stk-num.na{color:var(--text-3);}
+  .stk-real-total{font-weight:800;color:var(--navy);}
+  .stk-input{width:100%;max-width:80px;box-sizing:border-box;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font-size:12.3px;font-variant-numeric:tabular-nums;}
+  .stk-input:focus{border-color:var(--sky);outline:none;}
+  .stk-diff-badge{display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11.5px;padding:4px 10px;border-radius:20px;min-width:52px;}
+  .stk-diff-rojo{background:#FCE6E7;color:#B22A32;}
+  .stk-diff-amarillo{background:#FFF3D6;color:#9A6B00;}
+  .stk-diff-verde{background:#E4F8ED;color:#137B44;}
+  .stk-diff-na{background:#F1F2FA;color:var(--text-3);}
+  .stk-group-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);margin:18px 0 8px;padding-left:2px;}
+  .stk-group-title:first-child{margin-top:0;}
+  .stk-ajuste-footer{flex-shrink:0;background:#fff;border-top:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:14px;box-shadow:0 -4px 14px rgba(20,25,50,.06);}
+  .stk-hist-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:10px;max-width:900px;}
+  .stk-hist-head{display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .stk-hist-fecha{font-weight:700;color:var(--text-1);flex:1;font-size:12.5px;}
+  .stk-hist-badge-inicial{font-size:10px;font-weight:800;color:var(--blue);background:#EAF1FE;border-radius:20px;padding:2px 9px;}
+  .stk-desglose{font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.5;}
+
   .ci-table-scroll{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:auto;max-width:100%;padding-bottom:2px;}
   /* La tabla de Carga de compras usa el alto real disponible en pantalla (flex), no "vh" —
      "vh" no se recalcula con el control de zoom (CSS zoom no reescala unidades de viewport),
@@ -916,6 +950,10 @@
     <div class="module-nav-item" data-module="costeo" onclick="goModule('costeo')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L13.42 20.58a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7" cy="7" r="1.4" fill="currentColor" stroke="none"/></svg>
       <span class="nav-label">Costeo</span>
+    </div>
+    <div class="module-nav-item" data-module="stock" onclick="goModule('stock')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h2.2l.9 3"/><line x1="6.6" y1="5.3" x2="6.6" y2="16.5"/><path d="M6.6 16.5h3.5"/><circle cx="6.6" cy="19.6" r="1.7" fill="currentColor" stroke="none"/><rect x="8.6" y="7.3" width="11.4" height="9.2" rx="1.1"/><line x1="8.6" y1="11.9" x2="20" y2="11.9"/></svg>
+      <span class="nav-label">Stock</span>
     </div>
     <div class="module-nav-item" data-module="sueldos" onclick="goModule('sueldos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1901,6 +1939,28 @@
          pedido de Pancho, 07/09/2026: con el <select> agrupado no se podía tipear para filtrar. -->
     <datalist id="dlProveedoresPago"></datalist>
 
+    <!-- ===================== MÓDULO: STOCK ===================== -->
+    <section class="module-screen" id="moduleStock">
+      <div class="screen-header">
+        <div style="flex:1;">
+          <h1 style="font-size:20px;margin:0;font-weight:800;">Stock</h1>
+          <div class="sub" style="font-size:12.5px;color:var(--text-2);">Stock teórico vs. real de los insumos de Cafetería y Bebidas</div>
+        </div>
+        <button type="button" class="btn-primary secondary" id="stkBtnHistorial" onclick="stkToggleHistorial()">Ver historial</button>
+        <button type="button" class="btn-primary" id="stkBtnNuevoConteo" onclick="stkIniciarConteo()">+ Nuevo conteo de stock</button>
+      </div>
+      <div class="screen-scroll">
+        <div class="stk-scope-note">Por ahora el Stock solo cubre los insumos de proveedores de <strong>Cafetería y Bebidas</strong> (mismo criterio de Costeo). Si sale bien, se suma el resto de los conceptos.</div>
+        <div id="stkTableWrap"></div>
+        <div id="stkHistorialWrap" style="display:none;"></div>
+      </div>
+      <div class="stk-ajuste-footer" id="stkAjusteFooter" style="display:none;">
+        <span id="stkAjusteFooterInfo" style="flex:1;font-size:12.5px;color:var(--text-2);"></span>
+        <button type="button" class="btn-primary secondary" onclick="stkCancelarConteo()">Cancelar</button>
+        <button type="button" class="btn-primary" id="stkBtnConfirmarConteo" onclick="stkConfirmarConteo()">Guardar conteo</button>
+      </div>
+    </section>
+
     <!-- ===================== MÓDULO: REPORTES (placeholder) ===================== -->
     <section class="module-screen" id="moduleReportes">
       <div class="placeholder-card">
@@ -2687,7 +2747,7 @@ function applyPerfilSession(perfil){
 }
 // Secciones del módulo La Fortaleza (deben coincidir con SECTIONS_BY_PROYECTO.fortaleza en home.html
 // y con los data-module de la barra lateral). El dueño siempre tiene acceso a todas.
-const FORTALEZA_SECCIONES = ["ventas","cajaMayor","pagos","costeo","sueldos","reportes","config"];
+const FORTALEZA_SECCIONES = ["ventas","cajaMayor","pagos","costeo","stock","sueldos","reportes","config"];
 function tieneSeccionFortaleza(mod){
   if(!currentPerfil) return false;
   if(currentPerfil.rol === "dueño") return true;
@@ -2807,6 +2867,7 @@ function goModule(mod){
   if(mod==="ventas"){ initVentasResumen(); }
   if(mod==="cajaMayor"){ cmInit(); }
   if(mod==="costeo"){ initCosteo(); }
+  if(mod==="stock"){ initStock(); }
 }
 function goVentasPane(pane){
   // hoy solo existe "resumen"; queda preparado para futuras pestañas del módulo Ventas (p.ej. Reportes).
@@ -10453,6 +10514,515 @@ async function pvDeshacerUltimoAjuste(){
   renderPvHistorial();
   renderPreciosVenta();
   showToast("Ajuste deshecho correctamente");
+}
+
+/* =========================================================
+   MÓDULO: STOCK (La Fortaleza) — pedido de Pancho, 11/09/2026
+   =========================================================
+   Contrasta el stock TEÓRICO (Stock inicial + Compras − Ventas del período
+   transcurrido desde el conteo anterior) contra el stock REAL (cargado a
+   mano en 3 espacios: Heladera / Repuesto / Depósito).
+
+   Primera versión: solo cubre los insumos de proveedores con Concepto
+   "Cafeteria y Bebidas" (mismo universo que Costeo), reutilizando toda su
+   infraestructura (costeoInsumos, costeoCompraItems, recetasItems,
+   recetaLineas, ordenes, proveedoresConfig) — Stock no duplica ningún dato,
+   solo lo lee y lo cruza.
+
+   - "Compras" de un insumo en un período: suma de Bultos×Cantidad de sus
+     líneas de compra (lf_costeo_compra_items) cuya orden tenga Fecha del
+     comprobante en el período (fecha real de la factura, no la fecha de
+     carga en Pagos).
+   - "Ventas" de un insumo en un período: se recorre Compras-Ventas (ATC,
+     misma ingesta que usa Ventas > Resumen de ventas y Precios de venta) y,
+     para cada artículo vendido, se "explota" su receta recursivamente
+     (semi-elaborados y artículos usados como ingrediente de otro artículo)
+     para saber cuánto de ESTE insumo puntual consume 1 unidad vendida de
+     ese artículo — igual que recCostoPorcion, pero acumulando cantidad en
+     vez de costo. Un artículo vendido que no tiene receta cargada (o no
+     matchea por nombre exacto contra Compras-Ventas) no puede explotarse:
+     sus ventas de insumo quedan sin contar — riesgo ya existente y aceptado
+     en el resto del sitio (mismo criterio de matcheo por nombre exacto que
+     usa Precios de venta).
+   - Valorización en $ de la cantidad en stock: se recorren las compras de
+     ese insumo de la más reciente a la más vieja (por Fecha del comprobante,
+     hasta la fecha del propio conteo) consumiendo cantidad de cada factura
+     hasta cubrir el stock real — igual al ejemplo de Pancho (8 de la última
+     factura + 4 de la anteúltima + 2 de la antepenúltima). Si el stock real
+     supera todo lo comprado hasta esa fecha (dato inconsistente, o carga
+     inicial sin historial suficiente), el excedente se valoriza al precio
+     de la compra más vieja disponible (se marca "extrapolado" en el
+     desglose, visible en el tooltip del monto).
+
+   Supuestos propios de esta primera versión (no confirmados con Pancho,
+   avisar si hay que ajustar):
+   - El "período" de compras/ventas de un conteo es (fecha del conteo
+     anterior, fecha de este conteo] — exclusivo al principio, inclusive al
+     final. Un ítem que no tenía fila en el conteo anterior (insumo nuevo)
+     arranca su propio "Día 0" en este conteo: no se le calcula
+     compras/ventas/teórico, queda con esas columnas en "—" y este stock real
+     pasa a ser su stock inicial del próximo conteo.
+   - La fecha del conteo por default es hoy, pero se puede elegir cualquier
+     fecha posterior a la del conteo anterior (para cargar un conteo demorado
+     unos días).
+   ========================================================= */
+const STOCK_CONCEPTOS = ["Cafeteria y Bebidas"]; // se amplía a futuro (Servicio de cocina, etc.)
+let stkCortes = [];            // lf_stock_cortes, más nuevo primero
+let stkCorteItemsMap = {};     // { [corte_id]: [lf_stock_corte_items...] }
+let stkComprasVentasCache = null; // [{concepto, fecha:Date, cantidad}] — Compras-Ventas (ATC)
+let stkModoConteo = false;
+let stkConteoBase = null;      // { fechaISO, esInicial, porInsumo: {[insumoId]: {...}} }
+let stkConteoValores = {};     // { [insumoId]: {heladera, repuesto, deposito} } (strings, mientras se tipea)
+let stkViendoHistorial = false;
+let stkHistorialAbierto = null; // id de corte expandido en el historial
+
+function stkInsumosTrackeados(){
+  return costeoInsumos.filter(ins=>{
+    const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
+    return prov && STOCK_CONCEPTOS.includes(prov.concepto);
+  }).sort((a,b)=>{
+    const pa = proveedoresConfig.find(p=>p.id===a.proveedor_id);
+    const pb = proveedoresConfig.find(p=>p.id===b.proveedor_id);
+    const byProv = (pa?pa.nombre:"").localeCompare(pb?pb.nombre:"","es");
+    if(byProv!==0) return byProv;
+    return a.nomenclatura.localeCompare(b.nomenclatura,"es");
+  });
+}
+
+/* ---- Explosión recursiva de receta: cuánto de "targetInsumoId" consume 1 unidad vendida de
+   "recetaId" (artículo o semi-elaborado), atravesando semi-elaborados Y artículos usados como
+   ingrediente de otro artículo (misma generalización que ya usa recCostoPorcion/recDependsOn). ---- */
+function stkQtyPorUnidad(recetaId, targetInsumoId, visiting){
+  visiting = visiting ? new Set(visiting) : new Set();
+  if(visiting.has(recetaId)) return 0; // ciclo — no se puede explotar más
+  visiting.add(recetaId);
+  const item = recetasItems.find(r=>r.id===recetaId);
+  if(!item) return 0;
+  const lineas = recetaLineas.filter(l=>l.receta_id===recetaId);
+  if(!lineas.length) return 0;
+  const porciones = Number(item.porciones)||1;
+  let total = 0;
+  lineas.forEach(l=>{
+    if(l.insumo_tipo==="compra"){
+      if(l.insumo_compra_id===targetInsumoId) total += Number(l.cantidad||0);
+    } else if(l.insumo_semielaborado_id){
+      total += Number(l.cantidad||0) * stkQtyPorUnidad(l.insumo_semielaborado_id, targetInsumoId, visiting);
+    }
+  });
+  return porciones>0 ? total/porciones : 0;
+}
+
+async function stkCargarComprasVentasCache(){
+  try{
+    const ing = await vFetchIngestaRango("compras_ventas");
+    if(!ing){ stkComprasVentasCache = []; return; }
+    const iConcepto = vFindColIndex(ing.header, ["Concepto"]);
+    const iFecha = vFindColIndex(ing.header, ["Fecha de movimiento"]);
+    const iHora = vFindColIndex(ing.header, ["Hora de movimiento"]);
+    const iCantidad = vFindColIndex(ing.header, ["Cantidad"]);
+    if([iConcepto,iFecha,iCantidad].includes(-1)){ stkComprasVentasCache = []; return; }
+    stkComprasVentasCache = (ing.rows||[]).map(r=>{
+      const fecha = vJornadaFecha(r[iFecha], iHora!==-1 ? r[iHora] : null);
+      const cantRaw = r[iCantidad];
+      const cantidad = (cantRaw==="-"||cantRaw==null||cantRaw==="") ? 0 : (Number(cantRaw)||0);
+      return { concepto:(r[iConcepto]||"").toString().trim(), fecha, cantidad };
+    }).filter(r=>r.fecha && r.concepto);
+  }catch(e){
+    console.warn("No se pudo cargar Compras-Ventas para Stock", e);
+    stkComprasVentasCache = [];
+  }
+}
+
+// Compras de un insumo puntual en (desdeISO, hastaISO] — por Fecha del comprobante de la orden.
+function stkComprasEnPeriodo(insumoId, desdeISO, hastaISO){
+  return costeoCompraItems.filter(it=>{
+    if(it.insumo_id!==insumoId) return false;
+    const ord = ordenes.find(o=>o.id===it.orden_id);
+    const fecha = ord ? (ord.fechaComprobante || ord.fechaOrden) : null;
+    if(!fecha) return false;
+    if(desdeISO && !(fecha>desdeISO)) return false;
+    if(hastaISO && fecha>hastaISO) return false;
+    return true;
+  }).reduce((s,it)=> s + (Number(it.bultos)||0)*(Number(it.cantidad)||0), 0);
+}
+
+// Ventas explotadas de un conjunto de insumos en (desdeISO, hastaISO], a partir de Compras-Ventas (ATC).
+function stkVentasEnPeriodo(insumoIds, desdeISO, hastaISO){
+  const resultado = {}; insumoIds.forEach(id=>resultado[id]=0);
+  if(!stkComprasVentasCache || !stkComprasVentasCache.length) return resultado;
+  const porArticulo = {};
+  stkComprasVentasCache.forEach(r=>{
+    const fISO = vToISODate(r.fecha);
+    if(desdeISO && !(fISO>desdeISO)) return;
+    if(hastaISO && fISO>hastaISO) return;
+    porArticulo[r.concepto] = (porArticulo[r.concepto]||0) + r.cantidad;
+  });
+  Object.keys(porArticulo).forEach(nombre=>{
+    const art = recetasItems.find(r=>r.tipo==="articulo" && r.nombre===nombre);
+    if(!art) return; // no matchea ningún artículo con receta — no se puede explotar (ver nota arriba)
+    const cant = porArticulo[nombre];
+    insumoIds.forEach(insumoId=>{
+      const qty = stkQtyPorUnidad(art.id, insumoId);
+      if(qty) resultado[insumoId] += cant*qty;
+    });
+  });
+  return resultado;
+}
+
+// Valorización $ de "cantidadStock" unidades de un insumo: consume compras de la más reciente a la
+// más vieja (Fecha del comprobante, hasta hastaISO) hasta cubrir la cantidad — ver nota de cabecera.
+function stkValorizarStock(insumoId, cantidadStock, hastaISO){
+  const cant = Number(cantidadStock)||0;
+  if(cant<=0) return { monto:0, desglose:[], sinCompras: !costeoCompraItems.some(it=>it.insumo_id===insumoId) };
+  const compras = costeoCompraItems.filter(it=>it.insumo_id===insumoId).map(it=>{
+    const row = costeoComputeRow(it);
+    const ord = ordenes.find(o=>o.id===it.orden_id);
+    const fecha = ord ? (ord.fechaComprobante || ord.fechaOrden) : null;
+    return { fecha, cantidadUnidades: (Number(it.bultos)||0)*(Number(it.cantidad)||0), punit: row.punit };
+  }).filter(c=> c.fecha && c.cantidadUnidades>0 && (!hastaISO || c.fecha<=hastaISO))
+    .sort((a,b)=> a.fecha<b.fecha?1:(a.fecha>b.fecha?-1:0));
+  if(!compras.length) return { monto:null, desglose:[], sinCompras:true };
+  let restante = cant, total = 0;
+  const desglose = [];
+  for(const c of compras){
+    if(restante<=0) break;
+    const usar = Math.min(restante, c.cantidadUnidades);
+    total += usar*c.punit;
+    desglose.push({fecha:c.fecha, cantidad:usar, punit:c.punit});
+    restante -= usar;
+  }
+  if(restante>0){
+    const masAntigua = compras[compras.length-1];
+    total += restante*masAntigua.punit;
+    desglose.push({fecha:masAntigua.fecha, cantidad:restante, punit:masAntigua.punit, extrapolado:true});
+  }
+  return { monto:total, desglose, sinCompras:false };
+}
+
+/* ---- Carga de conteos guardados ---- */
+async function loadStkCortes(){
+  const { data, error } = await sb.from("lf_stock_cortes").select("*").order("fecha",{ascending:false}).order("created_at",{ascending:false});
+  if(error){ showToast("No se pudo cargar el historial de conteos de stock", "warn"); return; }
+  stkCortes = data || [];
+}
+async function loadStkCorteItems(corteId){
+  if(stkCorteItemsMap[corteId]) return stkCorteItemsMap[corteId];
+  const { data, error } = await sb.from("lf_stock_corte_items").select("*").eq("corte_id", corteId);
+  if(error){ showToast("No se pudieron cargar los ítems del conteo", "warn"); return []; }
+  stkCorteItemsMap[corteId] = data || [];
+  return stkCorteItemsMap[corteId];
+}
+
+async function initStock(){
+  await loadCosteoProveedoresExtra();
+  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadRecetasItems(), loadRecetaLineas(), loadStkCortes(), stkCargarComprasVentasCache()]);
+  stkModoConteo = false;
+  stkViendoHistorial = false;
+  stkHistorialAbierto = null;
+  document.getElementById("stkHistorialWrap").style.display = "none";
+  document.getElementById("stkTableWrap").style.display = "";
+  document.getElementById("stkAjusteFooter").style.display = "none";
+  document.getElementById("stkBtnNuevoConteo").style.display = "";
+  document.getElementById("stkBtnHistorial").textContent = "Ver historial";
+  if(stkCortes.length) await loadStkCorteItems(stkCortes[0].id);
+  stkRenderTabla();
+}
+
+/* ---- Formato y helpers de presentación ---- */
+function stkFmtNum(n){ return (n==null||isNaN(n)) ? "—" : Number(n).toLocaleString("es-AR",{maximumFractionDigits:2}); }
+function stkDiffClase(dif){
+  if(dif==null) return "stk-diff-na";
+  if(dif<0) return "stk-diff-rojo";
+  if(dif>0) return "stk-diff-amarillo";
+  return "stk-diff-verde";
+}
+function stkDesgloseTitle(desglose){
+  if(!desglose || !desglose.length) return "";
+  return (desglose||[]).map(d=>`${isoToDMY(d.fecha)}: ${stkFmtNum(d.cantidad)} × ${fmtMoneyCosteo(d.punit)}${d.extrapolado?" (extrapolado)":""}`).join(" · ");
+}
+function stkHeadRow(){
+  return `<div class="stk-head-row">
+    <div>Item</div><div>Stock inicial</div><div>Compras</div><div>Ventas</div><div>Stock teórico</div>
+    <div>Heladera</div><div>Repuesto</div><div>Depósito</div><div>Stock real</div><div>Diferencia</div><div>Valorización $</div>
+  </div>`;
+}
+
+/* ---- Modo lectura (último conteo guardado, o detalle de un conteo del historial) ---- */
+function stkRowLectura(ins, item){
+  const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
+  const dif = item ? item.diferencia : null;
+  return `<div class="stk-row">
+    <div class="stk-nombre" title="${costeoEsc(ins.nomenclatura)}">${costeoEsc(ins.nomenclatura)}<span class="stk-prov">${costeoEsc(prov?prov.nombre:"")}</span></div>
+    <div class="stk-num${(!item||item.stock_inicial==null)?' na':''}">${item&&item.stock_inicial!=null?stkFmtNum(item.stock_inicial):"—"}</div>
+    <div class="stk-num${(!item||item.compras==null)?' na':''}">${item&&item.compras!=null?stkFmtNum(item.compras):"—"}</div>
+    <div class="stk-num${(!item||item.ventas==null)?' na':''}">${item&&item.ventas!=null?stkFmtNum(item.ventas):"—"}</div>
+    <div class="stk-num${(!item||item.stock_teorico==null)?' na':''}">${item&&item.stock_teorico!=null?stkFmtNum(item.stock_teorico):"—"}</div>
+    <div class="stk-num">${item?stkFmtNum(item.heladera):"—"}</div>
+    <div class="stk-num">${item?stkFmtNum(item.repuesto):"—"}</div>
+    <div class="stk-num">${item?stkFmtNum(item.deposito):"—"}</div>
+    <div class="stk-num stk-real-total">${item?stkFmtNum(item.stock_real):"—"}</div>
+    <div>${item ? `<span class="stk-diff-badge ${stkDiffClase(dif)}">${dif==null?"—":((dif>0?"+":"")+stkFmtNum(dif))}</span>` : "—"}</div>
+    <div class="stk-num" title="${item?stkDesgloseTitle(item.desglose_valorizacion):''}">${item&&item.monto_valorizado!=null?fmtMoneyCosteo(item.monto_valorizado):"—"}</div>
+  </div>`;
+}
+function stkRenderTabla(){
+  const wrap = document.getElementById("stkTableWrap");
+  const insumos = stkInsumosTrackeados();
+  if(!insumos.length){
+    wrap.innerHTML = `<div class="empty-mini">Todavía no hay insumos cargados en Costeo para proveedores de Cafetería y Bebidas.</div>`;
+    document.getElementById("stkBtnHistorial").style.display = "none";
+    return;
+  }
+  const ultimoCorte = stkCortes[0];
+  if(!ultimoCorte){
+    wrap.innerHTML = `<div class="empty-mini">Todavía no se cargó ningún conteo de stock. Tocá "+ Nuevo conteo de stock" para hacer el primero (Día 0).</div>`;
+    document.getElementById("stkBtnHistorial").style.display = "none";
+    return;
+  }
+  document.getElementById("stkBtnHistorial").style.display = "";
+  const items = stkCorteItemsMap[ultimoCorte.id] || [];
+  const itemsPorInsumo = {}; items.forEach(it=>{ itemsPorInsumo[it.insumo_id]=it; });
+  let montoTotal = 0, algunMonto = false;
+  items.forEach(it=>{ if(it.monto_valorizado!=null){ montoTotal += Number(it.monto_valorizado); algunMonto = true; } });
+
+  let html = `<div class="stk-summary">
+    <div class="stks-item">Último conteo<strong>${isoToDMY(ultimoCorte.fecha)}${ultimoCorte.es_inicial?' · Día 0':''}</strong></div>
+    <div class="stks-item">Ítems contados<strong>${items.length} de ${insumos.length}</strong></div>
+    <div class="stks-item">Valorización total<strong>${algunMonto?fmtMoneyCosteo(montoTotal):"—"}</strong></div>
+  </div>`;
+  html += `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRow()}`;
+  insumos.forEach(ins=>{ html += stkRowLectura(ins, itemsPorInsumo[ins.id]); });
+  html += `</div></div>`;
+  wrap.innerHTML = html;
+}
+
+/* ---- Modo "nuevo conteo" ---- */
+async function stkRecalcularBase(fechaISO){
+  const insumos = stkInsumosTrackeados();
+  const ultimoCorte = stkCortes[0] || null;
+  let itemsUltimoCorte = [];
+  if(ultimoCorte) itemsUltimoCorte = await loadStkCorteItems(ultimoCorte.id);
+  const itemsUltimoPorInsumo = {}; itemsUltimoCorte.forEach(it=>{ itemsUltimoPorInsumo[it.insumo_id]=it; });
+  const insumoIds = insumos.map(i=>i.id);
+  const desdeISO = ultimoCorte ? ultimoCorte.fecha : null;
+  const ventasPorInsumo = ultimoCorte ? stkVentasEnPeriodo(insumoIds, desdeISO, fechaISO) : {};
+  const base = { fechaISO, esInicial: !ultimoCorte, porInsumo:{} };
+  insumos.forEach(ins=>{
+    const anterior = itemsUltimoPorInsumo[ins.id];
+    if(!anterior){
+      base.porInsumo[ins.id] = { stockInicial:null, compras:null, ventas:null, teorico:null, esNuevoItem:true };
+    } else {
+      const stockInicial = Number(anterior.stock_real)||0;
+      const compras = stkComprasEnPeriodo(ins.id, desdeISO, fechaISO);
+      const ventas = ventasPorInsumo[ins.id]||0;
+      base.porInsumo[ins.id] = { stockInicial, compras, ventas, teorico: stockInicial+compras-ventas, esNuevoItem:false };
+    }
+  });
+  return base;
+}
+
+async function stkIniciarConteo(){
+  if(stkModoConteo) return;
+  const insumos = stkInsumosTrackeados();
+  if(!insumos.length){ showToast("No hay insumos de Cafetería y Bebidas cargados en Costeo todavía", "warn"); return; }
+  showToast("Calculando compras y ventas del período…");
+  await stkCargarComprasVentasCache();
+  stkConteoBase = await stkRecalcularBase(todayISO());
+  stkConteoValores = {};
+  insumos.forEach(ins=>{ stkConteoValores[ins.id] = {heladera:"", repuesto:"", deposito:""}; });
+  stkModoConteo = true;
+  stkViendoHistorial = false;
+  document.getElementById("stkHistorialWrap").style.display = "none";
+  document.getElementById("stkAjusteFooter").style.display = "flex";
+  document.getElementById("stkBtnNuevoConteo").style.display = "none";
+  document.getElementById("stkBtnHistorial").style.display = "none";
+  stkActualizarFooter();
+  stkRenderConteo();
+}
+
+async function stkOnFechaConteoChange(val){
+  if(!val) return;
+  const ultimoCorte = stkCortes[0];
+  if(ultimoCorte && val<=ultimoCorte.fecha){
+    showToast(`La fecha tiene que ser posterior a la del último conteo (${isoToDMY(ultimoCorte.fecha)})`, "warn");
+    const input = document.getElementById("stkConteoFechaInput");
+    if(input) input.value = stkConteoBase.fechaISO;
+    return;
+  }
+  stkConteoBase = await stkRecalcularBase(val);
+  stkRenderConteo();
+}
+
+function stkCancelarConteo(){
+  stkModoConteo = false;
+  stkConteoBase = null; stkConteoValores = {};
+  document.getElementById("stkAjusteFooter").style.display = "none";
+  document.getElementById("stkBtnNuevoConteo").style.display = "";
+  document.getElementById("stkBtnHistorial").style.display = stkCortes.length ? "" : "none";
+  stkRenderTabla();
+}
+
+function stkRowConteo(ins){
+  const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
+  const b = stkConteoBase.porInsumo[ins.id];
+  const v = stkConteoValores[ins.id];
+  return `<div class="stk-row stk-row-new" id="stkConteoRow_${ins.id}">
+    <div class="stk-nombre" title="${costeoEsc(ins.nomenclatura)}">${costeoEsc(ins.nomenclatura)}<span class="stk-prov">${costeoEsc(prov?prov.nombre:"")}</span></div>
+    <div class="stk-num${b.stockInicial==null?' na':''}">${b.stockInicial==null?(b.esNuevoItem?"— (nuevo)":"—"):stkFmtNum(b.stockInicial)}</div>
+    <div class="stk-num${b.compras==null?' na':''}">${b.compras==null?"—":stkFmtNum(b.compras)}</div>
+    <div class="stk-num${b.ventas==null?' na':''}">${b.ventas==null?"—":stkFmtNum(b.ventas)}</div>
+    <div class="stk-num${b.teorico==null?' na':''}">${b.teorico==null?"—":stkFmtNum(b.teorico)}</div>
+    <div><input type="text" class="stk-input" inputmode="decimal" placeholder="0" value="${v.heladera}" oninput="stkOnValorInput('${ins.id}','heladera',this.value)"></div>
+    <div><input type="text" class="stk-input" inputmode="decimal" placeholder="0" value="${v.repuesto}" oninput="stkOnValorInput('${ins.id}','repuesto',this.value)"></div>
+    <div><input type="text" class="stk-input" inputmode="decimal" placeholder="0" value="${v.deposito}" oninput="stkOnValorInput('${ins.id}','deposito',this.value)"></div>
+    <div class="stk-num stk-real-total" id="stkReal_${ins.id}">0</div>
+    <div id="stkDif_${ins.id}"></div>
+    <div class="stk-num" id="stkMonto_${ins.id}">—</div>
+  </div>`;
+}
+function stkRenderConteo(){
+  const wrap = document.getElementById("stkTableWrap");
+  const insumos = stkInsumosTrackeados();
+  let html = `<div class="stk-scope-note" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <span style="flex:1;min-width:260px;">${stkConteoBase.esInicial ? "Primer conteo de stock (Día 0): registrá el stock real de cada ítem — desde acá se va a calcular el stock teórico de ahora en más." : "Cargá el stock real encontrado en cada espacio. Compras, ventas y stock teórico ya están calculados automáticamente para el período transcurrido desde el conteo anterior."}</span>
+    <label style="font-weight:700;font-size:12.5px;white-space:nowrap;">Fecha del conteo
+      <input type="date" id="stkConteoFechaInput" value="${stkConteoBase.fechaISO}" max="${todayISO()}" onchange="stkOnFechaConteoChange(this.value)">
+    </label>
+  </div>`;
+  html += `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRow()}`;
+  insumos.forEach(ins=>{ html += stkRowConteo(ins); });
+  html += `</div></div>`;
+  wrap.innerHTML = html;
+  insumos.forEach(ins=> stkRecalcularFilaConteo(ins.id));
+}
+function stkOnValorInput(insumoId, campo, val){
+  stkConteoValores[insumoId][campo] = val;
+  stkRecalcularFilaConteo(insumoId);
+  stkActualizarFooter();
+}
+function stkRecalcularFilaConteo(insumoId){
+  const v = stkConteoValores[insumoId];
+  const heladera = parseDecimalCosteo(v.heladera);
+  const repuesto = parseDecimalCosteo(v.repuesto);
+  const deposito = parseDecimalCosteo(v.deposito);
+  const real = heladera + repuesto + deposito;
+  const b = stkConteoBase.porInsumo[insumoId];
+  const dif = b.esNuevoItem ? null : (real - b.teorico);
+  const realEl = document.getElementById(`stkReal_${insumoId}`);
+  if(realEl) realEl.textContent = stkFmtNum(real);
+  const difEl = document.getElementById(`stkDif_${insumoId}`);
+  if(difEl){
+    difEl.innerHTML = b.esNuevoItem
+      ? `<span class="stk-diff-badge stk-diff-na" title="Sin conteo anterior — este conteo establece su base">—</span>`
+      : `<span class="stk-diff-badge ${stkDiffClase(dif)}">${(dif>0?"+":"")+stkFmtNum(dif)}</span>`;
+  }
+  const montoEl = document.getElementById(`stkMonto_${insumoId}`);
+  if(montoEl){
+    const val = stkValorizarStock(insumoId, real, stkConteoBase.fechaISO);
+    montoEl.textContent = val.monto==null ? "—" : fmtMoneyCosteo(val.monto);
+    montoEl.title = stkDesgloseTitle(val.desglose);
+  }
+}
+function stkActualizarFooter(){
+  const info = document.getElementById("stkAjusteFooterInfo");
+  if(!info) return;
+  const insumos = stkInsumosTrackeados();
+  const completos = insumos.filter(ins=>{
+    const v = stkConteoValores[ins.id];
+    return v && (v.heladera!==""||v.repuesto!==""||v.deposito!=="");
+  }).length;
+  info.textContent = `${completos} de ${insumos.length} ítem(s) con algún valor cargado — los que queden en blanco se guardan como 0.`;
+}
+
+async function stkConfirmarConteo(){
+  const insumos = stkInsumosTrackeados();
+  if(!confirm(`¿Confirmás el conteo de stock del ${isoToDMY(stkConteoBase.fechaISO)} para ${insumos.length} ítem(s) de Cafetería y Bebidas?`)) return;
+  if(!confirm("Última confirmación: este conteo va a quedar guardado en el historial y va a ser la base del próximo cálculo de stock. ¿Continuar?")) return;
+
+  const filas = insumos.map(ins=>{
+    const v = stkConteoValores[ins.id];
+    const heladera = parseDecimalCosteo(v.heladera);
+    const repuesto = parseDecimalCosteo(v.repuesto);
+    const deposito = parseDecimalCosteo(v.deposito);
+    const real = heladera + repuesto + deposito;
+    const b = stkConteoBase.porInsumo[ins.id];
+    const teorico = b.esNuevoItem ? null : b.teorico;
+    const dif = teorico==null ? null : (real - teorico);
+    const val = stkValorizarStock(ins.id, real, stkConteoBase.fechaISO);
+    return {
+      insumo_id: ins.id,
+      stock_inicial: b.esNuevoItem ? null : b.stockInicial,
+      compras: b.esNuevoItem ? null : b.compras,
+      ventas: b.esNuevoItem ? null : b.ventas,
+      stock_teorico: teorico,
+      heladera, repuesto, deposito,
+      stock_real: real,
+      diferencia: dif,
+      monto_valorizado: val.monto,
+      desglose_valorizacion: val.desglose
+    };
+  });
+
+  const { data: corteIns, error: errCorte } = await sb.from("lf_stock_cortes").insert({
+    fecha: stkConteoBase.fechaISO,
+    es_inicial: stkConteoBase.esInicial,
+    creado_por: currentPerfil?currentPerfil.id:null,
+    creado_por_nombre: currentPerfil?currentPerfil.nombre:"—"
+  }).select().single();
+  if(errCorte || !corteIns){ showToast("No se pudo guardar el conteo de stock", "warn"); return; }
+
+  const filasConCorte = filas.map(f=>({ ...f, corte_id: corteIns.id }));
+  const { error: errItems } = await sb.from("lf_stock_corte_items").insert(filasConCorte);
+  if(errItems) showToast("Se creó el conteo pero no se pudieron guardar sus ítems — avisar para revisar", "warn");
+  else showToast("Conteo de stock guardado correctamente");
+
+  stkModoConteo = false;
+  stkConteoBase = null; stkConteoValores = {};
+  document.getElementById("stkAjusteFooter").style.display = "none";
+  document.getElementById("stkBtnNuevoConteo").style.display = "";
+  await loadStkCortes();
+  if(stkCortes.length) await loadStkCorteItems(stkCortes[0].id);
+  document.getElementById("stkBtnHistorial").style.display = "";
+  stkRenderTabla();
+}
+
+/* ---- Historial ---- */
+function stkToggleHistorial(){
+  stkViendoHistorial = !stkViendoHistorial;
+  document.getElementById("stkTableWrap").style.display = stkViendoHistorial ? "none" : "";
+  document.getElementById("stkHistorialWrap").style.display = stkViendoHistorial ? "" : "none";
+  document.getElementById("stkBtnHistorial").textContent = stkViendoHistorial ? "Ver stock actual" : "Ver historial";
+  if(stkViendoHistorial) stkRenderHistorial();
+}
+async function stkAbrirDetalleCorte(corteId){
+  stkHistorialAbierto = (stkHistorialAbierto===corteId) ? null : corteId;
+  if(stkHistorialAbierto) await loadStkCorteItems(corteId);
+  stkRenderHistorial();
+}
+function stkRenderHistorial(){
+  const wrap = document.getElementById("stkHistorialWrap");
+  if(!stkCortes.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay conteos guardados.</div>`; return; }
+  const insumos = stkInsumosTrackeados();
+  wrap.innerHTML = stkCortes.map(c=>{
+    const abierto = stkHistorialAbierto===c.id;
+    const items = stkCorteItemsMap[c.id] || [];
+    let montoTotal = 0, algunMonto = false;
+    items.forEach(it=>{ if(it.monto_valorizado!=null){ montoTotal += Number(it.monto_valorizado); algunMonto = true; } });
+    let detalle = "";
+    if(abierto){
+      const itemsPorInsumo = {}; items.forEach(it=>{ itemsPorInsumo[it.insumo_id]=it; });
+      detalle = `<div class="stk-table-scroll" style="margin-top:10px;"><div class="stk-table">${stkHeadRow()}${
+        insumos.map(ins=>stkRowLectura(ins, itemsPorInsumo[ins.id])).join("")
+      }</div></div>`;
+    }
+    return `<div class="stk-hist-card">
+      <div class="stk-hist-head" onclick="stkAbrirDetalleCorte('${c.id}')">
+        <div class="stk-hist-fecha">${isoToDMY(c.fecha)} · ${costeoEsc(c.creado_por_nombre||"—")} · ${items.length} ítem(s)${algunMonto?(' · '+fmtMoneyCosteo(montoTotal)):''}</div>
+        ${c.es_inicial?'<span class="stk-hist-badge-inicial">Día 0</span>':''}
+      </div>
+      ${detalle}
+    </div>`;
+  }).join("");
 }
 </script>
 </body>
