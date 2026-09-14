@@ -558,14 +558,13 @@
   .stk-diff-amarillo{background:#FFF3D6;color:#9A6B00;}
   .stk-diff-verde{background:#E4F8ED;color:#137B44;}
   .stk-diff-na{background:#F1F2FA;color:var(--text-3);}
-  .stk-group-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);margin:18px 0 8px;padding-left:2px;}
-  .stk-group-title:first-child{margin-top:0;}
   .stk-ajuste-footer{flex-shrink:0;background:#fff;border-top:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:14px;box-shadow:0 -4px 14px rgba(20,25,50,.06);}
-  .stk-hist-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:10px;max-width:900px;}
-  .stk-hist-head{display:flex;align-items:center;gap:12px;cursor:pointer;}
-  .stk-hist-fecha{font-weight:700;color:var(--text-1);flex:1;font-size:12.5px;}
   .stk-hist-badge-inicial{font-size:10px;font-weight:800;color:var(--blue);background:#EAF1FE;border-radius:20px;padding:2px 9px;}
-  .stk-desglose{font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.5;}
+  .stk-fecha-fija{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--text-1);}
+  .stk-fecha-fija svg{width:15px;height:15px;color:var(--text-3);flex-shrink:0;}
+  .stk-fecha-fija strong{color:var(--navy);}
+  .stk-pane-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .stk-pane-head .stk-scope-note{flex:1;min-width:260px;margin-bottom:0;}
 
   .ci-table-scroll{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:auto;max-width:100%;padding-bottom:2px;}
   /* La tabla de Carga de compras usa el alto real disponible en pantalla (flex), no "vh" —
@@ -1944,20 +1943,48 @@
       <div class="screen-header">
         <div style="flex:1;">
           <h1 style="font-size:20px;margin:0;font-weight:800;">Stock</h1>
-          <div class="sub" style="font-size:12.5px;color:var(--text-2);">Stock teórico vs. real de los insumos de Cafetería y Bebidas</div>
+          <div class="sub" style="font-size:12.5px;color:var(--text-2);">Stock teórico vs. real del club</div>
         </div>
-        <button type="button" class="btn-primary secondary" id="stkBtnHistorial" onclick="stkToggleHistorial()">Ver historial</button>
-        <button type="button" class="btn-primary" id="stkBtnNuevoConteo" onclick="stkIniciarConteo()">+ Nuevo conteo de stock</button>
       </div>
       <div class="screen-scroll">
-        <div class="stk-scope-note">Por ahora el Stock solo cubre los insumos de proveedores de <strong>Cafetería y Bebidas</strong> (mismo criterio de Costeo). Si sale bien, se suma el resto de los conceptos.</div>
-        <div id="stkTableWrap"></div>
-        <div id="stkHistorialWrap" style="display:none;"></div>
+        <div class="rec-toggle" id="stkTipoToggle">
+          <button type="button" class="rec-toggle-btn active" data-stipo="insumos" onclick="stkGoTipo('insumos')">Insumos</button>
+          <button type="button" class="rec-toggle-btn" data-stipo="semi" onclick="stkGoTipo('semi')">Semielaborados</button>
+        </div>
+
+        <!-- STOCK > INSUMOS -->
+        <div id="stockPaneInsumos">
+          <div class="stk-pane-head">
+            <div class="stk-scope-note">Por ahora el Stock de insumos solo cubre los de proveedores de <strong>Cafetería y Bebidas</strong> (mismo criterio de Costeo) más los que se agreguen a mano. Si sale bien, se suma el resto de los conceptos por default.</div>
+            <button type="button" class="btn-primary secondary" id="stkBtnEditar" onclick="stkToggleEditor()">Editar insumos</button>
+            <button type="button" class="btn-primary secondary" id="stkBtnHistorial" onclick="stkToggleHistorial()">Ver historial</button>
+            <button type="button" class="btn-primary" id="stkBtnNuevoConteo" onclick="stkIniciarConteo()">+ Nuevo conteo de stock</button>
+          </div>
+          <div id="stkTableWrap"></div>
+          <div id="stkHistorialWrap" style="display:none;"></div>
+        </div>
+
+        <!-- STOCK > SEMIELABORADOS -->
+        <div id="stockPaneSemi" style="display:none;">
+          <div class="stk-pane-head">
+            <div class="stk-scope-note">Stock de semielaborados (milanesas, empanadas, etc. — los mismos de Costeo &gt; Recetas &gt; Semi-elaborados). La lista arranca vacía: usá "Editar semielaborados" para sumar los que ya estén listos para contarse. La <strong>Producción</strong> de cada conteo se carga a mano (dato de cocina), no se calcula sola como las Compras de Insumos.</div>
+            <button type="button" class="btn-primary secondary" id="stkSemiBtnEditar" onclick="stkToggleEditorSemi()">Editar semielaborados</button>
+            <button type="button" class="btn-primary secondary" id="stkSemiBtnHistorial" onclick="stkToggleHistorialSemi()">Ver historial</button>
+            <button type="button" class="btn-primary" id="stkSemiBtnNuevoConteo" onclick="stkIniciarConteoSemi()">+ Nuevo conteo de stock</button>
+          </div>
+          <div id="stkSemiTableWrap"></div>
+          <div id="stkSemiHistorialWrap" style="display:none;"></div>
+        </div>
       </div>
       <div class="stk-ajuste-footer" id="stkAjusteFooter" style="display:none;">
         <span id="stkAjusteFooterInfo" style="flex:1;font-size:12.5px;color:var(--text-2);"></span>
         <button type="button" class="btn-primary secondary" onclick="stkCancelarConteo()">Cancelar</button>
         <button type="button" class="btn-primary" id="stkBtnConfirmarConteo" onclick="stkConfirmarConteo()">Guardar conteo</button>
+      </div>
+      <div class="stk-ajuste-footer" id="stkSemiAjusteFooter" style="display:none;">
+        <span id="stkSemiAjusteFooterInfo" style="flex:1;font-size:12.5px;color:var(--text-2);"></span>
+        <button type="button" class="btn-primary secondary" onclick="stkCancelarConteoSemi()">Cancelar</button>
+        <button type="button" class="btn-primary" id="stkSemiBtnConfirmarConteo" onclick="stkConfirmarConteoSemi()">Guardar conteo</button>
       </div>
     </section>
 
@@ -10575,18 +10602,43 @@ let stkConteoBase = null;      // { fechaISO, esInicial, porInsumo: {[insumoId]:
 let stkConteoValores = {};     // { [insumoId]: {heladera, repuesto, deposito} } (strings, mientras se tipea)
 let stkViendoHistorial = false;
 let stkHistorialAbierto = null; // id de corte expandido en el historial
+let stkModoEditor = false;
+// Configuración editable de qué insumos se cuentan en Stock (pedido de Pancho, 14/09/2026): por
+// default se auto-incluyen los insumos de proveedores de STOCK_CONCEPTOS, pero se puede excluir
+// puntualmente alguno de esos (lf_stock_items_excluidos) y agregar a mano cualquier otro insumo
+// de Costeo de otro concepto (lf_stock_items_extra) — mismo patrón aditivo que
+// lf_costeo_proveedores_extra.
+let stkItemsExcluidosIds = new Set();
+let stkItemsExtraIds = new Set();
 
+// ¿Este insumo entraría a Stock por default (proveedor de STOCK_CONCEPTOS), sin importar si
+// después se lo excluyó a mano? Se usa para decidir si "sacar"/"agregar" tocan la tabla de
+// excluidos o la de extra.
+function stkEsInsumoDefault(insumoId){
+  const ins = costeoInsumos.find(i=>i.id===insumoId);
+  if(!ins) return false;
+  const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
+  return !!(prov && STOCK_CONCEPTOS.includes(prov.concepto));
+}
 function stkInsumosTrackeados(){
-  return costeoInsumos.filter(ins=>{
-    const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
-    return prov && STOCK_CONCEPTOS.includes(prov.concepto);
-  }).sort((a,b)=>{
+  return costeoInsumos.filter(ins=> stkEsInsumoDefault(ins.id) ? !stkItemsExcluidosIds.has(ins.id) : stkItemsExtraIds.has(ins.id))
+  .sort((a,b)=>{
     const pa = proveedoresConfig.find(p=>p.id===a.proveedor_id);
     const pb = proveedoresConfig.find(p=>p.id===b.proveedor_id);
     const byProv = (pa?pa.nombre:"").localeCompare(pb?pb.nombre:"","es");
     if(byProv!==0) return byProv;
     return a.nomenclatura.localeCompare(b.nomenclatura,"es");
   });
+}
+async function stkCargarConfigItems(){
+  const [rex, rext] = await Promise.all([
+    sb.from("lf_stock_items_excluidos").select("insumo_id"),
+    sb.from("lf_stock_items_extra").select("insumo_id")
+  ]);
+  if(rex.error) showToast("No se pudo cargar la lista de insumos excluidos de Stock", "warn");
+  if(rext.error) showToast("No se pudo cargar la lista de insumos agregados a Stock", "warn");
+  stkItemsExcluidosIds = new Set((rex.data||[]).map(r=>r.insumo_id));
+  stkItemsExtraIds = new Set((rext.data||[]).map(r=>r.insumo_id));
 }
 
 /* ---- Explosión recursiva de receta: cuánto de "targetInsumoId" consume 1 unidad vendida de
@@ -10715,17 +10767,41 @@ async function loadStkCorteItems(corteId){
 
 async function initStock(){
   await loadCosteoProveedoresExtra();
-  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadRecetasItems(), loadRecetaLineas(), loadStkCortes(), stkCargarComprasVentasCache()]);
+  await Promise.all([loadCosteoInsumos(), loadCosteoCompraItems(), loadRecetasItems(), loadRecetaLineas(), loadStkCortes(), loadStkSemiCortes(), stkCargarComprasVentasCache(), stkCargarConfigItems(), stkCargarConfigSemiItems()]);
   stkModoConteo = false;
   stkViendoHistorial = false;
+  stkModoEditor = false;
   stkHistorialAbierto = null;
   document.getElementById("stkHistorialWrap").style.display = "none";
   document.getElementById("stkTableWrap").style.display = "";
   document.getElementById("stkAjusteFooter").style.display = "none";
   document.getElementById("stkBtnNuevoConteo").style.display = "";
+  document.getElementById("stkBtnHistorial").style.display = "";
   document.getElementById("stkBtnHistorial").textContent = "Ver historial";
+  document.getElementById("stkBtnEditar").style.display = "";
+  document.getElementById("stkBtnEditar").textContent = "Editar insumos";
   if(stkCortes.length) await loadStkCorteItems(stkCortes[0].id);
   stkRenderTabla();
+
+  stkSemiModoConteo = false;
+  stkSemiViendoHistorial = false;
+  stkSemiModoEditor = false;
+  stkSemiHistorialAbierto = null;
+  document.getElementById("stkSemiHistorialWrap").style.display = "none";
+  document.getElementById("stkSemiTableWrap").style.display = "";
+  document.getElementById("stkSemiAjusteFooter").style.display = "none";
+  document.getElementById("stkSemiBtnNuevoConteo").style.display = "";
+  document.getElementById("stkSemiBtnHistorial").style.display = "";
+  document.getElementById("stkSemiBtnHistorial").textContent = "Ver historial";
+  document.getElementById("stkSemiBtnEditar").style.display = "";
+  document.getElementById("stkSemiBtnEditar").textContent = "Editar semielaborados";
+  if(stkSemiCortes.length) await loadStkSemiCorteItems(stkSemiCortes[0].id);
+  stkRenderTablaSemi();
+
+  // Siempre arranca en la pestaña Insumos al entrar al módulo.
+  document.querySelectorAll("#stkTipoToggle .rec-toggle-btn").forEach(b=>b.classList.toggle("active", b.dataset.stipo==="insumos"));
+  document.getElementById("stockPaneInsumos").style.display = "";
+  document.getElementById("stockPaneSemi").style.display = "none";
 }
 
 /* ---- Formato y helpers de presentación ---- */
@@ -10748,11 +10824,11 @@ function stkHeadRow(){
 }
 
 /* ---- Modo lectura (último conteo guardado, o detalle de un conteo del historial) ---- */
-function stkRowLectura(ins, item){
+function stkRowLectura(ins, item, fueraDeStock){
   const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
   const dif = item ? item.diferencia : null;
   return `<div class="stk-row">
-    <div class="stk-nombre" title="${costeoEsc(ins.nomenclatura)}">${costeoEsc(ins.nomenclatura)}<span class="stk-prov">${costeoEsc(prov?prov.nombre:"")}</span></div>
+    <div class="stk-nombre" title="${costeoEsc(ins.nomenclatura)}">${costeoEsc(ins.nomenclatura)}<span class="stk-prov">${costeoEsc(prov?prov.nombre:"")}${fueraDeStock?' · ya no se cuenta en Stock':''}</span></div>
     <div class="stk-num${(!item||item.stock_inicial==null)?' na':''}">${item&&item.stock_inicial!=null?stkFmtNum(item.stock_inicial):"—"}</div>
     <div class="stk-num${(!item||item.compras==null)?' na':''}">${item&&item.compras!=null?stkFmtNum(item.compras):"—"}</div>
     <div class="stk-num${(!item||item.ventas==null)?' na':''}">${item&&item.ventas!=null?stkFmtNum(item.ventas):"—"}</div>
@@ -10768,30 +10844,37 @@ function stkRowLectura(ins, item){
 function stkRenderTabla(){
   const wrap = document.getElementById("stkTableWrap");
   const insumos = stkInsumosTrackeados();
-  if(!insumos.length){
-    wrap.innerHTML = `<div class="empty-mini">Todavía no hay insumos cargados en Costeo para proveedores de Cafetería y Bebidas.</div>`;
-    document.getElementById("stkBtnHistorial").style.display = "none";
-    return;
-  }
   const ultimoCorte = stkCortes[0];
   if(!ultimoCorte){
-    wrap.innerHTML = `<div class="empty-mini">Todavía no se cargó ningún conteo de stock. Tocá "+ Nuevo conteo de stock" para hacer el primero (Día 0).</div>`;
+    wrap.innerHTML = insumos.length
+      ? `<div class="empty-mini">Todavía no se cargó ningún conteo de stock. Tocá "+ Nuevo conteo de stock" para hacer el primero (Día 0).</div>`
+      : `<div class="empty-mini">Todavía no hay insumos configurados para Stock. Tocá "Editar insumos" para elegir cuáles calcular.</div>`;
     document.getElementById("stkBtnHistorial").style.display = "none";
     return;
   }
   document.getElementById("stkBtnHistorial").style.display = "";
+  // Las filas se arman a partir de los ítems REALES de ese conteo (no de la lista de insumos
+  // trackeados hoy) — así un insumo sacado de Stock después sigue viéndose tal cual se contó,
+  // trazable, y uno agregado recién no aparece acá hasta que se lo cuente por primera vez.
   const items = stkCorteItemsMap[ultimoCorte.id] || [];
-  const itemsPorInsumo = {}; items.forEach(it=>{ itemsPorInsumo[it.insumo_id]=it; });
+  const trackedIds = new Set(insumos.map(i=>i.id));
+  const nuevosSinContar = insumos.filter(i=>!items.some(it=>it.insumo_id===i.id));
   let montoTotal = 0, algunMonto = false;
   items.forEach(it=>{ if(it.monto_valorizado!=null){ montoTotal += Number(it.monto_valorizado); algunMonto = true; } });
 
   let html = `<div class="stk-summary">
     <div class="stks-item">Último conteo<strong>${isoToDMY(ultimoCorte.fecha)}${ultimoCorte.es_inicial?' · Día 0':''}</strong></div>
-    <div class="stks-item">Ítems contados<strong>${items.length} de ${insumos.length}</strong></div>
+    <div class="stks-item">Ítems contados<strong>${items.length}</strong></div>
     <div class="stks-item">Valorización total<strong>${algunMonto?fmtMoneyCosteo(montoTotal):"—"}</strong></div>
   </div>`;
+  if(nuevosSinContar.length){
+    html += `<div class="stk-scope-note">${nuevosSinContar.length} insumo(s) agregado(s) a Stock todavía sin contar: ${nuevosSinContar.map(i=>costeoEsc(i.nomenclatura)).join(", ")}. Se van a incluir en el próximo conteo.</div>`;
+  }
   html += `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRow()}`;
-  insumos.forEach(ins=>{ html += stkRowLectura(ins, itemsPorInsumo[ins.id]); });
+  items.forEach(it=>{
+    const ins = costeoInsumos.find(i=>i.id===it.insumo_id);
+    if(ins) html += stkRowLectura(ins, it, !trackedIds.has(ins.id));
+  });
   html += `</div></div>`;
   wrap.innerHTML = html;
 }
@@ -10822,11 +10905,14 @@ async function stkRecalcularBase(fechaISO){
 }
 
 async function stkIniciarConteo(){
-  if(stkModoConteo) return;
+  if(stkModoConteo || stkModoEditor) return;
   const insumos = stkInsumosTrackeados();
-  if(!insumos.length){ showToast("No hay insumos de Cafetería y Bebidas cargados en Costeo todavía", "warn"); return; }
+  if(!insumos.length){ showToast("No hay insumos configurados para Stock todavía — usá \"Editar insumos\" para agregar alguno", "warn"); return; }
   showToast("Calculando compras y ventas del período…");
   await stkCargarComprasVentasCache();
+  // La fecha del conteo es SIEMPRE la de hoy y no se puede editar (pedido de Pancho, 14/09/2026):
+  // tiene que quedar trazable el día real en el que se hizo el conteo físico, para poder verificar
+  // después los montos contra ese día puntual.
   stkConteoBase = await stkRecalcularBase(todayISO());
   stkConteoValores = {};
   insumos.forEach(ins=>{ stkConteoValores[ins.id] = {heladera:"", repuesto:"", deposito:""}; });
@@ -10836,20 +10922,8 @@ async function stkIniciarConteo(){
   document.getElementById("stkAjusteFooter").style.display = "flex";
   document.getElementById("stkBtnNuevoConteo").style.display = "none";
   document.getElementById("stkBtnHistorial").style.display = "none";
+  document.getElementById("stkBtnEditar").style.display = "none";
   stkActualizarFooter();
-  stkRenderConteo();
-}
-
-async function stkOnFechaConteoChange(val){
-  if(!val) return;
-  const ultimoCorte = stkCortes[0];
-  if(ultimoCorte && val<=ultimoCorte.fecha){
-    showToast(`La fecha tiene que ser posterior a la del último conteo (${isoToDMY(ultimoCorte.fecha)})`, "warn");
-    const input = document.getElementById("stkConteoFechaInput");
-    if(input) input.value = stkConteoBase.fechaISO;
-    return;
-  }
-  stkConteoBase = await stkRecalcularBase(val);
   stkRenderConteo();
 }
 
@@ -10859,6 +10933,7 @@ function stkCancelarConteo(){
   document.getElementById("stkAjusteFooter").style.display = "none";
   document.getElementById("stkBtnNuevoConteo").style.display = "";
   document.getElementById("stkBtnHistorial").style.display = stkCortes.length ? "" : "none";
+  document.getElementById("stkBtnEditar").style.display = "";
   stkRenderTabla();
 }
 
@@ -10885,9 +10960,10 @@ function stkRenderConteo(){
   const insumos = stkInsumosTrackeados();
   let html = `<div class="stk-scope-note" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
     <span style="flex:1;min-width:260px;">${stkConteoBase.esInicial ? "Primer conteo de stock (Día 0): registrá el stock real de cada ítem — desde acá se va a calcular el stock teórico de ahora en más." : "Cargá el stock real encontrado en cada espacio. Compras, ventas y stock teórico ya están calculados automáticamente para el período transcurrido desde el conteo anterior."}</span>
-    <label style="font-weight:700;font-size:12.5px;white-space:nowrap;">Fecha del conteo
-      <input type="date" id="stkConteoFechaInput" value="${stkConteoBase.fechaISO}" max="${todayISO()}" onchange="stkOnFechaConteoChange(this.value)">
-    </label>
+    <div class="stk-fecha-fija" title="La fecha del conteo es siempre la de hoy y no se puede cambiar, para que quede trazable el día real en que se hizo.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></svg>
+      Fecha del conteo: <strong>${isoToDMY(stkConteoBase.fechaISO)}</strong>
+    </div>
   </div>`;
   html += `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRow()}`;
   insumos.forEach(ins=>{ html += stkRowConteo(ins); });
@@ -10936,7 +11012,7 @@ function stkActualizarFooter(){
 
 async function stkConfirmarConteo(){
   const insumos = stkInsumosTrackeados();
-  if(!confirm(`¿Confirmás el conteo de stock del ${isoToDMY(stkConteoBase.fechaISO)} para ${insumos.length} ítem(s) de Cafetería y Bebidas?`)) return;
+  if(!confirm(`¿Confirmás el conteo de stock del ${isoToDMY(stkConteoBase.fechaISO)} para ${insumos.length} ítem(s)?`)) return;
   if(!confirm("Última confirmación: este conteo va a quedar guardado en el historial y va a ser la base del próximo cálculo de stock. ¿Continuar?")) return;
 
   const filas = insumos.map(ins=>{
@@ -10980,19 +11056,25 @@ async function stkConfirmarConteo(){
   stkConteoBase = null; stkConteoValores = {};
   document.getElementById("stkAjusteFooter").style.display = "none";
   document.getElementById("stkBtnNuevoConteo").style.display = "";
+  document.getElementById("stkBtnEditar").style.display = "";
   await loadStkCortes();
   if(stkCortes.length) await loadStkCorteItems(stkCortes[0].id);
   document.getElementById("stkBtnHistorial").style.display = "";
   stkRenderTabla();
 }
 
-/* ---- Historial ---- */
+/* ---- Historial (análogo a "Cierres anteriores" de Caja Mayor: tabla + botón "Ver" que abre
+   el detalle completo de ese conteo debajo, con panel .cm-panel/.cm-table) ---- */
 function stkToggleHistorial(){
+  if(stkModoConteo) return;
   stkViendoHistorial = !stkViendoHistorial;
+  stkModoEditor = false;
   document.getElementById("stkTableWrap").style.display = stkViendoHistorial ? "none" : "";
   document.getElementById("stkHistorialWrap").style.display = stkViendoHistorial ? "" : "none";
   document.getElementById("stkBtnHistorial").textContent = stkViendoHistorial ? "Ver stock actual" : "Ver historial";
-  if(stkViendoHistorial) stkRenderHistorial();
+  document.getElementById("stkBtnEditar").style.display = stkViendoHistorial ? "none" : "";
+  document.getElementById("stkBtnNuevoConteo").style.display = stkViendoHistorial ? "none" : "";
+  if(stkViendoHistorial) stkRenderHistorial(); else stkRenderTabla();
 }
 async function stkAbrirDetalleCorte(corteId){
   stkHistorialAbierto = (stkHistorialAbierto===corteId) ? null : corteId;
@@ -11001,28 +11083,636 @@ async function stkAbrirDetalleCorte(corteId){
 }
 function stkRenderHistorial(){
   const wrap = document.getElementById("stkHistorialWrap");
-  if(!stkCortes.length){ wrap.innerHTML = `<div class="empty-mini">Todavía no hay conteos guardados.</div>`; return; }
-  const insumos = stkInsumosTrackeados();
-  wrap.innerHTML = stkCortes.map(c=>{
-    const abierto = stkHistorialAbierto===c.id;
+  if(!stkCortes.length){
+    wrap.innerHTML = `<div class="cm-panel"><div class="cm-empty-mini">Todavía no se registró ningún conteo de stock.</div></div>`;
+    return;
+  }
+  const thead = "<thead><tr><th></th><th>Fecha</th><th>Tipo</th><th>Ítems</th><th>Valorización</th><th>Cargado por</th><th></th></tr></thead>";
+  const filas = stkCortes.map(c=>{
     const items = stkCorteItemsMap[c.id] || [];
     let montoTotal = 0, algunMonto = false;
     items.forEach(it=>{ if(it.monto_valorizado!=null){ montoTotal += Number(it.monto_valorizado); algunMonto = true; } });
-    let detalle = "";
-    if(abierto){
-      const itemsPorInsumo = {}; items.forEach(it=>{ itemsPorInsumo[it.insumo_id]=it; });
-      detalle = `<div class="stk-table-scroll" style="margin-top:10px;"><div class="stk-table">${stkHeadRow()}${
-        insumos.map(ins=>stkRowLectura(ins, itemsPorInsumo[ins.id])).join("")
-      }</div></div>`;
-    }
-    return `<div class="stk-hist-card">
-      <div class="stk-hist-head" onclick="stkAbrirDetalleCorte('${c.id}')">
-        <div class="stk-hist-fecha">${isoToDMY(c.fecha)} · ${costeoEsc(c.creado_por_nombre||"—")} · ${items.length} ítem(s)${algunMonto?(' · '+fmtMoneyCosteo(montoTotal)):''}</div>
-        ${c.es_inicial?'<span class="stk-hist-badge-inicial">Día 0</span>':''}
-      </div>
-      ${detalle}
-    </div>`;
+    const abierto = stkHistorialAbierto===c.id;
+    return `<tr>
+      <td>${c.es_inicial?'<span class="stk-hist-badge-inicial">Día 0</span>':''}</td>
+      <td class="c-fecha">${isoToDMY(c.fecha)}</td>
+      <td>${c.es_inicial?"Conteo inicial":"Conteo"}</td>
+      <td>${items.length}</td>
+      <td class="c-monto">${algunMonto?fmtMoneyCosteo(montoTotal):"—"}</td>
+      <td class="c-usuario">${costeoEsc(c.creado_por_nombre||"—")}</td>
+      <td class="cm-row-actions"><button type="button" class="cm-btn-imputar" onclick="stkAbrirDetalleCorte('${c.id}')">${abierto?"Ocultar":"Ver"}</button></td>
+    </tr>`;
   }).join("");
+  let html = `<div class="cm-panel"><div class="cm-panel-head"><h3>Todos los conteos</h3><span class="cnt">${stkCortes.length}</span></div>
+    <div class="cm-panel-body"><table class="cm-table">${thead}<tbody>${filas}</tbody></table></div></div>`;
+
+  const abierto = stkCortes.find(c=>c.id===stkHistorialAbierto);
+  if(abierto){
+    const items = stkCorteItemsMap[abierto.id] || [];
+    // Detalle armado a partir de los ítems REALES de ese conteo (no de la config actual de
+    // Stock) — así queda trazable tal cual se contó ese día, aunque después se hayan
+    // agregado/sacado insumos del cálculo.
+    const filasDetalle = items.map(it=>{
+      const ins = costeoInsumos.find(i=>i.id===it.insumo_id);
+      return ins ? stkRowLectura(ins, it) : "";
+    }).join("");
+    html += `<div class="cm-panel" style="margin-top:16px;">
+      <div class="cm-panel-head"><h3>Detalle del conteo del ${isoToDMY(abierto.fecha)}</h3></div>
+      <div class="cm-panel-body" style="padding:14px 18px;">
+        <div class="stk-table-scroll"><div class="stk-table">${stkHeadRow()}${filasDetalle}</div></div>
+      </div>
+    </div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+/* ---- Editar insumos de Stock: sacar alguno de Cafetería y Bebidas que no se quiera contar por
+   ahora, o agregar cualquier otro insumo ya cargado en Costeo (de otro concepto). No borra nada
+   de Costeo — solo decide si ese insumo entra o no al cálculo de Stock. ---- */
+function stkInsumoLabel(ins){
+  const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
+  return `${ins.nomenclatura} (${prov?prov.nombre:"—"}) · ${prov?prov.concepto:"—"}`;
+}
+function stkToggleEditor(){
+  if(stkModoConteo) return;
+  stkModoEditor = !stkModoEditor;
+  stkViendoHistorial = false;
+  document.getElementById("stkHistorialWrap").style.display = "none";
+  document.getElementById("stkTableWrap").style.display = "";
+  document.getElementById("stkBtnEditar").textContent = stkModoEditor ? "Listo" : "Editar insumos";
+  document.getElementById("stkBtnHistorial").style.display = stkModoEditor ? "none" : "";
+  document.getElementById("stkBtnNuevoConteo").style.display = stkModoEditor ? "none" : "";
+  if(stkModoEditor) stkRenderEditor(); else stkRenderTabla();
+}
+function stkRenderEditor(){
+  const wrap = document.getElementById("stkTableWrap");
+  const trackedIds = new Set(stkInsumosTrackeados().map(i=>i.id));
+  const disponibles = costeoInsumos.filter(i=>!trackedIds.has(i.id)).sort((a,b)=>stkInsumoLabel(a).localeCompare(stkInsumoLabel(b),"es"));
+  const tracked = stkInsumosTrackeados();
+
+  let html = `<div class="stk-scope-note">Elegí qué insumos se calculan en Stock. Sacar uno de acá no lo borra de Costeo, solo deja de contarlo — y podés agregar cualquier otro insumo ya cargado en Costeo, de cualquier proveedor.</div>`;
+  html += `<div class="cm-panel" style="margin-bottom:16px;">
+    <div class="cm-panel-head"><h3>Agregar insumo a Stock</h3></div>
+    <div class="cm-panel-body" style="padding:14px 18px;overflow:visible;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="stkAddInsumoInput" list="dlStkInsumosDisponibles" placeholder="Buscar insumo por nombre…" autocomplete="off" style="flex:1;min-width:260px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:12.8px;" onkeydown="if(event.key==='Enter'){event.preventDefault();stkAgregarInsumo();}">
+        <button type="button" class="btn-primary" onclick="stkAgregarInsumo()">+ Agregar</button>
+      </div>
+      <datalist id="dlStkInsumosDisponibles">${disponibles.map(i=>`<option value="${costeoEsc(stkInsumoLabel(i))}">`).join("")}</datalist>
+      ${!disponibles.length ? '<div style="font-size:11.5px;color:var(--text-3);margin-top:8px;">Ya están todos los insumos de Costeo agregados a Stock.</div>' : ''}
+    </div>
+  </div>`;
+  html += `<div class="cm-panel"><div class="cm-panel-head"><h3>Insumos que se calculan en Stock</h3><span class="cnt">${tracked.length}</span></div>
+    <div class="cm-panel-body"><table class="cm-table"><thead><tr><th>Item</th><th>Proveedor</th><th>Concepto</th><th></th></tr></thead><tbody>`;
+  if(!tracked.length){
+    html += `<tr><td colspan="4"><div class="cm-empty-mini">Todavía no hay ningún insumo agregado a Stock.</div></td></tr>`;
+  } else {
+    tracked.forEach(ins=>{
+      const prov = proveedoresConfig.find(p=>p.id===ins.proveedor_id);
+      html += `<tr>
+        <td class="c-usuario">${costeoEsc(ins.nomenclatura)}</td>
+        <td>${costeoEsc(prov?prov.nombre:"—")}</td>
+        <td>${costeoEsc(prov?prov.concepto:"—")}</td>
+        <td class="cm-row-actions"><button type="button" class="cm-btn-del" title="Sacar de Stock" onclick="stkQuitarInsumo('${ins.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
+      </tr>`;
+    });
+  }
+  html += `</tbody></table></div></div>`;
+  wrap.innerHTML = html;
+}
+async function stkAgregarInsumo(){
+  const input = document.getElementById("stkAddInsumoInput");
+  const label = (input.value||"").trim();
+  if(!label) return;
+  const trackedIds = new Set(stkInsumosTrackeados().map(i=>i.id));
+  const match = costeoInsumos.find(i=>!trackedIds.has(i.id) && stkInsumoLabel(i)===label);
+  if(!match){ showToast("Elegí un insumo de la lista", "warn"); return; }
+  if(stkEsInsumoDefault(match.id)){
+    // Ya era de Cafetería y Bebidas: si aparece acá es porque estaba excluido — se saca la exclusión.
+    const { error } = await sb.from("lf_stock_items_excluidos").delete().eq("insumo_id", match.id);
+    if(error){ showToast("No se pudo agregar el insumo", "warn"); return; }
+  } else {
+    const { error } = await sb.from("lf_stock_items_extra").insert({ insumo_id: match.id, agregado_por: currentPerfil?currentPerfil.id:null });
+    if(error){ showToast("No se pudo agregar el insumo", "warn"); return; }
+  }
+  await stkCargarConfigItems();
+  input.value = "";
+  showToast("Insumo agregado a Stock");
+  stkRenderEditor();
+}
+async function stkQuitarInsumo(insumoId){
+  const ins = costeoInsumos.find(i=>i.id===insumoId);
+  if(!confirm(`¿Sacar "${ins?ins.nomenclatura:"este insumo"}" del cálculo de Stock?\n\nNo se borra de Costeo, solo deja de contarse acá — los conteos ya guardados que lo incluyen se siguen viendo igual en el historial.`)) return;
+  if(stkEsInsumoDefault(insumoId)){
+    const { error } = await sb.from("lf_stock_items_excluidos").upsert({ insumo_id: insumoId, excluido_por: currentPerfil?currentPerfil.id:null, excluido_fecha: new Date().toISOString() });
+    if(error){ showToast("No se pudo sacar el insumo", "warn"); return; }
+  } else {
+    const { error } = await sb.from("lf_stock_items_extra").delete().eq("insumo_id", insumoId);
+    if(error){ showToast("No se pudo sacar el insumo", "warn"); return; }
+  }
+  await stkCargarConfigItems();
+  showToast("Insumo sacado de Stock");
+  stkRenderEditor();
+}
+
+/* =========================================================
+   STOCK — SEMIELABORADOS (14/09/2026)
+   Segunda sección de Stock, para los productos con pre-elaboración propia (milanesas, empanadas,
+   etc. — los mismos "semi-elaborados" de Costeo > Recetas: lf_recetas_items tipo='semielaborado').
+   A diferencia de los insumos de compra, un semielaborado no se COMPRA: se PRODUCE en cocina, y hoy
+   el sitio no tiene ningún registro automático de cuánto se produjo en un período — por eso la
+   columna "Producción" se completa A MANO en cada conteo (pedido de Pancho, 14/09/2026: que cocina
+   detalle cuántas van produciendo), en vez de calcularse sola como pasa con "Compras" en Insumos.
+
+   Fórmula: Stock teórico = Stock inicial + Producción (manual) − Ventas (auto, explotadas por
+   receta contra Compras-Ventas/ATC, misma lógica que Insumos). Stock real = Heladera + Repuesto +
+   Depósito (manual, mismos 3 espacios que Insumos por ahora — no se pidió ninguno distinto).
+   Valorización $ = Stock real × costo unitario de la receta del semielaborado (recCostoPorcion, el
+   mismo costo que ya usan Costeo/Precios de venta) — acá no hay factura de compra de la que tirar
+   como con los insumos, así que no aplica el consumo LIFO de stkValorizarStock.
+
+   Pedido explícito de Pancho (14/09/2026): la sección se arma completa y funcional, pero la lista de
+   semielaborados trackeados arranca VACÍA — se van sumando de a uno con "Editar semielaborados"
+   cuando decidan empezar a contar cada uno (sin ningún semielaborado incluido por default, a
+   diferencia de los insumos de Cafetería y Bebidas).
+
+   Salvedad, palabras de Pancho: "va a ser más difícil de trazar ya que no son valores discretos" —
+   una receta dice, por ejemplo, que una milanesa lleva 300g de carne, pero el peso real varía
+   (desgrase, corte, etc.), así que Producción/Ventas van a ser siempre una aproximación teórica, no
+   un conteo exacto como el de un insumo comprado por unidad cerrada.
+   ========================================================= */
+let stkSemiCortes = [];
+let stkSemiCorteItemsMap = {};
+let stkSemiModoConteo = false;
+let stkSemiConteoBase = null;      // { fechaISO, esInicial, porSemi: {[semiId]: {stockInicial, ventas, esNuevoItem}} }
+let stkSemiConteoValores = {};     // { [semiId]: {produccion, heladera, repuesto, deposito} } (strings, mientras se tipea)
+let stkSemiViendoHistorial = false;
+let stkSemiHistorialAbierto = null;
+let stkSemiModoEditor = false;
+let stkSemiTrackeadosIds = new Set(); // aditivo puro — sin "default": arranca vacío a propósito.
+
+function stkSemiTrackeados(){
+  return recetasItems.filter(r=>r.tipo==="semielaborado" && stkSemiTrackeadosIds.has(r.id))
+    .sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+}
+async function stkCargarConfigSemiItems(){
+  const { data, error } = await sb.from("lf_stock_semi_items").select("semielaborado_id");
+  if(error){ showToast("No se pudo cargar la lista de semielaborados de Stock", "warn"); return; }
+  stkSemiTrackeadosIds = new Set((data||[]).map(r=>r.semielaborado_id));
+}
+function stkSemiUnidad(item){ return item.porciones_unidad==="Kg" ? "Kg" : "un."; }
+
+/* Explosión recursiva: cuánto de "targetSemiId" consume 1 unidad vendida de "recetaId" (artículo o
+   semi-elaborado), atravesando semi-elaborados y artículos usados como ingrediente de otro artículo
+   (misma generalización que stkQtyPorUnidad). Al llegar al propio targetSemiId NO sigue explotando
+   su receta interna — se quiere contar el semielaborado terminado que se usó, no sus insumos. */
+function stkQtyPorUnidadSemi(recetaId, targetSemiId, visiting){
+  visiting = visiting ? new Set(visiting) : new Set();
+  if(visiting.has(recetaId)) return 0; // ciclo — no se puede explotar más
+  visiting.add(recetaId);
+  const item = recetasItems.find(r=>r.id===recetaId);
+  if(!item) return 0;
+  const lineas = recetaLineas.filter(l=>l.receta_id===recetaId);
+  if(!lineas.length) return 0;
+  const porciones = Number(item.porciones)||1;
+  let total = 0;
+  lineas.forEach(l=>{
+    if(l.insumo_tipo==="semielaborado" && l.insumo_semielaborado_id){
+      if(l.insumo_semielaborado_id===targetSemiId) total += Number(l.cantidad||0);
+      else total += Number(l.cantidad||0) * stkQtyPorUnidadSemi(l.insumo_semielaborado_id, targetSemiId, visiting);
+    }
+  });
+  return porciones>0 ? total/porciones : 0;
+}
+// Ventas explotadas de un conjunto de semielaborados en (desdeISO, hastaISO], a partir del mismo
+// cache de Compras-Ventas (ATC) que ya usa Insumos.
+function stkVentasSemiEnPeriodo(semiIds, desdeISO, hastaISO){
+  const resultado = {}; semiIds.forEach(id=>resultado[id]=0);
+  if(!stkComprasVentasCache || !stkComprasVentasCache.length) return resultado;
+  const porArticulo = {};
+  stkComprasVentasCache.forEach(r=>{
+    const fISO = vToISODate(r.fecha);
+    if(desdeISO && !(fISO>desdeISO)) return;
+    if(hastaISO && fISO>hastaISO) return;
+    porArticulo[r.concepto] = (porArticulo[r.concepto]||0) + r.cantidad;
+  });
+  Object.keys(porArticulo).forEach(nombre=>{
+    const art = recetasItems.find(r=>r.tipo==="articulo" && r.nombre===nombre);
+    if(!art) return;
+    const cant = porArticulo[nombre];
+    semiIds.forEach(semiId=>{
+      const qty = stkQtyPorUnidadSemi(art.id, semiId);
+      if(qty) resultado[semiId] += cant*qty;
+    });
+  });
+  return resultado;
+}
+
+/* ---- Carga de conteos guardados (semielaborados) ---- */
+async function loadStkSemiCortes(){
+  const { data, error } = await sb.from("lf_stock_semi_cortes").select("*").order("fecha",{ascending:false}).order("created_at",{ascending:false});
+  if(error){ showToast("No se pudo cargar el historial de conteos de semielaborados", "warn"); return; }
+  stkSemiCortes = data || [];
+}
+async function loadStkSemiCorteItems(corteId){
+  if(stkSemiCorteItemsMap[corteId]) return stkSemiCorteItemsMap[corteId];
+  const { data, error } = await sb.from("lf_stock_semi_corte_items").select("*").eq("corte_id", corteId);
+  if(error){ showToast("No se pudieron cargar los ítems del conteo", "warn"); return []; }
+  stkSemiCorteItemsMap[corteId] = data || [];
+  return stkSemiCorteItemsMap[corteId];
+}
+
+/* ---- Sub-tab Insumos / Semielaborados ---- */
+function stkGoTipo(tipo){
+  if(stkModoConteo || stkModoEditor || stkSemiModoConteo || stkSemiModoEditor){
+    showToast("Terminá o cancelá lo que estás editando antes de cambiar de sección", "warn");
+    return;
+  }
+  document.querySelectorAll("#stkTipoToggle .rec-toggle-btn").forEach(b=>b.classList.toggle("active", b.dataset.stipo===tipo));
+  document.getElementById("stockPaneInsumos").style.display = tipo==="insumos" ? "" : "none";
+  document.getElementById("stockPaneSemi").style.display = tipo==="semi" ? "" : "none";
+  if(tipo==="semi") stkRenderTablaSemi();
+}
+
+/* ---- Formato y helpers de presentación (comparten stkFmtNum/stkDiffClase con Insumos) ---- */
+function stkHeadRowSemi(){
+  return `<div class="stk-head-row">
+    <div>Item</div><div>Stock inicial</div><div>Producción</div><div>Ventas</div><div>Stock teórico</div>
+    <div>Heladera</div><div>Repuesto</div><div>Depósito</div><div>Stock real</div><div>Diferencia</div><div>Valorización $</div>
+  </div>`;
+}
+
+/* ---- Modo lectura (último conteo guardado, o detalle de un conteo del historial) ---- */
+function stkRowLecturaSemi(item, corteItem, fueraDeStock){
+  const dif = corteItem ? corteItem.diferencia : null;
+  const un = stkSemiUnidad(item);
+  return `<div class="stk-row">
+    <div class="stk-nombre" title="${costeoEsc(item.nombre)}">${costeoEsc(item.nombre)}<span class="stk-prov">${costeoEsc(item.concepto||"—")} · ${un}${fueraDeStock?' · ya no se cuenta en Stock':''}</span></div>
+    <div class="stk-num${(!corteItem||corteItem.stock_inicial==null)?' na':''}">${corteItem&&corteItem.stock_inicial!=null?stkFmtNum(corteItem.stock_inicial):"—"}</div>
+    <div class="stk-num${(!corteItem||corteItem.produccion==null)?' na':''}">${corteItem&&corteItem.produccion!=null?stkFmtNum(corteItem.produccion):"—"}</div>
+    <div class="stk-num${(!corteItem||corteItem.ventas==null)?' na':''}">${corteItem&&corteItem.ventas!=null?stkFmtNum(corteItem.ventas):"—"}</div>
+    <div class="stk-num${(!corteItem||corteItem.stock_teorico==null)?' na':''}">${corteItem&&corteItem.stock_teorico!=null?stkFmtNum(corteItem.stock_teorico):"—"}</div>
+    <div class="stk-num">${corteItem?stkFmtNum(corteItem.heladera):"—"}</div>
+    <div class="stk-num">${corteItem?stkFmtNum(corteItem.repuesto):"—"}</div>
+    <div class="stk-num">${corteItem?stkFmtNum(corteItem.deposito):"—"}</div>
+    <div class="stk-num stk-real-total">${corteItem?stkFmtNum(corteItem.stock_real):"—"}</div>
+    <div>${corteItem ? `<span class="stk-diff-badge ${stkDiffClase(dif)}">${dif==null?"—":((dif>0?"+":"")+stkFmtNum(dif))}</span>` : "—"}</div>
+    <div class="stk-num" title="${corteItem&&corteItem.costo_unitario_usado!=null?('Costo unitario usado: '+fmtMoneyCosteo(corteItem.costo_unitario_usado)+'/'+un):''}">${corteItem&&corteItem.monto_valorizado!=null?fmtMoneyCosteo(corteItem.monto_valorizado):"—"}</div>
+  </div>`;
+}
+function stkRenderTablaSemi(){
+  const wrap = document.getElementById("stkSemiTableWrap");
+  const semis = stkSemiTrackeados();
+  const ultimoCorte = stkSemiCortes[0];
+  if(!ultimoCorte){
+    wrap.innerHTML = semis.length
+      ? `<div class="empty-mini">Todavía no se cargó ningún conteo de stock de semielaborados. Tocá "+ Nuevo conteo de stock" para hacer el primero (Día 0).</div>`
+      : `<div class="empty-mini">Todavía no hay semielaborados configurados para Stock. Tocá "Editar semielaborados" para elegir cuáles empezar a contar.</div>`;
+    document.getElementById("stkSemiBtnHistorial").style.display = "none";
+    return;
+  }
+  document.getElementById("stkSemiBtnHistorial").style.display = "";
+  const items = stkSemiCorteItemsMap[ultimoCorte.id] || [];
+  const trackedIds = new Set(semis.map(i=>i.id));
+  const nuevosSinContar = semis.filter(i=>!items.some(it=>it.semielaborado_id===i.id));
+  let montoTotal = 0, algunMonto = false;
+  items.forEach(it=>{ if(it.monto_valorizado!=null){ montoTotal += Number(it.monto_valorizado); algunMonto = true; } });
+
+  let html = `<div class="stk-summary">
+    <div class="stks-item">Último conteo<strong>${isoToDMY(ultimoCorte.fecha)}${ultimoCorte.es_inicial?' · Día 0':''}</strong></div>
+    <div class="stks-item">Ítems contados<strong>${items.length}</strong></div>
+    <div class="stks-item">Valorización total<strong>${algunMonto?fmtMoneyCosteo(montoTotal):"—"}</strong></div>
+  </div>`;
+  if(nuevosSinContar.length){
+    html += `<div class="stk-scope-note">${nuevosSinContar.length} semielaborado(s) agregado(s) a Stock todavía sin contar: ${nuevosSinContar.map(i=>costeoEsc(i.nombre)).join(", ")}. Se van a incluir en el próximo conteo.</div>`;
+  }
+  html += `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRowSemi()}`;
+  items.forEach(it=>{
+    const item = recetasItems.find(r=>r.id===it.semielaborado_id);
+    if(item) html += stkRowLecturaSemi(item, it, !trackedIds.has(item.id));
+  });
+  html += `</div></div>`;
+  wrap.innerHTML = html;
+}
+
+/* ---- Modo "nuevo conteo" ---- */
+async function stkRecalcularBaseSemi(fechaISO){
+  const semis = stkSemiTrackeados();
+  const ultimoCorte = stkSemiCortes[0] || null;
+  let itemsUltimoCorte = [];
+  if(ultimoCorte) itemsUltimoCorte = await loadStkSemiCorteItems(ultimoCorte.id);
+  const itemsUltimoPorSemi = {}; itemsUltimoCorte.forEach(it=>{ itemsUltimoPorSemi[it.semielaborado_id]=it; });
+  const semiIds = semis.map(i=>i.id);
+  const desdeISO = ultimoCorte ? ultimoCorte.fecha : null;
+  const ventasPorSemi = ultimoCorte ? stkVentasSemiEnPeriodo(semiIds, desdeISO, fechaISO) : {};
+  const base = { fechaISO, esInicial: !ultimoCorte, porSemi:{} };
+  semis.forEach(item=>{
+    const anterior = itemsUltimoPorSemi[item.id];
+    if(!anterior){
+      base.porSemi[item.id] = { stockInicial:null, ventas:null, esNuevoItem:true };
+    } else {
+      const stockInicial = Number(anterior.stock_real)||0;
+      const ventas = ventasPorSemi[item.id]||0;
+      // "teórico" NO se calcula acá: depende de "Producción", que se carga a mano en el conteo (ver
+      // stkRecalcularFilaConteoSemi) — a diferencia de Compras en Insumos, que sí está disponible de
+      // antemano y se puede sumar sola.
+      base.porSemi[item.id] = { stockInicial, ventas, esNuevoItem:false };
+    }
+  });
+  return base;
+}
+async function stkIniciarConteoSemi(){
+  if(stkModoConteo || stkModoEditor || stkSemiModoConteo || stkSemiModoEditor) return;
+  const semis = stkSemiTrackeados();
+  if(!semis.length){ showToast("No hay semielaborados configurados para Stock todavía — usá \"Editar semielaborados\" para agregar alguno", "warn"); return; }
+  showToast("Calculando ventas del período…");
+  await stkCargarComprasVentasCache();
+  // Misma regla que Insumos: la fecha del conteo es siempre la de hoy y no se puede editar.
+  stkSemiConteoBase = await stkRecalcularBaseSemi(todayISO());
+  stkSemiConteoValores = {};
+  semis.forEach(item=>{ stkSemiConteoValores[item.id] = {produccion:"", heladera:"", repuesto:"", deposito:""}; });
+  stkSemiModoConteo = true;
+  stkSemiViendoHistorial = false;
+  document.getElementById("stkSemiHistorialWrap").style.display = "none";
+  document.getElementById("stkSemiAjusteFooter").style.display = "flex";
+  document.getElementById("stkSemiBtnNuevoConteo").style.display = "none";
+  document.getElementById("stkSemiBtnHistorial").style.display = "none";
+  document.getElementById("stkSemiBtnEditar").style.display = "none";
+  stkActualizarFooterSemi();
+  stkRenderConteoSemi();
+}
+function stkCancelarConteoSemi(){
+  stkSemiModoConteo = false;
+  stkSemiConteoBase = null; stkSemiConteoValores = {};
+  document.getElementById("stkSemiAjusteFooter").style.display = "none";
+  document.getElementById("stkSemiBtnNuevoConteo").style.display = "";
+  document.getElementById("stkSemiBtnHistorial").style.display = stkSemiCortes.length ? "" : "none";
+  document.getElementById("stkSemiBtnEditar").style.display = "";
+  stkRenderTablaSemi();
+}
+function stkRowConteoSemi(item){
+  const b = stkSemiConteoBase.porSemi[item.id];
+  const v = stkSemiConteoValores[item.id];
+  const un = stkSemiUnidad(item);
+  return `<div class="stk-row stk-row-new" id="stkSemiConteoRow_${item.id}">
+    <div class="stk-nombre" title="${costeoEsc(item.nombre)}">${costeoEsc(item.nombre)}<span class="stk-prov">${costeoEsc(item.concepto||"—")} · ${un}</span></div>
+    <div class="stk-num${b.stockInicial==null?' na':''}">${b.stockInicial==null?(b.esNuevoItem?"— (nuevo)":"—"):stkFmtNum(b.stockInicial)}</div>
+    <div>${b.esNuevoItem ? '<span class="stk-num na">—</span>' : `<input type="text" class="stk-input" inputmode="decimal" placeholder="0" value="${v.produccion}" oninput="stkOnValorInputSemi('${item.id}','produccion',this.value)">`}</div>
+    <div class="stk-num${b.ventas==null?' na':''}">${b.ventas==null?"—":stkFmtNum(b.ventas)}</div>
+    <div class="stk-num na" id="stkSemiTeorico_${item.id}">—</div>
+    <div><input type="text" class="stk-input" inputmode="decimal" placeholder="0" value="${v.heladera}" oninput="stkOnValorInputSemi('${item.id}','heladera',this.value)"></div>
+    <div><input type="text" class="stk-input" inputmode="decimal" placeholder="0" value="${v.repuesto}" oninput="stkOnValorInputSemi('${item.id}','repuesto',this.value)"></div>
+    <div><input type="text" class="stk-input" inputmode="decimal" placeholder="0" value="${v.deposito}" oninput="stkOnValorInputSemi('${item.id}','deposito',this.value)"></div>
+    <div class="stk-num stk-real-total" id="stkSemiReal_${item.id}">0</div>
+    <div id="stkSemiDif_${item.id}"></div>
+    <div class="stk-num" id="stkSemiMonto_${item.id}">—</div>
+  </div>`;
+}
+function stkRenderConteoSemi(){
+  const wrap = document.getElementById("stkSemiTableWrap");
+  const semis = stkSemiTrackeados();
+  let html = `<div class="stk-scope-note" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <span style="flex:1;min-width:260px;">${stkSemiConteoBase.esInicial ? "Primer conteo de stock de semielaborados (Día 0): registrá el stock real de cada ítem — desde acá se va a calcular el stock teórico de ahora en más." : "Cargá la Producción del período (dato manual de cocina) y el stock real encontrado en cada espacio. Ventas y stock teórico se recalculan solos a medida que completás Producción."}</span>
+    <div class="stk-fecha-fija" title="La fecha del conteo es siempre la de hoy y no se puede cambiar, para que quede trazable el día real en que se hizo.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></svg>
+      Fecha del conteo: <strong>${isoToDMY(stkSemiConteoBase.fechaISO)}</strong>
+    </div>
+  </div>`;
+  html += `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRowSemi()}`;
+  semis.forEach(item=>{ html += stkRowConteoSemi(item); });
+  html += `</div></div>`;
+  wrap.innerHTML = html;
+  semis.forEach(item=> stkRecalcularFilaConteoSemi(item.id));
+}
+function stkOnValorInputSemi(semiId, campo, val){
+  stkSemiConteoValores[semiId][campo] = val;
+  stkRecalcularFilaConteoSemi(semiId);
+  stkActualizarFooterSemi();
+}
+function stkRecalcularFilaConteoSemi(semiId){
+  const v = stkSemiConteoValores[semiId];
+  const heladera = parseDecimalCosteo(v.heladera);
+  const repuesto = parseDecimalCosteo(v.repuesto);
+  const deposito = parseDecimalCosteo(v.deposito);
+  const real = heladera + repuesto + deposito;
+  const b = stkSemiConteoBase.porSemi[semiId];
+  const produccion = b.esNuevoItem ? null : parseDecimalCosteo(v.produccion);
+  const teorico = b.esNuevoItem ? null : (b.stockInicial + produccion - b.ventas);
+  const dif = teorico==null ? null : (real - teorico);
+
+  const teoricoEl = document.getElementById(`stkSemiTeorico_${semiId}`);
+  if(teoricoEl){ teoricoEl.textContent = teorico==null ? "—" : stkFmtNum(teorico); teoricoEl.classList.toggle("na", teorico==null); }
+  const realEl = document.getElementById(`stkSemiReal_${semiId}`);
+  if(realEl) realEl.textContent = stkFmtNum(real);
+  const difEl = document.getElementById(`stkSemiDif_${semiId}`);
+  if(difEl){
+    difEl.innerHTML = teorico==null
+      ? `<span class="stk-diff-badge stk-diff-na" title="Sin conteo anterior — este conteo establece su base">—</span>`
+      : `<span class="stk-diff-badge ${stkDiffClase(dif)}">${(dif>0?"+":"")+stkFmtNum(dif)}</span>`;
+  }
+  const montoEl = document.getElementById(`stkSemiMonto_${semiId}`);
+  if(montoEl){
+    const costoUnit = recCostoPorcion(semiId);
+    montoEl.textContent = costoUnit==null ? "—" : fmtMoneyCosteo(real*costoUnit);
+    montoEl.title = costoUnit==null ? "Receta sin costo calculable todavía (falta algún insumo con compra cargada)" : `Costo unitario usado: ${fmtMoneyCosteo(costoUnit)}`;
+  }
+}
+function stkActualizarFooterSemi(){
+  const info = document.getElementById("stkSemiAjusteFooterInfo");
+  if(!info) return;
+  const semis = stkSemiTrackeados();
+  const completos = semis.filter(item=>{
+    const v = stkSemiConteoValores[item.id];
+    return v && (v.produccion!==""||v.heladera!==""||v.repuesto!==""||v.deposito!=="");
+  }).length;
+  info.textContent = `${completos} de ${semis.length} ítem(s) con algún valor cargado — los que queden en blanco se guardan como 0.`;
+}
+async function stkConfirmarConteoSemi(){
+  const semis = stkSemiTrackeados();
+  if(!confirm(`¿Confirmás el conteo de stock de semielaborados del ${isoToDMY(stkSemiConteoBase.fechaISO)} para ${semis.length} ítem(s)?`)) return;
+  if(!confirm("Última confirmación: este conteo va a quedar guardado en el historial y va a ser la base del próximo cálculo de stock. ¿Continuar?")) return;
+
+  const filas = semis.map(item=>{
+    const v = stkSemiConteoValores[item.id];
+    const heladera = parseDecimalCosteo(v.heladera);
+    const repuesto = parseDecimalCosteo(v.repuesto);
+    const deposito = parseDecimalCosteo(v.deposito);
+    const real = heladera + repuesto + deposito;
+    const b = stkSemiConteoBase.porSemi[item.id];
+    const produccion = b.esNuevoItem ? null : parseDecimalCosteo(v.produccion);
+    const teorico = b.esNuevoItem ? null : (b.stockInicial + produccion - b.ventas);
+    const dif = teorico==null ? null : (real - teorico);
+    const costoUnit = recCostoPorcion(item.id);
+    const monto = costoUnit==null ? null : real*costoUnit;
+    return {
+      semielaborado_id: item.id,
+      stock_inicial: b.esNuevoItem ? null : b.stockInicial,
+      produccion: b.esNuevoItem ? null : produccion,
+      ventas: b.esNuevoItem ? null : b.ventas,
+      stock_teorico: teorico,
+      heladera, repuesto, deposito,
+      stock_real: real,
+      diferencia: dif,
+      costo_unitario_usado: costoUnit,
+      monto_valorizado: monto
+    };
+  });
+
+  const { data: corteIns, error: errCorte } = await sb.from("lf_stock_semi_cortes").insert({
+    fecha: stkSemiConteoBase.fechaISO,
+    es_inicial: stkSemiConteoBase.esInicial,
+    creado_por: currentPerfil?currentPerfil.id:null,
+    creado_por_nombre: currentPerfil?currentPerfil.nombre:"—"
+  }).select().single();
+  if(errCorte || !corteIns){ showToast("No se pudo guardar el conteo de stock de semielaborados", "warn"); return; }
+
+  const filasConCorte = filas.map(f=>({ ...f, corte_id: corteIns.id }));
+  const { error: errItems } = await sb.from("lf_stock_semi_corte_items").insert(filasConCorte);
+  if(errItems) showToast("Se creó el conteo pero no se pudieron guardar sus ítems — avisar para revisar", "warn");
+  else showToast("Conteo de stock de semielaborados guardado correctamente");
+
+  stkSemiModoConteo = false;
+  stkSemiConteoBase = null; stkSemiConteoValores = {};
+  document.getElementById("stkSemiAjusteFooter").style.display = "none";
+  document.getElementById("stkSemiBtnNuevoConteo").style.display = "";
+  document.getElementById("stkSemiBtnEditar").style.display = "";
+  await loadStkSemiCortes();
+  if(stkSemiCortes.length) await loadStkSemiCorteItems(stkSemiCortes[0].id);
+  document.getElementById("stkSemiBtnHistorial").style.display = "";
+  stkRenderTablaSemi();
+}
+
+/* ---- Historial (análogo a "Cierres anteriores" de Caja Mayor, igual que en Insumos) ---- */
+function stkToggleHistorialSemi(){
+  if(stkSemiModoConteo) return;
+  stkSemiViendoHistorial = !stkSemiViendoHistorial;
+  stkSemiModoEditor = false;
+  document.getElementById("stkSemiTableWrap").style.display = stkSemiViendoHistorial ? "none" : "";
+  document.getElementById("stkSemiHistorialWrap").style.display = stkSemiViendoHistorial ? "" : "none";
+  document.getElementById("stkSemiBtnHistorial").textContent = stkSemiViendoHistorial ? "Ver stock actual" : "Ver historial";
+  document.getElementById("stkSemiBtnEditar").style.display = stkSemiViendoHistorial ? "none" : "";
+  document.getElementById("stkSemiBtnNuevoConteo").style.display = stkSemiViendoHistorial ? "none" : "";
+  if(stkSemiViendoHistorial) stkRenderHistorialSemi(); else stkRenderTablaSemi();
+}
+async function stkAbrirDetalleCorteSemi(corteId){
+  stkSemiHistorialAbierto = (stkSemiHistorialAbierto===corteId) ? null : corteId;
+  if(stkSemiHistorialAbierto) await loadStkSemiCorteItems(corteId);
+  stkRenderHistorialSemi();
+}
+function stkRenderHistorialSemi(){
+  const wrap = document.getElementById("stkSemiHistorialWrap");
+  if(!stkSemiCortes.length){
+    wrap.innerHTML = `<div class="cm-panel"><div class="cm-empty-mini">Todavía no se registró ningún conteo de stock de semielaborados.</div></div>`;
+    return;
+  }
+  const thead = "<thead><tr><th></th><th>Fecha</th><th>Tipo</th><th>Ítems</th><th>Valorización</th><th>Cargado por</th><th></th></tr></thead>";
+  const filas = stkSemiCortes.map(c=>{
+    const items = stkSemiCorteItemsMap[c.id] || [];
+    let montoTotal = 0, algunMonto = false;
+    items.forEach(it=>{ if(it.monto_valorizado!=null){ montoTotal += Number(it.monto_valorizado); algunMonto = true; } });
+    const abierto = stkSemiHistorialAbierto===c.id;
+    return `<tr>
+      <td>${c.es_inicial?'<span class="stk-hist-badge-inicial">Día 0</span>':''}</td>
+      <td class="c-fecha">${isoToDMY(c.fecha)}</td>
+      <td>${c.es_inicial?"Conteo inicial":"Conteo"}</td>
+      <td>${items.length}</td>
+      <td class="c-monto">${algunMonto?fmtMoneyCosteo(montoTotal):"—"}</td>
+      <td class="c-usuario">${costeoEsc(c.creado_por_nombre||"—")}</td>
+      <td class="cm-row-actions"><button type="button" class="cm-btn-imputar" onclick="stkAbrirDetalleCorteSemi('${c.id}')">${abierto?"Ocultar":"Ver"}</button></td>
+    </tr>`;
+  }).join("");
+  let html = `<div class="cm-panel"><div class="cm-panel-head"><h3>Todos los conteos</h3><span class="cnt">${stkSemiCortes.length}</span></div>
+    <div class="cm-panel-body"><table class="cm-table">${thead}<tbody>${filas}</tbody></table></div></div>`;
+
+  const abierto = stkSemiCortes.find(c=>c.id===stkSemiHistorialAbierto);
+  if(abierto){
+    const items = stkSemiCorteItemsMap[abierto.id] || [];
+    const filasDetalle = items.map(it=>{
+      const item = recetasItems.find(r=>r.id===it.semielaborado_id);
+      return item ? stkRowLecturaSemi(item, it) : "";
+    }).join("");
+    html += `<div class="cm-panel" style="margin-top:16px;">
+      <div class="cm-panel-head"><h3>Detalle del conteo del ${isoToDMY(abierto.fecha)}</h3></div>
+      <div class="cm-panel-body" style="padding:14px 18px;">
+        <div class="stk-table-scroll"><div class="stk-table">${stkHeadRowSemi()}${filasDetalle}</div></div>
+      </div>
+    </div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+/* ---- Editar semielaborados de Stock: la lista arranca vacía — solo sumar de a uno los que ya
+   estén listos para empezar a contarse. No borra nada de Recetas, solo decide si ese semielaborado
+   entra o no al cálculo de Stock. ---- */
+function stkSemiEditorLabel(item){ return `${item.nombre} · ${item.concepto||"—"}`; }
+function stkToggleEditorSemi(){
+  if(stkSemiModoConteo) return;
+  stkSemiModoEditor = !stkSemiModoEditor;
+  stkSemiViendoHistorial = false;
+  document.getElementById("stkSemiHistorialWrap").style.display = "none";
+  document.getElementById("stkSemiTableWrap").style.display = "";
+  document.getElementById("stkSemiBtnEditar").textContent = stkSemiModoEditor ? "Listo" : "Editar semielaborados";
+  document.getElementById("stkSemiBtnHistorial").style.display = stkSemiModoEditor ? "none" : "";
+  document.getElementById("stkSemiBtnNuevoConteo").style.display = stkSemiModoEditor ? "none" : "";
+  if(stkSemiModoEditor) stkRenderEditorSemi(); else stkRenderTablaSemi();
+}
+function stkRenderEditorSemi(){
+  const wrap = document.getElementById("stkSemiTableWrap");
+  const trackedIds = stkSemiTrackeadosIds;
+  const disponibles = recetasItems.filter(r=>r.tipo==="semielaborado" && !trackedIds.has(r.id)).sort((a,b)=>stkSemiEditorLabel(a).localeCompare(stkSemiEditorLabel(b),"es"));
+  const tracked = stkSemiTrackeados();
+
+  let html = `<div class="stk-scope-note">Elegí qué semielaborados se calculan en Stock (los mismos de Costeo &gt; Recetas &gt; Semi-elaborados). La lista arranca vacía a propósito — sumá acá solo los que ya estén listos para empezar a contarse.</div>`;
+  html += `<div class="cm-panel" style="margin-bottom:16px;">
+    <div class="cm-panel-head"><h3>Agregar semielaborado a Stock</h3></div>
+    <div class="cm-panel-body" style="padding:14px 18px;overflow:visible;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="stkAddSemiInput" list="dlStkSemiDisponibles" placeholder="Buscar semielaborado por nombre…" autocomplete="off" style="flex:1;min-width:260px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:12.8px;" onkeydown="if(event.key==='Enter'){event.preventDefault();stkAgregarSemi();}">
+        <button type="button" class="btn-primary" onclick="stkAgregarSemi()">+ Agregar</button>
+      </div>
+      <datalist id="dlStkSemiDisponibles">${disponibles.map(i=>`<option value="${costeoEsc(stkSemiEditorLabel(i))}">`).join("")}</datalist>
+      ${!disponibles.length ? '<div style="font-size:11.5px;color:var(--text-3);margin-top:8px;">Ya están todos los semielaborados de Costeo agregados a Stock (o todavía no hay ninguno cargado en Recetas).</div>' : ''}
+    </div>
+  </div>`;
+  html += `<div class="cm-panel"><div class="cm-panel-head"><h3>Semielaborados que se calculan en Stock</h3><span class="cnt">${tracked.length}</span></div>
+    <div class="cm-panel-body"><table class="cm-table"><thead><tr><th>Item</th><th>Concepto</th><th>Unidad</th><th></th></tr></thead><tbody>`;
+  if(!tracked.length){
+    html += `<tr><td colspan="4"><div class="cm-empty-mini">Todavía no hay ningún semielaborado agregado a Stock.</div></td></tr>`;
+  } else {
+    tracked.forEach(item=>{
+      html += `<tr>
+        <td class="c-usuario">${costeoEsc(item.nombre)}</td>
+        <td>${costeoEsc(item.concepto||"—")}</td>
+        <td>${stkSemiUnidad(item)}</td>
+        <td class="cm-row-actions"><button type="button" class="cm-btn-del" title="Sacar de Stock" onclick="stkQuitarSemi('${item.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
+      </tr>`;
+    });
+  }
+  html += `</tbody></table></div></div>`;
+  wrap.innerHTML = html;
+}
+async function stkAgregarSemi(){
+  const input = document.getElementById("stkAddSemiInput");
+  const label = (input.value||"").trim();
+  if(!label) return;
+  const trackedIds = stkSemiTrackeadosIds;
+  const match = recetasItems.find(r=>r.tipo==="semielaborado" && !trackedIds.has(r.id) && stkSemiEditorLabel(r)===label);
+  if(!match){ showToast("Elegí un semielaborado de la lista", "warn"); return; }
+  const { error } = await sb.from("lf_stock_semi_items").insert({ semielaborado_id: match.id, agregado_por: currentPerfil?currentPerfil.id:null });
+  if(error){ showToast("No se pudo agregar el semielaborado", "warn"); return; }
+  await stkCargarConfigSemiItems();
+  input.value = "";
+  showToast("Semielaborado agregado a Stock");
+  stkRenderEditorSemi();
+}
+async function stkQuitarSemi(semiId){
+  const item = recetasItems.find(r=>r.id===semiId);
+  if(!confirm(`¿Sacar "${item?item.nombre:"este semielaborado"}" del cálculo de Stock?\n\nNo se borra de Recetas, solo deja de contarse acá — los conteos ya guardados que lo incluyen se siguen viendo igual en el historial.`)) return;
+  const { error } = await sb.from("lf_stock_semi_items").delete().eq("semielaborado_id", semiId);
+  if(error){ showToast("No se pudo sacar el semielaborado", "warn"); return; }
+  await stkCargarConfigSemiItems();
+  showToast("Semielaborado sacado de Stock");
+  stkRenderEditorSemi();
 }
 </script>
 </body>
