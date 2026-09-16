@@ -565,6 +565,9 @@
   .stk-fecha-fija strong{color:var(--navy);}
   .stk-pane-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
   .stk-pane-head .stk-scope-note{flex:1;min-width:260px;margin-bottom:0;}
+  .stk-conteo-buscador{margin-bottom:12px;}
+  .stk-conteo-buscador input{width:100%;max-width:420px;box-sizing:border-box;padding:9px 12px;border-radius:9px;border:1px solid var(--border);font-size:12.8px;}
+  .stk-conteo-buscador input:focus{border-color:var(--sky);outline:none;}
 
   .ci-table-scroll{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:auto;max-width:100%;padding-bottom:2px;}
   /* La tabla de Carga de compras usa el alto real disponible en pantalla (flex), no "vh" —
@@ -10600,6 +10603,7 @@ let stkComprasVentasCache = null; // [{concepto, fecha:Date, cantidad}] — Comp
 let stkModoConteo = false;
 let stkConteoBase = null;      // { fechaISO, esInicial, porInsumo: {[insumoId]: {...}} }
 let stkConteoValores = {};     // { [insumoId]: {heladera, repuesto, deposito} } (strings, mientras se tipea)
+let stkConteoBusqueda = "";    // buscador por nombre para completar más rápido (14/09/2026)
 let stkViendoHistorial = false;
 let stkHistorialAbierto = null; // id de corte expandido en el historial
 let stkModoEditor = false;
@@ -10915,6 +10919,7 @@ async function stkIniciarConteo(){
   // después los montos contra ese día puntual.
   stkConteoBase = await stkRecalcularBase(todayISO());
   stkConteoValores = {};
+  stkConteoBusqueda = "";
   insumos.forEach(ins=>{ stkConteoValores[ins.id] = {heladera:"", repuesto:"", deposito:""}; });
   stkModoConteo = true;
   stkViendoHistorial = false;
@@ -10928,8 +10933,12 @@ async function stkIniciarConteo(){
 }
 
 function stkCancelarConteo(){
+  // Pedido de Pancho (16/09/2026): que se pueda volver atrás desde el conteo. El botón ya vivía en
+  // el footer fijo de abajo; se le sumó esta confirmación para no perder por error lo ya tipeado.
+  const hayDatos = Object.values(stkConteoValores).some(v=> v.heladera!==""||v.repuesto!==""||v.deposito!=="");
+  if(hayDatos && !confirm("¿Cancelar el conteo? Se van a perder los valores que ya cargaste.")) return;
   stkModoConteo = false;
-  stkConteoBase = null; stkConteoValores = {};
+  stkConteoBase = null; stkConteoValores = {}; stkConteoBusqueda = "";
   document.getElementById("stkAjusteFooter").style.display = "none";
   document.getElementById("stkBtnNuevoConteo").style.display = "";
   document.getElementById("stkBtnHistorial").style.display = stkCortes.length ? "" : "none";
@@ -10955,9 +10964,22 @@ function stkRowConteo(ins){
     <div class="stk-num" id="stkMonto_${ins.id}">—</div>
   </div>`;
 }
+// Buscador por nombre para completar más rápido cuando hay muchos ítems (pedido de Pancho,
+// 16/09/2026) — filtra qué filas se muestran, pero NO saca ítems del conteo: los valores ya
+// tipeados en un ítem que queda oculto por el filtro se guardan igual al confirmar (stkConfirmarConteo
+// sigue recorriendo stkInsumosTrackeados() completo, no la lista filtrada).
+function stkConteoInsumosFiltrados(){
+  const q = recNormalizaTexto(stkConteoBusqueda.trim());
+  const insumos = stkInsumosTrackeados();
+  if(!q) return insumos;
+  return insumos.filter(ins=>recNormalizaTexto(ins.nomenclatura).includes(q));
+}
+function stkOnConteoBuscar(value){
+  stkConteoBusqueda = value||"";
+  stkRenderConteoTabla();
+}
 function stkRenderConteo(){
   const wrap = document.getElementById("stkTableWrap");
-  const insumos = stkInsumosTrackeados();
   let html = `<div class="stk-scope-note" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
     <span style="flex:1;min-width:260px;">${stkConteoBase.esInicial ? "Primer conteo de stock (Día 0): registrá el stock real de cada ítem — desde acá se va a calcular el stock teórico de ahora en más." : "Cargá el stock real encontrado en cada espacio. Compras, ventas y stock teórico ya están calculados automáticamente para el período transcurrido desde el conteo anterior."}</span>
     <div class="stk-fecha-fija" title="La fecha del conteo es siempre la de hoy y no se puede cambiar, para que quede trazable el día real en que se hizo.">
@@ -10965,10 +10987,21 @@ function stkRenderConteo(){
       Fecha del conteo: <strong>${isoToDMY(stkConteoBase.fechaISO)}</strong>
     </div>
   </div>`;
-  html += `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRow()}`;
+  html += `<div class="stk-conteo-buscador"><input type="text" id="stkConteoBuscadorInput" placeholder="Buscar insumo por nombre para completar más rápido…" autocomplete="off" value="${costeoEsc(stkConteoBusqueda)}" oninput="stkOnConteoBuscar(this.value)"></div>`;
+  html += `<div id="stkConteoTablaWrap"></div>`;
+  wrap.innerHTML = html;
+  stkRenderConteoTabla();
+}
+function stkRenderConteoTabla(){
+  const tablaWrap = document.getElementById("stkConteoTablaWrap");
+  const insumos = stkConteoInsumosFiltrados();
+  let html = `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRow()}`;
   insumos.forEach(ins=>{ html += stkRowConteo(ins); });
   html += `</div></div>`;
-  wrap.innerHTML = html;
+  if(!insumos.length){
+    html += `<div class="empty-mini">Ningún insumo coincide con "${costeoEsc(stkConteoBusqueda)}".</div>`;
+  }
+  tablaWrap.innerHTML = html;
   insumos.forEach(ins=> stkRecalcularFilaConteo(ins.id));
 }
 function stkOnValorInput(insumoId, campo, val){
@@ -11053,7 +11086,7 @@ async function stkConfirmarConteo(){
   else showToast("Conteo de stock guardado correctamente");
 
   stkModoConteo = false;
-  stkConteoBase = null; stkConteoValores = {};
+  stkConteoBase = null; stkConteoValores = {}; stkConteoBusqueda = "";
   document.getElementById("stkAjusteFooter").style.display = "none";
   document.getElementById("stkBtnNuevoConteo").style.display = "";
   document.getElementById("stkBtnEditar").style.display = "";
@@ -11246,6 +11279,7 @@ let stkSemiCorteItemsMap = {};
 let stkSemiModoConteo = false;
 let stkSemiConteoBase = null;      // { fechaISO, esInicial, porSemi: {[semiId]: {stockInicial, ventas, esNuevoItem}} }
 let stkSemiConteoValores = {};     // { [semiId]: {produccion, heladera, repuesto, deposito} } (strings, mientras se tipea)
+let stkSemiConteoBusqueda = "";    // buscador por nombre para completar más rápido (14/09/2026)
 let stkSemiViendoHistorial = false;
 let stkSemiHistorialAbierto = null;
 let stkSemiModoEditor = false;
@@ -11430,6 +11464,7 @@ async function stkIniciarConteoSemi(){
   // Misma regla que Insumos: la fecha del conteo es siempre la de hoy y no se puede editar.
   stkSemiConteoBase = await stkRecalcularBaseSemi(todayISO());
   stkSemiConteoValores = {};
+  stkSemiConteoBusqueda = "";
   semis.forEach(item=>{ stkSemiConteoValores[item.id] = {produccion:"", heladera:"", repuesto:"", deposito:""}; });
   stkSemiModoConteo = true;
   stkSemiViendoHistorial = false;
@@ -11442,8 +11477,10 @@ async function stkIniciarConteoSemi(){
   stkRenderConteoSemi();
 }
 function stkCancelarConteoSemi(){
+  const hayDatos = Object.values(stkSemiConteoValores).some(v=> v.produccion!==""||v.heladera!==""||v.repuesto!==""||v.deposito!=="");
+  if(hayDatos && !confirm("¿Cancelar el conteo? Se van a perder los valores que ya cargaste.")) return;
   stkSemiModoConteo = false;
-  stkSemiConteoBase = null; stkSemiConteoValores = {};
+  stkSemiConteoBase = null; stkSemiConteoValores = {}; stkSemiConteoBusqueda = "";
   document.getElementById("stkSemiAjusteFooter").style.display = "none";
   document.getElementById("stkSemiBtnNuevoConteo").style.display = "";
   document.getElementById("stkSemiBtnHistorial").style.display = stkSemiCortes.length ? "" : "none";
@@ -11468,9 +11505,18 @@ function stkRowConteoSemi(item){
     <div class="stk-num" id="stkSemiMonto_${item.id}">—</div>
   </div>`;
 }
+function stkSemiConteoFiltrados(){
+  const q = recNormalizaTexto(stkSemiConteoBusqueda.trim());
+  const semis = stkSemiTrackeados();
+  if(!q) return semis;
+  return semis.filter(item=>recNormalizaTexto(item.nombre).includes(q));
+}
+function stkOnSemiConteoBuscar(value){
+  stkSemiConteoBusqueda = value||"";
+  stkRenderConteoTablaSemi();
+}
 function stkRenderConteoSemi(){
   const wrap = document.getElementById("stkSemiTableWrap");
-  const semis = stkSemiTrackeados();
   let html = `<div class="stk-scope-note" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
     <span style="flex:1;min-width:260px;">${stkSemiConteoBase.esInicial ? "Primer conteo de stock de semielaborados (Día 0): registrá el stock real de cada ítem — desde acá se va a calcular el stock teórico de ahora en más." : "Cargá la Producción del período (dato manual de cocina) y el stock real encontrado en cada espacio. Ventas y stock teórico se recalculan solos a medida que completás Producción."}</span>
     <div class="stk-fecha-fija" title="La fecha del conteo es siempre la de hoy y no se puede cambiar, para que quede trazable el día real en que se hizo.">
@@ -11478,10 +11524,21 @@ function stkRenderConteoSemi(){
       Fecha del conteo: <strong>${isoToDMY(stkSemiConteoBase.fechaISO)}</strong>
     </div>
   </div>`;
-  html += `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRowSemi()}`;
+  html += `<div class="stk-conteo-buscador"><input type="text" id="stkSemiConteoBuscadorInput" placeholder="Buscar semielaborado por nombre para completar más rápido…" autocomplete="off" value="${costeoEsc(stkSemiConteoBusqueda)}" oninput="stkOnSemiConteoBuscar(this.value)"></div>`;
+  html += `<div id="stkSemiConteoTablaWrap"></div>`;
+  wrap.innerHTML = html;
+  stkRenderConteoTablaSemi();
+}
+function stkRenderConteoTablaSemi(){
+  const tablaWrap = document.getElementById("stkSemiConteoTablaWrap");
+  const semis = stkSemiConteoFiltrados();
+  let html = `<div class="stk-table-scroll"><div class="stk-table">${stkHeadRowSemi()}`;
   semis.forEach(item=>{ html += stkRowConteoSemi(item); });
   html += `</div></div>`;
-  wrap.innerHTML = html;
+  if(!semis.length){
+    html += `<div class="empty-mini">Ningún semielaborado coincide con "${costeoEsc(stkSemiConteoBusqueda)}".</div>`;
+  }
+  tablaWrap.innerHTML = html;
   semis.forEach(item=> stkRecalcularFilaConteoSemi(item.id));
 }
 function stkOnValorInputSemi(semiId, campo, val){
@@ -11572,7 +11629,7 @@ async function stkConfirmarConteoSemi(){
   else showToast("Conteo de stock de semielaborados guardado correctamente");
 
   stkSemiModoConteo = false;
-  stkSemiConteoBase = null; stkSemiConteoValores = {};
+  stkSemiConteoBase = null; stkSemiConteoValores = {}; stkSemiConteoBusqueda = "";
   document.getElementById("stkSemiAjusteFooter").style.display = "none";
   document.getElementById("stkSemiBtnNuevoConteo").style.display = "";
   document.getElementById("stkSemiBtnEditar").style.display = "";
