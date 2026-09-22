@@ -245,6 +245,18 @@
   .field textarea{resize:vertical;min-height:64px;}
   .field-row{display:flex;gap:12px;}
   .field-row .field{flex:1;min-width:0;}
+  .stepper-input{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:9px;background:#FBFBFE;overflow:hidden;}
+  .stepper-input input{border:none !important;border-radius:0 !important;text-align:center;background:transparent !important;box-shadow:none !important;padding:10px 4px;}
+  .stepper-input input:focus{box-shadow:none !important;}
+  .stepper-btn{flex:0 0 34px;border:none;background:#F1F2F8;color:var(--text-2);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s ease, color .12s ease;}
+  .stepper-btn:hover{background:var(--sky);color:#fff;}
+  .stepper-btn:first-child{border-right:1px solid var(--border);}
+  .stepper-btn:last-child{border-left:1px solid var(--border);}
+  .field-checkbox{display:flex;align-items:center;gap:8px;padding:10px 0 0 0;}
+  .field-checkbox input{width:auto !important;margin:0;}
+  .field-checkbox label{margin:0;font-size:13px;font-weight:600;color:var(--text-1);text-transform:none;letter-spacing:0;cursor:pointer;}
+  .sueldos-grid .row{cursor:pointer;}
+  .sueldos-grid .row:hover{background:#F7F8FC;}
   .field.error input, .field.error select{border-color:#D1414A;background:#FFF6F6;}
   .check-inline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);font-weight:600;cursor:pointer;margin:-10px 0 18px 1px;user-select:none;}
   .check-inline input{width:15px;height:15px;cursor:pointer;accent-color:var(--blue);}
@@ -1102,14 +1114,58 @@
           <!-- PANE: LIQUIDACIÓN -->
           <section class="pagos-pane" id="stabLiquidacion">
             <div class="topbar">
-              <div><h1>Liquidación de sueldos</h1><div class="masa-subtitle" id="liqSubtitle">Todavía no está disponible para Che Mono.</div></div>
+              <div><h1>Liquidación de sueldos</h1><div class="masa-subtitle" id="liqSubtitle">Cargá el reporte de marcaciones del mes para empezar.</div></div>
             </div>
+
             <div class="screen-scroll">
-              <div class="placeholder-card">
-                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
-                <h2>Liquidación en construcción</h2>
-                <p>La pestaña "Liquidación" de La Fortaleza corre un motor de presentismo armado a medida (horarios esperados por empleado, feriados, horas extra, Parte A/B, generación de recibos) hecho a la medida de ese club. Para Che Mono vamos a construirla en un próximo chat, una vez que tengas los empleados cargados acá y me pases sus horarios habituales, el formato del reporte de fichadas y cómo querés estructurar los pagos — tal cual lo charlamos.</p>
+
+            <div id="liqLiquidadoBanner" class="liq-liquidado-banner" style="display:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0;"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span id="liqLiquidadoBannerTexto">Este mes ya fue liquidado.</span>
+            </div>
+
+            <div class="form-card liq-card" id="liqUploadCard">
+              <div class="form-section-title">Reporte de marcaciones</div>
+              <div class="attach-zone" id="liqAttachZone" onclick="liqZoneClick()"></div>
+              <input type="file" id="liqFileInput" accept=".xlsx,.xls" style="display:none">
+            </div>
+
+            <div id="liqContent" style="display:none;">
+
+              <div class="form-card liq-card">
+                <div class="form-section-title">Feriados de <span id="liqMesLabel1"></span></div>
+                <div class="liq-feriados-row">
+                  <div class="field" style="max-width:150px;"><label>Cantidad de feriados</label><input type="number" id="liqCantFeriados" min="0" max="15" value="0" oninput="liqRenderFeriadosInputs()"></div>
+                  <div id="liqFeriadosFechas" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+                  <button class="btn-primary" style="max-width:130px;" onclick="liqAplicarFeriados()">Aplicar</button>
+                </div>
+                <div class="actualizacion-hint" style="margin-top:10px;">El feriado trabajado/no trabajado se determina automáticamente según si la persona fichó ese día.</div>
               </div>
+
+              <div class="form-card liq-card">
+                <div class="form-section-title">Presentismo — <span id="liqMesLabel2"></span></div>
+                <div class="liq-legend">
+                  <span><span class="lg-dot" style="background:#E4F8ED;border:1px solid #137B44;"></span>Excedente &gt; 30 min</span>
+                  <span><span class="lg-dot" style="background:#FCE6E7;border:1px solid #B22A32;"></span>Faltante &gt; 30 min</span>
+                  <span><span class="lg-dot" style="background:#F1F2FA;border:1px solid var(--gray);"></span>Ausente</span>
+                  <span><span class="lg-dot" style="background:#FFF6DF;border:1px solid #E3A008;"></span>Feriado</span>
+                </div>
+                <div class="liq-scroll"><table class="liq-table" id="liqTablaPresentismo"></table></div>
+              </div>
+
+              <div class="form-card liq-card">
+                <div class="form-section-title">Liquidación — <span id="liqMesLabel3"></span></div>
+                <div class="liq-scroll"><table class="liq-table" id="liqTablaLiquidacion"></table></div>
+                <div class="liq-total-bar">
+                  <div>
+                    <div class="lt-label">Total a liquidar (Pago A + Pago B)</div>
+                    <div class="lt-value" id="liqTotalGeneral">$0</div>
+                  </div>
+                  <button class="btn-primary" id="liqBtnLiquidar" style="max-width:180px;" onclick="liqConfirmarLiquidar()" disabled title="Cargá un reporte de marcaciones para habilitar la liquidación">Liquidar</button>
+                </div>
+              </div>
+
+            </div>
             </div>
           </section>
 
@@ -1117,7 +1173,7 @@
           <section class="pagos-pane" id="stabNuevoEmpleado">
             <div class="screen-header">
               <div class="back-btn" onclick="goSueldosTab('esquema')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
-              <div><h1 style="font-size:22px;">Cargar nuevo empleado</h1></div>
+              <div><h1 style="font-size:22px;" id="empFormTitle">Cargar nuevo empleado</h1></div>
             </div>
             <div class="form-card">
               <div class="form-section-title">Datos del empleado</div>
@@ -1135,6 +1191,7 @@
                     <option value="">Seleccionar…</option>
                     <option>Mañana</option>
                     <option>Tarde</option>
+                    <option>Intermedio</option>
                   </select>
                 </div>
               </div>
@@ -1144,13 +1201,14 @@
                   <select id="ePuesto">
                     <option value="">Seleccionar…</option>
                     <option>Encargado</option>
-                    <option>Cocinero/a</option>
+                    <option>Jefe de cocina</option>
+                    <option>Cocinero</option>
                     <option>Ayudante de cocina</option>
-                    <option>Mozo/a</option>
-                    <option>Cajero/a</option>
-                    <option>Bachero/a</option>
-                    <option>Delivery</option>
-                    <option>Administración</option>
+                    <option>Bachero</option>
+                    <option>Mesero</option>
+                    <option>Barra</option>
+                    <option>Cajero</option>
+                    <option>Administrativo</option>
                   </select>
                 </div>
               </div>
@@ -1163,9 +1221,27 @@
                 </div>
                 <div class="field" id="fld-eSueldo"><label>SUELDO</label><input type="text" id="eSueldo" placeholder="$0" oninput="onNuevoEmpleadoSueldoInput(this)"></div>
               </div>
+              <div class="form-section-title">Presentismo (para Liquidación)</div>
+              <div class="field-row">
+                <div class="field" id="fld-eHorasEsperadas" style="max-width:200px;"><label>Horas promedio esperadas por jornada</label>
+                  <div class="stepper-input">
+                    <button type="button" class="stepper-btn" onclick="stepHorasEsperadas(-1)">−</button>
+                    <input type="text" id="eHorasEsperadas" value="8" inputmode="numeric" oninput="onHorasEsperadasInput(this)">
+                    <button type="button" class="stepper-btn" onclick="stepHorasEsperadas(1)">+</button>
+                  </div>
+                </div>
+                <div class="field" id="fld-eJornadaPartida">
+                  <label>Jornada</label>
+                  <div class="field-checkbox">
+                    <input type="checkbox" id="eJornadaPartida">
+                    <label for="eJornadaPartida">Tiene corte (turno partido, con pausa)</label>
+                  </div>
+                </div>
+              </div>
               <div class="form-footer">
                 <button class="btn-primary" style="flex:1" onclick="guardarNuevoEmpleado()">Guardar empleado</button>
                 <button class="btn-primary secondary" onclick="goSueldosTab('esquema')">Cancelar</button>
+                <button class="btn-primary secondary" id="btnEliminarEmpleado" onclick="eliminarEmpleadoActual()" style="display:none;color:#B22A32;">Eliminar empleado</button>
               </div>
             </div>
           </section>
@@ -1495,11 +1571,18 @@ function goSueldosTab(tab){
   scope.querySelectorAll(".pagos-pane").forEach(function(p){ p.classList.remove("active"); });
   var target = document.getElementById(SUELDOS_PANE_ID[tab]);
   if(target) target.classList.add("active");
-  if(tab==="nuevoEmpleado"){ resetNuevoEmpleadoForm(); }
+  if(tab==="nuevoEmpleado" && !eEditId){ resetNuevoEmpleadoForm(); }
   if(tab==="esquema"){ renderEmpleadosTable(); renderUltimaActualizacionInfo(); }
+  if(tab==="liquidacion"){ liqOnTabOpen(); if(liqInitDone && liqState.mes) liqRenderTablaLiquidacion(); }
 }
 
+/* ---- alta / edición / baja de empleados ---- */
+var eEditId = null; // id del empleado en edición, o null si es un alta nueva
+
 function resetNuevoEmpleadoForm(){
+  eEditId = null;
+  document.getElementById("empFormTitle").textContent = "Cargar nuevo empleado";
+  document.getElementById("btnEliminarEmpleado").style.display = "none";
   document.getElementById("eNumeracion").value = "N° " + (empleadosCache.length+1);
   document.getElementById("eCondicion").value = "";
   document.getElementById("eNombreCompleto").value = "";
@@ -1507,6 +1590,42 @@ function resetNuevoEmpleadoForm(){
   document.getElementById("ePuesto").value = "";
   document.getElementById("eInicioActividades").value = "";
   document.getElementById("eSueldo").value = "";
+  document.getElementById("eHorasEsperadas").value = "8";
+  document.getElementById("eJornadaPartida").checked = false;
+}
+
+function editarEmpleado(id){
+  var emp = empleadosCache.find(function(e){ return e.id===id; });
+  if(!emp) return;
+  eEditId = id;
+  goSueldosTab("nuevoEmpleado");
+  document.getElementById("empFormTitle").textContent = "Editar empleado";
+  document.getElementById("btnEliminarEmpleado").style.display = "";
+  document.getElementById("eNumeracion").value = "N° " + emp.numeracion;
+  document.getElementById("eCondicion").value = emp.condicion || "";
+  document.getElementById("eNombreCompleto").value = emp.nombre_completo || "";
+  document.getElementById("eTurno").value = emp.turno || "";
+  document.getElementById("ePuesto").value = emp.puesto || "";
+  document.getElementById("eInicioActividades").value = emp.inicio_actividades ? isoToDMY(emp.inicio_actividades) : "";
+  document.getElementById("eSueldo").value = emp.sueldo ? formatearPesosVivo(emp.sueldo) : "";
+  document.getElementById("eHorasEsperadas").value = String(emp.horas_esperadas!=null ? emp.horas_esperadas : 8);
+  document.getElementById("eJornadaPartida").checked = !!emp.jornada_partida;
+}
+
+async function eliminarEmpleadoActual(){
+  if(!eEditId) return;
+  var emp = empleadosCache.find(function(e){ return e.id===eEditId; });
+  if(!emp) return;
+  if(!confirm("¿Eliminar a " + emp.nombre_completo + "? Esta acción no se puede deshacer.")) return;
+  var res = await sb.from("cm_empleados").delete().eq("id", eEditId);
+  if(res.error){
+    showToast("No se pudo eliminar el empleado: " + res.error.message, "warn");
+    return;
+  }
+  await logHistorialSueldos("Baja de empleado", "Se eliminó a " + emp.nombre_completo + " (" + emp.puesto + ").");
+  showToast("Empleado eliminado correctamente");
+  await loadEmpleados();
+  goSueldosTab("esquema");
 }
 
 function parseSueldoInput(str){
@@ -1524,6 +1643,18 @@ function onNuevoEmpleadoSueldoInput(el){
   el.value = formatearPesosVivo(Number(digits));
 }
 
+/* ---- horas promedio esperadas: input numérico + flechas -1/+1 ---- */
+function onHorasEsperadasInput(el){
+  var v = el.value.replace(/[^\d.,]/g,"").replace(",", ".");
+  el.value = v;
+}
+function stepHorasEsperadas(delta){
+  var el = document.getElementById("eHorasEsperadas");
+  var n = parseFloat(String(el.value).replace(",", ".")) || 0;
+  n = Math.max(0, Math.min(24, n + delta));
+  el.value = String(n);
+}
+
 async function guardarNuevoEmpleado(){
   var condicion = document.getElementById("eCondicion").value;
   var nombre = document.getElementById("eNombreCompleto").value.trim();
@@ -1531,9 +1662,37 @@ async function guardarNuevoEmpleado(){
   var puesto = document.getElementById("ePuesto").value;
   var inicioDMY = document.getElementById("eInicioActividades").value.trim();
   var sueldo = parseSueldoInput(document.getElementById("eSueldo").value);
+  var horasEsperadas = parseFloat(String(document.getElementById("eHorasEsperadas").value).replace(",", ".")) || 0;
+  var jornadaPartida = document.getElementById("eJornadaPartida").checked;
 
   if(!condicion || !nombre || !turno || !puesto){
     showToast("Completá todos los campos obligatorios antes de guardar.", "warn");
+    return;
+  }
+
+  if(eEditId){
+    var empPrevio = empleadosCache.find(function(e){ return e.id===eEditId; });
+    var payloadEdit = {
+      condicion: condicion,
+      nombre_completo: nombre,
+      turno: turno,
+      puesto: puesto,
+      inicio_actividades: inicioDMY ? dmyToISO(inicioDMY) : null,
+      horas_esperadas: horasEsperadas,
+      jornada_partida: jornadaPartida
+    };
+    /* El SUELDO se edita desde "Actualización de sueldos" (deja registro en el historial
+       y permite anular el lote); acá no lo tocamos para no pisar ese flujo. */
+    var resEdit = await sb.from("cm_empleados").update(payloadEdit).eq("id", eEditId).select().single();
+    if(resEdit.error){
+      showToast("No se pudo guardar los cambios: " + resEdit.error.message, "warn");
+      return;
+    }
+    var idx = empleadosCache.findIndex(function(e){ return e.id===eEditId; });
+    if(idx>-1) empleadosCache[idx] = resEdit.data;
+    logHistorialSueldos("Edición de empleado", (empPrevio?empPrevio.nombre_completo:nombre) + ": datos actualizados.");
+    showToast("Empleado actualizado correctamente");
+    goSueldosTab("esquema");
     return;
   }
 
@@ -1545,6 +1704,8 @@ async function guardarNuevoEmpleado(){
     inicio_actividades: inicioDMY ? dmyToISO(inicioDMY) : null,
     sueldo: sueldo,
     sueldo_anterior: sueldo,
+    horas_esperadas: horasEsperadas,
+    jornada_partida: jornadaPartida,
     creado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null
   };
 
@@ -1643,7 +1804,9 @@ var SUELDOS_GRID_COLUMNS = [
       var pctMasa = masaTotal>0 ? (getSueldoPreview(e)/masaTotal*100) : 0;
       return "<div class=\"cell\">" + pctMasa.toFixed(1) + "%</div>"; } },
   { id:"ultimaActualizacion", label:"Última actualización", sortField:"modificado_fecha", defaultWidth:170, minWidth:130, maxWidth:230,
-    cell:function(e){ return "<div class=\"cell c-fecha-emp\">" + (e.modificado_fecha ? fmtFechaHora(e.modificado_fecha) : "—") + "</div>"; } }
+    cell:function(e){ return "<div class=\"cell c-fecha-emp\">" + (e.modificado_fecha ? fmtFechaHora(e.modificado_fecha) : "—") + "</div>"; } },
+  { id:"horasEsperadas", label:"Hs. esperadas", sortField:"horas_esperadas", defaultWidth:120, minWidth:90, maxWidth:160,
+    cell:function(e){ return "<div class=\"cell\">" + (e.horas_esperadas!=null ? e.horas_esperadas+"h"+(e.jornada_partida?" · con corte":"") : "—") + "</div>"; } }
 ];
 var SUELDOS_GRID_STATE_KEY = "cm_sueldos_grid_state_v1";
 
@@ -1912,9 +2075,15 @@ function renderEmpleadosTable(){
     var emp = list[j];
     var cellsHtml = "";
     for(var k=0;k<cols.length;k++){ cellsHtml += cols[k].cell(emp); }
-    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\"><div class=\"cell c-num-emp\">" + (j+1) + "</div>" + cellsHtml + "</div>";
+    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\" onclick=\"onEmpleadoRowClick(event,'" + emp.id + "')\"><div class=\"cell c-num-emp\">" + (j+1) + "</div>" + cellsHtml + "</div>";
   }
   tbody.innerHTML = rows;
+}
+
+function onEmpleadoRowClick(ev, id){
+  if(modoActualizacionSueldos) return;
+  if(ev && ev.target && ev.target.closest && ev.target.closest(".sueldo-edit-input")) return;
+  editarEmpleado(id);
 }
 
 function onSueldoEditInput(id, inputEl){
@@ -2077,6 +2246,1069 @@ async function anularUltimaActualizacionSueldos(){
   await cargarUltimaActualizacionSueldos();
   showToast("Actualización anulada correctamente");
 }
+
+
+/* =========================================================
+   SUELDOS: Liquidación de sueldos
+   Portado del motor de Liquidación de La Fortaleza (lf_liquidaciones/
+   lf_ordenes) a las tablas propias de Che Mono (cm_liquidaciones/
+   cm_ordenes). Ver conversación de porteo para el detalle función por
+   función; el resumen de los cambios de fondo es:
+   - La Fortaleza tenía dos objetos hardcodeados, LIQ_EXPECTED_HOURS
+     (horas esperadas + tipo de horario por empleado) y
+     LIQ_NOMBRE_COMPLETO (nombre corto del reporte de fichadas -> nombre
+     completo real). Acá esos datos ya viven en cm_empleados
+     (horas_esperadas, jornada_partida) y se leen de empleadosCache, así
+     que no hace falta mantenerlos a mano en el código.
+   - El "nombre corto" que trae el reporte de marcaciones no tiene un
+     mapeo fijo a un empleado: se resuelve en tiempo real contra
+     empleadosCache con liqEmpleadoPorNombreCorto() (ver comentario ahí).
+   - Pagos (cm_ordenes) todavía no está construido como módulo en Che
+     Mono, así que el array global `ordenes` (que en La Fortaleza ya
+     está en memoria por el módulo Pagos) puede no existir todavía acá;
+     el código lo trata como opcional (typeof-checks) para no romper
+     mientras tanto, y va a engancharse solo cuando ese módulo se arme.
+   ========================================================= */
+
+var LIQ_DEDUP_WINDOW_MIN = 60;
+var LIQ_FLIP_MAX_DIFF_MIN = 215;
+var LIQ_DOW_ABBR = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+var LIQ_MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+var liqState = {
+  mes: null,                 // "yyyy-mm-01" (ISO, primer día del mes)
+  marcacionesHeader: null,
+  marcacionesRows: null,     // [{empleado,fecha,hora,tipo,codigo,fuente}]
+  fileName: null,
+  presentismo: null,         // {nombreCorto: {jornadaISO: {...}}}
+  feriados: [],              // ["yyyy-mm-dd", ...]
+  montoA: {},                // {key: numero}
+  pagoBManual: {},           // {key: numero} — solo si el usuario editó el sugerido
+  horasExtraManual: {},      // {key: numero de horas, ej. 1.5}
+  feriadosManual: {},        // {key: cantidad de jornales}
+  ausenciasManual: {},       // {key: cantidad de jornales}
+  liquidado: false,
+  liquidacionId: null,
+  ordenAId: null,
+  ordenBId: null
+};
+var liqInitDone = false;
+var liqGuardarDraftTimer = null;
+
+/* ---------- matcheo nombre corto del reporte -> empleado real ----------
+   Che Mono todavía no tiene un ejemplo real del reporte de fichadas, así
+   que este matcheo es a criterio (mejor esfuerzo) hasta que se vea un
+   archivo real: se toma el "Nombres" tal cual viene en el reporte y se
+   busca, sin distinguir mayúsculas/minúsculas, qué nombre_completo de
+   empleadosCache empieza con ese texto (o lo contiene como palabra
+   suelta) — ej. reporte dice "Juan" y el empleado es "Juan Pérez" -> matchea.
+   Si en un archivo real el formato es otro (apellido primero, sigla,
+   etc.) hay que ajustar esta función nada más. */
+function liqEmpleadoPorNombreCorto(nombreCorto){
+  var key = String(nombreCorto||"").trim().toLowerCase();
+  if(!key) return null;
+  var candidatos = (empleadosCache||[]).filter(function(e){
+    var nombre = String(e.nombre_completo||"").trim().toLowerCase();
+    if(!nombre) return false;
+    if(nombre.indexOf(key)===0) return true;               // empieza igual: "juan perez" vs "juan"
+    if((" "+nombre).indexOf(" "+key)!==-1) return true;     // aparece como palabra suelta
+    if(key.indexOf(nombre)===0) return true;                // el reporte trae más texto que el nombre
+    return false;
+  });
+  if(candidatos.length===1) return candidatos[0];
+  if(candidatos.length>1){
+    var exacto = candidatos.filter(function(e){ return String(e.nombre_completo||"").trim().toLowerCase()===key; })[0];
+    if(exacto) return exacto;
+    var prefijo = candidatos.filter(function(e){ return String(e.nombre_completo||"").trim().toLowerCase().indexOf(key)===0; })[0];
+    return prefijo || candidatos[0];
+  }
+  return null;
+}
+function liqCfgParaEmpleado(emp){
+  return {
+    horasEsperadas: Number(emp && emp.horas_esperadas!=null ? emp.horas_esperadas : 8),
+    horario: (emp && emp.jornada_partida) ? "cortado" : "continuo"
+  };
+}
+
+/* ---------- utilidades de fecha/hora ----------
+   vParseFlexDate/vToISODate/vParseHoraHour/vJornadaFecha portadas de Ventas
+   (todavía sin módulo propio en Che Mono) para el corte de jornada 05:00:
+   un movimiento entre las 00:00 y las 04:59 se atribuye al día calendario
+   ANTERIOR (la jornada laboral recién cierra pasada la medianoche). */
+function vParseFlexDate(val){
+  if (val instanceof Date) return new Date(val.getUTCFullYear(), val.getUTCMonth(), val.getUTCDate());
+  var str = String(val).trim();
+  if (!str || str === "-") return null;
+  str = str.split(" ")[0].split("T")[0];
+  var sep = str.indexOf("/")!==-1 ? "/" : (str.indexOf("-")!==-1 ? "-" : null);
+  if (!sep) return null;
+  var parts = str.split(sep).map(Number);
+  if (parts.length !== 3) return null;
+  var d,m,y;
+  if (sep === "-" && parts[0] > 31) { y=parts[0]; m=parts[1]; d=parts[2]; } else { d=parts[0]; m=parts[1]; y=parts[2]; }
+  if (!d || !m || !y) return null;
+  return new Date(y, m-1, d);
+}
+function vToISODate(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function vParseHoraHour(val){
+  if (val===undefined || val===null) return 0;
+  if (val instanceof Date) return val.getUTCHours();
+  var s = String(val).trim();
+  if (!s || s==="-") return 0;
+  var h = parseInt(s.split(":")[0], 10);
+  return isNaN(h) ? 0 : h;
+}
+function vJornadaFecha(fechaVal, horaVal){
+  var fecha = vParseFlexDate(fechaVal);
+  if (!fecha) return null;
+  if (vParseHoraHour(horaVal) < 5){
+    var d = new Date(fecha);
+    d.setDate(d.getDate()-1);
+    return d;
+  }
+  return fecha;
+}
+function liqJornadaISO(fechaStr, horaStr){
+  var d = vJornadaFecha(fechaStr, horaStr);
+  return d ? vToISODate(d) : null;
+}
+function liqAbsMinutes(row){
+  return Date.parse(row.fecha + "T" + row.hora + "Z") / 60000;
+}
+function liqMinutoDelDia(row){
+  var p = String(row.hora).split(":");
+  return Number(p[0])*60 + Number(p[1]||0) + (p[2]?Number(p[2])/60:0);
+}
+function liqDiffCircular(a,b){
+  var d = Math.abs(a-b);
+  return Math.min(d, 1440-d);
+}
+function liqFmtHM(mins){
+  if(mins==null) return "—";
+  var sign = mins<0 ? "-" : "+";
+  var abs = Math.round(Math.abs(mins));
+  var h = Math.floor(abs/60), m = abs%60;
+  return sign+h+":"+(m<10?"0":"")+m;
+}
+function liqDiaSemana(jornadaISO){
+  var partes = jornadaISO.split("-").map(Number);
+  var d = new Date(Date.UTC(partes[0], partes[1]-1, partes[2]));
+  return LIQ_DOW_ABBR[d.getUTCDay()];
+}
+
+/* ---------- motor de presentismo (portado sin cambios de lógica) ---------- */
+function liqAgruparPorEmpleadoYJornada(rows){
+  var grupos = {};
+  rows.forEach(function(r){
+    if(!r.empleado || !r.fecha || !r.hora || !r.tipo) return;
+    var jornada = liqJornadaISO(r.fecha, r.hora);
+    if(!jornada) return;
+    grupos[r.empleado] = grupos[r.empleado] || {};
+    grupos[r.empleado][jornada] = grupos[r.empleado][jornada] || [];
+    grupos[r.empleado][jornada].push(Object.assign({}, r, {jornada:jornada}));
+  });
+  Object.keys(grupos).forEach(function(emp){
+    Object.keys(grupos[emp]).forEach(function(j){
+      grupos[emp][j].sort(function(a,b){ return liqAbsMinutes(a)-liqAbsMinutes(b); });
+    });
+  });
+  return grupos;
+}
+function liqDedupFichadas(rowsDelDia){
+  var out = [];
+  for(var i=0;i<rowsDelDia.length;i++){
+    var cur = rowsDelDia[i];
+    var prev = out.length ? out[out.length-1] : null;
+    if(prev && prev.tipo===cur.tipo){
+      var diffMin = Math.abs(liqAbsMinutes(cur)-liqAbsMinutes(prev));
+      if(diffMin <= LIQ_DEDUP_WINDOW_MIN) continue;
+    }
+    out.push(cur);
+  }
+  return out;
+}
+function liqConstruirEstadisticasHorarios(jornadasCrudas, longitudCanonica){
+  var stats = {};
+  function push(rol,min){ stats[rol]=stats[rol]||[]; stats[rol].push(min); }
+  Object.keys(jornadasCrudas).forEach(function(j){
+    var limpio = liqDedupFichadas(jornadasCrudas[j]);
+    if(longitudCanonica && limpio.length!==longitudCanonica) return;
+    var ok = true;
+    for(var i=0;i<limpio.length;i++){
+      var esperado = i%2===0 ? "Entrada" : "Salida";
+      if(limpio[i].tipo!==esperado){ ok=false; break; }
+    }
+    if(!ok || limpio.length===0 || limpio.length%2!==0) return;
+    for(var k=0;k<limpio.length;k++){
+      var pos = Math.floor(k/2);
+      var rol = (k%2===0?"e":"s")+pos;
+      push(rol, liqMinutoDelDia(limpio[k]));
+    }
+  });
+  var medianas = {};
+  Object.keys(stats).forEach(function(rol){
+    var arr = stats[rol].slice().sort(function(a,b){ return a-b; });
+    medianas[rol] = arr[Math.floor(arr.length/2)];
+  });
+  return medianas;
+}
+function liqRepararAlternancia(rowsDelDia, medianas){
+  var rows = rowsDelDia.map(function(r){ return Object.assign({}, r); });
+  var cambios = [];
+  for(var i=1;i<rows.length;i++){
+    if(rows[i].tipo!==rows[i-1].tipo) continue;
+    var posPrev = Math.floor((i-1)/2);
+    var tipoActual = rows[i-1].tipo;
+    var rolOpuesto = tipoActual==="Entrada" ? "s" : "e";
+    var rol = rolOpuesto+posPrev;
+    var diffA = medianas[rol]!=null ? liqDiffCircular(liqMinutoDelDia(rows[i-1]), medianas[rol]) : Infinity;
+    var diffB = medianas[rol]!=null ? liqDiffCircular(liqMinutoDelDia(rows[i]), medianas[rol]) : Infinity;
+    if(diffA<=LIQ_FLIP_MAX_DIFF_MIN && diffA<=diffB){
+      cambios.push({idx:i-1, de:rows[i-1].tipo, a: rolOpuesto==="e"?"Entrada":"Salida", diffMin:diffA});
+      rows[i-1].tipo = rolOpuesto==="e"?"Entrada":"Salida";
+    } else if(diffB<=LIQ_FLIP_MAX_DIFF_MIN){
+      cambios.push({idx:i, de:rows[i].tipo, a: rolOpuesto==="e"?"Entrada":"Salida", diffMin:diffB});
+      rows[i].tipo = rolOpuesto==="e"?"Entrada":"Salida";
+    }
+  }
+  return {rows:rows, cambios:cambios};
+}
+function liqArmarIntervalos(rowsDelDia){
+  var intervalos = [];
+  var abierto = null;
+  rowsDelDia.forEach(function(r){
+    if(r.tipo==="Entrada"){
+      if(abierto) intervalos.push({entrada:abierto, salida:null, minutos:null});
+      abierto = r;
+    } else if(r.tipo==="Salida"){
+      if(abierto){
+        var mins = (Date.parse(r.fecha+"T"+r.hora+"Z") - Date.parse(abierto.fecha+"T"+abierto.hora+"Z"))/60000;
+        if(mins<0) mins += 24*60;
+        intervalos.push({entrada:abierto, salida:r, minutos:mins});
+        abierto = null;
+      } else {
+        intervalos.push({entrada:null, salida:r, minutos:null});
+      }
+    }
+  });
+  if(abierto) intervalos.push({entrada:abierto, salida:null, minutos:null});
+  return {intervalos:intervalos};
+}
+function liqPromedioIntervaloPosicion(diasResueltos, posicion, jornadaExcluida){
+  var total=0, count=0;
+  Object.keys(diasResueltos).forEach(function(j){
+    if(j===jornadaExcluida) return;
+    var iv = diasResueltos[j].intervalos && diasResueltos[j].intervalos[posicion];
+    if(iv && iv.minutos!=null){ total+=iv.minutos; count++; }
+  });
+  return count ? total/count : null;
+}
+/* Adaptado: recibe el registro de empleado (de empleadosCache) en vez de
+   buscar por nombre corto en LIQ_EXPECTED_HOURS. */
+function liqProcesarEmpleado(emp, jornadasRaw){
+  if(!emp) return null;
+  var cfg = liqCfgParaEmpleado(emp);
+  var esperadoMin = cfg.horasEsperadas*60;
+  var longitudCanonica = cfg.horario==="cortado" ? 4 : 2;
+  var medianas = liqConstruirEstadisticasHorarios(jornadasRaw, longitudCanonica);
+  var dias = {};
+  Object.keys(jornadasRaw).forEach(function(j){
+    var limpio = liqDedupFichadas(jornadasRaw[j]);
+    var reparado = liqRepararAlternancia(limpio, medianas);
+    var armado = liqArmarIntervalos(reparado.rows);
+    dias[j] = {intervalos:armado.intervalos, cambios:reparado.cambios};
+  });
+  var resultado = {};
+  Object.keys(dias).forEach(function(j){
+    var info = dias[j];
+    var intervalos = info.intervalos;
+    var completados = intervalos.filter(function(iv){ return iv.minutos!=null; });
+    var incompletosIdx = intervalos.map(function(iv,idx){ return iv.minutos==null?idx:-1; }).filter(function(i){ return i!==-1; });
+    var totalReal = completados.reduce(function(s,iv){ return s+iv.minutos; }, 0);
+    var obs = [];
+    var estimado = false;
+    info.cambios.forEach(function(c){
+      obs.push("fichada corregida (decía "+c.de+", se interpretó como "+c.a+" por horario habitual)");
+    });
+    if(intervalos.length===0){
+      resultado[j] = {totalReal:null, diffMin:null, obs:["ausente"], estado:"ausente"};
+      return;
+    }
+    var huboContenidoReal = completados.length>0;
+    function lado(iv){ return iv.entrada==null ? "entrada" : "salida"; }
+    incompletosIdx.forEach(function(idx){
+      var hora = intervalos[idx].entrada ? intervalos[idx].entrada.hora : intervalos[idx].salida.hora;
+      obs.push("no ficho "+lado(intervalos[idx])+" ("+hora+")");
+    });
+    if(incompletosIdx.length>0){
+      if(cfg.horario==="cortado" && huboContenidoReal){
+        incompletosIdx.forEach(function(idx){
+          var prom = liqPromedioIntervaloPosicion(dias, idx, j);
+          if(prom!=null){ totalReal+=prom; estimado=true; }
+          else { totalReal = esperadoMin; }
+        });
+      } else {
+        totalReal = esperadoMin;
+      }
+    }
+    var diff, estado;
+    if(incompletosIdx.length>0 && !estimado){
+      diff = 0; estado = "neutro";
+    } else {
+      diff = totalReal - esperadoMin;
+      estado = diff>30 ? "verde" : diff<-30 ? "rojo" : "neutro";
+    }
+    resultado[j] = {totalReal:totalReal, diffMin:diff, obs:obs, estado:estado, intervalos:intervalos};
+  });
+  return resultado;
+}
+
+/* ---------- lectura del reporte de marcaciones (xlsx) ---------- */
+function liqLeerReporteMarcaciones(file){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        var data = new Uint8Array(e.target.result);
+        var wb = XLSX.read(data, {type:"array", cellDates:false});
+        var sheetName = wb.SheetNames[0];
+        var ws = wb.Sheets[sheetName];
+        var raw = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+        var headerIdx = -1;
+        for(var i=0;i<Math.min(raw.length,6);i++){
+          var norm = (raw[i]||[]).map(function(h){ return (h||"").toString().trim().toLowerCase(); });
+          if(norm.indexOf("nombres")!==-1 && norm.indexOf("fecha")!==-1 && norm.indexOf("hora")!==-1){ headerIdx = i; break; }
+        }
+        if(headerIdx===-1) return reject(new Error("No se encontró el encabezado esperado (Nombres/Fecha/Hora) en el archivo."));
+        var header = raw[headerIdx].map(function(h){ return (h===null||h===undefined)?"":h.toString().trim(); });
+        var iNombre = header.findIndex(function(h){ return h.toLowerCase()==="nombres"; });
+        var iFecha = header.findIndex(function(h){ return h.toLowerCase()==="fecha"; });
+        var iHora = header.findIndex(function(h){ return h.toLowerCase()==="hora"; });
+        var iTipo = header.findIndex(function(h){ return h.toLowerCase().indexOf("tipo de marcaci")===0; });
+        var iCodigo = header.findIndex(function(h){ return h.toLowerCase().indexOf("código")===0 || h.toLowerCase().indexOf("codigo")===0; });
+        var iFuente = header.findIndex(function(h){ return h.toLowerCase().indexOf("fuente")===0; });
+        if(iNombre===-1 || iFecha===-1 || iHora===-1 || iTipo===-1) return reject(new Error("Faltan columnas obligatorias (Nombres, Fecha, Hora o Tipo de Marcación)."));
+        var rows = raw.slice(headerIdx+1).filter(function(r){ return r && r[iNombre]; }).map(function(r){
+          return {
+            empleado: (r[iNombre]||"").toString().trim(),
+            fecha: liqNormFecha(r[iFecha]),
+            hora: liqNormHora(r[iHora]),
+            tipo: (r[iTipo]||"").toString().trim(),
+            codigo: iCodigo!==-1 ? r[iCodigo] : null,
+            fuente: iFuente!==-1 ? r[iFuente] : null
+          };
+        }).filter(function(r){ return r.fecha && r.hora && r.tipo; });
+        resolve({header:header, rows:rows});
+      }catch(err){ reject(err); }
+    };
+    reader.onerror = function(){ reject(new Error("No se pudo leer el archivo.")); };
+    reader.readAsArrayBuffer(file);
+  });
+}
+function liqNormFecha(v){
+  if(v===null||v===undefined) return null;
+  var s = String(v).trim();
+  if(!s) return null;
+  s = s.split(" ")[0].split("T")[0];
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  var sep = s.indexOf("/")!==-1 ? "/" : null;
+  if(sep){
+    var p = s.split(sep).map(Number);
+    if(p.length===3) return p[2]+"-"+String(p[1]).padStart(2,"0")+"-"+String(p[0]).padStart(2,"0");
+  }
+  return null;
+}
+function liqNormHora(v){
+  if(v===null||v===undefined) return null;
+  var s = String(v).trim();
+  if(!s) return null;
+  var p = s.split(":");
+  if(p.length<2) return null;
+  var h = String(parseInt(p[0],10)).padStart(2,"0");
+  var m = String(parseInt(p[1],10)).padStart(2,"0");
+  var sec = p[2] ? String(parseInt(p[2],10)).padStart(2,"0") : "00";
+  return h+":"+m+":"+sec;
+}
+
+/* ---------- zona de carga (reutiliza el estilo .attach-zone ya presente en Che Mono) ---------- */
+function liqRenderZone(){
+  var zone = document.getElementById("liqAttachZone");
+  if(liqState.fileName){
+    zone.classList.add("filled");
+    zone.innerHTML =
+      '<div class="az-left">' +
+        '<div class="az-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>' +
+        '<div class="az-text"><div class="az-name">Reporte de marcaciones</div><div class="az-sub">✓ '+liqEscapeHtml(liqState.fileName)+' · '+(liqState.marcacionesRows?liqState.marcacionesRows.length:0)+' filas</div></div>' +
+      '</div>' +
+      '<div class="az-actions"><button type="button" class="az-btn" onclick="event.stopPropagation(); liqZoneClick()" title="Reemplazar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/></svg></button></div>';
+  } else {
+    zone.classList.remove("filled");
+    zone.innerHTML =
+      '<div class="az-left">' +
+        '<div class="az-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>' +
+        '<div class="az-text"><div class="az-name">Reporte de marcaciones</div><div class="az-sub">Excel (.xlsx) · click o arrastrá el archivo acá</div></div>' +
+      '</div>';
+  }
+}
+function liqEscapeHtml(s){
+  return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function liqZoneClick(){
+  document.getElementById("liqFileInput").click();
+}
+function liqWireZoneEvents(){
+  var input = document.getElementById("liqFileInput");
+  var zone = document.getElementById("liqAttachZone");
+  input.addEventListener("change", function(e){ var f=e.target.files[0]; if(f) liqOnFileSelected(f); });
+  zone.addEventListener("dragover", function(e){ e.preventDefault(); zone.classList.add("dragover"); });
+  zone.addEventListener("dragleave", function(){ zone.classList.remove("dragover"); });
+  zone.addEventListener("drop", function(e){
+    e.preventDefault(); zone.classList.remove("dragover");
+    var f = e.dataTransfer.files[0]; if(f) liqOnFileSelected(f);
+  });
+}
+async function liqOnFileSelected(file){
+  try{
+    var parsed = await liqLeerReporteMarcaciones(file);
+    if(!parsed.rows.length){ showToast("El archivo no tiene filas de marcaciones reconocibles.", "warn"); return; }
+    await liqProcesarArchivo(parsed, file.name);
+  }catch(err){
+    showToast("No se pudo procesar el archivo: "+err.message, "warn");
+  }
+  document.getElementById("liqFileInput").value = "";
+}
+
+/* ---------- procesamiento: detecta el mes, corre el motor, funde con el draft guardado ----------
+   Adaptado: en vez de iterar las claves fijas de LIQ_EXPECTED_HOURS, se procesan todos los
+   nombres cortos que aparecen efectivamente en el reporte subido, matcheados contra
+   empleadosCache con liqEmpleadoPorNombreCorto(). Un nombre del reporte sin match no rompe
+   nada: simplemente no genera fila de presentismo (se podría loguear a futuro). */
+async function liqProcesarArchivo(parsed, fileName){
+  var grupos = liqAgruparPorEmpleadoYJornada(parsed.rows);
+  var conteoMes = {};
+  Object.keys(grupos).forEach(function(emp){
+    Object.keys(grupos[emp]).forEach(function(j){
+      var ym = j.slice(0,7);
+      conteoMes[ym] = (conteoMes[ym]||0)+1;
+    });
+  });
+  var mesDetectado = Object.keys(conteoMes).sort(function(a,b){ return conteoMes[b]-conteoMes[a]; })[0];
+  if(!mesDetectado){ showToast("No se pudieron detectar jornadas válidas en el archivo.", "warn"); return; }
+  var mesISO = mesDetectado+"-01";
+
+  var filaExistente = null;
+  try{
+    var chk = await sb.from("cm_liquidaciones").select("*").eq("mes", mesISO).maybeSingle();
+    if(!chk.error && chk.data) filaExistente = chk.data;
+  }catch(e){ console.warn("No se pudo verificar si el mes ya tenía datos guardados", e); }
+  if(filaExistente && filaExistente.liquidado){
+    showToast("La liquidación de "+liqMesNombre(mesISO)+" ya fue confirmada. Para modificarla, hacelo desde Pagos.", "warn");
+    return;
+  }
+
+  var presentismo = {};
+  Object.keys(grupos).forEach(function(nombreCorto){
+    var emp = liqEmpleadoPorNombreCorto(nombreCorto);
+    if(!emp) return;
+    presentismo[nombreCorto] = liqProcesarEmpleado(emp, grupos[nombreCorto] || {});
+  });
+
+  liqState.mes = mesISO;
+  liqState.marcacionesHeader = parsed.header;
+  liqState.marcacionesRows = parsed.rows;
+  liqState.fileName = fileName;
+  liqState.presentismo = presentismo;
+  liqState.feriados = filaExistente ? (filaExistente.feriados || []) : [];
+  liqState.montoA = filaExistente ? (filaExistente.montos_a || {}) : {};
+  liqState.pagoBManual = filaExistente ? (filaExistente.pagos_b || {}) : {};
+  liqState.horasExtraManual = filaExistente ? (filaExistente.horas_extra_manual || {}) : {};
+  liqState.feriadosManual = filaExistente ? (filaExistente.feriados_manual || {}) : {};
+  liqState.ausenciasManual = filaExistente ? (filaExistente.ausencias_manual || {}) : {};
+  liqState.liquidado = false;
+  liqState.liquidacionId = filaExistente ? filaExistente.id : null;
+  liqState.ordenAId = filaExistente ? filaExistente.orden_a_id : null;
+  liqState.ordenBId = filaExistente ? filaExistente.orden_b_id : null;
+
+  liqRenderZone();
+  liqRenderTodo();
+  liqGuardarDraft();
+}
+
+/* ---------- render general ---------- */
+function liqMesNombre(mesISO){
+  var partes = mesISO.split("-").map(Number);
+  return LIQ_MESES[partes[1]-1] + " " + partes[0];
+}
+function liqDiasDelMes(mesISO){
+  var partes = mesISO.split("-").map(Number);
+  var y = partes[0], m = partes[1];
+  var cant = new Date(y, m, 0).getDate();
+  var out = [];
+  for(var d=1; d<=cant; d++){ out.push(mesISO.slice(0,8)+String(d).padStart(2,"0")); }
+  return out;
+}
+/* Adaptado: en vez de recorrer LIQ_NOMBRE_COMPLETO, matchea cada nombreCorto que quedó
+   registrado en liqState.presentismo contra empleadosCache en el momento. */
+function liqEmpleadosPorKey(){
+  var out = {};
+  Object.keys(liqState.presentismo||{}).forEach(function(key){
+    out[key] = liqEmpleadoPorNombreCorto(key);
+  });
+  return out;
+}
+/* ---------- Adelantos de sueldo (se extraen de Pagos, no se cargan a mano en Liquidación) ----------
+   Misma regla que en La Fortaleza (ver liqEjecutarLiquidar/liqComputeTotales): una orden de Pagos
+   cuenta como "adelanto del mes en estudio" si Concepto="Sueldos y CS" + Rubro="Adelanto de
+   sueldo" + Estado="Pagado" + Fecha de orden dentro del mes de liqState.mes, y se suma por
+   Proveedor=nombre del empleado. El módulo Pagos de Che Mono todavía no está construido, así que
+   el array global `ordenes` puede no existir todavía: mientras tanto esto simplemente no
+   encuentra adelantos (mapa vacío) sin romper nada, y va a engancharse solo en cuanto Pagos se
+   arme con el mismo nombre de variable. */
+function liqAdelantosPorNombre(){
+  var mapa = {};
+  if(!liqState.mes) return mapa;
+  var mesPrefix = String(liqState.mes).slice(0,7);
+  var src = (typeof ordenes !== "undefined" && ordenes) ? ordenes : [];
+  src.forEach(function(o){
+    if(o.concepto!=="Sueldos y CS" || o.rubro!=="Adelanto de sueldo") return;
+    if(o.estado!=="Pagado") return;
+    if(!o.fechaOrden || String(o.fechaOrden).slice(0,7)!==mesPrefix) return;
+    var nombre = o.proveedor||"";
+    mapa[nombre] = (mapa[nombre]||0) + Number(o.monto||0);
+  });
+  return mapa;
+}
+function liqRenderTodo(){
+  if(!liqState.mes) return;
+  document.getElementById("liqUploadCard").style.display = "";
+  document.getElementById("liqContent").style.display = "";
+  document.getElementById("liqSubtitle").textContent = "Mes en estudio: " + liqMesNombre(liqState.mes) + (liqState.liquidado ? " · liquidado" : "");
+  ["liqMesLabel1","liqMesLabel2","liqMesLabel3"].forEach(function(id){ document.getElementById(id).textContent = liqMesNombre(liqState.mes); });
+  var banner = document.getElementById("liqLiquidadoBanner");
+  if(liqState.liquidado){
+    banner.style.display = "flex";
+    document.getElementById("liqLiquidadoBannerTexto").textContent =
+      "La liquidación de " + liqMesNombre(liqState.mes) + " ya fue confirmada. Los montos quedaron fijos; para modificarlos, hacelo directamente desde Pagos.";
+  } else {
+    banner.style.display = "none";
+  }
+  liqRenderFeriadosInputs();
+  liqRenderTablaPresentismo();
+  liqRenderTablaLiquidacion();
+}
+
+/* ---------- feriados ---------- */
+function liqRenderFeriadosInputs(){
+  var cont = document.getElementById("liqFeriadosFechas");
+  var dias = liqDiasDelMes(liqState.mes);
+  var min = dias[0], max = dias[dias.length-1];
+  var cantInput = document.getElementById("liqCantFeriados");
+  var cant = Math.max(liqState.feriados.length, Math.min(15, Number(cantInput.value)||0));
+  cantInput.value = cant;
+  cantInput.disabled = liqState.liquidado;
+  cont.innerHTML = "";
+  for(var i=0;i<cant;i++){
+    var inp = document.createElement("input");
+    inp.type = "date";
+    inp.value = liqState.feriados[i] || "";
+    inp.min = min; inp.max = max;
+    inp.disabled = liqState.liquidado;
+    inp.style.cssText = "padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;";
+    cont.appendChild(inp);
+  }
+}
+function liqAplicarFeriados(){
+  if(liqState.liquidado) return;
+  var inputs = document.querySelectorAll("#liqFeriadosFechas input[type=date]");
+  liqState.feriados = Array.prototype.map.call(inputs, function(i){ return i.value; }).filter(Boolean);
+  liqRenderTablaPresentismo();
+  liqRenderTablaLiquidacion();
+  liqGuardarDraft();
+}
+
+/* ---------- tabla de presentismo ---------- */
+function liqRenderTablaPresentismo(){
+  var dias = liqDiasDelMes(liqState.mes);
+  var thead = "<thead><tr><th class=\"liq-col-nombre\">Nombre completo</th>";
+  dias.forEach(function(j){
+    var dd = j.slice(8,10);
+    var esFeriado = liqState.feriados.indexOf(j)!==-1;
+    thead += "<th class=\""+(esFeriado?"liq-th-feriado":"")+"\"><span class=\"liq-th-dow\">"+liqDiaSemana(j)+"</span><span class=\"liq-th-dd\">"+dd+"</span>"+(esFeriado?"<span class=\"liq-flag\">FERIADO</span>":"")+"</th>";
+  });
+  thead += "</tr></thead>";
+
+  var porKey = liqEmpleadosPorKey();
+  var tbody = "<tbody>";
+  Object.keys(liqState.presentismo||{}).forEach(function(key){
+    var emp = porKey[key];
+    var cfg = liqCfgParaEmpleado(emp);
+    var nombre = emp ? emp.nombre_completo : key;
+    var row = "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(nombre)+"<span class=\"liq-col-esperado\">"+cfg.horasEsperadas+"h · "+cfg.horario+"</span></td>";
+    var datosEmp = (liqState.presentismo && liqState.presentismo[key]) || {};
+    dias.forEach(function(j){
+      var d = datosEmp[j];
+      var esFeriado = liqState.feriados.indexOf(j)!==-1;
+      var feriadoCls = esFeriado ? " liq-dia-feriado-col" : "";
+      if(!d){
+        row += "<td class=\"liq-dia-ausente"+feriadoCls+"\">aus.</td>";
+      } else if(d.estado==="ausente"){
+        row += "<td class=\"liq-dia-ausente"+feriadoCls+"\">aus.</td>";
+      } else {
+        var cls = "liq-dia-"+d.estado+feriadoCls;
+        var obsHtml = "";
+        if(d.obs && d.obs.length){
+          cls += " liq-tiene-obs";
+          obsHtml = "<div class=\"liq-tooltip\">"+d.obs.map(liqEscapeHtml).join("<br>")+"</div>";
+        }
+        row += "<td class=\""+cls+"\" style=\"position:relative;\">"+liqFmtHM(d.diffMin)+obsHtml+"</td>";
+      }
+    });
+    row += "</tr>";
+    tbody += row;
+  });
+  tbody += "</tbody>";
+  document.getElementById("liqTablaPresentismo").innerHTML = thead+tbody;
+}
+
+/* ---------- tabla de liquidación ---------- */
+function liqCalcularAgregados(key){
+  var dias = (liqState.presentismo && liqState.presentismo[key]) || {};
+  var mesPrefix = liqState.mes.slice(0,7);
+  var ausencias=0, feriadosTrabajados=0, horasExtraMin=0;
+  Object.keys(dias).forEach(function(j){
+    if(j.slice(0,7)!==mesPrefix) return;
+    var d = dias[j];
+    var esFeriado = liqState.feriados.indexOf(j)!==-1;
+    if(d.estado==="ausente"){ ausencias++; }
+    else {
+      if(esFeriado) feriadosTrabajados++;
+      if(d.estado==="rojo" || d.estado==="verde") horasExtraMin += d.diffMin;
+    }
+  });
+  return {ausencias:ausencias, feriadosTrabajados:feriadosTrabajados, horasExtraMin:horasExtraMin};
+}
+/* Adaptado: las filas "con presentismo" son las claves de liqState.presentismo (nombres cortos
+   del reporte ya matcheados), y el resto de empleadosCache que no matchearon ningún nombre del
+   reporte se listan igual, sin presentismo (igual que Vanina en La Fortaleza). */
+function liqRenderTablaLiquidacion(){
+  var porKey = liqEmpleadosPorKey();
+  var keysConPresentismo = Object.keys(liqState.presentismo||{});
+  var nombresConPresentismo = keysConPresentismo.map(function(k){ var e=porKey[k]; return e?e.nombre_completo:null; }).filter(Boolean);
+  var otros = (empleadosCache||[]).filter(function(e){ return nombresConPresentismo.indexOf(e.nombre_completo)===-1; });
+
+  var filas = keysConPresentismo.map(function(key){
+    var emp = porKey[key];
+    return {key:key, emp:emp, nombre: emp?emp.nombre_completo:key, tienePresentismo:true};
+  }).concat(otros.map(function(e){
+    return {key:"emp_"+e.id, emp:e, nombre:e.nombre_completo, tienePresentismo:false};
+  }));
+
+  var adelantosPorNombre = liqAdelantosPorNombre();
+
+  var thead = "<thead>" +
+    "<tr>" +
+      "<th rowspan=\"2\" class=\"liq-col-nombre\">Nombre</th>" +
+      "<th rowspan=\"2\">Cond.</th><th rowspan=\"2\">Sueldo</th><th rowspan=\"2\">A</th><th rowspan=\"2\">B</th>" +
+      "<th rowspan=\"2\">Adelantos</th>" +
+      "<th colspan=\"2\" class=\"liq-th-group\">Horas extra</th>" +
+      "<th colspan=\"2\" class=\"liq-th-group\">Feriados</th>" +
+      "<th colspan=\"2\" class=\"liq-th-group\">Ausencias</th>" +
+      "<th rowspan=\"2\">Sugerido pago B</th><th rowspan=\"2\">Pago B</th>" +
+    "</tr>" +
+    "<tr>" +
+      "<th class=\"liq-th-sub\">Reporte</th><th class=\"liq-th-sub\">Manual</th>" +
+      "<th class=\"liq-th-sub\">Reporte</th><th class=\"liq-th-sub\">Manual</th>" +
+      "<th class=\"liq-th-sub\">Reporte</th><th class=\"liq-th-sub\">Manual</th>" +
+    "</tr>" +
+    "</thead>";
+
+  var totalA = 0, totalB = 0;
+  var rows = "";
+  filas.forEach(function(f){
+    if(!f.emp){
+      rows += "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+"<span class=\"liq-sin-presentismo\">sin ficha en la base</span></td><td colspan=\"13\" class=\"liq-num-cell\" style=\"color:var(--text-3);\">—</td></tr>";
+      return;
+    }
+    var sueldo = Number(f.emp.sueldo||0);
+    var esCondA = f.emp.condicion==="A";
+    var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : 0) : 0;
+    var b = sueldo - a;
+    var adelanto = Number(adelantosPorNombre[f.nombre]||0);
+    var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
+    var jornal = sueldo/30;
+    var valorHora = jornal/8;
+    var horasExtraManual = Number(liqState.horasExtraManual[f.key]||0);
+    var feriadosManual = Number(liqState.feriadosManual[f.key]||0);
+    var ausenciasManual = Number(liqState.ausenciasManual[f.key]||0);
+    var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora));
+    var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
+    totalA += a; totalB += pagoB;
+
+    var horasExtraTxt = liqFmtHM(agr.horasExtraMin);
+    var horasExtraCls = agr.horasExtraMin>0 ? "liq-dia-verde" : agr.horasExtraMin<0 ? "liq-dia-rojo" : "";
+    var dis = liqState.liquidado ? "disabled" : "";
+    var manualInput = function(field, val){
+      return "<input type=\"text\" class=\"liq-input-num\" data-emp=\""+f.key+"\" data-field=\""+field+"\" value=\""+liqFmtDecimal(val)+"\" oninput=\"liqOnVariableManualInput(this)\" "+dis+">";
+    };
+
+    rows += "<tr>" +
+      "<td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+(f.tienePresentismo?"":"<span class=\"liq-sin-presentismo\">sin presentismo</span>")+"</td>" +
+      "<td><span class=\"liq-badge-cond cond-"+f.emp.condicion.toLowerCase()+"\">"+f.emp.condicion+"</span></td>" +
+      "<td class=\"liq-num-cell\">"+fmtMoney(sueldo)+"</td>" +
+      "<td>"+(esCondA
+        ? "<input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"a\" value=\""+fmtMoney(a)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+">"
+        : "<span class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(0)+"</span>") + "</td>" +
+      "<td class=\"liq-num-cell\">"+fmtMoney(b)+"</td>" +
+      "<td class=\"liq-num-cell\" style=\""+(adelanto>0?"color:#B22A32;font-weight:700;":"color:var(--text-3);")+"\" title=\"Suma de Pagos con Concepto=Sueldos y CS, Rubro=Adelanto de sueldo, Proveedor="+liqEscapeHtml(f.nombre)+", pagados este mes\">"+(adelanto>0?"−"+fmtMoney(adelanto):"—")+"</td>" +
+      "<td class=\"liq-num-cell "+horasExtraCls+"\">"+(f.tienePresentismo?horasExtraTxt:"—")+"</td>" +
+      "<td>"+manualInput("horasExtraManual", horasExtraManual)+"</td>" +
+      "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.feriadosTrabajados:"—")+"</td>" +
+      "<td>"+manualInput("feriadosManual", feriadosManual)+"</td>" +
+      "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.ausencias:"—")+"</td>" +
+      "<td>"+manualInput("ausenciasManual", ausenciasManual)+"</td>" +
+      "<td class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(sugerido)+"</td>" +
+      "<td><input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"pagob\" value=\""+fmtMoney(pagoB)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+"></td>" +
+      "</tr>";
+  });
+
+  document.getElementById("liqTablaLiquidacion").innerHTML = thead+"<tbody>"+rows+"</tbody>";
+  document.getElementById("liqTotalGeneral").textContent = fmtMoney(totalA+totalB);
+  var btn = document.getElementById("liqBtnLiquidar");
+  btn.disabled = liqState.liquidado;
+  btn.title = liqState.liquidado ? "Este mes ya fue liquidado" : "Crea las órdenes de pago y genera los recibos";
+  btn.textContent = liqState.liquidado ? "Ya liquidado" : "Liquidar";
+}
+function liqOnMontoInput(el){
+  if(liqState.liquidado) return;
+  var key = el.dataset.emp, field = el.dataset.field;
+  var val = liqParseMontoInput(el.value);
+  if(field==="a") liqState.montoA[key] = val; else liqState.pagoBManual[key] = val;
+  liqRenderTablaLiquidacion();
+  var restored = document.querySelector('#liqTablaLiquidacion input[data-emp="'+key+'"][data-field="'+field+'"]');
+  if(restored){
+    restored.focus();
+    var pos2 = restored.value.length;
+    restored.setSelectionRange && restored.setSelectionRange(pos2,pos2);
+  }
+  liqGuardarDraft();
+}
+function liqOnVariableManualInput(el){
+  if(liqState.liquidado) return;
+  var key = el.dataset.emp, field = el.dataset.field;
+  var val = liqParseDecimalInput(el.value);
+  liqState[field][key] = val;
+  liqRenderTablaLiquidacion();
+  var restored = document.querySelector('#liqTablaLiquidacion input[data-emp="'+key+'"][data-field="'+field+'"]');
+  if(restored){
+    restored.focus();
+    var pos2 = restored.value.length;
+    restored.setSelectionRange && restored.setSelectionRange(pos2,pos2);
+  }
+  liqGuardarDraft();
+}
+function liqParseDecimalInput(str){
+  var s = String(str||"").trim().replace(",", ".").replace(/[^0-9.\-]/g,"");
+  var val = parseFloat(s);
+  return isNaN(val) ? 0 : val;
+}
+function liqFmtDecimal(n){
+  n = Number(n||0);
+  var r = Math.round(n*100)/100;
+  return String(r).replace(".", ",");
+}
+function liqParseMontoInput(str){
+  var digits = String(str||"").replace(/[^\d]/g,"");
+  return digits ? Number(digits) : 0;
+}
+
+/* ---------- totales (usado por persistencia y por Liquidar) ---------- */
+function liqComputeTotales(){
+  var porKey = liqEmpleadosPorKey();
+  var keysConPresentismo = Object.keys(liqState.presentismo||{});
+  var nombresConPresentismo = keysConPresentismo.map(function(k){ var e=porKey[k]; return e?e.nombre_completo:null; }).filter(Boolean);
+  var otros = (empleadosCache||[]).filter(function(e){ return nombresConPresentismo.indexOf(e.nombre_completo)===-1; });
+  var filas = keysConPresentismo.map(function(key){
+    return {key:key, emp:porKey[key], tienePresentismo:true};
+  }).concat(otros.map(function(e){ return {key:"emp_"+e.id, emp:e, tienePresentismo:false}; }));
+
+  var adelantosPorNombre = liqAdelantosPorNombre();
+  var totalA=0, totalB=0, totalAdelantos=0, montosA={}, pagosB={}, recibos=[];
+  filas.forEach(function(f){
+    if(!f.emp) return;
+    var sueldo = Number(f.emp.sueldo||0);
+    var esCondA = f.emp.condicion==="A";
+    var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : 0) : 0;
+    var adelanto = Number(adelantosPorNombre[f.emp.nombre_completo]||0);
+    var jornal = sueldo/30;
+    var valorHora = jornal/8;
+    var horasExtraManual = Number(liqState.horasExtraManual[f.key]||0);
+    var feriadosManual = Number(liqState.feriadosManual[f.key]||0);
+    var ausenciasManual = Number(liqState.ausenciasManual[f.key]||0);
+    var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora));
+    var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
+    totalA += a; totalB += pagoB; totalAdelantos += adelanto;
+    montosA[f.key] = a; pagosB[f.key] = pagoB;
+    recibos.push({key:f.key, emp:f.emp, monto:pagoB});
+  });
+  return {totalA:totalA, totalB:totalB, totalAdelantos:totalAdelantos, montosA:montosA, pagosB:pagosB, recibos:recibos};
+}
+
+/* ---------- persistencia (cm_liquidaciones, una fila por mes) ---------- */
+function liqGuardarDraft(){
+  clearTimeout(liqGuardarDraftTimer);
+  liqGuardarDraftTimer = setTimeout(liqGuardarDraftAhora, 700);
+}
+async function liqGuardarDraftAhora(){
+  if(!liqState.mes || liqState.liquidado) return;
+  var tot = liqComputeTotales();
+  var payload = {
+    mes: liqState.mes,
+    marcaciones_header: liqState.marcacionesHeader,
+    marcaciones_rows: liqState.marcacionesRows,
+    marcaciones_file_name: liqState.fileName,
+    feriados: liqState.feriados,
+    montos_a: liqState.montoA,
+    pagos_b: liqState.pagoBManual,
+    horas_extra_manual: liqState.horasExtraManual,
+    feriados_manual: liqState.feriadosManual,
+    ausencias_manual: liqState.ausenciasManual,
+    total_a: tot.totalA,
+    total_b: tot.totalB,
+    modificado_por: (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null
+  };
+  try{
+    if(liqState.liquidacionId){
+      var res = await sb.from("cm_liquidaciones").update(payload).eq("id", liqState.liquidacionId);
+      if(res.error) console.warn("No se pudo guardar el borrador de liquidación", res.error);
+    } else {
+      payload.creado_por = payload.modificado_por;
+      var res2 = await sb.from("cm_liquidaciones").insert(payload).select().single();
+      if(res2.error) console.warn("No se pudo guardar el borrador de liquidación", res2.error);
+      else liqState.liquidacionId = res2.data.id;
+    }
+  }catch(e){ console.warn("No se pudo guardar el borrador de liquidación", e); }
+}
+async function liqOnTabOpen(){
+  if(liqInitDone) return;
+  liqInitDone = true;
+  liqRenderZone();
+  liqWireZoneEvents();
+  if(!empleadosCache.length){ try{ await loadEmpleados(); }catch(e){} }
+  try{
+    var res = await sb.from("cm_liquidaciones").select("*").order("mes", {ascending:false}).limit(1);
+    if(!res.error && res.data && res.data.length){
+      var row = res.data[0];
+      liqState.mes = row.mes;
+      liqState.marcacionesHeader = row.marcaciones_header;
+      liqState.marcacionesRows = row.marcaciones_rows || [];
+      liqState.fileName = row.marcaciones_file_name;
+      liqState.feriados = row.feriados || [];
+      liqState.montoA = row.montos_a || {};
+      liqState.pagoBManual = row.pagos_b || {};
+      liqState.horasExtraManual = row.horas_extra_manual || {};
+      liqState.feriadosManual = row.feriados_manual || {};
+      liqState.ausenciasManual = row.ausencias_manual || {};
+      liqState.liquidado = !!row.liquidado;
+      liqState.liquidacionId = row.id;
+      liqState.ordenAId = row.orden_a_id;
+      liqState.ordenBId = row.orden_b_id;
+      var grupos = liqAgruparPorEmpleadoYJornada(liqState.marcacionesRows);
+      var presentismo = {};
+      Object.keys(grupos).forEach(function(nombreCorto){
+        var emp = liqEmpleadoPorNombreCorto(nombreCorto);
+        if(!emp) return;
+        presentismo[nombreCorto] = liqProcesarEmpleado(emp, grupos[nombreCorto]||{});
+      });
+      liqState.presentismo = presentismo;
+      liqRenderZone();
+      liqRenderTodo();
+    }
+  }catch(e){ console.warn("No se pudo cargar la última liquidación guardada", e); }
+}
+
+/* ---------- número a letras (pesos, es-AR) ---------- */
+function liqNumeroALetras(n){
+  n = Math.round(Math.abs(Number(n)||0));
+  if(n===0) return "cero";
+  var UNIDADES = ["","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve"];
+  var DIECI = ["diez","once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve"];
+  var DECENAS = ["","","veinte","treinta","cuarenta","cincuenta","sesenta","setenta","ochenta","noventa"];
+  var CENTENAS = ["","ciento","doscientos","trescientos","cuatrocientos","quinientos","seiscientos","setecientos","ochocientos","novecientos"];
+  function under100(num){
+    if(num<10) return UNIDADES[num];
+    if(num<20) return DIECI[num-10];
+    if(num<30) return num===20 ? "veinte" : "veinti"+UNIDADES[num-20];
+    var d = Math.floor(num/10), u = num%10;
+    return u===0 ? DECENAS[d] : DECENAS[d]+" y "+UNIDADES[u];
+  }
+  function under1000(num){
+    if(num<100) return under100(num);
+    var c = Math.floor(num/100), r = num%100;
+    if(c===1 && r===0) return "cien";
+    return r===0 ? CENTENAS[c] : CENTENAS[c]+" "+under100(r);
+  }
+  function apocopar(str){
+    if(str.slice(-9)==="veintiuno") return str.slice(0,-3)+"ún";
+    if(str.slice(-4)===" uno") return str.slice(0,-3)+"un";
+    if(str==="uno") return "un";
+    return str;
+  }
+  function under1e6(num){
+    var miles = Math.floor(num/1000), resto = num%1000, out = "";
+    if(miles>0) out = miles===1 ? "mil" : apocopar(under1000(miles))+" mil";
+    if(resto>0) out += (out?" ":"")+under1000(resto);
+    return out;
+  }
+  var millones = Math.floor(n/1000000), resto1e6 = n%1000000, out = "";
+  if(millones>0) out = millones===1 ? "un millón" : apocopar(under1e6(millones))+" millones";
+  if(resto1e6>0) out += (out?" ":"")+under1e6(resto1e6);
+  return out.trim();
+}
+function liqEscapeXml(s){
+  return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+}
+
+/* ---------- generación de recibos (Word), uno por empleado, en un .zip ----------
+   Sin cambios de lógica respecto a La Fortaleza: la plantilla nueva de Che Mono usa
+   exactamente los mismos placeholders {{FECHA}}/{{MONTO_LETRAS}}/{{MONTO_NUM}}/{{MES}}/
+   {{NOMBRE_LEGAL}}/{{DNI}} (ver LIQ_RECIBO_TEMPLATE_B64 más abajo). */
+async function liqGenerarReciboDocx(datos){
+  var bin = atob(LIQ_RECIBO_TEMPLATE_B64);
+  var bytes = new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  var zip = await JSZip.loadAsync(bytes);
+  var xml = await zip.file("word/document.xml").async("string");
+  xml = xml
+    .replace("{{FECHA}}", liqEscapeXml(datos.fecha))
+    .replace("{{MONTO_LETRAS}}", liqEscapeXml(datos.montoLetras))
+    .replace("{{MONTO_NUM}}", liqEscapeXml(datos.montoNum))
+    .replace("{{MES}}", liqEscapeXml(datos.mes))
+    .replace("{{NOMBRE_LEGAL}}", liqEscapeXml(datos.nombreLegal))
+    .replace("{{DNI}}", liqEscapeXml(datos.dni||""));
+  zip.file("word/document.xml", xml);
+  return zip.generateAsync({type:"blob"});
+}
+function liqSlug(s){
+  return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-zA-Z0-9]+/g,"_").replace(/^_+|_+$/g,"");
+}
+async function liqGenerarYDescargarRecibos(recibos, mesISO, fechaDMY){
+  var zip = new JSZip();
+  var mesNombre = liqMesNombre(mesISO);
+  for(var i=0;i<recibos.length;i++){
+    var r = recibos[i];
+    if(!(r.monto>0)) continue;
+    var blob = await liqGenerarReciboDocx({
+      fecha: fechaDMY,
+      montoLetras: liqNumeroALetras(r.monto),
+      montoNum: fmtMoney(r.monto).replace("$",""),
+      mes: mesNombre.split(" ")[0],
+      nombreLegal: r.emp.nombre_legal || r.emp.nombre_completo.toUpperCase(),
+      dni: r.emp.dni || ""
+    });
+    zip.file("Recibo_"+liqSlug(r.emp.nombre_completo)+".docx", blob);
+  }
+  var contenido = await zip.generateAsync({type:"blob"});
+  var url = URL.createObjectURL(contenido);
+  var a = document.createElement("a");
+  a.href = url; a.download = "Recibos_Sueldos_"+liqSlug(mesNombre)+".zip";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+
+/* ---------- Liquidar: crea la(s) orden(es) de pago en Pagos y genera los recibos ----------
+   Adaptado: cm_ordenes en vez de lf_ordenes, cm_liquidaciones en vez de lf_liquidaciones, y el
+   registro puntual por orden (logHistorialOrden en La Fortaleza) usa acá logHistorialSueldos
+   (ya existente en Che Mono, escribe en cm_historial) en vez de portar una función aparte. El
+   array `ordenes` y las funciones renderList/updateCounts/mapOrdenRow del módulo Pagos son
+   opcionales (typeof-checks) porque ese módulo todavía no está construido en Che Mono. */
+function liqConfirmarLiquidar(){
+  if(!liqState.mes || liqState.liquidado) return;
+  var tot = liqComputeTotales();
+  if(tot.totalA<=0 && tot.totalB<=0){ showToast("No hay montos para liquidar este mes.", "warn"); return; }
+  var msg = "Vas a liquidar " + liqMesNombre(liqState.mes) + ":\n\n" +
+    (tot.totalA>0 ? "• Parte A (Bco. Galicia): " + fmtMoney(tot.totalA) + "\n" : "") +
+    (tot.totalB>0 ? "• Parte B (Efectivo, con recibo): " + fmtMoney(tot.totalB) + "\n" : "") +
+    (tot.totalAdelantos>0 ? "\n(Ya se descontaron " + fmtMoney(tot.totalAdelantos) + " en adelantos de sueldo pagados este mes, cargados desde Pagos)\n" : "") +
+    "\nEsto va a crear la(s) orden(es) de pago en Pagos (como Pendiente) y va a descargar un .zip con los recibos de sueldo. ¿Confirmás?";
+  if(!confirm(msg)) return;
+  liqEjecutarLiquidar(tot);
+}
+async function liqEjecutarLiquidar(tot){
+  var mesNombre = liqMesNombre(liqState.mes);
+  var hoy = todayISO();
+  var creadoPorId = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null;
+  var creadoPorNombre = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.nombre : "—";
+  var ordenAId = null, ordenBId = null;
+
+  try{
+    if(tot.totalA>0){
+      var payloadA = {
+        fecha_orden: hoy, comprobante_tipo: null, fecha_comprobante: hoy, comprobante: "",
+        proveedor: "No especifica proveedor", concepto: "Sueldos y CS", rubro: "Sueldos",
+        monto_factura: tot.totalA, monto_retencion: 0, monto: tot.totalA,
+        estado: "Pendiente", metodo: "Bco. Galicia", fecha_venc: null, fecha_pago: null,
+        notas: "Liquidación de sueldos — parte A — " + mesNombre + ".",
+        unread: true, creado_por: creadoPorId, creado_por_nombre: creadoPorNombre,
+        modificado_por: creadoPorId, modificado_por_nombre: creadoPorNombre, modificado_fecha: new Date().toISOString()
+      };
+      var resA = await sb.from("cm_ordenes").insert(payloadA).select().single();
+      if(resA.error){ showToast("No se pudo crear la orden de pago (parte A): "+resA.error.message, "warn"); return; }
+      ordenAId = resA.data.id;
+      if(typeof ordenes!=="undefined" && ordenes && typeof mapOrdenRow==="function") ordenes.unshift(mapOrdenRow(resA.data));
+      await logHistorialSueldos("Creó una orden de pago", ordenAId+" (Sueldos, parte A, "+fmtMoney(tot.totalA)+")");
+    }
+    if(tot.totalB>0){
+      var payloadB = {
+        fecha_orden: hoy, comprobante_tipo: "Pago B", fecha_comprobante: hoy, comprobante: "",
+        proveedor: "No especifica proveedor", concepto: "Sueldos y CS", rubro: "Sueldos",
+        monto_factura: tot.totalB, monto_retencion: 0, monto: tot.totalB,
+        estado: "Pendiente", metodo: "Efectivo", fecha_venc: null, fecha_pago: null,
+        notas: "Liquidación de sueldos — parte B — " + mesNombre + ".",
+        unread: true, creado_por: creadoPorId, creado_por_nombre: creadoPorNombre,
+        modificado_por: creadoPorId, modificado_por_nombre: creadoPorNombre, modificado_fecha: new Date().toISOString()
+      };
+      var resB = await sb.from("cm_ordenes").insert(payloadB).select().single();
+      if(resB.error){ showToast("No se pudo crear la orden de pago (parte B): "+resB.error.message, "warn"); return; }
+      ordenBId = resB.data.id;
+      if(typeof ordenes!=="undefined" && ordenes && typeof mapOrdenRow==="function") ordenes.unshift(mapOrdenRow(resB.data));
+      await logHistorialSueldos("Creó una orden de pago", ordenBId+" (Sueldos, parte B, "+fmtMoney(tot.totalB)+")");
+    }
+    if(typeof renderList==="function") renderList();
+    if(typeof updateCounts==="function") updateCounts();
+
+    liqState.liquidado = true;
+    liqState.ordenAId = ordenAId;
+    liqState.ordenBId = ordenBId;
+    liqState.montoA = tot.montosA;
+    liqState.pagoBManual = tot.pagosB;
+
+    var payloadLiq = {
+      mes: liqState.mes, marcaciones_header: liqState.marcacionesHeader, marcaciones_rows: liqState.marcacionesRows,
+      marcaciones_file_name: liqState.fileName, feriados: liqState.feriados,
+      montos_a: tot.montosA, pagos_b: tot.pagosB, total_a: tot.totalA, total_b: tot.totalB,
+      liquidado: true, liquidado_en: new Date().toISOString(), liquidado_por: creadoPorId,
+      orden_a_id: ordenAId, orden_b_id: ordenBId, modificado_por: creadoPorId
+    };
+    if(liqState.liquidacionId){
+      await sb.from("cm_liquidaciones").update(payloadLiq).eq("id", liqState.liquidacionId);
+    } else {
+      payloadLiq.creado_por = creadoPorId;
+      var resLiq = await sb.from("cm_liquidaciones").insert(payloadLiq).select().single();
+      if(!resLiq.error) liqState.liquidacionId = resLiq.data.id;
+    }
+
+    await logHistorialSueldos("Liquidación de sueldos", mesNombre + ": " + fmtMoney(tot.totalA+tot.totalB) + " (A: "+fmtMoney(tot.totalA)+", B: "+fmtMoney(tot.totalB)+").");
+    showToast("Liquidación de "+mesNombre+" confirmada. Generando los recibos...");
+    liqRenderTodo();
+    await liqGenerarYDescargarRecibos(tot.recibos, liqState.mes, isoToDMY(hoy));
+  }catch(e){
+    console.error(e);
+    showToast("Ocurrió un error al liquidar. Revisá Pagos para confirmar qué se llegó a crear.", "warn");
+  }
+}
+
+var LIQ_RECIBO_TEMPLATE_B64 = "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";
 
 loadSueldosGridState();
 renderSueldosGridHeader();
