@@ -146,6 +146,7 @@
   .filter-btn svg{width:12px;height:12px;}
 
   .list-scroll{flex:1;overflow:auto;padding:0 32px 24px 32px;}
+  #stabEsquema .list-scroll{padding-left:76px;}
   .list{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-md) var(--radius-md);overflow:hidden;width:max-content;min-width:100%;}
   .row{border-bottom:1px solid var(--border);cursor:pointer;position:relative;transition:background .12s ease;}
   .row:last-child{border-bottom:none;}
@@ -774,9 +775,22 @@
 .cta-outline:hover{background:rgba(89,119,210,0.08);}
 .cta-outline.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .masa-subtitle{color:var(--text-2);font-size:14px;margin-top:4px;}
-.sueldos-grid{display:grid;grid-template-columns:var(--grid-template-sueldos, 56px 1fr);align-items:center;width:max-content;min-width:100%;}
+.sueldos-grid{display:grid;grid-template-columns:var(--grid-template-sueldos, 68px 1fr);align-items:center;width:max-content;min-width:100%;}
 .sueldos-grid .cell{padding:13px 8px;font-size:13.3px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.sueldos-grid .c-num-emp{font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center;padding:13px 4px;}
+.sueldos-grid .c-num-emp{font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center;padding:13px 4px;display:flex;align-items:center;justify-content:center;gap:5px;}
+.emp-drag-handle{cursor:grab;color:var(--gray);font-size:12px;line-height:1;opacity:.55;user-select:none;letter-spacing:-1px;}
+.emp-drag-handle:hover{opacity:1;color:var(--sky);}
+.emp-drag-handle.disabled{cursor:not-allowed;opacity:.22;}
+.sueldos-grid .row.dragging-row{opacity:.4;}
+.sueldos-grid .row.drag-over{box-shadow:inset 0 2px 0 var(--blue);}
+/* ---- brackets de agrupación cocina/salón ---- */
+.list-scroll{position:relative;}
+.emp-bracket-gutter{position:absolute;left:16px;top:0;width:44px;pointer-events:none;z-index:2;}
+.emp-bracket{position:absolute;left:0;width:44px;}
+.emp-bracket .eb-line{position:absolute;right:4px;top:6px;bottom:6px;width:9px;border-left:2px solid var(--c);border-top:2px solid var(--c);border-bottom:2px solid var(--c);border-top-left-radius:5px;border-bottom-left-radius:5px;}
+.emp-bracket .eb-label{position:absolute;left:0;top:50%;width:16px;text-align:center;transform:translateY(-50%) rotate(-90deg);transform-origin:center;font-size:9.5px;font-weight:800;letter-spacing:.07em;color:var(--c);white-space:nowrap;}
+.emp-bracket-cocina{--c:#C97C3D;}
+.emp-bracket-salon{--c:var(--blue);}
 .sueldos-grid .c-nombre-emp{font-weight:700;color:var(--text-1);}
 .sueldos-grid .c-monto-emp{font-weight:800;color:var(--text-1);text-align:right;font-variant-numeric:tabular-nums;padding-right:16px;}
 .sueldos-grid .c-fecha-emp{font-weight:600;color:var(--text-3);font-size:12px;font-variant-numeric:tabular-nums;}
@@ -1065,7 +1079,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
             Actualización de sueldos
           </button>
-          <button class="cta-nueva" id="ctaNuevoEmpleadoBtn" onclick="goSueldosTab('nuevoEmpleado')">
+          <button class="cta-nueva" id="ctaNuevoEmpleadoBtn" onclick="abrirNuevoEmpleado()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Cargar nuevo empleado
           </button>
@@ -1094,6 +1108,7 @@
             </div>
             <div class="list-scroll">
               <div class="sueldos-grid col-head-row" id="sueldosColHeadRow"></div>
+              <div class="emp-bracket-gutter" id="empBracketGutter"></div>
               <div class="list" id="empleadosBody"></div>
               <div class="empty-state" id="empleadosEmptyState" style="display:none;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path></svg>
@@ -1172,7 +1187,7 @@
           <!-- PANE: CARGAR NUEVO EMPLEADO -->
           <section class="pagos-pane" id="stabNuevoEmpleado">
             <div class="screen-header">
-              <div class="back-btn" onclick="goSueldosTab('esquema')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+              <div class="back-btn" onclick="cancelarNuevoEmpleado()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
               <div><h1 style="font-size:22px;" id="empFormTitle">Cargar nuevo empleado</h1></div>
             </div>
             <div class="form-card">
@@ -1240,7 +1255,7 @@
               </div>
               <div class="form-footer">
                 <button class="btn-primary" style="flex:1" onclick="guardarNuevoEmpleado()">Guardar empleado</button>
-                <button class="btn-primary secondary" onclick="goSueldosTab('esquema')">Cancelar</button>
+                <button class="btn-primary secondary" onclick="cancelarNuevoEmpleado()">Cancelar</button>
                 <button class="btn-primary secondary" id="btnEliminarEmpleado" onclick="eliminarEmpleadoActual()" style="display:none;color:#B22A32;">Eliminar empleado</button>
               </div>
             </div>
@@ -1579,6 +1594,20 @@ function goSueldosTab(tab){
 /* ---- alta / edición / baja de empleados ---- */
 var eEditId = null; // id del empleado en edición, o null si es un alta nueva
 
+/* Punto de entrada único y "a prueba de balas" para abrir el formulario en
+   modo alta: sea cual sea el estado previo de eEditId, esto siempre lo
+   deja en null y limpia el formulario ANTES de mostrarlo. */
+function abrirNuevoEmpleado(){
+  eEditId = null;
+  resetNuevoEmpleadoForm();
+  goSueldosTab("nuevoEmpleado");
+}
+
+function cancelarNuevoEmpleado(){
+  eEditId = null;
+  goSueldosTab("esquema");
+}
+
 function resetNuevoEmpleadoForm(){
   eEditId = null;
   document.getElementById("empFormTitle").textContent = "Cargar nuevo empleado";
@@ -1624,6 +1653,7 @@ async function eliminarEmpleadoActual(){
   }
   await logHistorialSueldos("Baja de empleado", "Se eliminó a " + emp.nombre_completo + " (" + emp.puesto + ").");
   showToast("Empleado eliminado correctamente");
+  eEditId = null;
   await loadEmpleados();
   goSueldosTab("esquema");
 }
@@ -1692,15 +1722,22 @@ async function guardarNuevoEmpleado(){
     if(idx>-1) empleadosCache[idx] = resEdit.data;
     logHistorialSueldos("Edición de empleado", (empPrevio?empPrevio.nombre_completo:nombre) + ": datos actualizados.");
     showToast("Empleado actualizado correctamente");
+    eEditId = null;
     goSueldosTab("esquema");
     return;
   }
+
+  /* Alta nueva: numeracion la asigna el código (ya no es un identity de
+     Postgres) — se agrega al final del orden manual actual. */
+  var maxNumeracion = 0;
+  empleadosCache.forEach(function(e){ if(Number(e.numeracion||0) > maxNumeracion) maxNumeracion = Number(e.numeracion); });
 
   var payload = {
     condicion: condicion,
     nombre_completo: nombre,
     turno: turno,
     puesto: puesto,
+    numeracion: maxNumeracion + 1,
     inicio_actividades: inicioDMY ? dmyToISO(inicioDMY) : null,
     sueldo: sueldo,
     sueldo_anterior: sueldo,
@@ -1850,7 +1887,7 @@ function getSueldosVisibleColumnDefs(){
 }
 function applySueldosGridTemplateColumns(){
   var cols = getSueldosVisibleColumnDefs();
-  var parts = ["56px"].concat(cols.map(function(c){ return "var(--cw-" + c.id + ", " + c.defaultWidth + "px)"; }));
+  var parts = ["68px"].concat(cols.map(function(c){ return "var(--cw-" + c.id + ", " + c.defaultWidth + "px)"; }));
   document.documentElement.style.setProperty("--grid-template-sueldos", parts.join(" "));
 }
 function renderSueldosGridHeader(){
@@ -2070,19 +2107,198 @@ function renderEmpleadosTable(){
 
   var list = getSortedEmpleados();
   var cols = getSueldosVisibleColumnDefs();
+  var dragDisabled = !!sueldosSortField; /* el reordenamiento manual sólo tiene sentido en el orden por N° (numeracion) */
   var rows = "";
   for(var j=0;j<list.length;j++){
     var emp = list[j];
     var cellsHtml = "";
     for(var k=0;k<cols.length;k++){ cellsHtml += cols[k].cell(emp); }
-    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\" onclick=\"onEmpleadoRowClick(event,'" + emp.id + "')\"><div class=\"cell c-num-emp\">" + (j+1) + "</div>" + cellsHtml + "</div>";
+    var handleTitle = dragDisabled ? "Ordená por N° para poder arrastrar y reordenar" : "Arrastrá para reordenar";
+    var handleHtml = "<span class=\"emp-drag-handle" + (dragDisabled ? " disabled" : "") + "\" draggable=\"" + (dragDisabled ? "false" : "true") + "\" title=\"" + handleTitle + "\">⋮⋮</span>";
+    var numCellTitle = dragDisabled ? " title=\"Posición según el orden actual (no es la numeración manual). Ordená por N° para ver y arrastrar el orden manual.\"" : "";
+    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\" onclick=\"onEmpleadoRowClick(event,'" + emp.id + "')\"><div class=\"cell c-num-emp\"" + numCellTitle + ">" + handleHtml + "<span class=\"emp-num-val\">" + (j+1) + "</span></div>" + cellsHtml + "</div>";
   }
   tbody.innerHTML = rows;
+  initEmpleadosDragAndDrop();
+  requestAnimationFrame(renderEmpBrackets);
+}
+
+/* =========================================================
+   Reordenamiento manual (drag & drop) de la numeracion.
+   Sólo aplica cuando la grilla está en su orden natural (por
+   numeracion, sueldosSortField===null); en cualquier otro orden
+   de columna, arrastrar queda deshabilitado (ver dragDisabled).
+   ========================================================= */
+var empDragFromId = null;
+
+function initEmpleadosDragAndDrop(){
+  var body = document.getElementById("empleadosBody");
+  if(!body || body.dataset.dndWired) return;
+  body.dataset.dndWired = "1";
+
+  body.addEventListener("dragstart", function(ev){
+    var handle = ev.target.closest && ev.target.closest(".emp-drag-handle");
+    if(!handle || handle.classList.contains("disabled") || sueldosSortField){ ev.preventDefault(); return; }
+    var row = handle.closest(".row");
+    if(!row){ ev.preventDefault(); return; }
+    empDragFromId = row.dataset.id;
+    row.classList.add("dragging-row");
+    ev.dataTransfer.effectAllowed = "move";
+    try{ ev.dataTransfer.setData("text/plain", empDragFromId); }catch(e){}
+  });
+
+  body.addEventListener("dragover", function(ev){
+    if(!empDragFromId || sueldosSortField) return;
+    ev.preventDefault();
+    var row = ev.target.closest && ev.target.closest(".row");
+    if(!row) return;
+    body.querySelectorAll(".row.drag-over").forEach(function(r){ r.classList.remove("drag-over"); });
+    if(row.dataset.id !== empDragFromId) row.classList.add("drag-over");
+  });
+
+  body.addEventListener("dragleave", function(ev){
+    var row = ev.target.closest && ev.target.closest(".row");
+    if(row) row.classList.remove("drag-over");
+  });
+
+  body.addEventListener("drop", function(ev){
+    ev.preventDefault();
+    body.querySelectorAll(".row.drag-over").forEach(function(r){ r.classList.remove("drag-over"); });
+    body.querySelectorAll(".row.dragging-row").forEach(function(r){ r.classList.remove("dragging-row"); });
+    var fromId = empDragFromId;
+    empDragFromId = null;
+    if(!fromId || sueldosSortField) return;
+    var row = ev.target.closest && ev.target.closest(".row");
+    if(!row) return;
+    var toId = row.dataset.id;
+    if(toId===fromId) return;
+    reordenarEmpleadoManual(fromId, toId);
+  });
+
+  body.addEventListener("dragend", function(){
+    body.querySelectorAll(".row.drag-over").forEach(function(r){ r.classList.remove("drag-over"); });
+    body.querySelectorAll(".row.dragging-row").forEach(function(r){ r.classList.remove("dragging-row"); });
+    empDragFromId = null;
+  });
+}
+
+/* Mueve fromId a la posición donde estaba toId (drag & drop entre dos filas). */
+function reordenarEmpleadoManual(fromId, toId){
+  var ids = getSortedEmpleados().map(function(e){ return e.id; });
+  var fromIdx = ids.indexOf(fromId);
+  var toIdx = ids.indexOf(toId);
+  if(fromIdx<0 || toIdx<0) return;
+  ids.splice(fromIdx, 1);
+  var insertAt = ids.indexOf(toId);
+  if(insertAt<0) insertAt = ids.length;
+  ids.splice(insertAt, 0, fromId);
+  return aplicarNuevoOrdenEmpleados(ids);
+}
+
+/* Función invocable directamente (UI o tests) para mover un empleado a una
+   posición 1-based dentro del orden manual, sin pasar por drag & drop. */
+function moverEmpleado(id, nuevaPosicion){
+  var ids = getSortedEmpleados().map(function(e){ return e.id; });
+  var idx = ids.indexOf(id);
+  if(idx<0) return Promise.resolve(false);
+  ids.splice(idx, 1);
+  var target = Math.max(0, Math.min(ids.length, nuevaPosicion-1));
+  ids.splice(target, 0, id);
+  return aplicarNuevoOrdenEmpleados(ids);
+}
+
+/* Recibe el nuevo orden completo (array de ids) y persiste en la DB sólo
+   los empleados cuya numeracion realmente cambió (1..N según su nueva
+   posición). Si algo falla a mitad de camino, avisa y resincroniza desde
+   la DB para no dejar el estado a medio actualizar. */
+async function aplicarNuevoOrdenEmpleados(newOrderIds){
+  var updates = [];
+  for(var i=0;i<newOrderIds.length;i++){
+    var id = newOrderIds[i];
+    var emp = empleadosCache.find(function(e){ return e.id===id; });
+    if(!emp) continue;
+    var nuevaNum = i+1;
+    if(Number(emp.numeracion||0) !== nuevaNum){ updates.push({ id: id, numeracion: nuevaNum }); }
+  }
+  if(!updates.length) return true;
+
+  try{
+    for(var k=0;k<updates.length;k++){
+      var u = updates[k];
+      var res = await sb.from("cm_empleados").update({ numeracion: u.numeracion }).eq("id", u.id);
+      if(res.error) throw res.error;
+    }
+  }catch(err){
+    showToast("No se pudo guardar el nuevo orden: " + (err && err.message ? err.message : "error desconocido"), "warn");
+    await loadEmpleados();
+    return false;
+  }
+
+  updates.forEach(function(u){
+    var emp = empleadosCache.find(function(e){ return e.id===u.id; });
+    if(emp) emp.numeracion = u.numeracion;
+  });
+  renderEmpleadosTable();
+  return true;
+}
+
+/* =========================================================
+   Recuadro/índice visual a la izquierda de la tabla que agrupa
+   filas contiguas de Cocina y de Salón (ver puestos abajo).
+   Se recalcula después de cada render de la tabla.
+   ========================================================= */
+var EMP_PUESTOS_COCINA = ["Jefe de cocina", "Cocinero", "Ayudante de cocina", "Bachero"];
+var EMP_PUESTOS_SALON = ["Mesero", "Barra", "Cajero"];
+
+function clasificarPuestoEmpleado(puesto){
+  if(EMP_PUESTOS_COCINA.indexOf(puesto)>-1) return "cocina";
+  if(EMP_PUESTOS_SALON.indexOf(puesto)>-1) return "salon";
+  return null;
+}
+
+function renderEmpBrackets(){
+  var gutter = document.getElementById("empBracketGutter");
+  var body = document.getElementById("empleadosBody");
+  if(!gutter || !body) return;
+  gutter.innerHTML = "";
+
+  var rowEls = body.querySelectorAll(".row");
+  if(!rowEls.length) return;
+
+  var runs = [];
+  var current = null;
+  rowEls.forEach(function(rowEl){
+    var id = rowEl.dataset.id;
+    var emp = empleadosCache.find(function(e){ return e.id===id; });
+    var grupo = emp ? clasificarPuestoEmpleado(emp.puesto) : null;
+    if(grupo){
+      if(current && current.grupo===grupo){ current.last = rowEl; }
+      else { current = { grupo: grupo, first: rowEl, last: rowEl }; runs.push(current); }
+    } else {
+      current = null;
+    }
+  });
+
+  var frag = document.createDocumentFragment();
+  runs.forEach(function(run){
+    var top = run.first.offsetTop;
+    var bottom = run.last.offsetTop + run.last.offsetHeight;
+    var label = run.grupo==="cocina" ? "COCINA" : "SALÓN";
+    var cls = run.grupo==="cocina" ? "emp-bracket-cocina" : "emp-bracket-salon";
+    var el = document.createElement("div");
+    el.className = "emp-bracket " + cls;
+    el.style.top = top + "px";
+    el.style.height = Math.max(0, bottom-top) + "px";
+    el.innerHTML = "<div class=\"eb-line\"></div><div class=\"eb-label\">" + label + "</div>";
+    frag.appendChild(el);
+  });
+  gutter.appendChild(frag);
 }
 
 function onEmpleadoRowClick(ev, id){
   if(modoActualizacionSueldos) return;
   if(ev && ev.target && ev.target.closest && ev.target.closest(".sueldo-edit-input")) return;
+  if(ev && ev.target && ev.target.closest && ev.target.closest(".emp-drag-handle")) return;
   editarEmpleado(id);
 }
 
