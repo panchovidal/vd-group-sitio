@@ -919,6 +919,273 @@
 .cm-resumen-head{font-size:12.5px;font-weight:800;color:var(--text-1);margin-bottom:10px;}
 .cm-total-bar button:disabled{opacity:.45;cursor:not-allowed;}
 .cm-hint{font-size:12px;color:var(--text-3);margin:2px 0 18px 1px;max-width:900px;}
+  /* =========================================================
+     CONFIGURACIÓN · COMPRAS (Proveedores / Insumos) — Che Mono
+     ========================================================= */
+  .cfg-subbar{display:flex;align-items:center;gap:6px;padding:10px 32px;background:#FAFBFF;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .cfg-subtab{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:9px;font-size:12.8px;font-weight:700;color:var(--text-2);cursor:pointer;user-select:none;border:1px solid transparent;transition:background .15s ease,color .15s ease,border-color .15s ease;}
+  .cfg-subtab svg{width:15px;height:15px;opacity:.75;}
+  .cfg-subtab:hover{background:#F0F2FA;color:var(--text-1);}
+  .cfg-subtab.active{background:#fff;color:var(--blue);border-color:var(--border);box-shadow:var(--shadow-sm);}
+  .cfg-subtab.active svg{opacity:1;}
+  .cfg-subtab .cnt{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;background:#EEF0F9;color:var(--text-2);font-variant-numeric:tabular-nums;}
+  .cfg-subtab.active .cnt{background:#EAF0FF;color:var(--blue);}
+  .cfg-subbar .spacer{flex:1;}
+  .cfg-live{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--text-3);}
+  .cfg-live i{width:7px;height:7px;border-radius:50%;background:#9AA0BF;display:block;}
+  .cfg-live.on i{background:#1F9D5A;box-shadow:0 0 0 3px rgba(31,157,90,.16);animation:cfgPulse 2.4s ease-in-out infinite;}
+  @keyframes cfgPulse{0%,100%{box-shadow:0 0 0 3px rgba(31,157,90,.16);}50%{box-shadow:0 0 0 6px rgba(31,157,90,.06);}}
+
+  .cfg-view{display:none;flex-direction:column;flex:1;min-height:0;}
+  .cfg-view.active{display:flex;}
+  .cfg-head{padding:20px 32px 0 32px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;flex-shrink:0;}
+  .cfg-head h1{font-size:21px;margin:0;font-weight:800;letter-spacing:-.2px;}
+  .cfg-kpis{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .cfg-kpi{display:flex;align-items:baseline;gap:5px;font-size:12px;font-weight:600;color:var(--text-2);background:#fff;border:1px solid var(--border);border-radius:20px;padding:4px 11px;}
+  .cfg-kpi b{font-size:13px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .cfg-head .spacer{flex:1;}
+  .cfg-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .cfg-search{position:relative;width:280px;}
+  .cfg-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text-3);}
+  .cfg-search input{width:100%;padding:10px 32px 10px 36px;border-radius:10px;border:1px solid var(--border);background:#fff;font-size:13px;outline:none;transition:border-color .15s ease,box-shadow .15s ease;}
+  .cfg-search input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(89,119,210,0.15);}
+  .cfg-search .x{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:22px;height:22px;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-radius:6px;display:none;align-items:center;justify-content:center;}
+  .cfg-search .x.show{display:flex;}
+  .cfg-search .x:hover{background:#F1F2FA;color:var(--text-1);}
+  .cfg-search .x svg{position:static;transform:none;width:12px;height:12px;}
+  .cfg-cta{display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(38,47,76,.22);transition:transform .15s ease,filter .15s ease,box-shadow .15s ease;white-space:nowrap;}
+  .cfg-cta:hover{filter:brightness(1.15);transform:translateY(-1px);box-shadow:0 10px 22px rgba(38,47,76,.28);}
+  .cfg-cta svg{width:16px;height:16px;}
+  .cfg-cta .plus{width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;}
+  .cfg-cta .plus svg{width:13px;height:13px;}
+  .cfg-cta .caret{width:13px;height:13px;opacity:.8;margin-left:2px;}
+  .cfg-cta-ghost{display:flex;align-items:center;gap:7px;background:#fff;color:var(--navy);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12.8px;font-weight:800;cursor:pointer;white-space:nowrap;transition:background .15s ease,border-color .15s ease;}
+  .cfg-cta-ghost:hover{background:#F5F6FB;border-color:var(--gray);}
+  .cfg-cta-ghost svg{width:14px;height:14px;}
+
+  .cfg-create-menu{position:fixed;width:340px;background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);border:1px solid var(--border);padding:8px;z-index:65;display:none;}
+  .cfg-create-menu.show{display:block;animation:cfgPop .14s ease;}
+  @keyframes cfgPop{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+  .cfg-create-menu .cm-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);padding:8px 10px 6px;}
+  .cfg-create-opt{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;cursor:pointer;transition:background .12s ease;}
+  .cfg-create-opt:hover{background:#F4F6FC;}
+  .cfg-create-opt .lvl{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:800;}
+  .cfg-create-opt .lvl svg{width:18px;height:18px;}
+  .cfg-create-opt .lvl.l1{background:#EEF0F9;color:var(--navy);}
+  .cfg-create-opt .lvl.l2{background:#EAF0FF;color:var(--blue);}
+  .cfg-create-opt .lvl.l3{background:#E7F6EE;color:#137B44;}
+  .cfg-create-opt strong{display:block;font-size:13.3px;font-weight:800;color:var(--text-1);}
+  .cfg-create-opt span{display:block;font-size:11.5px;color:var(--text-2);margin-top:1px;line-height:1.35;}
+  .cfg-create-opt .step{margin-left:auto;white-space:nowrap;padding-left:6px;font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.04em;}
+
+  .cfg-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 32px 0 32px;flex-shrink:0;min-height:0;}
+  .cfg-chips:empty{display:none;}
+  .cfg-chip{display:flex;align-items:center;gap:6px;background:#EAF0FF;color:var(--blue);border:1px solid #D6E2FA;border-radius:20px;padding:4px 6px 4px 11px;font-size:11.8px;font-weight:700;max-width:420px;}
+  .cfg-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cfg-chip b{font-weight:800;color:var(--navy);}
+  .cfg-chip button{width:18px;height:18px;border:none;border-radius:50%;background:rgba(58,69,112,.12);color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cfg-chip button:hover{background:var(--blue);color:#fff;}
+  .cfg-chip button svg{width:9px;height:9px;}
+  .cfg-chips .clear-all{font-size:11.8px;font-weight:700;color:var(--text-2);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+  .cfg-chips .clear-all:hover{color:#C23434;}
+  .cfg-chips .res{font-size:11.8px;font-weight:600;color:var(--text-3);}
+
+  .cfg-scroll{flex:1;overflow:auto;padding:14px 32px 90px 32px;}
+  .cfg-table-wrap{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:clip;box-shadow:var(--shadow-sm);min-width:760px;}
+  .cfg-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;}
+  .cfg-table thead th{position:sticky;top:0;z-index:4;background:#F7F8FD;border-bottom:2px solid var(--border);padding:0;text-align:left;}
+  .cfg-th{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);}
+  .cfg-th .lvl-dot{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;flex-shrink:0;}
+  .cfg-th .lvl-dot.l1{background:#E3E6F3;color:var(--navy);}
+  .cfg-th .lvl-dot.l2{background:#DCE6FF;color:var(--blue);}
+  .cfg-th .lvl-dot.l3{background:#D9F1E4;color:#137B44;}
+  .cfg-th .lvl-dot.l4{background:#FFF0DB;color:#A0620D;}
+  .cfg-fbtn{margin-left:auto;display:flex;align-items:center;gap:5px;height:24px;padding:0 8px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text-3);cursor:pointer;font-size:10.5px;font-weight:800;letter-spacing:.02em;text-transform:none;}
+  .cfg-fbtn svg{width:12px;height:12px;}
+  .cfg-fbtn:hover{background:#E9ECF8;color:var(--text-1);}
+  .cfg-fbtn.active{background:var(--blue);color:#fff;}
+  .cfg-fbtn.open{border-color:var(--sky);background:#fff;color:var(--blue);}
+  .cfg-table td{border-bottom:1px solid var(--border);padding:0;vertical-align:top;font-size:13.2px;}
+  .cfg-table tr:last-child td{border-bottom:none;}
+  .cfg-table td.c-l1{background:#FBFBFE;border-right:1px solid var(--border);}
+  .cfg-table td.c-l2{border-right:1px solid var(--border);background:#FEFEFF;}
+  .cfg-table td.grp-end{border-bottom:1px solid #D9DDEE;}
+  .cfg-cell{display:flex;align-items:flex-start;gap:9px;padding:11px 14px;min-width:0;position:relative;}
+  .cfg-cell.sticky{position:sticky;top:41px;}
+  .cfg-cell .nm{font-weight:700;color:var(--text-1);line-height:1.35;word-break:break-word;}
+  .c-l1 .cfg-cell .nm{font-weight:800;font-size:13.5px;}
+  .cfg-cell .meta{font-size:11px;font-weight:600;color:var(--text-3);margin-top:2px;}
+  .cfg-cell .txt{flex:1;min-width:0;}
+  .cfg-cell mark{background:#FFF1B8;color:inherit;border-radius:3px;padding:0 1px;}
+  .cfg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;margin-top:4px;}
+  .cfg-chev{width:20px;height:20px;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin:-1px -4px 0 -6px;transition:transform .15s ease,background .12s ease;}
+  .cfg-chev:hover{background:#ECEEF8;color:var(--text-1);}
+  .cfg-chev svg{width:13px;height:13px;}
+  .cfg-chev.collapsed{transform:rotate(-90deg);}
+  .cfg-acts{display:flex;gap:2px;flex-shrink:0;opacity:0;transition:opacity .12s ease;margin:-3px -6px 0 0;}
+  .cfg-cell:hover .cfg-acts, .cfg-cell:focus-within .cfg-acts{opacity:1;}
+  .cfg-ibtn{width:26px;height:26px;border-radius:7px;border:none;background:transparent;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cfg-ibtn:hover{background:#ECEEF8;color:var(--text-1);}
+  .cfg-ibtn.add:hover{background:#E7F6EE;color:#137B44;}
+  .cfg-ibtn.del:hover{background:#FFF1F1;color:#C23434;}
+  .cfg-ibtn svg{width:14px;height:14px;}
+  .cfg-empty-cell{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:12.3px;color:var(--text-3);font-style:italic;}
+  .cfg-empty-cell a{font-style:normal;font-weight:700;color:var(--blue);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+  .cfg-empty-cell a:hover{text-decoration:underline;}
+  .cfg-collapsed-sum{padding:12px 14px;font-size:12.3px;color:var(--text-3);font-weight:600;cursor:pointer;}
+  .cfg-collapsed-sum:hover{color:var(--blue);}
+  .cfg-also{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:#5B34D6;background:#F1EDFF;border-radius:20px;padding:2px 8px;margin-top:4px;cursor:default;}
+  .cfg-contact{padding:11px 14px;font-size:11.8px;color:var(--text-2);line-height:1.55;min-width:0;}
+  .cfg-contact div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cfg-contact .k{color:var(--text-3);font-weight:700;margin-right:4px;}
+  .cfg-contact .none{color:var(--gray);}
+  .cfg-provlist{padding:8px 14px 9px 14px;display:flex;flex-direction:column;gap:6px;}
+  .cfg-provline{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+  .cfg-provline .pn{font-size:12.5px;font-weight:800;color:var(--text-1);min-width:0;padding-top:2px;}
+  .cfg-provline .pn::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--sky);margin-right:7px;vertical-align:1px;}
+  .cfg-pres-pills{display:flex;gap:5px;flex-wrap:wrap;}
+  .cfg-pill{display:inline-flex;align-items:center;gap:0;font-size:11.3px;font-weight:700;color:#8A560B;background:#FFF5E6;border:1px solid #FBE3BF;border-radius:20px;padding:2px 9px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .cfg-pill .b{color:#A0620D;font-weight:600;}
+  .cfg-pill .sep{margin:0 5px;opacity:.55;}
+  .cfg-nores{padding:60px 20px;text-align:center;color:var(--text-3);}
+  .cfg-nores svg{width:44px;height:44px;color:var(--gray);margin-bottom:10px;}
+  .cfg-nores strong{display:block;font-size:14px;color:var(--text-2);margin-bottom:4px;}
+  .cfg-nores span{font-size:12.5px;}
+  .cfg-nores .btn-ghost{display:inline-flex;margin-top:14px;}
+  .cfg-onboard{max-width:620px;margin:40px auto;text-align:center;}
+  .cfg-onboard .ic{width:64px;height:64px;border-radius:18px;background:#FFF5E6;color:#A0620D;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+  .cfg-onboard .ic svg{width:30px;height:30px;}
+  .cfg-onboard h2{font-size:19px;margin:0 0 8px;font-weight:800;}
+  .cfg-onboard p{font-size:13.3px;color:var(--text-2);line-height:1.6;margin:0 0 20px;}
+  .cfg-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:left;margin-bottom:22px;}
+  .cfg-steps div{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .cfg-steps b{display:block;font-size:10.5px;font-weight:800;color:var(--sky);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+  .cfg-steps span{font-size:12.5px;font-weight:700;color:var(--text-1);}
+  .cfg-onboard .row-btns{display:flex;gap:10px;justify-content:center;}
+
+  /* Popover de filtros (tildar / escribir) */
+  .cfg-fpop{position:fixed;width:290px;background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);border:1px solid var(--border);z-index:66;display:none;}
+  .cfg-fpop.show{display:block;animation:cfgPop .14s ease;}
+  .cfg-fpop .fp-head{padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;}
+  .cfg-fpop .fp-head h4{margin:0;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
+  .cfg-fpop .fp-mode{font-size:10.5px;font-weight:700;color:var(--sky);}
+  .cfg-fpop .fp-search{position:relative;margin:0 14px 8px;}
+  .cfg-fpop .fp-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-3);}
+  .cfg-fpop .fp-search input{width:100%;padding:9px 10px 9px 32px;border-radius:9px;border:1px solid var(--border);font-size:12.8px;outline:none;}
+  .cfg-fpop .fp-search input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(89,119,210,0.14);}
+  .cfg-fpop .fp-bulk{display:flex;justify-content:space-between;padding:0 14px 6px;font-size:11.3px;font-weight:700;}
+  .cfg-fpop .fp-bulk a{color:var(--blue);cursor:pointer;}
+  .cfg-fpop .fp-bulk a:hover{text-decoration:underline;}
+  .cfg-fpop .fp-bulk span{color:var(--text-3);}
+  .cfg-fpop .fp-list{max-height:260px;overflow-y:auto;padding:0 8px 8px;display:flex;flex-direction:column;gap:1px;}
+  .cfg-fopt{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:12.8px;color:var(--text-1);user-select:none;}
+  .cfg-fopt:hover{background:#F5F6FA;}
+  .cfg-fopt .ck{width:16px;height:16px;border-radius:5px;border:1.6px solid var(--gray);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;}
+  .cfg-fopt .ck svg{width:10px;height:10px;color:#fff;opacity:0;}
+  .cfg-fopt.on .ck{background:var(--blue);border-color:var(--blue);}
+  .cfg-fopt.on .ck svg{opacity:1;}
+  .cfg-fopt .lb{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cfg-fopt .lb mark{background:#FFF1B8;color:inherit;border-radius:3px;}
+  .cfg-fopt .ct{font-size:11px;font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;}
+  .cfg-fopt.zero{opacity:.45;}
+  .cfg-fpop .fp-empty{padding:14px;font-size:12.3px;color:var(--text-3);font-style:italic;text-align:center;}
+  .cfg-fpop .fp-foot{display:flex;gap:8px;padding:10px 14px 12px;border-top:1px solid var(--border);}
+  .cfg-fpop .fp-foot button{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;}
+
+  /* Panel lateral de alta / edición */
+  .cfg-panel{width:500px;}
+  .cfg-panel.wide{width:640px;}
+  .cfg-panel .panel-head .lvl-badge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:20px;margin-bottom:8px;}
+  .lvl-badge.l1{background:#EEF0F9;color:var(--navy);}
+  .lvl-badge.l2{background:#EAF0FF;color:var(--blue);}
+  .lvl-badge.l3{background:#E7F6EE;color:#137B44;}
+  .cfg-crumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11.5px;font-weight:700;color:var(--text-3);margin-top:4px;}
+  .cfg-crumb span.on{color:var(--blue);}
+  .cfg-crumb svg{width:10px;height:10px;}
+  .cfg-field-msg{font-size:11.5px;font-weight:700;margin-top:6px;display:none;align-items:center;gap:6px;}
+  .cfg-field-msg.show{display:flex;}
+  .cfg-field-msg.err{color:#C23434;}
+  .cfg-field-msg.ok{color:#137B44;}
+  .cfg-field-msg svg{width:13px;height:13px;flex-shrink:0;}
+  .field.dup input{border-color:#D1414A;background:#FFF6F6;}
+  .cfg-sec-title{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--sky);margin:24px 0 12px;}
+  .cfg-sec-title:first-child{margin-top:0;}
+  .cfg-sec-title .n{width:20px;height:20px;border-radius:6px;background:#EAF0FF;color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10.5px;}
+  .cfg-sec-title .opt{font-size:10.5px;color:var(--text-3);text-transform:none;letter-spacing:0;font-weight:600;}
+  .cfg-note{display:flex;gap:10px;background:#F5F8FF;border:1px solid #DDE6FA;border-radius:11px;padding:11px 13px;font-size:12px;color:var(--text-2);line-height:1.5;margin-bottom:16px;}
+  .cfg-note svg{width:16px;height:16px;color:var(--sky);flex-shrink:0;margin-top:1px;}
+  .cfg-note b{color:var(--navy);}
+
+  /* Multi-selección de rubros (proveedor) */
+  .cfg-ms{border:1px solid var(--border);border-radius:11px;background:#FBFBFE;overflow:hidden;}
+  .cfg-ms.err{border-color:#D1414A;}
+  .cfg-ms-sel{display:flex;flex-wrap:wrap;gap:6px;padding:10px 10px 0;}
+  .cfg-ms-sel:empty{display:none;}
+  .cfg-ms-tag{display:inline-flex;align-items:center;gap:5px;background:var(--blue);color:#fff;border-radius:20px;padding:3px 5px 3px 10px;font-size:11.5px;font-weight:700;}
+  .cfg-ms-tag small{opacity:.7;font-weight:600;}
+  .cfg-ms-tag button{width:16px;height:16px;border:none;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .cfg-ms-tag button svg{width:8px;height:8px;}
+  .cfg-ms-search{position:relative;padding:10px;}
+  .cfg-ms-search input{width:100%;padding:8px 10px 8px 30px !important;border-radius:8px !important;font-size:12.8px !important;background:#fff !important;}
+  .cfg-ms-search svg{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--text-3);}
+  .cfg-ms-list{max-height:230px;overflow-y:auto;border-top:1px solid var(--border);background:#fff;}
+  .cfg-ms-grp{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);padding:9px 12px 3px;background:#fff;position:sticky;top:0;}
+  .cfg-ms-opt{display:flex;align-items:center;gap:9px;padding:7px 12px;font-size:12.8px;cursor:pointer;color:var(--text-1);}
+  .cfg-ms-opt:hover{background:#F5F6FA;}
+  .cfg-ms-opt .ck{width:16px;height:16px;border-radius:5px;border:1.6px solid var(--gray);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;}
+  .cfg-ms-opt .ck svg{width:10px;height:10px;color:#fff;opacity:0;}
+  .cfg-ms-opt.on .ck{background:var(--blue);border-color:var(--blue);}
+  .cfg-ms-opt.on .ck svg{opacity:1;}
+
+  /* Combo buscable (proveedor dentro de insumo) */
+  .cfg-combo{position:relative;}
+  .cfg-combo input{padding-right:30px !important;}
+  .cfg-combo > svg{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-3);pointer-events:none;}
+  .cfg-combo-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);max-height:240px;overflow-y:auto;z-index:5;display:none;padding:4px;}
+  .cfg-combo-list.show{display:block;}
+  .cfg-combo-opt{padding:7px 10px;border-radius:7px;font-size:12.8px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;}
+  .cfg-combo-opt small{color:var(--text-3);font-weight:600;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%;}
+  .cfg-combo-opt:hover, .cfg-combo-opt.hl{background:#F1F4FD;}
+  .cfg-combo-opt.dis{opacity:.4;pointer-events:none;}
+  .cfg-combo-empty{padding:10px;font-size:12px;color:var(--text-3);font-style:italic;}
+
+  /* Tarjetas proveedor → presentaciones (insumo) */
+  .cfg-pv-card{border:1px solid var(--border);border-radius:13px;background:#fff;margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .cfg-pv-card.err{border-color:#E7A1A5;}
+  .cfg-pv-top{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 10px 14px;background:#FAFBFF;border-bottom:1px solid var(--border);}
+  .cfg-pv-top .idx{width:24px;height:24px;border-radius:7px;background:var(--navy);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:8px;}
+  .cfg-pv-top .field{flex:1;margin:0;}
+  .cfg-pv-top .field label{margin-bottom:5px;}
+  .cfg-pv-top .cfg-ibtn{margin-top:22px;}
+  .cfg-pres-head{display:grid;grid-template-columns:1.25fr .8fr .8fr 30px;gap:8px;padding:10px 14px 0;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+  .cfg-pres-row{display:grid;grid-template-columns:1.25fr .8fr .8fr 30px;gap:8px;padding:6px 14px;align-items:center;}
+  .cfg-pres-row input, .cfg-pres-row select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:13px;background:#FBFBFE;outline:none;color:var(--text-1);}
+  .cfg-pres-row input:focus, .cfg-pres-row select:focus{border-color:var(--sky);background:#fff;box-shadow:0 0 0 3px rgba(89,119,210,0.14);}
+  .cfg-pres-row input.bad, .cfg-pres-row select.bad{border-color:#D1414A;background:#FFF6F6;}
+  .cfg-pres-row input.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .cfg-pres-prev{grid-column:1 / -1;font-size:11px;font-weight:700;color:#8A560B;margin-top:-2px;padding-left:2px;}
+  .cfg-pres-add{display:inline-flex;align-items:center;gap:6px;margin:6px 14px 12px;font-size:12px;font-weight:800;color:var(--blue);cursor:pointer;background:none;border:none;padding:4px 0;}
+  .cfg-pres-add:hover{text-decoration:underline;}
+  .cfg-pres-add svg{width:13px;height:13px;}
+  .cfg-add-prov{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border:1.5px dashed var(--gray);border-radius:12px;background:#FAFBFF;color:var(--blue);font-size:12.8px;font-weight:800;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+  .cfg-add-prov:hover{border-color:var(--sky);background:#F1F5FF;}
+  .cfg-add-prov svg{width:15px;height:15px;}
+  .cfg-err-box{display:none;background:#FFF4F4;border:1px solid #F6CFCF;color:#B22A32;border-radius:10px;padding:10px 12px;font-size:12.3px;font-weight:600;margin-top:14px;line-height:1.5;}
+  .cfg-err-box.show{display:block;}
+  .cfg-panel .panel-foot .btn-primary[disabled]{opacity:.55;cursor:not-allowed;filter:none;}
+
+  /* Modal de confirmación / aviso */
+  .cfg-modal .confirm-box{width:420px;}
+  .cfg-modal .confirm-icon.info{background:#EAF0FF;color:var(--blue);}
+  .cfg-modal .confirm-box p b{color:var(--text-1);}
+  .cfg-modal .confirm-box ul{margin:-8px 0 18px;padding-left:18px;font-size:12.5px;color:var(--text-2);line-height:1.6;max-height:140px;overflow:auto;}
+  .cfg-modal .confirm-actions{flex-wrap:wrap;}
+  .cfg-modal .confirm-actions button{min-width:0;}
+  .cfg-modal .confirm-soft{background:#FFF1F1;color:#C23434;border:1px solid #FBD8D8 !important;}
+  .cfg-modal .confirm-soft:hover{background:#FFE4E4;}
+  .cfg-modal .confirm-primary{background:var(--blue);color:#fff;}
+  @media (max-width:1100px){ .cfg-search{width:200px;} }
+  .cfg-panel mark, .cfg-fpop mark, .cfg-combo-list mark{background:#FFF1B8;color:inherit;border-radius:3px;padding:0;}
 </style>
 </head>
 <body>
@@ -1279,17 +1546,146 @@
 
     <!-- ===================== MÓDULO: CONFIGURACIÓN ===================== -->
     <section class="module-screen" id="moduleConfig">
-      <div class="topbar">
-        <div><h1>Configuración</h1><div class="sub">Listas maestras, compras y actividad del sistema.</div></div>
-      </div>
-      <div class="placeholder-card">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></div>
-        <h2>Módulo en construcción</h2>
-        <p>La estructura de &quot;Configuración&quot; ya está lista. El contenido y la lógica de este módulo se van a construir en un próximo chat, igual que en La Fortaleza pero con la información propia de Che Mono.</p>
+      <div class="pagos-shell" id="configSubnav">
+        <div class="pagos-topbar">
+          <div class="pagos-tab active" data-ctab="compras" onclick="goConfigTab('compras')">Compras</div>
+          <div class="pagos-tab" data-ctab="actividad" onclick="goConfigTab('actividad')">Actividad</div>
+        </div>
+
+        <div class="pagos-body">
+
+          <!-- CONFIG > COMPRAS (Proveedores / Insumos) -->
+          <section class="pagos-pane active" id="ctabCompras">
+            <div class="cfg-subbar">
+              <div class="cfg-subtab active" data-cview="proveedores" onclick="cfgGoView('proveedores')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+                Proveedores <span class="cnt" id="cfgCntProveedores">·</span>
+              </div>
+              <div class="cfg-subtab" data-cview="insumos" onclick="cfgGoView('insumos')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                Insumos <span class="cnt" id="cfgCntInsumos">·</span>
+              </div>
+              <div class="spacer"></div>
+              <div class="cfg-live" id="cfgLive" title="Los cambios que hagan otros usuarios se reflejan acá automáticamente"><i></i><span>Conectando…</span></div>
+            </div>
+
+            <!-- VISTA: PROVEEDORES -->
+            <div class="cfg-view active" id="cfgViewProveedores">
+              <div class="cfg-head">
+                <div>
+                  <h1>Proveedores</h1>
+                  <div class="cfg-kpis" id="cfgKpisProveedores"></div>
+                </div>
+                <div class="spacer"></div>
+                <div class="cfg-actions">
+                  <div class="cfg-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="cfgSearchProveedores" placeholder="Buscar categoría, rubro o proveedor…" oninput="cfgOnSearch('proveedores', this.value)" autocomplete="off">
+                    <button class="x" id="cfgSearchXProveedores" onclick="cfgClearSearch('proveedores')" title="Borrar búsqueda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+                  </div>
+                  <button class="cfg-cta-ghost" onclick="cfgToggleAllGroups('proveedores')" id="cfgToggleAllProveedores" title="Contraer / expandir todas las categorías">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 15 12 20 17 15"/><polyline points="7 9 12 4 17 9"/></svg><span>Contraer todo</span>
+                  </button>
+                  <button class="cfg-cta" onclick="cfgOpenCreateMenu(this, 'proveedores')">
+                    <span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                    Crear nuevo
+                    <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="cfg-chips" id="cfgChipsProveedores"></div>
+              <div class="cfg-scroll" id="cfgScrollProveedores">
+                <div id="cfgTableProveedores"></div>
+              </div>
+            </div>
+
+            <!-- VISTA: INSUMOS -->
+            <div class="cfg-view" id="cfgViewInsumos">
+              <div class="cfg-head">
+                <div>
+                  <h1>Insumos</h1>
+                  <div class="cfg-kpis" id="cfgKpisInsumos"></div>
+                </div>
+                <div class="spacer"></div>
+                <div class="cfg-actions">
+                  <div class="cfg-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="cfgSearchInsumos" placeholder="Buscar insumo, rubro o proveedor…" oninput="cfgOnSearch('insumos', this.value)" autocomplete="off">
+                    <button class="x" id="cfgSearchXInsumos" onclick="cfgClearSearch('insumos')" title="Borrar búsqueda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+                  </div>
+                  <button class="cfg-cta-ghost" onclick="cfgOpenCreateMenu(this, 'insumos-clasif')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Categoría / Rubro
+                  </button>
+                  <button class="cfg-cta" onclick="cfgOpenInsumoForm(null)">
+                    <span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                    Crear nuevo insumo
+                  </button>
+                </div>
+              </div>
+              <div class="cfg-chips" id="cfgChipsInsumos"></div>
+              <div class="cfg-scroll" id="cfgScrollInsumos">
+                <div id="cfgTableInsumos"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CONFIG > ACTIVIDAD (auditoría de cambios) -->
+          <section class="pagos-pane" id="ctabActividad">
+            <div class="screen-header">
+              <div><h1 style="font-size:20px;margin:0;font-weight:800;">Actividad</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Quién hizo cada cambio en el sistema, para poder trazar errores</div></div>
+            </div>
+            <div class="screen-scroll">
+              <div class="resumen-text-filters" style="margin-top:0;">
+                <div class="f"><label>Usuario</label><input type="text" id="actFiltroUsuario" placeholder="Todos" oninput="renderActividad()"></div>
+                <div class="f"><label>Sección</label>
+                  <select id="actFiltroModulo" onchange="renderActividad()">
+                    <option value="">Todas</option>
+                    <option value="pagos">Pagos</option>
+                    <option value="sueldos">Sueldos</option>
+                    <option value="cajaMayor">Caja Mayor</option>
+                    <option value="config">Configuración</option>
+                  </select>
+                </div>
+                <button class="btn-ghost" onclick="document.getElementById('actFiltroUsuario').value='';document.getElementById('actFiltroModulo').value='';renderActividad()">Limpiar filtro</button>
+              </div>
+              <div class="config-card" id="actividadList" style="max-width:900px;margin-top:16px;"></div>
+            </div>
+          </section>
+
+        </div>
       </div>
     </section>
 
   </main>
+</div>
+
+<!-- CONFIGURACIÓN · COMPRAS: menú "Crear nuevo", popover de filtros, panel lateral y modal -->
+<div class="cfg-create-menu" id="cfgCreateMenu"></div>
+<div class="cfg-fpop" id="cfgFilterPop"></div>
+<div class="overlay" id="cfgOverlay" onclick="cfgClosePanel()"></div>
+<aside class="panel cfg-panel" id="cfgPanel" aria-hidden="true">
+  <div class="panel-head">
+    <div style="min-width:0;">
+      <div id="cfgPanelBadge"></div>
+      <h2 id="cfgPanelTitle">—</h2>
+      <div class="cfg-crumb" id="cfgPanelCrumb"></div>
+    </div>
+    <button class="panel-close" onclick="cfgClosePanel()" title="Cerrar (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+  </div>
+  <div class="panel-body" id="cfgPanelBody"></div>
+  <div class="panel-foot">
+    <button class="btn-primary secondary" onclick="cfgClosePanel()">Cancelar</button>
+    <button class="btn-primary" id="cfgPanelSave" onclick="cfgPanelSubmit()">Guardar</button>
+  </div>
+</aside>
+<div class="confirm-overlay cfg-modal" id="cfgModal">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="cfgModalIcon"></div>
+    <h3 id="cfgModalTitle"></h3>
+    <div id="cfgModalBody"></div>
+    <div class="confirm-actions" id="cfgModalActions"></div>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -3530,11 +3926,1240 @@ loadSueldosGridState();
 renderSueldosGridHeader();
 loadEmpleados();
 
+/* =========================================================
+   CONFIGURACIÓN · COMPRAS — Proveedores e Insumos (Che Mono)
+   ---------------------------------------------------------
+   Proveedores: Categoría (cm_conceptos) > Rubro (cm_rubros) > Proveedor
+     (cm_proveedores). Un proveedor puede estar en 1 o más rubros
+     (cm_proveedor_rubros), p.ej. un empleado en "Sueldo del mes" y
+     en "Adelantos".
+   Insumos: Categoría (cm_ins_categorias) > Rubro (cm_ins_rubros) >
+     Insumo (cm_insumos). Cada insumo tiene 1 o más proveedores y, por
+     proveedor, 1 o más presentaciones/bultos con [cant.] + [un.]
+     (cm_insumo_presentaciones). Esto es lo que después usa Costeo
+     para llevar el precio de compra a $/unidad de medida.
+   No puede haber nombres repetidos en ningún nivel (se valida acá en
+   vivo y en la base con índices únicos sin tildes/mayúsculas).
+   Todas las altas/bajas/modificaciones quedan en cm_historial
+   (solapa Actividad) y se sincronizan entre usuarios en tiempo real.
+   ========================================================= */
+
+const CFG_UNIDADES = [
+  { v:"kg", l:"kg",  n:"Kilogramos" },
+  { v:"g",  l:"g",   n:"Gramos" },
+  { v:"l",  l:"l",   n:"Litros" },
+  { v:"ml", l:"ml",  n:"Mililitros" },
+  { v:"un", l:"un.", n:"Unidades" }
+];
+const CFG_RT_TABLES = ["cm_conceptos","cm_rubros","cm_proveedores","cm_proveedor_rubros","cm_ins_categorias","cm_ins_rubros","cm_insumos","cm_insumo_presentaciones"];
+const CFG_DOM = {
+  proveedores: { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Proveedor", hojaPl:"proveedores", keys:["cat","rubro","prov"] },
+  insumos:     { catTable:"cm_ins_categorias", rubTable:"cm_ins_rubros", rubFk:"categoria_id", hoja:"Insumo", hojaPl:"insumos", keys:["cat","rubro","ins","prov"] }
+};
+const CFG_KEY_LABEL = { cat:"Categoría", rubro:"Rubro", prov:"Proveedor", ins:"Insumo" };
+const CFG_PALETTE = ["#3A4570","#5977D2","#2E9E88","#C9812A","#B23D7C","#6B5BD2","#1477A6","#8C6A3F","#D0521F","#4C8C3A","#9C3FB5","#557089"];
+
+let cfgData = {
+  proveedores: { cats:[], rubros:[] },
+  insumos:     { cats:[], rubros:[] },
+  provs:[], links:[], items:[], pres:[]
+};
+let cfgLoaded = false, cfgLoading = null;
+let cfgView = "proveedores";
+const cfgState = {
+  proveedores: { search:"", collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), prov:cfgNewF() } },
+  insumos:     { search:"", collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), ins:cfgNewF(), prov:cfgNewF() } }
+};
+function cfgNewF(){ return { text:"", sel:new Set() }; }
+
+/* ---------- utilidades ---------- */
+function cfgEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function cfgNorm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim(); }
+function cfgCmp(a,b){ return String(a||"").localeCompare(String(b||""), "es", { sensitivity:"base", numeric:true }); }
+function cfgFmtNum(n){ return Number(n).toLocaleString("es-AR", { maximumFractionDigits:3 }); }
+function cfgParseNum(s){
+  s = String(s==null?"":s).trim().replace(/\s/g,"");
+  if(!s) return NaN;
+  if(s.indexOf(",")>=0) s = s.replace(/\./g,"").replace(",",".");
+  const n = Number(s);
+  return isFinite(n) ? n : NaN;
+}
+function cfgUnLabel(u){ const x = CFG_UNIDADES.find(k=>k.v===u); return x ? x.l : u; }
+function cfgColor(id){ let h=0; const s=String(id); for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return CFG_PALETTE[h % CFG_PALETTE.length]; }
+/* resalta coincidencias ignorando tildes/mayúsculas */
+function cfgHi(text, q){
+  text = String(text==null?"":text);
+  const nq = cfgNorm(q);
+  if(!nq) return cfgEsc(text);
+  let flat = "", map = [];
+  for(let i=0;i<text.length;i++){
+    const n = text[i].normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+    for(let j=0;j<n.length;j++){ flat += n[j]; map.push(i); }
+  }
+  let out = "", last = 0, from = 0, idx;
+  while(nq && (idx = flat.indexOf(nq, from)) >= 0){
+    const s = map[idx], e = map[idx+nq.length-1]+1;
+    if(s < last){ from = idx+1; continue; }
+    out += cfgEsc(text.slice(last, s)) + "<mark>" + cfgEsc(text.slice(s, e)) + "</mark>";
+    last = e; from = idx + nq.length;
+  }
+  return out + cfgEsc(text.slice(last));
+}
+function cfgZoom(){ const z = parseFloat(document.documentElement.style.zoom); return (z && isFinite(z)) ? z : 1; }
+function cfgPlace(el, anchor, align){
+  const z = cfgZoom(), r = anchor.getBoundingClientRect();
+  const vw = window.innerWidth / z, vh = window.innerHeight / z;
+  el.style.visibility = "hidden"; el.classList.add("show");
+  const w = el.offsetWidth, h = el.offsetHeight;
+  let top = r.bottom/z + 8, left = align==="right" ? r.right/z - w : r.left/z;
+  if(left + w > vw - 12) left = vw - 12 - w;
+  if(left < 12) left = 12;
+  if(top + h > vh - 12) top = Math.max(12, r.top/z - h - 8);
+  el.style.top = top+"px"; el.style.left = left+"px"; el.style.visibility = "";
+}
+const CFG_IC = {
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+  del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  funnel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  cat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  rub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  prov:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>'
+};
+
+/* ---------- lookups ---------- */
+function cfgCat(dom, id){ return cfgData[dom].cats.find(c=>c.id===id); }
+function cfgRub(dom, id){ return cfgData[dom].rubros.find(r=>r.id===id); }
+function cfgProv(id){ return cfgData.provs.find(p=>p.id===id); }
+function cfgIns(id){ return cfgData.items.find(i=>i.id===id); }
+function cfgRubrosDeProv(provId){ return cfgData.links.filter(l=>l.proveedor_id===provId).map(l=>cfgRub("proveedores", l.rubro_id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre)); }
+function cfgProvsDeRubro(rubId){ return cfgData.links.filter(l=>l.rubro_id===rubId).map(l=>cfgProv(l.proveedor_id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre)); }
+function cfgPresDeIns(insId){ return cfgData.pres.filter(p=>p.insumo_id===insId).sort((a,b)=>(a.orden-b.orden)); }
+function cfgInsumosDeProv(provId){
+  const ids = new Set(cfgData.pres.filter(p=>p.proveedor_id===provId).map(p=>p.insumo_id));
+  return cfgData.items.filter(i=>ids.has(i.id)).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+}
+function cfgPresLabel(p){ return (p.bulto ? p.bulto+" · " : "") + cfgFmtNum(p.cantidad) + " " + cfgUnLabel(p.unidad); }
+function cfgExists(list, nombre, exceptId){ const n = cfgNorm(nombre); return list.find(x=>x.id!==exceptId && cfgNorm(x.nombre)===n); }
+
+/* ---------- carga de datos (Supabase) ---------- */
+async function cfgLoadAll(){
+  const res = await Promise.all([
+    sb.from("cm_conceptos").select("id,nombre"),
+    sb.from("cm_rubros").select("id,nombre,concepto_id"),
+    sb.from("cm_proveedores").select("id,nombre,cuit,telefono,email,notas"),
+    sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
+    sb.from("cm_ins_categorias").select("id,nombre"),
+    sb.from("cm_ins_rubros").select("id,nombre,categoria_id"),
+    sb.from("cm_insumos").select("id,nombre,rubro_id,notas"),
+    sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden")
+  ]);
+  const err = res.find(r=>r.error);
+  if(err){ console.warn("Config compras:", err.error); showToast("No se pudieron cargar los datos de Compras", "warn"); return false; }
+  cfgData.proveedores.cats   = (res[0].data||[]).map(c=>({ id:c.id, nombre:c.nombre }));
+  cfgData.proveedores.rubros = (res[1].data||[]).map(r=>({ id:r.id, nombre:r.nombre, catId:r.concepto_id }));
+  cfgData.provs  = res[2].data||[];
+  cfgData.links  = res[3].data||[];
+  cfgData.insumos.cats   = (res[4].data||[]).map(c=>({ id:c.id, nombre:c.nombre }));
+  cfgData.insumos.rubros = (res[5].data||[]).map(r=>({ id:r.id, nombre:r.nombre, catId:r.categoria_id }));
+  cfgData.items  = res[6].data||[];
+  cfgData.pres   = (res[7].data||[]).map(p=>Object.assign({}, p, { cantidad:Number(p.cantidad) }));
+  cfgLoaded = true;
+  cfgPruneFilters();
+  return true;
+}
+async function cfgReload(){
+  if(cfgLoading) return cfgLoading;
+  cfgLoading = cfgLoadAll().finally(()=>{ cfgLoading = null; });
+  const ok = await cfgLoading;
+  if(ok) cfgRenderAll();
+  return ok;
+}
+
+/* ---------- filas planas (para filtros) ---------- */
+function cfgBuildRows(dom){
+  const rows = [], D = cfgData[dom];
+  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  cats.forEach(c=>{
+    const rubs = D.rubros.filter(r=>r.catId===c.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    if(!rubs.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:null, rubro:null, leafId:null, leaf:null, provs:[] }); return; }
+    rubs.forEach(r=>{
+      if(dom==="proveedores"){
+        const ps = cfgProvsDeRubro(r.id);
+        if(!ps.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:null, leaf:null, provs:[] }); return; }
+        ps.forEach(p=>rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:p.id, leaf:p.nombre, provs:[p.nombre], extra:[p.cuit,p.telefono,p.email].filter(Boolean).join(" ") }));
+      } else {
+        const ins = cfgData.items.filter(i=>i.rubro_id===r.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+        if(!ins.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:null, leaf:null, provs:[] }); return; }
+        ins.forEach(i=>{
+          const provNames = [...new Set(cfgPresDeIns(i.id).map(p=>(cfgProv(p.proveedor_id)||{}).nombre).filter(Boolean))];
+          rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:i.id, leaf:i.nombre, provs:provNames });
+        });
+      }
+    });
+  });
+  return rows;
+}
+function cfgRowVals(row, key){
+  if(key==="cat") return [row.cat];
+  if(key==="rubro") return row.rubro==null ? [] : [row.rubro];
+  if(key==="prov") return row.provs;
+  if(key==="ins") return row.leaf==null ? [] : [row.leaf];
+  return [];
+}
+function cfgFActive(f){ return f.sel.size>0 || !!cfgNorm(f.text); }
+function cfgPassF(row, key, f){
+  if(!cfgFActive(f)) return true;
+  const vals = cfgRowVals(row, key);
+  if(!vals.length) return false;
+  if(f.sel.size) return vals.some(v=>f.sel.has(v));
+  const t = cfgNorm(f.text);
+  return vals.some(v=>cfgNorm(v).includes(t));
+}
+function cfgPassSearch(row, q){
+  if(!q) return true;
+  return [row.cat, row.rubro, row.leaf, row.extra].concat(row.provs).some(v=>v && cfgNorm(v).includes(q));
+}
+function cfgFilterRows(dom, rows, exceptKey){
+  const st = cfgState[dom], q = cfgNorm(st.search);
+  return rows.filter(r=>cfgPassSearch(r,q) && CFG_DOM[dom].keys.every(k=>k===exceptKey || cfgPassF(r,k,st.filters[k])));
+}
+function cfgAnyFilter(dom){ const st=cfgState[dom]; return !!cfgNorm(st.search) || CFG_DOM[dom].keys.some(k=>cfgFActive(st.filters[k])); }
+function cfgPruneFilters(){
+  ["proveedores","insumos"].forEach(dom=>{
+    const rows = cfgBuildRows(dom);
+    CFG_DOM[dom].keys.forEach(k=>{
+      const f = cfgState[dom].filters[k]; if(!f.sel.size) return;
+      const all = new Set(); rows.forEach(r=>cfgRowVals(r,k).forEach(v=>all.add(v)));
+      [...f.sel].forEach(v=>{ if(!all.has(v)) f.sel.delete(v); });
+    });
+  });
+}
+
+/* ---------- render general ---------- */
+function cfgRenderAll(){
+  if(!cfgLoaded) return;
+  const P = cfgData.provs.length, I = cfgData.items.length;
+  document.getElementById("cfgCntProveedores").textContent = P;
+  document.getElementById("cfgCntInsumos").textContent = I;
+  cfgRenderDom("proveedores");
+  cfgRenderDom("insumos");
+  if(document.getElementById("cfgFilterPop").classList.contains("show")) cfgRenderFilterList();
+}
+function cfgGoView(v){
+  cfgView = v;
+  document.querySelectorAll(".cfg-subtab").forEach(t=>t.classList.toggle("active", t.dataset.cview===v));
+  document.getElementById("cfgViewProveedores").classList.toggle("active", v==="proveedores");
+  document.getElementById("cfgViewInsumos").classList.toggle("active", v==="insumos");
+  cfgCloseFloating();
+}
+function cfgOnSearch(dom, val){
+  cfgState[dom].search = val;
+  document.getElementById("cfgSearchX"+(dom==="proveedores"?"Proveedores":"Insumos")).classList.toggle("show", !!val);
+  cfgRenderDom(dom);
+}
+function cfgClearSearch(dom){
+  const inp = document.getElementById("cfgSearch"+(dom==="proveedores"?"Proveedores":"Insumos"));
+  inp.value = ""; cfgOnSearch(dom, ""); inp.focus();
+}
+function cfgClearFilter(dom, key){ const f = cfgState[dom].filters[key]; f.text=""; f.sel.clear(); cfgRenderDom(dom); if(cfgFP.dom===dom && cfgFP.key===key) cfgRenderFilterPop(); }
+function cfgClearAll(dom){
+  CFG_DOM[dom].keys.forEach(k=>{ const f=cfgState[dom].filters[k]; f.text=""; f.sel.clear(); });
+  cfgState[dom].search = "";
+  const suf = dom==="proveedores"?"Proveedores":"Insumos";
+  document.getElementById("cfgSearch"+suf).value = "";
+  document.getElementById("cfgSearchX"+suf).classList.remove("show");
+  cfgCloseFloating();
+  cfgRenderDom(dom);
+}
+function cfgToggleGroup(dom, catId){
+  const s = cfgState[dom].collapsed;
+  s.has(catId) ? s.delete(catId) : s.add(catId);
+  cfgRenderDom(dom);
+}
+function cfgToggleAllGroups(dom){
+  const s = cfgState[dom].collapsed, cats = cfgData[dom].cats;
+  if(s.size >= cats.length && cats.length){ s.clear(); } else { cats.forEach(c=>s.add(c.id)); }
+  cfgRenderDom(dom);
+}
+
+function cfgKpi(n,s1,sn){ return `<span class="cfg-kpi"><b>${n}</b> ${n===1?s1:sn}</span>`; }
+function cfgRenderDom(dom){
+  const suf = dom==="proveedores" ? "Proveedores" : "Insumos";
+  const D = cfgData[dom], st = cfgState[dom];
+  // KPIs
+  const kp = document.getElementById("cfgKpis"+suf);
+  if(dom==="proveedores"){
+    kp.innerHTML = cfgKpi(D.cats.length,"categoría","categorías")+cfgKpi(D.rubros.length,"rubro","rubros")+cfgKpi(cfgData.provs.length,"proveedor","proveedores");
+  } else {
+    const provVinc = new Set(cfgData.pres.map(p=>p.proveedor_id)).size;
+    kp.innerHTML = cfgKpi(D.cats.length,"categoría","categorías")+cfgKpi(D.rubros.length,"rubro","rubros")+cfgKpi(cfgData.items.length,"insumo","insumos")+cfgKpi(provVinc,"proveedor vinculado","proveedores vinculados");
+  }
+  // Toggle todo
+  const tg = document.getElementById("cfgToggleAll"+suf);
+  if(tg){ tg.querySelector("span").textContent = (st.collapsed.size >= D.cats.length && D.cats.length) ? "Expandir todo" : "Contraer todo"; }
+
+  const allRows = cfgBuildRows(dom);
+  const rows = cfgFilterRows(dom, allRows);
+  cfgRenderChips(dom, rows, allRows);
+
+  const host = document.getElementById("cfgTable"+suf);
+  if(!D.cats.length){ host.innerHTML = cfgOnboardHtml(dom); return; }
+  if(!rows.length){
+    host.innerHTML = `<div class="cfg-table-wrap">${cfgTheadOnly(dom)}<div class="cfg-nores">${CFG_IC.search.replace('<svg','<svg style="width:44px;height:44px"')}<strong>No hay resultados</strong><span>Ningún registro coincide con la búsqueda o los filtros aplicados.</span><br><button class="btn-ghost" onclick="cfgClearAll('${dom}')">Limpiar búsqueda y filtros</button></div></div>`;
+    return;
+  }
+  host.innerHTML = `<div class="cfg-table-wrap">${cfgTableHtml(dom, rows)}</div>`;
+  const th = host.querySelector("thead");
+  if(th) host.style.setProperty("--cfg-th-h", th.offsetHeight+"px");
+}
+
+function cfgColsDef(dom){
+  return dom==="proveedores"
+    ? [ {k:"cat", w:"24%", lvl:"l1", n:"1"}, {k:"rubro", w:"25%", lvl:"l2", n:"2"}, {k:"prov", w:"29%", lvl:"l3", n:"3"}, {k:null, w:"22%", label:"Datos de contacto"} ]
+    : [ {k:"cat", w:"18%", lvl:"l1", n:"1"}, {k:"rubro", w:"19%", lvl:"l2", n:"2"}, {k:"ins", w:"21%", lvl:"l3", n:"3"}, {k:"prov", w:"42%", lvl:"l4", n:"", label:"Proveedores y presentaciones"} ];
+}
+function cfgTheadOnly(dom){ return `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}</table>`; }
+function cfgColgroup(dom){ return "<colgroup>"+cfgColsDef(dom).map(c=>`<col style="width:${c.w}">`).join("")+"</colgroup>"; }
+function cfgThead(dom){
+  const st = cfgState[dom];
+  return "<thead><tr>"+cfgColsDef(dom).map(c=>{
+    const label = c.label || CFG_KEY_LABEL[c.k];
+    if(!c.k) return `<th><div class="cfg-th">${cfgEsc(label)}</div></th>`;
+    const f = st.filters[c.k], act = cfgFActive(f);
+    const badge = act ? (f.sel.size ? f.sel.size : "abc") : "";
+    const open = (cfgFP.dom===dom && cfgFP.key===c.k) ? " open" : "";
+    const dot = c.n ? `<span class="lvl-dot ${c.lvl}">${c.n}</span>` : `<span class="lvl-dot ${c.lvl}">${CFG_IC.prov.replace('<svg','<svg style="width:11px;height:11px"')}</span>`;
+    return `<th><div class="cfg-th">${dot}${cfgEsc(label)}<button class="cfg-fbtn${act?" active":""}${open}" data-fdom="${dom}" data-fkey="${c.k}" onclick="cfgOpenFilter(event,'${dom}','${c.k}')" title="Filtrar ${cfgEsc(CFG_KEY_LABEL[c.k].toLowerCase())}">${CFG_IC.funnel}${badge?`<span>${badge}</span>`:""}</button></div></th>`;
+  }).join("")+"</tr></thead>";
+}
+
+function cfgActs(btns){ return `<div class="cfg-acts">${btns.join("")}</div>`; }
+function cfgBtn(kind, title, onclick){ return `<button class="cfg-ibtn ${kind==="plus"?"add":kind}" title="${cfgEsc(title)}" onclick="event.stopPropagation();${onclick}">${CFG_IC[kind]}</button>`; }
+
+function cfgTableHtml(dom, rows){
+  const st = cfgState[dom], q = st.search, filtering = cfgAnyFilter(dom);
+  const fT = k => st.filters[k] && !st.filters[k].sel.size ? st.filters[k].text : "";
+  const hiQ = (txt, k) => cfgHi(txt, fT(k) || q);
+  const isProv = dom==="proveedores";
+  const leafKey = isProv ? "prov" : "ins";
+  const nCols = cfgColsDef(dom).length;
+  // agrupar
+  const groups = [];
+  rows.forEach(r=>{
+    let g = groups[groups.length-1];
+    if(!g || g.catId!==r.catId){ g = { catId:r.catId, cat:r.cat, rubs:[] }; groups.push(g); }
+    let rg = g.rubs[g.rubs.length-1];
+    if(!rg || rg.rubroId!==r.rubroId){ rg = { rubroId:r.rubroId, rubro:r.rubro, rows:[] }; g.rubs.push(rg); }
+    rg.rows.push(r);
+  });
+  let html = `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}<tbody>`;
+  groups.forEach(g=>{
+    const collapsed = !filtering && st.collapsed.has(g.catId);
+    const totRub = cfgData[dom].rubros.filter(r=>r.catId===g.catId);
+    const leafIds = new Set();
+    totRub.forEach(r=>{
+      if(isProv) cfgData.links.filter(l=>l.rubro_id===r.id).forEach(l=>leafIds.add(l.proveedor_id));
+      else cfgData.items.filter(i=>i.rubro_id===r.id).forEach(i=>leafIds.add(i.id));
+    });
+    const catMeta = `${totRub.length} ${totRub.length===1?"rubro":"rubros"} · ${leafIds.size} ${leafIds.size===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}`;
+    const nRows = collapsed ? 1 : g.rubs.reduce((a,rg)=>a+rg.rows.length,0);
+    const catCell = `<td class="c-l1" rowspan="${nRows}"><div class="cfg-cell sticky" style="top:var(--cfg-th-h,41px)">
+        <button class="cfg-chev${collapsed?" collapsed":""}" onclick="cfgToggleGroup('${dom}','${g.catId}')" title="${collapsed?"Expandir":"Contraer"}"${filtering?' disabled style="opacity:.35;cursor:default"':''}>${CFG_IC.chev}</button>
+        <span class="cfg-dot" style="background:${cfgColor(g.catId)}"></span>
+        <div class="txt"><div class="nm">${hiQ(g.cat,"cat")}</div><div class="meta">${catMeta}</div></div>
+        ${cfgActs([cfgBtn("plus","Agregar rubro en esta categoría",`cfgOpenRubroForm('${dom}',null,'${g.catId}')`), cfgBtn("edit","Editar categoría",`cfgOpenCatForm('${dom}','${g.catId}')`), cfgBtn("del","Eliminar categoría",`cfgDeleteCat('${dom}','${g.catId}')`)])}
+      </div></td>`;
+    if(collapsed){
+      html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('${dom}','${g.catId}')">Categoría contraída · ${catMeta} — click para ver</div></td></tr>`;
+      return;
+    }
+    let firstInCat = true;
+    g.rubs.forEach((rg, ri)=>{
+      const lastRub = ri===g.rubs.length-1;
+      rg.rows.forEach((r, i)=>{
+        const lastRow = lastRub && i===rg.rows.length-1;
+        html += `<tr${lastRow?' class="cat-end"':""}>`;
+        if(firstInCat){ html += catCell; firstInCat = false; }
+        if(rg.rubroId==null){
+          html += `<td colspan="${nCols-1}" class="${lastRow?"grp-end":""}"><div class="cfg-empty-cell">Sin rubros todavía · <a onclick="cfgOpenRubroForm('${dom}',null,'${g.catId}')">${CFG_IC.plus.replace('<svg','<svg style="width:12px;height:12px"')} Agregar rubro</a></div></td></tr>`;
+          return;
+        }
+        if(i===0){
+          const nLeaf = isProv ? cfgData.links.filter(l=>l.rubro_id===rg.rubroId).length : cfgData.items.filter(x=>x.rubro_id===rg.rubroId).length;
+          const addTitle = isProv ? "Agregar proveedor en este rubro" : "Crear insumo en este rubro";
+          const addFn = isProv ? `cfgOpenProvForm(null,'${rg.rubroId}')` : `cfgOpenInsumoForm(null,'${rg.rubroId}')`;
+          html += `<td class="c-l2${lastRub?" grp-end":""}" rowspan="${rg.rows.length}"><div class="cfg-cell">
+              <div class="txt"><div class="nm">${hiQ(rg.rubro,"rubro")}</div><div class="meta">${nLeaf} ${nLeaf===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}</div></div>
+              ${cfgActs([cfgBtn("plus",addTitle,addFn), cfgBtn("edit","Editar rubro",`cfgOpenRubroForm('${dom}','${rg.rubroId}')`), cfgBtn("del","Eliminar rubro",`cfgDeleteRubro('${dom}','${rg.rubroId}')`)])}
+            </div></td>`;
+        }
+        const endCls = lastRow ? "grp-end" : "";
+        if(r.leafId==null){
+          const lnk = isProv ? `<a onclick="cfgOpenProvForm(null,'${r.rubroId}')">${CFG_IC.plus.replace('<svg','<svg style="width:12px;height:12px"')} Agregar proveedor</a>` : `<a onclick="cfgOpenInsumoForm(null,'${r.rubroId}')">${CFG_IC.plus.replace('<svg','<svg style="width:12px;height:12px"')} Crear insumo</a>`;
+          html += `<td colspan="${nCols-2}" class="${endCls}"><div class="cfg-empty-cell">${isProv?"Sin proveedores asignados":"Sin insumos"} · ${lnk}</div></td></tr>`;
+          return;
+        }
+        if(isProv){
+          const p = cfgProv(r.leafId);
+          const otros = cfgRubrosDeProv(p.id).filter(x=>x.id!==r.rubroId);
+          const also = otros.length ? `<div><span class="cfg-also" title="También está en: ${cfgEsc(otros.map(o=>o.nombre).join(", "))}">También en ${cfgEsc(otros.length===1?otros[0].nombre:otros.length+" rubros")}</span></div>` : "";
+          html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(p.nombre,"prov")}</div>${also}</div>
+              ${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar / quitar proveedor",`cfgDeleteProv('${p.id}','${r.rubroId}')`)])}</div></td>`;
+          const c = [];
+          if(p.cuit) c.push(`<div><span class="k">CUIT</span>${cfgHi(p.cuit,q)}</div>`);
+          if(p.telefono) c.push(`<div><span class="k">Tel.</span>${cfgHi(p.telefono,q)}</div>`);
+          if(p.email) c.push(`<div><span class="k">Email</span>${cfgHi(p.email,q)}</div>`);
+          html += `<td class="${endCls}"><div class="cfg-contact">${c.length?c.join(""):'<span class="none">—</span>'}</div></td>`;
+        } else {
+          const ins = cfgIns(r.leafId), pres = cfgPresDeIns(ins.id);
+          html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(ins.nombre,"ins")}</div><div class="meta">${pres.length} ${pres.length===1?"presentación":"presentaciones"}</div></div>
+              ${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${ins.id}')`), cfgBtn("del","Eliminar insumo",`cfgDeleteInsumo('${ins.id}')`)])}</div></td>`;
+          const byProv = [];
+          pres.forEach(p=>{ let g2 = byProv.find(x=>x.id===p.proveedor_id); if(!g2){ g2={id:p.proveedor_id, pres:[]}; byProv.push(g2);} g2.pres.push(p); });
+          const lines = byProv.map(bp=>{
+            const pv = cfgProv(bp.id);
+            return `<div class="cfg-provline"><span class="pn">${hiQ(pv?pv.nombre:"(proveedor eliminado)","prov")}</span><span class="cfg-pres-pills">${bp.pres.map(p=>`<span class="cfg-pill" title="${p.bulto?cfgEsc("1 "+p.bulto+" = "):"Cada bulto = "}${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}">${p.bulto?`<span class="b">${cfgEsc(p.bulto)}</span><span class="sep">·</span>`:""}${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}</span>`).join("")}</span></div>`;
+          }).join("");
+          html += `<td class="${endCls}"><div class="cfg-provlist">${lines || '<span class="cfg-contact none">Sin proveedores</span>'}</div></td>`;
+        }
+        html += `</tr>`;
+      });
+    });
+  });
+  return html + "</tbody></table>";
+}
+
+function cfgRenderChips(dom, rows, allRows){
+  const suf = dom==="proveedores" ? "Proveedores" : "Insumos";
+  const el = document.getElementById("cfgChips"+suf), st = cfgState[dom];
+  if(!cfgAnyFilter(dom)){ el.innerHTML = ""; return; }
+  const chips = [];
+  if(cfgNorm(st.search)) chips.push(`<span class="cfg-chip"><span>Búsqueda: <b>“${cfgEsc(st.search.trim())}”</b></span><button onclick="cfgClearSearch('${dom}')" title="Quitar">${CFG_IC.x}</button></span>`);
+  CFG_DOM[dom].keys.forEach(k=>{
+    const f = st.filters[k]; if(!cfgFActive(f)) return;
+    const txt = f.sel.size ? [...f.sel].sort(cfgCmp).map(cfgEsc).join(", ") : `contiene “${cfgEsc(f.text.trim())}”`;
+    chips.push(`<span class="cfg-chip" title="${cfgEsc(CFG_KEY_LABEL[k])}"><span>${CFG_KEY_LABEL[k]}: <b>${txt}</b></span><button onclick="cfgClearFilter('${dom}','${k}')" title="Quitar filtro">${CFG_IC.x}</button></span>`);
+  });
+  const leafCount = new Set(rows.filter(r=>r.leafId).map(r=>r.leafId)).size;
+  const leafTotal = dom==="proveedores" ? cfgData.provs.length : cfgData.items.length;
+  el.innerHTML = chips.join("") + `<span class="res">Mostrando ${leafCount} de ${leafTotal} ${CFG_DOM[dom].hojaPl}</span><span class="clear-all" onclick="cfgClearAll('${dom}')">Limpiar todo</span>`;
+}
+
+function cfgOnboardHtml(dom){
+  if(dom==="proveedores"){
+    return `<div class="cfg-onboard"><div class="ic" style="background:#EAF0FF;color:var(--blue)">${CFG_IC.prov}</div><h2>Todavía no hay proveedores</h2><p>Empezá creando una categoría, después sus rubros y por último los proveedores de cada rubro.</p>
+      <div class="row-btns"><button class="cfg-cta" onclick="cfgOpenCatForm('proveedores',null)"><span class="plus">${CFG_IC.plus}</span>Crear primera categoría</button></div></div>`;
+  }
+  return `<div class="cfg-onboard"><div class="ic">${CFG_IC.box}</div><h2>Armemos la lista de insumos</h2>
+    <p>Los insumos se ordenan igual que los proveedores: <b>Categoría › Rubro › Insumo</b>. Para cada insumo vas a indicar qué proveedores te lo venden y en qué bultos (cantidad + unidad), que es lo que después usa Costeo para calcular el costo por kg, litro o unidad.</p>
+    <div class="cfg-steps"><div><b>Paso 1</b><span>Crear una categoría<br><small style="color:var(--text-3);font-weight:600">ej. Cocina</small></span></div><div><b>Paso 2</b><span>Crear sus rubros<br><small style="color:var(--text-3);font-weight:600">ej. Fiambres, Lácteos</small></span></div><div><b>Paso 3</b><span>Crear los insumos<br><small style="color:var(--text-3);font-weight:600">ej. Jamón cocido</small></span></div></div>
+    <div class="row-btns"><button class="cfg-cta" onclick="cfgOpenCatForm('insumos',null)"><span class="plus">${CFG_IC.plus}</span>Crear primera categoría</button></div></div>`;
+}
+
+/* ---------- popover de filtros: tildar o escribir (lectura inteligente) ---------- */
+let cfgFP = { dom:null, key:null, btn:null };
+function cfgOpenFilter(ev, dom, key){
+  ev.stopPropagation();
+  const pop = document.getElementById("cfgFilterPop");
+  if(pop.classList.contains("show") && cfgFP.dom===dom && cfgFP.key===key){ cfgCloseFloating(); return; }
+  cfgCloseFloating();
+  cfgFP = { dom, key };
+  cfgRenderFilterPop();
+  const btn = document.querySelector(`.cfg-fbtn[data-fdom="${dom}"][data-fkey="${key}"]`);
+  if(btn){ btn.classList.add("open"); cfgPlace(pop, btn, "left"); }
+  const inp = document.getElementById("cfgFpInput");
+  if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+function cfgRenderFilterPop(){
+  const { dom, key } = cfgFP; if(!dom) return;
+  const f = cfgState[dom].filters[key];
+  const pop = document.getElementById("cfgFilterPop");
+  pop.innerHTML = `
+    <div class="fp-head"><h4>Filtrar por ${cfgEsc(CFG_KEY_LABEL[key].toLowerCase())}</h4><span class="fp-mode" id="cfgFpMode"></span></div>
+    <div class="fp-search">${CFG_IC.search}<input type="text" id="cfgFpInput" placeholder="Escribí para filtrar…" value="${cfgEsc(f.text)}" autocomplete="off"
+      oninput="cfgFpOnInput(this.value)" onkeydown="if(event.key==='Enter'){cfgCloseFloating();} if(event.key==='Escape'){cfgCloseFloating();}"></div>
+    <div class="fp-bulk"><a onclick="cfgFpSelectVisible()">Tildar los visibles</a><span id="cfgFpCount"></span><a onclick="cfgFpSelectNone()">Destildar</a></div>
+    <div class="fp-list" id="cfgFpList"></div>
+    <div class="fp-foot"><button class="fa-clear" onclick="cfgClearFilter('${dom}','${key}')">Limpiar</button><button class="fa-apply" onclick="cfgCloseFloating()">Listo</button></div>`;
+  cfgRenderFilterList();
+}
+function cfgFpOptions(){
+  const { dom, key } = cfgFP;
+  const rows = cfgFilterRows(dom, cfgBuildRows(dom), key);
+  const counts = new Map();
+  rows.forEach(r=>cfgRowVals(r,key).forEach(v=>{
+    if(!counts.has(v)) counts.set(v, new Set());
+    if(r.leafId) counts.get(v).add(r.leafId);
+  }));
+  const f = cfgState[dom].filters[key];
+  cfgBuildRows(dom).forEach(r=>cfgRowVals(r,key).forEach(v=>{ if(!counts.has(v)) counts.set(v, new Set()); }));
+  return [...counts.entries()].map(([v,s])=>({ v, n:s.size })).sort((a,b)=>cfgCmp(a.v,b.v));
+}
+function cfgRenderFilterList(){
+  const { dom, key } = cfgFP; if(!dom) return;
+  const list = document.getElementById("cfgFpList"); if(!list) return;
+  const f = cfgState[dom].filters[key], t = cfgNorm(f.text);
+  const opts = cfgFpOptions().filter(o=>!t || cfgNorm(o.v).includes(t));
+  const showCount = key!=="ins" && !(dom==="proveedores" && key==="prov");
+  list.innerHTML = opts.length ? opts.map(o=>`<div class="cfg-fopt${f.sel.has(o.v)?" on":""}${o.n===0&&showCount&&!f.sel.has(o.v)?" zero":""}" data-v="${cfgEsc(o.v)}" onclick="cfgFpToggle(this.dataset.v)"><span class="ck">${CFG_IC.check}</span><span class="lb">${cfgHi(o.v, f.text)}</span>${showCount?`<span class="ct">${o.n}</span>`:""}</div>`).join("")
+    : `<div class="fp-empty">Sin coincidencias para “${cfgEsc(f.text)}”</div>`;
+  const mode = document.getElementById("cfgFpMode");
+  if(mode) mode.textContent = f.sel.size ? `${f.sel.size} tildado${f.sel.size===1?"":"s"}` : (t ? "Filtrando por texto" : "");
+  const cnt = document.getElementById("cfgFpCount");
+  if(cnt) cnt.textContent = `${opts.length} opci${opts.length===1?"ón":"ones"}`;
+  cfgFP.visible = opts.map(o=>o.v);
+}
+function cfgFpOnInput(val){
+  const { dom, key } = cfgFP;
+  cfgState[dom].filters[key].text = val;
+  cfgRenderDom(dom); cfgRenderFilterList(); cfgReopenMark();
+}
+function cfgFpToggle(v){
+  const { dom, key } = cfgFP, f = cfgState[dom].filters[key];
+  f.sel.has(v) ? f.sel.delete(v) : f.sel.add(v);
+  cfgRenderDom(dom); cfgRenderFilterList(); cfgReopenMark();
+}
+function cfgFpSelectVisible(){
+  const { dom, key } = cfgFP, f = cfgState[dom].filters[key];
+  (cfgFP.visible||[]).forEach(v=>f.sel.add(v));
+  cfgRenderDom(dom); cfgRenderFilterList(); cfgReopenMark();
+}
+function cfgFpSelectNone(){
+  const { dom, key } = cfgFP; cfgState[dom].filters[key].sel.clear();
+  cfgRenderDom(dom); cfgRenderFilterList(); cfgReopenMark();
+}
+function cfgReopenMark(){
+  const b = document.querySelector(`.cfg-fbtn[data-fdom="${cfgFP.dom}"][data-fkey="${cfgFP.key}"]`);
+  if(b) b.classList.add("open");
+}
+
+/* ---------- menú "Crear nuevo" ---------- */
+function cfgOpenCreateMenu(btn, kind){
+  const m = document.getElementById("cfgCreateMenu");
+  const wasOpen = m.classList.contains("show") && m.dataset.kind===kind;
+  cfgCloseFloating();
+  if(wasOpen) return;
+  m.dataset.kind = kind;
+  const dom = kind==="proveedores" ? "proveedores" : "insumos";
+  const opt = (lvl, n, ic, title, desc, fn) => `<div class="cfg-create-opt" onclick="cfgCloseFloating();${fn}"><span class="lvl ${lvl}">${ic}</span><div><strong>${title}</strong><span>${desc}</span></div><span class="step">${n}</span></div>`;
+  let html = `<div class="cm-title">¿Qué querés crear?</div>`;
+  html += opt("l1","NIVEL 1",CFG_IC.cat,"Categoría", dom==="proveedores"?"Agrupa rubros. Ej. Servicio de cocina":"Agrupa rubros de insumos. Ej. Cocina", `cfgOpenCatForm('${dom}',null)`);
+  html += opt("l2","NIVEL 2",CFG_IC.rub,"Rubro", dom==="proveedores"?"Pertenece a una categoría. Ej. Almacén":"Pertenece a una categoría. Ej. Fiambres", `cfgOpenRubroForm('${dom}',null,null)`);
+  if(dom==="proveedores") html += opt("l3","NIVEL 3",CFG_IC.prov,"Proveedor","Se asigna a uno o más rubros", `cfgOpenProvForm(null,null)`);
+  else html += opt("l3","NIVEL 3",CFG_IC.box,"Insumo","Con sus proveedores y presentaciones", `cfgOpenInsumoForm(null,null)`);
+  m.innerHTML = html;
+  cfgPlace(m, btn, "right");
+}
+function cfgCloseFloating(){
+  document.getElementById("cfgCreateMenu").classList.remove("show");
+  document.getElementById("cfgFilterPop").classList.remove("show");
+  document.querySelectorAll(".cfg-fbtn.open").forEach(b=>b.classList.remove("open"));
+  cfgFP = { dom:null, key:null };
+}
+document.addEventListener("mousedown", e=>{
+  const inPop = e.target.closest("#cfgFilterPop, #cfgCreateMenu, .cfg-fbtn, .cfg-cta, .cfg-cta-ghost");
+  if(!inPop) cfgCloseFloating();
+  if(!e.target.closest(".cfg-combo")) document.querySelectorAll(".cfg-combo-list.show").forEach(l=>l.classList.remove("show"));
+});
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Escape") return;
+  if(document.getElementById("cfgModal").classList.contains("show")){ cfgCloseModal(); return; }
+  if(document.getElementById("cfgFilterPop").classList.contains("show") || document.getElementById("cfgCreateMenu").classList.contains("show")){ cfgCloseFloating(); return; }
+  if(document.getElementById("cfgPanel").classList.contains("show")) cfgClosePanel();
+});
+window.addEventListener("resize", cfgCloseFloating);
+
+/* ---------- panel lateral (alta / edición) ---------- */
+let cfgPS = null; // estado del panel abierto
+function cfgOpenPanel(o){
+  cfgCloseFloating();
+  cfgPS = o;
+  const p = document.getElementById("cfgPanel");
+  p.classList.toggle("wide", !!o.wide);
+  const lvlTxt = { l1:"Nivel 1 · Categoría", l2:"Nivel 2 · Rubro", l3:"Nivel 3 · "+(o.hoja||"") }[o.lvl];
+  document.getElementById("cfgPanelBadge").innerHTML = `<span class="lvl-badge ${o.lvl}">${lvlTxt}</span>`;
+  document.getElementById("cfgPanelTitle").textContent = o.title;
+  document.getElementById("cfgPanelCrumb").innerHTML = o.crumb || "";
+  document.getElementById("cfgPanelBody").innerHTML = o.body;
+  const sv = document.getElementById("cfgPanelSave");
+  sv.textContent = o.saveLabel || "Guardar"; sv.disabled = false;
+  p.classList.add("show"); p.setAttribute("aria-hidden","false");
+  document.getElementById("cfgOverlay").classList.add("show");
+  if(o.afterOpen) o.afterOpen();
+  setTimeout(()=>{ const f = document.querySelector("#cfgPanelBody [data-autofocus]"); if(f) f.focus(); }, 60);
+}
+function cfgClosePanel(){
+  document.getElementById("cfgPanel").classList.remove("show");
+  document.getElementById("cfgPanel").setAttribute("aria-hidden","true");
+  document.getElementById("cfgOverlay").classList.remove("show");
+  cfgPS = null;
+}
+async function cfgPanelSubmit(){
+  if(!cfgPS || !cfgPS.submit) return;
+  const sv = document.getElementById("cfgPanelSave");
+  if(sv.disabled) return;
+  sv.disabled = true; const prev = sv.textContent; sv.textContent = "Guardando…";
+  try{
+    const ok = await cfgPS.submit();
+    if(ok){ cfgClosePanel(); }
+  } finally {
+    if(cfgPS){ sv.disabled = false; sv.textContent = prev; }
+  }
+}
+function cfgCrumb(parts){
+  return parts.map((t,i)=>`<span class="${i===parts.length-1?"on":""}">${cfgEsc(t)}</span>`).join(CFG_IC.arrow);
+}
+function cfgErrText(error, que){
+  const code = error && error.code;
+  if(code==="23505") return `Ya existe ${que} con ese nombre (puede haberlo creado otro usuario recién).`;
+  if(code==="23503") return "No se puede: está siendo usado por otros registros.";
+  if(code==="42501") return "No tenés permisos para modificar Configuración.";
+  if(code==="22023" && error.message) return error.message;
+  return "No se pudo guardar. Revisá la conexión e intentá de nuevo.";
+}
+function cfgShowErr(msg){ const b = document.getElementById("cfgErrBox"); if(b){ b.innerHTML = msg; b.classList.add("show"); b.scrollIntoView({block:"nearest", behavior:"smooth"}); } else showToast(msg, "warn"); }
+function cfgHideErr(){ const b = document.getElementById("cfgErrBox"); if(b) b.classList.remove("show"); }
+/* validación de nombre duplicado en vivo */
+function cfgNameField(label, value, placeholder){
+  return `<div class="field" id="cfgFldNombre"><label>${label}</label><input type="text" id="cfgFNombre" maxlength="90" value="${cfgEsc(value||"")}" placeholder="${cfgEsc(placeholder)}" data-autofocus autocomplete="off" oninput="cfgCheckName()" onkeydown="if(event.key==='Enter'&&this.closest('.cfg-panel:not(.wide)')){event.preventDefault();cfgPanelSubmit();}">
+    <div class="cfg-field-msg" id="cfgFNombreMsg"></div></div>`;
+}
+function cfgCheckName(){
+  if(!cfgPS || !cfgPS.nameList) return true;
+  const inp = document.getElementById("cfgFNombre"), msg = document.getElementById("cfgFNombreMsg"), fld = document.getElementById("cfgFldNombre");
+  const v = inp.value.trim();
+  const dup = v ? cfgExists(cfgPS.nameList(), v, cfgPS.id) : null;
+  fld.classList.toggle("dup", !!dup);
+  if(dup){ msg.className = "cfg-field-msg err show"; msg.innerHTML = `${CFG_IC.warn}<span>Ya existe “${cfgEsc(dup.nombre)}”${cfgPS.dupHint?cfgPS.dupHint(dup):""}. No puede haber dos iguales.</span>`; }
+  else if(v && cfgPS.id==null){ msg.className = "cfg-field-msg ok show"; msg.innerHTML = `${CFG_IC.ok}<span>Nombre disponible</span>`; }
+  else { msg.className = "cfg-field-msg"; msg.innerHTML = ""; }
+  cfgHideErr();
+  if(cfgPS.hoja==="Insumo" && document.getElementById("cfgFRub")) cfgInsCrumb();
+  return !dup;
+}
+function cfgReadName(){
+  const v = (document.getElementById("cfgFNombre").value||"").replace(/\s+/g," ").trim();
+  if(!v){ document.getElementById("cfgFldNombre").classList.add("error"); cfgShowErr("Completá el nombre."); return null; }
+  document.getElementById("cfgFldNombre").classList.remove("error");
+  if(!cfgCheckName()){ cfgShowErr("Ese nombre ya existe. Elegí otro."); return null; }
+  return v;
+}
+
+/* ===== Categoría ===== */
+function cfgOpenCatForm(dom, id){
+  const D = cfgData[dom], c = id ? cfgCat(dom,id) : null;
+  if(id && !c){ showToast("La categoría ya no existe", "warn"); return; }
+  const nR = c ? D.rubros.filter(r=>r.catId===c.id).length : 0;
+  const ambito = dom==="proveedores" ? "Proveedores" : "Insumos";
+  cfgOpenPanel({
+    lvl:"l1", id, title: c ? "Editar categoría" : "Nueva categoría",
+    crumb: cfgCrumb([ambito, c ? c.nombre : "Nueva categoría"]),
+    body: `<div class="cfg-note">${CFG_IC.info}<div>La <b>categoría</b> es el nivel más amplio. Dentro de cada una vas a crear sus <b>rubros</b>${dom==="proveedores"?", y en cada rubro, sus <b>proveedores</b>":", y en cada rubro, sus <b>insumos</b>"}.${c?`<br>Esta categoría tiene <b>${nR}</b> ${nR===1?"rubro":"rubros"}.`:""}</div></div>
+      ${cfgNameField("Nombre de la categoría", c && c.nombre, dom==="proveedores"?"Ej. Servicio de cocina":"Ej. Cocina")}
+      <div class="cfg-err-box" id="cfgErrBox"></div>`,
+    saveLabel: c ? "Guardar cambios" : "Crear categoría",
+    nameList: ()=>cfgData[dom].cats,
+    submit: async ()=>{
+      const nombre = cfgReadName(); if(!nombre) return false;
+      const T = CFG_DOM[dom].catTable;
+      const r = c ? await sb.from(T).update({ nombre }).eq("id", c.id) : await sb.from(T).insert({ nombre });
+      if(r.error){ cfgShowErr(cfgErrText(r.error, "una categoría")); return false; }
+      if(c){ if(c.nombre!==nombre) logHistorialConfig(`Editó una categoría de ${ambito.toLowerCase()}`, `“${c.nombre}” → “${nombre}”`); }
+      else logHistorialConfig(`Creó una categoría de ${ambito.toLowerCase()}`, `“${nombre}”`);
+      await cfgReload();
+      showToast(c ? "Categoría actualizada" : "Categoría creada");
+      return true;
+    }
+  });
+}
+
+/* ===== Rubro ===== */
+function cfgOpenRubroForm(dom, id, presetCatId){
+  const D = cfgData[dom], r = id ? cfgRub(dom,id) : null;
+  if(id && !r){ showToast("El rubro ya no existe", "warn"); return; }
+  const ambito = dom==="proveedores" ? "Proveedores" : "Insumos";
+  if(!D.cats.length){
+    cfgModal({ icon:"info", title:"Primero creá una categoría", body:`<p>Cada rubro pertenece a una categoría, y todavía no hay ninguna en ${ambito}.</p>`,
+      actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Crear categoría", cls:"confirm-primary", fn:()=>cfgOpenCatForm(dom,null)}] });
+    return;
+  }
+  const catSel = r ? r.catId : (presetCatId || "");
+  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const n = r ? (dom==="proveedores" ? cfgData.links.filter(l=>l.rubro_id===r.id).length : cfgData.items.filter(i=>i.rubro_id===r.id).length) : 0;
+  const catName = catSel ? (cfgCat(dom,catSel)||{}).nombre : null;
+  cfgOpenPanel({
+    lvl:"l2", id, title: r ? "Editar rubro" : "Nuevo rubro",
+    crumb: cfgCrumb([ambito, catName || "Categoría", r ? r.nombre : "Nuevo rubro"]),
+    body: `<div class="field" id="cfgFldCat"><label>Categoría</label><select id="cfgFCat">${catSel?"":'<option value="">Elegí una categoría…</option>'}${cats.map(c=>`<option value="${c.id}"${c.id===catSel?" selected":""}>${cfgEsc(c.nombre)}</option>`).join("")}</select></div>
+      ${cfgNameField("Nombre del rubro", r && r.nombre, dom==="proveedores"?"Ej. Almacén":"Ej. Fiambres")}
+      ${r && n ? `<div class="cfg-note">${CFG_IC.info}<div>Este rubro tiene <b>${n}</b> ${n===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}. Si lo cambiás de categoría, se mueven con él.</div></div>` : ""}
+      <div class="cfg-err-box" id="cfgErrBox"></div>`,
+    saveLabel: r ? "Guardar cambios" : "Crear rubro",
+    nameList: ()=>cfgData[dom].rubros,
+    dupHint: d=>` en la categoría “${cfgEsc((cfgCat(dom,d.catId)||{}).nombre||"")}”`,
+    afterOpen: ()=>{ if(catSel) setTimeout(()=>document.getElementById("cfgFNombre").focus(), 80); },
+    submit: async ()=>{
+      const catId = document.getElementById("cfgFCat").value;
+      document.getElementById("cfgFldCat").classList.toggle("error", !catId);
+      if(!catId){ cfgShowErr("Elegí a qué categoría pertenece el rubro."); return false; }
+      const nombre = cfgReadName(); if(!nombre) return false;
+      const payload = { nombre }; payload[CFG_DOM[dom].rubFk] = catId;
+      const T = CFG_DOM[dom].rubTable;
+      const res = r ? await sb.from(T).update(payload).eq("id", r.id) : await sb.from(T).insert(payload);
+      if(res.error){ cfgShowErr(cfgErrText(res.error, "un rubro")); return false; }
+      const catN = (cfgCat(dom,catId)||{}).nombre;
+      if(r){
+        const ch = [];
+        if(r.nombre!==nombre) ch.push(`“${r.nombre}” → “${nombre}”`);
+        if(r.catId!==catId) ch.push(`categoría: “${(cfgCat(dom,r.catId)||{}).nombre}” → “${catN}”`);
+        if(ch.length) logHistorialConfig(`Editó un rubro de ${ambito.toLowerCase()}`, `“${nombre}” · ${ch.join(" · ")}`);
+      } else logHistorialConfig(`Creó un rubro de ${ambito.toLowerCase()}`, `“${nombre}” en la categoría “${catN}”`);
+      cfgState[dom].collapsed.delete(catId);
+      await cfgReload();
+      showToast(r ? "Rubro actualizado" : "Rubro creado");
+      return true;
+    }
+  });
+}
+
+/* ===== Proveedor ===== */
+function cfgOpenProvForm(id, presetRubroId){
+  const p = id ? cfgProv(id) : null;
+  if(id && !p){ showToast("El proveedor ya no existe", "warn"); return; }
+  if(!cfgData.proveedores.rubros.length){
+    cfgModal({ icon:"info", title:"Primero creá un rubro", body:`<p>Cada proveedor se asigna a uno o más rubros, y todavía no hay rubros cargados.</p>`,
+      actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Crear rubro", cls:"confirm-primary", fn:()=>cfgOpenRubroForm('proveedores',null,null)}] });
+    return;
+  }
+  const sel = new Set(p ? cfgRubrosDeProv(p.id).map(r=>r.id) : (presetRubroId ? [presetRubroId] : []));
+  const nIns = p ? cfgInsumosDeProv(p.id).length : 0;
+  const preRub = presetRubroId ? cfgRub("proveedores", presetRubroId) : null;
+  cfgOpenPanel({
+    lvl:"l3", hoja:"Proveedor", id, title: p ? "Editar proveedor" : "Nuevo proveedor",
+    crumb: cfgCrumb(preRub && !p ? ["Proveedores", (cfgCat("proveedores",preRub.catId)||{}).nombre, preRub.nombre, "Nuevo proveedor"] : ["Proveedores", p ? p.nombre : "Nuevo proveedor"]),
+    body: `<div class="cfg-sec-title"><span class="n">1</span>Identificación</div>
+      ${cfgNameField("Nombre o razón social", p && p.nombre, "Ej. Castello Ponte")}
+      <div class="cfg-sec-title"><span class="n">2</span>Rubros <span class="opt">· uno o más</span></div>
+      <div class="cfg-ms" id="cfgMs">
+        <div class="cfg-ms-sel" id="cfgMsSel"></div>
+        <div class="cfg-ms-search">${CFG_IC.search}<input type="text" id="cfgMsQ" placeholder="Buscar rubro o categoría…" oninput="cfgMsRender()" autocomplete="off" style="border:1px solid var(--border);outline:none;"></div>
+        <div class="cfg-ms-list" id="cfgMsList"></div>
+      </div>
+      ${nIns ? `<div class="cfg-note" style="margin-top:14px">${CFG_IC.info}<div>Este proveedor está asignado a <b>${nIns}</b> ${nIns===1?"insumo":"insumos"} en la solapa Insumos.</div></div>`:""}
+      <div class="cfg-sec-title"><span class="n">3</span>Datos de contacto <span class="opt">· opcionales</span></div>
+      <div class="field-row"><div class="field"><label>CUIT</label><input type="text" id="cfgFCuit" maxlength="20" placeholder="30-12345678-9" value="${cfgEsc(p&&p.cuit||"")}"></div>
+        <div class="field"><label>Teléfono</label><input type="text" id="cfgFTel" maxlength="40" placeholder="11 5555-5555" value="${cfgEsc(p&&p.telefono||"")}"></div></div>
+      <div class="field"><label>Email</label><input type="email" id="cfgFEmail" maxlength="120" placeholder="ventas@proveedor.com" value="${cfgEsc(p&&p.email||"")}"></div>
+      <div class="field"><label>Notas</label><textarea id="cfgFNotas" maxlength="600" placeholder="Días de entrega, contacto, condiciones de pago…">${cfgEsc(p&&p.notas||"")}</textarea></div>
+      <div class="cfg-err-box" id="cfgErrBox"></div>`,
+    saveLabel: p ? "Guardar cambios" : "Crear proveedor",
+    nameList: ()=>cfgData.provs,
+    dupHint: d=>{ const rs = cfgRubrosDeProv(d.id).map(r=>r.nombre); return rs.length ? ` (en ${cfgEsc(rs.join(", "))}). Si también te vende en otro rubro, editalo y sumale el rubro` : ""; },
+    msSel: sel,
+    afterOpen: ()=>cfgMsRender(),
+    submit: async ()=>{
+      const nombre = cfgReadName(); if(!nombre) return false;
+      const rubIds = [...cfgPS.msSel];
+      document.getElementById("cfgMs").classList.toggle("err", !rubIds.length);
+      if(!rubIds.length){ cfgShowErr("Asigná el proveedor a al menos un rubro."); return false; }
+      const email = document.getElementById("cfgFEmail").value.trim();
+      if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ cfgShowErr("El email no parece válido."); return false; }
+      const args = { p_id: p ? p.id : null, p_nombre: nombre, p_cuit: document.getElementById("cfgFCuit").value, p_telefono: document.getElementById("cfgFTel").value,
+        p_email: email, p_notas: document.getElementById("cfgFNotas").value, p_rubro_ids: rubIds };
+      const res = await sb.rpc("cm_guardar_proveedor", args);
+      if(res.error){ cfgShowErr(cfgErrText(res.error, "un proveedor")); return false; }
+      const rubN = ids => ids.map(i=>(cfgRub("proveedores",i)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
+      if(p){
+        const antes = cfgRubrosDeProv(p.id).map(r=>r.id);
+        const ch = [];
+        if(p.nombre!==nombre) ch.push(`“${p.nombre}” → “${nombre}”`);
+        if(rubN(antes)!==rubN(rubIds)) ch.push(`rubros: ${rubN(antes)} → ${rubN(rubIds)}`);
+        const campos = [["cuit","CUIT",args.p_cuit],["telefono","teléfono",args.p_telefono],["email","email",args.p_email],["notas","notas",args.p_notas]];
+        const cc = campos.filter(([k,,v])=>(p[k]||"")!==(v||"").trim()).map(x=>x[1]);
+        if(cc.length) ch.push("actualizó "+cc.join(", "));
+        if(ch.length) logHistorialConfig("Editó un proveedor", `“${nombre}” · ${ch.join(" · ")}`);
+      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}`);
+      await cfgReload();
+      showToast(p ? "Proveedor actualizado" : "Proveedor creado");
+      return true;
+    }
+  });
+}
+function cfgMsRender(){
+  if(!cfgPS || !cfgPS.msSel) return;
+  const sel = cfgPS.msSel, q = cfgNorm((document.getElementById("cfgMsQ")||{}).value);
+  const D = cfgData.proveedores;
+  document.getElementById("cfgMsSel").innerHTML = [...sel].map(id=>cfgRub("proveedores",id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre))
+    .map(r=>`<span class="cfg-ms-tag">${cfgEsc(r.nombre)} <small>${cfgEsc((cfgCat("proveedores",r.catId)||{}).nombre||"")}</small><button onclick="cfgMsToggle('${r.id}')" title="Quitar">${CFG_IC.x}</button></span>`).join("");
+  let html = "";
+  D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).forEach(c=>{
+    const catHit = q && cfgNorm(c.nombre).includes(q);
+    const rs = D.rubros.filter(r=>r.catId===c.id && (!q || catHit || cfgNorm(r.nombre).includes(q))).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    if(!rs.length) return;
+    html += `<div class="cfg-ms-grp">${cfgHi(c.nombre, q)}</div>` + rs.map(r=>`<div class="cfg-ms-opt${sel.has(r.id)?" on":""}" onclick="cfgMsToggle('${r.id}')"><span class="ck">${CFG_IC.check}</span><span>${cfgHi(r.nombre, q)}</span></div>`).join("");
+  });
+  document.getElementById("cfgMsList").innerHTML = html || `<div class="cfg-combo-empty" style="padding:14px">No hay rubros que coincidan.</div>`;
+}
+function cfgMsToggle(id){
+  const s = cfgPS.msSel; s.has(id) ? s.delete(id) : s.add(id);
+  document.getElementById("cfgMs").classList.remove("err"); cfgHideErr();
+  const list = document.getElementById("cfgMsList"), st = list.scrollTop;
+  cfgMsRender(); list.scrollTop = st;
+}
+
+/* ===== Insumo: nombre › categoría › rubro › proveedores › presentaciones ===== */
+let cfgKeySeq = 0;
+function cfgNewPres(p){ return { key:++cfgKeySeq, id:p?p.id:null, bulto:p?(p.bulto||""):"", cant:p?String(cfgFmtNum(p.cantidad)).replace(/\./g,""):"", unidad:p?p.unidad:"kg" }; }
+function cfgOpenInsumoForm(id, presetRubroId){
+  const ins = id ? cfgIns(id) : null;
+  if(id && !ins){ showToast("El insumo ya no existe", "warn"); return; }
+  const D = cfgData.insumos;
+  if(!D.rubros.length){
+    cfgModal({ icon:"info", title: D.cats.length ? "Primero creá un rubro de insumos" : "Primero creá una categoría y un rubro",
+      body:`<p>Los insumos se ordenan como <b>Categoría › Rubro › Insumo</b>. ${D.cats.length?"Ya tenés categorías, falta crear al menos un rubro.":"Todavía no hay categorías de insumos."}</p>`,
+      actions:[{label:"Cancelar", cls:"confirm-cancel"}, D.cats.length ? {label:"Crear rubro", cls:"confirm-primary", fn:()=>cfgOpenRubroForm('insumos',null,null)} : {label:"Crear categoría", cls:"confirm-primary", fn:()=>cfgOpenCatForm('insumos',null)}] });
+    return;
+  }
+  if(!cfgData.provs.length){ showToast("Primero cargá proveedores en la solapa Proveedores", "warn"); return; }
+  const rubroId = ins ? ins.rubro_id : (presetRubroId || "");
+  const catId = rubroId ? (cfgRub("insumos", rubroId)||{}).catId : "";
+  // proveedores + presentaciones actuales
+  const pvs = [];
+  if(ins){
+    cfgPresDeIns(ins.id).forEach(p=>{
+      let g = pvs.find(x=>x.provId===p.proveedor_id);
+      if(!g){ g = { key:++cfgKeySeq, provId:p.proveedor_id, pres:[] }; pvs.push(g); }
+      g.pres.push(cfgNewPres(p));
+    });
+  }
+  if(!pvs.length) pvs.push({ key:++cfgKeySeq, provId:"", pres:[cfgNewPres()] });
+  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const rubCat = rubroId ? cfgRub("insumos", rubroId) : null;
+  cfgOpenPanel({
+    lvl:"l3", hoja:"Insumo", wide:true, id, title: ins ? "Editar insumo" : "Crear nuevo insumo",
+    crumb: cfgCrumb(["Insumos", catId ? (cfgCat("insumos",catId)||{}).nombre : "Categoría", rubCat ? rubCat.nombre : "Rubro", ins ? ins.nombre : "Nuevo insumo"]),
+    body: `<div class="cfg-sec-title"><span class="n">1</span>Insumo</div>
+      ${cfgNameField("Nombre del insumo", ins && ins.nombre, "Ej. Jamón cocido")}
+      <div class="field-row">
+        <div class="field" id="cfgFldCat"><label>Categoría</label><select id="cfgFCat" onchange="cfgInsOnCat()">${catId?"":'<option value="">Elegí…</option>'}${cats.map(c=>`<option value="${c.id}"${c.id===catId?" selected":""}>${cfgEsc(c.nombre)}</option>`).join("")}</select></div>
+        <div class="field" id="cfgFldRub"><label>Rubro</label><select id="cfgFRub" onchange="cfgInsOnRub()"></select></div>
+      </div>
+      <div class="cfg-sec-title"><span class="n">2</span>Proveedores y presentaciones</div>
+      <div class="cfg-note">${CFG_IC.info}<div>Para cada proveedor indicá <b>cómo te entrega el insumo</b>: el contenido de cada bulto en <b>cantidad + unidad</b>. Podés cargar varias presentaciones por proveedor (ej. <i>Horma · 3,5 kg</i> y <i>Feteado · 1 kg</i>).<br>En <b>Costeo</b>, al cargar una compra (ej. $10.000 por 3,5 kg), el sistema va a calcular el costo por unidad de medida: <b>$2.857,14/kg</b>.</div></div>
+      <div id="cfgPvCards"></div>
+      <button type="button" class="cfg-add-prov" onclick="cfgInsAddProv()">${CFG_IC.plus} Agregar otro proveedor</button>
+      <div class="cfg-sec-title"><span class="n">3</span>Notas <span class="opt">· opcional</span></div>
+      <div class="field"><textarea id="cfgFNotas" maxlength="600" placeholder="Marca preferida, calidad, observaciones…">${cfgEsc(ins&&ins.notas||"")}</textarea></div>
+      <div class="cfg-err-box" id="cfgErrBox"></div>`,
+    saveLabel: ins ? "Guardar cambios" : "Crear insumo",
+    nameList: ()=>cfgData.items,
+    dupHint: d=>{ const r = cfgRub("insumos", d.rubro_id); return r ? ` en el rubro “${cfgEsc(r.nombre)}”` : ""; },
+    pvs, rubroId,
+    afterOpen: ()=>{ cfgInsFillRubros(rubroId); cfgInsRenderCards(); },
+    submit: cfgInsSubmit.bind(null, ins)
+  });
+}
+function cfgInsFillRubros(selId){
+  const catId = document.getElementById("cfgFCat").value;
+  const sel = document.getElementById("cfgFRub");
+  const rs = cfgData.insumos.rubros.filter(r=>r.catId===catId).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  if(!catId){ sel.innerHTML = '<option value="">Elegí la categoría primero</option>'; sel.disabled = true; return; }
+  sel.disabled = false;
+  sel.innerHTML = rs.length ? ((selId && rs.some(r=>r.id===selId)) ? "" : '<option value="">Elegí…</option>') + rs.map(r=>`<option value="${r.id}"${r.id===selId?" selected":""}>${cfgEsc(r.nombre)}</option>`).join("")
+    : '<option value="">Esta categoría no tiene rubros</option>';
+}
+function cfgInsOnCat(){ cfgInsFillRubros(""); document.getElementById("cfgFldCat").classList.remove("error"); cfgInsCrumb(); cfgHideErr(); }
+function cfgInsOnRub(){ document.getElementById("cfgFldRub").classList.remove("error"); cfgInsCrumb(); cfgHideErr(); }
+function cfgInsCrumb(){
+  const c = cfgCat("insumos", document.getElementById("cfgFCat").value), r = cfgRub("insumos", document.getElementById("cfgFRub").value);
+  const nm = (document.getElementById("cfgFNombre").value||"").trim();
+  document.getElementById("cfgPanelCrumb").innerHTML = cfgCrumb(["Insumos", c?c.nombre:"Categoría", r?r.nombre:"Rubro", nm || (cfgPS&&cfgPS.id?"Insumo":"Nuevo insumo")]);
+}
+function cfgInsRenderCards(){
+  const host = document.getElementById("cfgPvCards"); if(!host || !cfgPS) return;
+  const pvs = cfgPS.pvs;
+  host.innerHTML = pvs.map((g, gi)=>{
+    const pv = g.provId ? cfgProv(g.provId) : null;
+    const presRows = g.pres.map(p=>`
+      <div class="cfg-pres-row" data-pkey="${p.key}">
+        <input type="text" maxlength="40" placeholder="Bulto (opcional): Horma, Caja…" value="${cfgEsc(p.bulto)}" oninput="cfgInsSetPres(${g.key},${p.key},'bulto',this.value)">
+        <input type="text" class="num" inputmode="decimal" maxlength="12" placeholder="Cant." value="${cfgEsc(p.cant)}" oninput="cfgInsSetPres(${g.key},${p.key},'cant',this.value)">
+        <select onchange="cfgInsSetPres(${g.key},${p.key},'unidad',this.value)">${CFG_UNIDADES.map(u=>`<option value="${u.v}"${u.v===p.unidad?" selected":""}>${u.l} · ${u.n.toLowerCase()}</option>`).join("")}</select>
+        <button type="button" class="cfg-ibtn del" title="Quitar presentación" onclick="cfgInsDelPres(${g.key},${p.key})"${g.pres.length<2?' style="visibility:hidden"':""}>${CFG_IC.del}</button>
+        <div class="cfg-pres-prev" id="cfgPrev${p.key}">${cfgPresPreview(p)}</div>
+      </div>`).join("");
+    return `<div class="cfg-pv-card" id="cfgPv${g.key}">
+      <div class="cfg-pv-top"><span class="idx">${gi+1}</span>
+        <div class="field"><label>Proveedor</label>
+          <div class="cfg-combo" data-gkey="${g.key}">
+            <input type="text" placeholder="Buscá el proveedor…" value="${cfgEsc(pv?pv.nombre:"")}" autocomplete="off"
+              onfocus="cfgComboOpen(this)" oninput="cfgComboOpen(this)" onkeydown="cfgComboKey(event,this)" onblur="setTimeout(()=>cfgComboBlur(this),160)">
+            ${CFG_IC.down}
+            <div class="cfg-combo-list"></div>
+          </div>
+        </div>
+        <button type="button" class="cfg-ibtn del" title="Quitar este proveedor" onclick="cfgInsDelProv(${g.key})"${pvs.length<2?' style="visibility:hidden"':""}>${CFG_IC.del}</button>
+      </div>
+      <div class="cfg-pres-head"><span>Bulto</span><span style="text-align:right">Cant. por bulto</span><span>Un. por bulto</span><span></span></div>
+      ${presRows}
+      <button type="button" class="cfg-pres-add" onclick="cfgInsAddPres(${g.key})">${CFG_IC.plus} Agregar otra presentación</button>
+    </div>`;
+  }).join("");
+}
+function cfgPresPreview(p){
+  const n = cfgParseNum(p.cant);
+  if(!(n>0)) return "";
+  return `→ ${p.bulto.trim() ? "1 "+cfgEsc(p.bulto.trim()) : "Cada bulto"} = ${cfgFmtNum(n)} ${cfgEsc(cfgUnLabel(p.unidad))}`;
+}
+function cfgInsG(gk){ return cfgPS.pvs.find(g=>g.key===gk); }
+function cfgInsSetPres(gk, pk, field, val){
+  const p = cfgInsG(gk).pres.find(x=>x.key===pk); p[field] = val;
+  const pv = document.getElementById("cfgPrev"+pk); if(pv) pv.innerHTML = cfgPresPreview(p);
+  const row = document.querySelector(`.cfg-pres-row[data-pkey="${pk}"]`); if(row) row.querySelectorAll(".bad").forEach(e=>e.classList.remove("bad"));
+  cfgHideErr();
+}
+function cfgInsAddPres(gk){ cfgInsG(gk).pres.push(cfgNewPres()); cfgInsRenderCards(); const g = cfgInsG(gk); const row = document.querySelector(`.cfg-pres-row[data-pkey="${g.pres[g.pres.length-1].key}"] input`); if(row) row.focus(); }
+function cfgInsDelPres(gk, pk){ const g = cfgInsG(gk); if(g.pres.length<2) return; g.pres = g.pres.filter(p=>p.key!==pk); cfgInsRenderCards(); }
+function cfgInsAddProv(){
+  cfgPS.pvs.push({ key:++cfgKeySeq, provId:"", pres:[cfgNewPres()] });
+  cfgInsRenderCards();
+  const cards = document.querySelectorAll("#cfgPvCards .cfg-pv-card"); const last = cards[cards.length-1];
+  if(last){ last.scrollIntoView({block:"nearest", behavior:"smooth"}); last.querySelector(".cfg-combo input").focus(); }
+}
+function cfgInsDelProv(gk){ if(cfgPS.pvs.length<2) return; cfgPS.pvs = cfgPS.pvs.filter(g=>g.key!==gk); cfgInsRenderCards(); }
+
+/* combo buscable de proveedores */
+function cfgComboOpts(inp){
+  const gk = Number(inp.closest(".cfg-combo").dataset.gkey);
+  const usados = new Set(cfgPS.pvs.filter(g=>g.key!==gk && g.provId).map(g=>g.provId));
+  const g = cfgInsG(gk), cur = g.provId ? cfgProv(g.provId) : null;
+  const q = (cur && inp.value===cur.nombre) ? "" : cfgNorm(inp.value);
+  return cfgData.provs.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(p=>({ p, rubs:cfgRubrosDeProv(p.id).map(r=>r.nombre).join(", "), used:usados.has(p.id) }))
+    .filter(o=>!q || cfgNorm(o.p.nombre).includes(q) || cfgNorm(o.rubs).includes(q));
+}
+function cfgComboOpen(inp){
+  const list = inp.parentElement.querySelector(".cfg-combo-list");
+  const opts = cfgComboOpts(inp), q = inp.value;
+  const g = cfgInsG(Number(inp.closest(".cfg-combo").dataset.gkey)), cur = g.provId ? cfgProv(g.provId) : null;
+  const hq = (cur && q===cur.nombre) ? "" : q;
+  list.innerHTML = opts.length ? opts.map((o,i)=>`<div class="cfg-combo-opt${o.used?" dis":""}${i===0&&!o.used&&hq?" hl":""}" data-id="${o.p.id}" onmousedown="event.preventDefault();cfgComboPick(this)"><span>${cfgHi(o.p.nombre,hq)}</span><small>${o.used?"ya agregado":cfgEsc(o.rubs)}</small></div>`).join("")
+    : `<div class="cfg-combo-empty">No hay proveedores con “${cfgEsc(q)}”. Si es nuevo, crealo primero en la solapa Proveedores.</div>`;
+  list.classList.add("show");
+}
+function cfgComboPick(opt){
+  const combo = opt.closest(".cfg-combo"), gk = Number(combo.dataset.gkey), p = cfgProv(opt.dataset.id);
+  cfgInsG(gk).provId = p.id;
+  const inp = combo.querySelector("input"); inp.value = p.nombre;
+  combo.querySelector(".cfg-combo-list").classList.remove("show");
+  document.getElementById("cfgPv"+gk).classList.remove("err"); cfgHideErr();
+  const next = document.querySelector(`#cfgPv${gk} .cfg-pres-row input`); if(next) next.focus();
+}
+function cfgComboKey(e, inp){
+  const list = inp.parentElement.querySelector(".cfg-combo-list");
+  const items = [...list.querySelectorAll(".cfg-combo-opt:not(.dis)")];
+  let i = items.findIndex(x=>x.classList.contains("hl"));
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+    e.preventDefault(); if(!list.classList.contains("show")) cfgComboOpen(inp);
+    items.forEach(x=>x.classList.remove("hl"));
+    i = e.key==="ArrowDown" ? Math.min(items.length-1, i+1) : Math.max(0, i-1);
+    if(items[i]){ items[i].classList.add("hl"); items[i].scrollIntoView({block:"nearest"}); }
+  } else if(e.key==="Enter"){
+    e.preventDefault(); if(items[i>=0?i:0] && list.classList.contains("show")) cfgComboPick(items[i>=0?i:0]);
+  } else if(e.key==="Escape"){ list.classList.remove("show"); e.stopPropagation(); }
+}
+function cfgComboBlur(inp){
+  if(!cfgPS || !document.body.contains(inp)) return;
+  const combo = inp.closest(".cfg-combo"), g = cfgInsG(Number(combo.dataset.gkey));
+  combo.querySelector(".cfg-combo-list").classList.remove("show");
+  const cur = g.provId ? cfgProv(g.provId) : null;
+  if(!cur || inp.value!==cur.nombre){
+    // si lo escrito coincide exactamente con un proveedor, se toma; si no, se vuelve al elegido
+    const m = cfgData.provs.find(p=>cfgNorm(p.nombre)===cfgNorm(inp.value) && !cfgPS.pvs.some(x=>x!==g && x.provId===p.id));
+    if(m){ g.provId = m.id; inp.value = m.nombre; } else inp.value = cur ? cur.nombre : "";
+  }
+}
+
+async function cfgInsSubmit(ins){
+  const nombre = cfgReadName(); if(!nombre) return false;
+  const catId = document.getElementById("cfgFCat").value, rubroId = document.getElementById("cfgFRub").value;
+  document.getElementById("cfgFldCat").classList.toggle("error", !catId);
+  document.getElementById("cfgFldRub").classList.toggle("error", !rubroId);
+  if(!catId || !rubroId){ cfgShowErr("Elegí la categoría y el rubro del insumo."); return false; }
+  const errs = [], pres = [];
+  let orden = 0;
+  cfgPS.pvs.forEach((g, gi)=>{
+    const card = document.getElementById("cfgPv"+g.key);
+    card.classList.remove("err");
+    if(!g.provId){ card.classList.add("err"); errs.push(`Proveedor ${gi+1}: elegí un proveedor de la lista.`); return; }
+    const pvName = (cfgProv(g.provId)||{}).nombre;
+    const seen = new Set();
+    g.pres.forEach((p, pi)=>{
+      const row = card.querySelector(`.cfg-pres-row[data-pkey="${p.key}"]`);
+      const n = cfgParseNum(p.cant);
+      if(!(n>0)){ row.querySelectorAll("input")[1].classList.add("bad"); card.classList.add("err"); errs.push(`${pvName}: la cantidad de la presentación ${pi+1} tiene que ser un número mayor a 0.`); return; }
+      const sig = cfgNorm(p.bulto)+"|"+n+"|"+p.unidad;
+      if(seen.has(sig)){ row.querySelectorAll("input")[0].classList.add("bad"); card.classList.add("err"); errs.push(`${pvName}: hay dos presentaciones iguales (${cfgPresLabel({bulto:p.bulto.trim(), cantidad:n, unidad:p.unidad})}).`); return; }
+      seen.add(sig);
+      pres.push({ id:p.id, proveedor_id:g.provId, bulto:p.bulto.trim(), cantidad:n, unidad:p.unidad, orden:orden++ });
+    });
+  });
+  if(errs.length){ cfgShowErr(errs.map(cfgEsc).join("<br>")); return false; }
+  const notas = document.getElementById("cfgFNotas").value;
+  const res = await sb.rpc("cm_guardar_insumo", { p_id: ins ? ins.id : null, p_nombre: nombre, p_rubro_id: rubroId, p_notas: notas, p_presentaciones: pres });
+  if(res.error){ cfgShowErr(cfgErrText(res.error, "un insumo")); return false; }
+  const resumen = list => { const m = new Map(); list.forEach(p=>{ const k=(cfgProv(p.proveedor_id)||{}).nombre||"?"; if(!m.has(k)) m.set(k,[]); m.get(k).push(cfgPresLabel(p)); }); return [...m.entries()].map(([k,v])=>`${k} (${v.join(", ")})`).join("; "); };
+  const rubN = (cfgRub("insumos", rubroId)||{}).nombre, catN = (cfgCat("insumos", catId)||{}).nombre;
+  if(ins){
+    const antes = cfgPresDeIns(ins.id), ch = [];
+    if(ins.nombre!==nombre) ch.push(`“${ins.nombre}” → “${nombre}”`);
+    if(ins.rubro_id!==rubroId) ch.push(`rubro: “${(cfgRub("insumos",ins.rubro_id)||{}).nombre}” → “${rubN}”`);
+    const a = resumen(antes), d = resumen(pres);
+    if(a!==d) ch.push(`proveedores: ${a||"—"} → ${d}`);
+    if((ins.notas||"")!==notas.trim()) ch.push("actualizó notas");
+    if(ch.length) logHistorialConfig("Editó un insumo", `“${nombre}” · ${ch.join(" · ")}`);
+  } else logHistorialConfig("Creó un insumo", `“${nombre}” en ${catN} › ${rubN} · proveedores: ${resumen(pres)}`);
+  cfgState.insumos.collapsed.delete(catId);
+  await cfgReload();
+  showToast(ins ? "Insumo actualizado" : "Insumo creado");
+  return true;
+}
+
+/* ---------- modal de confirmación / aviso ---------- */
+function cfgModal(o){
+  cfgCloseFloating();
+  const ic = document.getElementById("cfgModalIcon");
+  ic.className = "confirm-icon" + (o.icon==="info" ? " info" : "");
+  ic.innerHTML = o.icon==="info" ? CFG_IC.info : CFG_IC.del;
+  document.getElementById("cfgModalTitle").textContent = o.title;
+  document.getElementById("cfgModalBody").innerHTML = o.body || "";
+  const acts = document.getElementById("cfgModalActions");
+  acts.innerHTML = "";
+  (o.actions||[{label:"Entendido", cls:"confirm-cancel"}]).forEach(a=>{
+    const b = document.createElement("button");
+    b.className = a.cls || "confirm-cancel"; b.textContent = a.label;
+    if(a.disabled){ b.disabled = true; b.style.opacity = ".45"; b.style.cursor = "not-allowed"; b.title = a.disabledTitle||""; }
+    b.onclick = async ()=>{
+      if(a.fn){
+        b.disabled = true; const t = b.textContent; b.textContent = "Procesando…";
+        const keep = await a.fn();
+        b.disabled = false; b.textContent = t;
+        if(keep===false) return;
+      }
+      cfgCloseModal();
+      if(a.after) a.after();
+    };
+    acts.appendChild(b);
+  });
+  document.getElementById("cfgModal").classList.add("show");
+}
+function cfgCloseModal(){ document.getElementById("cfgModal").classList.remove("show"); }
+function cfgLi(items, max){ max = max||12; const more = items.length>max ? `<li>… y ${items.length-max} más</li>` : ""; return `<ul>${items.slice(0,max).map(x=>`<li>${cfgEsc(x)}</li>`).join("")}${more}</ul>`; }
+async function cfgDel(table, match, what){
+  let q = sb.from(table).delete();
+  Object.keys(match).forEach(k=>{ q = q.eq(k, match[k]); });
+  const r = await q;
+  if(r.error){ showToast(cfgErrText(r.error, what), "warn"); return false; }
+  return true;
+}
+
+/* ===== Eliminar categoría ===== */
+function cfgDeleteCat(dom, id){
+  const c = cfgCat(dom, id); if(!c) return;
+  const ambito = dom==="proveedores" ? "proveedores" : "insumos";
+  const rubs = cfgData[dom].rubros.filter(r=>r.catId===id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  if(rubs.length){
+    cfgModal({ icon:"info", title:"No se puede eliminar todavía",
+      body:`<p>La categoría <b>“${cfgEsc(c.nombre)}”</b> tiene <b>${rubs.length}</b> ${rubs.length===1?"rubro":"rubros"}. Para eliminarla, primero eliminá sus rubros o movelos a otra categoría (editando cada rubro).</p>${cfgLi(rubs.map(r=>r.nombre))}` });
+    return;
+  }
+  cfgModal({ title:"¿Eliminar categoría?", body:`<p>Vas a eliminar la categoría <b>“${cfgEsc(c.nombre)}”</b> de ${ambito}. Esta acción no se puede deshacer.</p>`,
+    actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: async ()=>{
+      if(!await cfgDel(CFG_DOM[dom].catTable, {id}, "la categoría")) return false;
+      logHistorialConfig(`Eliminó una categoría de ${ambito}`, `“${c.nombre}”`);
+      await cfgReload(); showToast("Categoría eliminada");
+    }}] });
+}
+
+/* ===== Eliminar rubro ===== */
+function cfgDeleteRubro(dom, id){
+  const r = cfgRub(dom, id); if(!r) return;
+  const catN = (cfgCat(dom, r.catId)||{}).nombre;
+  if(dom==="insumos"){
+    const ins = cfgData.items.filter(i=>i.rubro_id===id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    if(ins.length){
+      cfgModal({ icon:"info", title:"No se puede eliminar todavía", body:`<p>El rubro <b>“${cfgEsc(r.nombre)}”</b> tiene <b>${ins.length}</b> ${ins.length===1?"insumo":"insumos"}. Movelos a otro rubro (editando cada insumo) o eliminalos primero.</p>${cfgLi(ins.map(i=>i.nombre))}` });
+      return;
+    }
+  } else {
+    const provs = cfgProvsDeRubro(id);
+    const huerfanos = provs.filter(p=>cfgRubrosDeProv(p.id).length===1);
+    if(huerfanos.length){
+      cfgModal({ icon:"info", title:"No se puede eliminar todavía", body:`<p>El rubro <b>“${cfgEsc(r.nombre)}”</b> es el único rubro de ${huerfanos.length===1?"este proveedor":"estos proveedores"}. Asignales otro rubro o eliminalos primero:</p>${cfgLi(huerfanos.map(p=>p.nombre))}` });
+      return;
+    }
+    if(provs.length){
+      cfgModal({ title:"¿Eliminar rubro?", body:`<p>Vas a eliminar el rubro <b>“${cfgEsc(r.nombre)}”</b> (${cfgEsc(catN)}). ${provs.length===1?"Este proveedor":"Estos proveedores"} también ${provs.length===1?"está":"están"} en otros rubros, así que solo se ${provs.length===1?"desvincula":"desvinculan"} de este:</p>${cfgLi(provs.map(p=>p.nombre))}`,
+        actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Desvincular y eliminar", cls:"confirm-delete", fn: async ()=>{
+          if(!await cfgDel("cm_proveedor_rubros", {rubro_id:id}, "el rubro")) return false;
+          if(!await cfgDel("cm_rubros", {id}, "el rubro")){ await cfgReload(); return false; }
+          logHistorialConfig("Eliminó un rubro de proveedores", `“${r.nombre}” (${catN}) · se desvincularon: ${provs.map(p=>p.nombre).join(", ")}`);
+          await cfgReload(); showToast("Rubro eliminado");
+        }}] });
+      return;
+    }
+  }
+  cfgModal({ title:"¿Eliminar rubro?", body:`<p>Vas a eliminar el rubro <b>“${cfgEsc(r.nombre)}”</b> de la categoría <b>${cfgEsc(catN)}</b>. Esta acción no se puede deshacer.</p>`,
+    actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: async ()=>{
+      if(!await cfgDel(CFG_DOM[dom].rubTable, {id}, "el rubro")) return false;
+      logHistorialConfig(`Eliminó un rubro de ${dom}`, `“${r.nombre}” (${catN})`);
+      await cfgReload(); showToast("Rubro eliminado");
+    }}] });
+}
+
+/* ===== Eliminar / quitar proveedor ===== */
+function cfgDeleteProv(provId, rubroCtx){
+  const p = cfgProv(provId); if(!p) return;
+  const rubs = cfgRubrosDeProv(provId), rubCtx = rubroCtx ? cfgRub("proveedores", rubroCtx) : null;
+  const ins = cfgInsumosDeProv(provId);
+  const bloqueado = ins.length > 0;
+  const delAll = async ()=>{
+    if(!await cfgDel("cm_proveedores", {id:provId}, "el proveedor")) return false;
+    logHistorialConfig("Eliminó un proveedor", `“${p.nombre}” · rubros: ${rubs.map(r=>r.nombre).join(", ")||"—"}`);
+    await cfgReload(); showToast("Proveedor eliminado");
+  };
+  const aviso = bloqueado ? `<p style="margin-top:-6px"><b>No se puede eliminar por completo:</b> está asignado a ${ins.length===1?"este insumo":"estos insumos"}. Quitalo primero desde la solapa Insumos.</p>${cfgLi(ins.map(i=>i.nombre))}` : "";
+  if(rubs.length > 1 && rubCtx){
+    cfgModal({ title:"¿Quitar o eliminar?", body:`<p><b>“${cfgEsc(p.nombre)}”</b> está en ${rubs.length} rubros: ${cfgEsc(rubs.map(r=>r.nombre).join(", "))}. Podés quitarlo solo de <b>“${cfgEsc(rubCtx.nombre)}”</b> o eliminar el proveedor de todos lados.</p>${aviso}`,
+      actions:[{label:"Cancelar", cls:"confirm-cancel"},
+        {label:`Quitar de “${rubCtx.nombre}”`, cls:"confirm-soft", fn: async ()=>{
+          if(!await cfgDel("cm_proveedor_rubros", {proveedor_id:provId, rubro_id:rubCtx.id}, "el proveedor")) return false;
+          logHistorialConfig("Quitó un proveedor de un rubro", `“${p.nombre}” ya no está en “${rubCtx.nombre}”`);
+          await cfgReload(); showToast("Proveedor quitado del rubro");
+        }},
+        {label:"Eliminar proveedor", cls:"confirm-delete", disabled:bloqueado, disabledTitle:"Está asignado a insumos", fn: delAll}] });
+    return;
+  }
+  if(bloqueado){
+    cfgModal({ icon:"info", title:"No se puede eliminar todavía", body:`<p><b>“${cfgEsc(p.nombre)}”</b> está asignado a ${ins.length===1?"este insumo":"estos insumos"}. Quitalo primero desde la solapa Insumos.</p>${cfgLi(ins.map(i=>i.nombre))}` });
+    return;
+  }
+  cfgModal({ title:"¿Eliminar proveedor?", body:`<p>Vas a eliminar <b>“${cfgEsc(p.nombre)}”</b>${rubs.length?` (${cfgEsc(rubs.map(r=>r.nombre).join(", "))})`:""}. Esta acción no se puede deshacer.</p>`,
+    actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: delAll}] });
+}
+
+/* ===== Eliminar insumo ===== */
+function cfgDeleteInsumo(id){
+  const ins = cfgIns(id); if(!ins) return;
+  const pres = cfgPresDeIns(id);
+  cfgModal({ title:"¿Eliminar insumo?", body:`<p>Vas a eliminar <b>“${cfgEsc(ins.nombre)}”</b> junto con sus ${pres.length} ${pres.length===1?"presentación":"presentaciones"}. Esta acción no se puede deshacer.</p>`,
+    actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: async ()=>{
+      if(!await cfgDel("cm_insumos", {id}, "el insumo")) return false;
+      const rub = cfgRub("insumos", ins.rubro_id);
+      logHistorialConfig("Eliminó un insumo", `“${ins.nombre}”${rub?` (${rub.nombre})`:""}`);
+      await cfgReload(); showToast("Insumo eliminado");
+    }}] });
+}
+
+/* =========================================================
+   ACTIVIDAD (auditoría de cambios) — igual a La Fortaleza,
+   leída de public.cm_historial (Supabase)
+   ========================================================= */
+async function logHistorialConfig(accion, detalle){
+  try{
+    await sb.from("cm_historial").insert({
+      usuario_id: currentPerfil ? currentPerfil.id : null,
+      usuario_nombre: currentPerfil ? (currentPerfil.nombre || currentPerfil.usuario) : "—",
+      accion, detalle: detalle||"", modulo: "config"
+    });
+  }catch(e){ console.warn("No se pudo registrar en el historial:", e); }
+}
+let historialCache = [];
+async function loadHistorial(){
+  const { data, error } = await sb.from("cm_historial").select("*").order("fecha", { ascending:false }).limit(200);
+  if(error){ showToast("No se pudo cargar el historial de actividad", "warn"); historialCache = []; return; }
+  historialCache = data || [];
+}
+async function renderActividad(){
+  await loadHistorial();
+  const f = (document.getElementById("actFiltroUsuario").value||"").trim().toLowerCase();
+  const modulo = document.getElementById("actFiltroModulo").value;
+  const rows = historialCache.filter(h=>
+    (!f || (h.usuario_nombre||"").toLowerCase().includes(f)) &&
+    (!modulo || (h.modulo||"config")===modulo)
+  );
+  const el = document.getElementById("actividadList");
+  if(!rows.length){ el.innerHTML = `<div class="empty-mini">${historialCache.length?"Ningún registro coincide con ese filtro.":"Todavía no hay actividad registrada."}</div>`; return; }
+  el.innerHTML = rows.map(h=>`
+    <div class="config-list-row" style="align-items:flex-start;">
+      <div style="flex:1;min-width:0;">
+        <div class="main-txt" style="white-space:normal;">${cfgEsc(h.accion)} <span class="tag" style="font-size:9.5px;">${({pagos:"Pagos",sueldos:"Sueldos",cajaMayor:"Caja Mayor",config:"Configuración"})[h.modulo||"config"] || "Configuración"}</span></div>
+        <div class="sub-txt" style="display:block;margin-top:2px;font-weight:500;white-space:normal;">${cfgEsc(h.detalle||"")}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div class="sub-txt" style="font-weight:800;color:var(--text-1);">${cfgEsc(h.usuario_nombre||"—")}</div>
+        <div class="sub-txt">${fmtFechaHora(h.fecha)}</div>
+      </div>
+    </div>`).join("");
+}
+
+/* ---------- navegación de Configuración ---------- */
+function goConfigTab(ctab){
+  const scope = document.getElementById("configSubnav");
+  scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.ctab===ctab));
+  scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
+  document.getElementById("ctab"+ctab.charAt(0).toUpperCase()+ctab.slice(1)).classList.add("active");
+  cfgCloseFloating();
+  if(ctab==="compras") cfgEnsureLoaded();
+  if(ctab==="actividad") renderActividad();
+}
+async function cfgEnsureLoaded(){
+  cfgStartRealtime();
+  if(!cfgLoaded){
+    ["Proveedores","Insumos"].forEach(s=>{ document.getElementById("cfgTable"+s).innerHTML = `<div class="cfg-nores"><strong>Cargando…</strong></div>`; });
+    await cfgReload();
+  } else cfgRenderAll();
+}
+function cfgOnEnterModule(){
+  const act = document.querySelector("#configSubnav .pagos-tab.active");
+  if(act && act.dataset.ctab==="actividad") renderActividad(); else cfgEnsureLoaded();
+}
+
+/* ---------- tiempo real: cambios de otros usuarios ---------- */
+let cfgRT = null, cfgRTTimer = null;
+function cfgSetLive(on, txt){ const el = document.getElementById("cfgLive"); if(!el) return; el.classList.toggle("on", !!on); el.querySelector("span").textContent = txt; }
+function cfgStartRealtime(){
+  if(cfgRT || !sb.channel) return;
+  try{
+    cfgRT = sb.channel("cm-config-compras");
+    CFG_RT_TABLES.forEach(t=>cfgRT.on("postgres_changes", { event:"*", schema:"public", table:t }, ()=>{
+      clearTimeout(cfgRTTimer);
+      cfgRTTimer = setTimeout(()=>{ if(cfgLoaded) cfgReload(); }, 450);
+    }));
+    cfgRT.subscribe(status=>{
+      if(status==="SUBSCRIBED") cfgSetLive(true, "Sincronizado en tiempo real");
+      else if(status==="CHANNEL_ERROR" || status==="TIMED_OUT" || status==="CLOSED") cfgSetLive(false, "Sin sincronización en vivo");
+    });
+  }catch(e){ cfgSetLive(false, "Sin sincronización en vivo"); }
+}
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && cfgLoaded) cfgReload(); });
+
 function goModule(mod){
   document.querySelectorAll(".module-nav-item").forEach(i=>i.classList.toggle("active", i.dataset.module===mod));
   document.querySelectorAll(".module-screen").forEach(s=>s.classList.remove("active"));
   const el = document.getElementById("module"+mod.charAt(0).toUpperCase()+mod.slice(1));
   if(el) el.classList.add("active");
+  if(mod==="config") cfgOnEnterModule();
 }
 
 /* SESI\u00d3N REAL (Supabase Auth) \u2014 el login siempre ocurre en home.html;
