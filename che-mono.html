@@ -1157,8 +1157,8 @@
   .cfg-pv-top .field{flex:1;margin:0;}
   .cfg-pv-top .field label{margin-bottom:5px;}
   .cfg-pv-top .cfg-ibtn{margin-top:22px;}
-  .cfg-pres-head{display:grid;grid-template-columns:1.25fr .8fr .8fr 30px;gap:8px;padding:10px 14px 0;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
-  .cfg-pres-row{display:grid;grid-template-columns:1.25fr .8fr .8fr 30px;gap:8px;padding:6px 14px;align-items:center;}
+  .cfg-pres-head{display:grid;grid-template-columns:1fr 1fr 30px;gap:8px;padding:10px 14px 0;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+  .cfg-pres-row{display:grid;grid-template-columns:1fr 1fr 30px;gap:8px;padding:6px 14px;align-items:center;}
   .cfg-pres-row input, .cfg-pres-row select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:13px;background:#FBFBFE;outline:none;color:var(--text-1);}
   .cfg-pres-row input:focus, .cfg-pres-row select:focus{border-color:var(--sky);background:#fff;box-shadow:0 0 0 3px rgba(89,119,210,0.14);}
   .cfg-pres-row input.bad, .cfg-pres-row select.bad{border-color:#D1414A;background:#FFF6F6;}
@@ -1613,10 +1613,6 @@
                     <input type="text" id="cfgSearchInsumos" placeholder="Buscar insumo, rubro o proveedor…" oninput="cfgOnSearch('insumos', this.value)" autocomplete="off">
                     <button class="x" id="cfgSearchXInsumos" onclick="cfgClearSearch('insumos')" title="Borrar búsqueda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
                   </div>
-                  <button class="cfg-cta-ghost" onclick="cfgOpenCreateMenu(this, 'insumos-clasif')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Categoría / Rubro
-                  </button>
                   <button class="cfg-cta" onclick="cfgOpenInsumoForm(null)">
                     <span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
                     Crear nuevo insumo
@@ -3933,35 +3929,36 @@ loadEmpleados();
      (cm_proveedores). Un proveedor puede estar en 1 o más rubros
      (cm_proveedor_rubros), p.ej. un empleado en "Sueldo del mes" y
      en "Adelantos".
-   Insumos: Categoría (cm_ins_categorias) > Rubro (cm_ins_rubros) >
-     Insumo (cm_insumos). Cada insumo tiene 1 o más proveedores y, por
-     proveedor, 1 o más presentaciones/bultos con [cant.] + [un.]
-     (cm_insumo_presentaciones). Esto es lo que después usa Costeo
-     para llevar el precio de compra a $/unidad de medida.
+   Insumos: usan las MISMAS categorías y rubros de Proveedores
+     (Categoría > Rubro > Insumo, cm_insumos.rubro_id -> cm_rubros).
+     Cada insumo tiene 1 o más proveedores y, por proveedor, 1 o más
+     formas de pedido [cantidad] + [unidad] (kg / lts / un / pq) en
+     cm_insumo_presentaciones. Costeo usa esto para convertir los
+     bultos comprados a costo por unidad de medida.
    No puede haber nombres repetidos en ningún nivel (se valida acá en
    vivo y en la base con índices únicos sin tildes/mayúsculas).
    Todas las altas/bajas/modificaciones quedan en cm_historial
    (solapa Actividad) y se sincronizan entre usuarios en tiempo real.
    ========================================================= */
 
+/* Unidades de pedido: se guardan y muestran exactamente así (minúsculas) */
 const CFG_UNIDADES = [
-  { v:"kg", l:"kg",  n:"Kilogramos" },
-  { v:"g",  l:"g",   n:"Gramos" },
-  { v:"l",  l:"l",   n:"Litros" },
-  { v:"ml", l:"ml",  n:"Mililitros" },
-  { v:"un", l:"un.", n:"Unidades" }
+  { v:"kg",  l:"kg",  n:"Kilogramos" },
+  { v:"lts", l:"lts", n:"Litros" },
+  { v:"un",  l:"un",  n:"Unidades" },
+  { v:"pq",  l:"pq",  n:"Paquetes" }
 ];
-const CFG_RT_TABLES = ["cm_conceptos","cm_rubros","cm_proveedores","cm_proveedor_rubros","cm_ins_categorias","cm_ins_rubros","cm_insumos","cm_insumo_presentaciones"];
+const CFG_RT_TABLES = ["cm_conceptos","cm_rubros","cm_proveedores","cm_proveedor_rubros","cm_insumos","cm_insumo_presentaciones"];
 const CFG_DOM = {
   proveedores: { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Proveedor", hojaPl:"proveedores", keys:["cat","rubro","prov"] },
-  insumos:     { catTable:"cm_ins_categorias", rubTable:"cm_ins_rubros", rubFk:"categoria_id", hoja:"Insumo", hojaPl:"insumos", keys:["cat","rubro","ins","prov"] }
+  insumos:     { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Insumo", hojaPl:"insumos", keys:["cat","rubro","ins","prov"] }
 };
 const CFG_KEY_LABEL = { cat:"Categoría", rubro:"Rubro", prov:"Proveedor", ins:"Insumo" };
 const CFG_PALETTE = ["#3A4570","#5977D2","#2E9E88","#C9812A","#B23D7C","#6B5BD2","#1477A6","#8C6A3F","#D0521F","#4C8C3A","#9C3FB5","#557089"];
 
 let cfgData = {
   proveedores: { cats:[], rubros:[] },
-  insumos:     { cats:[], rubros:[] },
+  insumos:     null, // = proveedores (mismas categorías y rubros)
   provs:[], links:[], items:[], pres:[]
 };
 let cfgLoaded = false, cfgLoading = null;
@@ -4049,7 +4046,7 @@ function cfgInsumosDeProv(provId){
   const ids = new Set(cfgData.pres.filter(p=>p.proveedor_id===provId).map(p=>p.insumo_id));
   return cfgData.items.filter(i=>ids.has(i.id)).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
 }
-function cfgPresLabel(p){ return (p.bulto ? p.bulto+" · " : "") + cfgFmtNum(p.cantidad) + " " + cfgUnLabel(p.unidad); }
+function cfgPresLabel(p){ return cfgFmtNum(p.cantidad) + " " + cfgUnLabel(p.unidad); }
 function cfgExists(list, nombre, exceptId){ const n = cfgNorm(nombre); return list.find(x=>x.id!==exceptId && cfgNorm(x.nombre)===n); }
 
 /* ---------- carga de datos (Supabase) ---------- */
@@ -4059,8 +4056,6 @@ async function cfgLoadAll(){
     sb.from("cm_rubros").select("id,nombre,concepto_id"),
     sb.from("cm_proveedores").select("id,nombre,cuit,telefono,email,notas"),
     sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
-    sb.from("cm_ins_categorias").select("id,nombre"),
-    sb.from("cm_ins_rubros").select("id,nombre,categoria_id"),
     sb.from("cm_insumos").select("id,nombre,rubro_id,notas"),
     sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden")
   ]);
@@ -4070,10 +4065,9 @@ async function cfgLoadAll(){
   cfgData.proveedores.rubros = (res[1].data||[]).map(r=>({ id:r.id, nombre:r.nombre, catId:r.concepto_id }));
   cfgData.provs  = res[2].data||[];
   cfgData.links  = res[3].data||[];
-  cfgData.insumos.cats   = (res[4].data||[]).map(c=>({ id:c.id, nombre:c.nombre }));
-  cfgData.insumos.rubros = (res[5].data||[]).map(r=>({ id:r.id, nombre:r.nombre, catId:r.categoria_id }));
-  cfgData.items  = res[6].data||[];
-  cfgData.pres   = (res[7].data||[]).map(p=>Object.assign({}, p, { cantidad:Number(p.cantidad) }));
+  cfgData.insumos = cfgData.proveedores;
+  cfgData.items  = res[4].data||[];
+  cfgData.pres   = (res[5].data||[]).map(p=>Object.assign({}, p, { cantidad:Number(p.cantidad) }));
   cfgLoaded = true;
   cfgPruneFilters();
   return true;
@@ -4091,7 +4085,8 @@ function cfgBuildRows(dom){
   const rows = [], D = cfgData[dom];
   const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
   cats.forEach(c=>{
-    const rubs = D.rubros.filter(r=>r.catId===c.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    let rubs = D.rubros.filter(r=>r.catId===c.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    if(dom==="insumos"){ rubs = rubs.filter(r=>cfgData.items.some(i=>i.rubro_id===r.id)); if(!rubs.length) return; }
     if(!rubs.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:null, rubro:null, leafId:null, leaf:null, provs:[] }); return; }
     rubs.forEach(r=>{
       if(dom==="proveedores"){
@@ -4203,7 +4198,9 @@ function cfgRenderDom(dom){
     kp.innerHTML = cfgKpi(D.cats.length,"categoría","categorías")+cfgKpi(D.rubros.length,"rubro","rubros")+cfgKpi(cfgData.provs.length,"proveedor","proveedores");
   } else {
     const provVinc = new Set(cfgData.pres.map(p=>p.proveedor_id)).size;
-    kp.innerHTML = cfgKpi(D.cats.length,"categoría","categorías")+cfgKpi(D.rubros.length,"rubro","rubros")+cfgKpi(cfgData.items.length,"insumo","insumos")+cfgKpi(provVinc,"proveedor vinculado","proveedores vinculados");
+    const rubUsados = new Set(cfgData.items.map(i=>i.rubro_id));
+    const catUsadas = new Set([...rubUsados].map(r=>(cfgRub("proveedores",r)||{}).catId).filter(Boolean));
+    kp.innerHTML = cfgKpi(cfgData.items.length,"insumo","insumos")+cfgKpi(catUsadas.size,"categoría","categorías")+cfgKpi(rubUsados.size,"rubro","rubros")+cfgKpi(provVinc,"proveedor vinculado","proveedores vinculados");
   }
   // Toggle todo
   const tg = document.getElementById("cfgToggleAll"+suf);
@@ -4214,7 +4211,7 @@ function cfgRenderDom(dom){
   cfgRenderChips(dom, rows, allRows);
 
   const host = document.getElementById("cfgTable"+suf);
-  if(!D.cats.length){ host.innerHTML = cfgOnboardHtml(dom); return; }
+  if(dom==="proveedores" ? !D.cats.length : !cfgData.items.length){ host.innerHTML = cfgOnboardHtml(dom); return; }
   if(!rows.length){
     host.innerHTML = `<div class="cfg-table-wrap">${cfgTheadOnly(dom)}<div class="cfg-nores">${CFG_IC.search.replace('<svg','<svg style="width:44px;height:44px"')}<strong>No hay resultados</strong><span>Ningún registro coincide con la búsqueda o los filtros aplicados.</span><br><button class="btn-ghost" onclick="cfgClearAll('${dom}')">Limpiar búsqueda y filtros</button></div></div>`;
     return;
@@ -4227,7 +4224,7 @@ function cfgRenderDom(dom){
 function cfgColsDef(dom){
   return dom==="proveedores"
     ? [ {k:"cat", w:"24%", lvl:"l1", n:"1"}, {k:"rubro", w:"25%", lvl:"l2", n:"2"}, {k:"prov", w:"29%", lvl:"l3", n:"3"}, {k:null, w:"22%", label:"Datos de contacto"} ]
-    : [ {k:"cat", w:"18%", lvl:"l1", n:"1"}, {k:"rubro", w:"19%", lvl:"l2", n:"2"}, {k:"ins", w:"21%", lvl:"l3", n:"3"}, {k:"prov", w:"42%", lvl:"l4", n:"", label:"Proveedores y presentaciones"} ];
+    : [ {k:"cat", w:"18%", lvl:"l1", n:"1"}, {k:"rubro", w:"19%", lvl:"l2", n:"2"}, {k:"ins", w:"21%", lvl:"l3", n:"3"}, {k:"prov", w:"42%", lvl:"l4", n:"", label:"Proveedores · cantidad y unidad de pedido"} ];
 }
 function cfgTheadOnly(dom){ return `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}</table>`; }
 function cfgColgroup(dom){ return "<colgroup>"+cfgColsDef(dom).map(c=>`<col style="width:${c.w}">`).join("")+"</colgroup>"; }
@@ -4266,7 +4263,7 @@ function cfgTableHtml(dom, rows){
   let html = `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}<tbody>`;
   groups.forEach(g=>{
     const collapsed = !filtering && st.collapsed.has(g.catId);
-    const totRub = cfgData[dom].rubros.filter(r=>r.catId===g.catId);
+    const totRub = cfgData[dom].rubros.filter(r=>r.catId===g.catId && (isProv || cfgData.items.some(i=>i.rubro_id===r.id)));
     const leafIds = new Set();
     totRub.forEach(r=>{
       if(isProv) cfgData.links.filter(l=>l.rubro_id===r.id).forEach(l=>leafIds.add(l.proveedor_id));
@@ -4278,7 +4275,7 @@ function cfgTableHtml(dom, rows){
         <button class="cfg-chev${collapsed?" collapsed":""}" onclick="cfgToggleGroup('${dom}','${g.catId}')" title="${collapsed?"Expandir":"Contraer"}"${filtering?' disabled style="opacity:.35;cursor:default"':''}>${CFG_IC.chev}</button>
         <span class="cfg-dot" style="background:${cfgColor(g.catId)}"></span>
         <div class="txt"><div class="nm">${hiQ(g.cat,"cat")}</div><div class="meta">${catMeta}</div></div>
-        ${cfgActs([cfgBtn("plus","Agregar rubro en esta categoría",`cfgOpenRubroForm('${dom}',null,'${g.catId}')`), cfgBtn("edit","Editar categoría",`cfgOpenCatForm('${dom}','${g.catId}')`), cfgBtn("del","Eliminar categoría",`cfgDeleteCat('${dom}','${g.catId}')`)])}
+        ${isProv ? cfgActs([cfgBtn("plus","Agregar rubro en esta categoría",`cfgOpenRubroForm('${dom}',null,'${g.catId}')`), cfgBtn("edit","Editar categoría",`cfgOpenCatForm('${dom}','${g.catId}')`), cfgBtn("del","Eliminar categoría",`cfgDeleteCat('${dom}','${g.catId}')`)]) : ""}
       </div></td>`;
     if(collapsed){
       html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('${dom}','${g.catId}')">Categoría contraída · ${catMeta} — click para ver</div></td></tr>`;
@@ -4300,8 +4297,8 @@ function cfgTableHtml(dom, rows){
           const addTitle = isProv ? "Agregar proveedor en este rubro" : "Crear insumo en este rubro";
           const addFn = isProv ? `cfgOpenProvForm(null,'${rg.rubroId}')` : `cfgOpenInsumoForm(null,'${rg.rubroId}')`;
           html += `<td class="c-l2${lastRub?" grp-end":""}" rowspan="${rg.rows.length}"><div class="cfg-cell">
-              <div class="txt"><div class="nm">${hiQ(rg.rubro,"rubro")}</div><div class="meta">${nLeaf} ${nLeaf===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}</div></div>
-              ${cfgActs([cfgBtn("plus",addTitle,addFn), cfgBtn("edit","Editar rubro",`cfgOpenRubroForm('${dom}','${rg.rubroId}')`), cfgBtn("del","Eliminar rubro",`cfgDeleteRubro('${dom}','${rg.rubroId}')`)])}
+              <div class="txt"><div class="nm">${hiQ(rg.rubro,"rubro")}</div><div class="meta">${nLeaf} ${nLeaf===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}${isProv ? (n=>n?` · ${n} ${n===1?"insumo":"insumos"}`:"")(cfgData.items.filter(x=>x.rubro_id===rg.rubroId).length) : ""}</div></div>
+              ${isProv ? cfgActs([cfgBtn("plus",addTitle,addFn), cfgBtn("edit","Editar rubro",`cfgOpenRubroForm('${dom}','${rg.rubroId}')`), cfgBtn("del","Eliminar rubro",`cfgDeleteRubro('${dom}','${rg.rubroId}')`)]) : cfgActs([cfgBtn("plus",addTitle,addFn)])}
             </div></td>`;
         }
         const endCls = lastRow ? "grp-end" : "";
@@ -4323,13 +4320,13 @@ function cfgTableHtml(dom, rows){
           html += `<td class="${endCls}"><div class="cfg-contact">${c.length?c.join(""):'<span class="none">—</span>'}</div></td>`;
         } else {
           const ins = cfgIns(r.leafId), pres = cfgPresDeIns(ins.id);
-          html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(ins.nombre,"ins")}</div><div class="meta">${pres.length} ${pres.length===1?"presentación":"presentaciones"}</div></div>
+          html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(ins.nombre,"ins")}</div><div class="meta">${pres.length} ${pres.length===1?"forma de pedido":"formas de pedido"}</div></div>
               ${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${ins.id}')`), cfgBtn("del","Eliminar insumo",`cfgDeleteInsumo('${ins.id}')`)])}</div></td>`;
           const byProv = [];
           pres.forEach(p=>{ let g2 = byProv.find(x=>x.id===p.proveedor_id); if(!g2){ g2={id:p.proveedor_id, pres:[]}; byProv.push(g2);} g2.pres.push(p); });
           const lines = byProv.map(bp=>{
             const pv = cfgProv(bp.id);
-            return `<div class="cfg-provline"><span class="pn">${hiQ(pv?pv.nombre:"(proveedor eliminado)","prov")}</span><span class="cfg-pres-pills">${bp.pres.map(p=>`<span class="cfg-pill" title="${p.bulto?cfgEsc("1 "+p.bulto+" = "):"Cada bulto = "}${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}">${p.bulto?`<span class="b">${cfgEsc(p.bulto)}</span><span class="sep">·</span>`:""}${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}</span>`).join("")}</span></div>`;
+            return `<div class="cfg-provline"><span class="pn">${hiQ(pv?pv.nombre:"(proveedor eliminado)","prov")}</span><span class="cfg-pres-pills">${bp.pres.map(p=>`<span class="cfg-pill" title="Se pide por ${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}">${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}</span>`).join("")}</span></div>`;
           }).join("");
           html += `<td class="${endCls}"><div class="cfg-provlist">${lines || '<span class="cfg-contact none">Sin proveedores</span>'}</div></td>`;
         }
@@ -4361,10 +4358,9 @@ function cfgOnboardHtml(dom){
     return `<div class="cfg-onboard"><div class="ic" style="background:#EAF0FF;color:var(--blue)">${CFG_IC.prov}</div><h2>Todavía no hay proveedores</h2><p>Empezá creando una categoría, después sus rubros y por último los proveedores de cada rubro.</p>
       <div class="row-btns"><button class="cfg-cta" onclick="cfgOpenCatForm('proveedores',null)"><span class="plus">${CFG_IC.plus}</span>Crear primera categoría</button></div></div>`;
   }
-  return `<div class="cfg-onboard"><div class="ic">${CFG_IC.box}</div><h2>Armemos la lista de insumos</h2>
-    <p>Los insumos se ordenan igual que los proveedores: <b>Categoría › Rubro › Insumo</b>. Para cada insumo vas a indicar qué proveedores te lo venden y en qué bultos (cantidad + unidad), que es lo que después usa Costeo para calcular el costo por kg, litro o unidad.</p>
-    <div class="cfg-steps"><div><b>Paso 1</b><span>Crear una categoría<br><small style="color:var(--text-3);font-weight:600">ej. Cocina</small></span></div><div><b>Paso 2</b><span>Crear sus rubros<br><small style="color:var(--text-3);font-weight:600">ej. Fiambres, Lácteos</small></span></div><div><b>Paso 3</b><span>Crear los insumos<br><small style="color:var(--text-3);font-weight:600">ej. Jamón cocido</small></span></div></div>
-    <div class="row-btns"><button class="cfg-cta" onclick="cfgOpenCatForm('insumos',null)"><span class="plus">${CFG_IC.plus}</span>Crear primera categoría</button></div></div>`;
+  return `<div class="cfg-onboard"><div class="ic">${CFG_IC.box}</div><h2>Todavía no hay insumos</h2>
+    <p>Cada insumo se asocia a una <b>categoría y rubro de Proveedores</b> (ej. Servicio de cocina › Almacen › Jamón cocido). Para cada uno indicás qué proveedores te lo venden y <b>la cantidad y unidad en la que se pide</b> (kg, lts, un o pq). Después, en Costeo, se calcula el costo por unidad de medida.</p>
+    <div class="row-btns"><button class="cfg-cta" onclick="cfgOpenInsumoForm(null)"><span class="plus">${CFG_IC.plus}</span>Crear nuevo insumo</button></div></div>`;
 }
 
 /* ---------- popover de filtros: tildar o escribir (lectura inteligente) ---------- */
@@ -4561,7 +4557,7 @@ function cfgOpenCatForm(dom, id){
   const D = cfgData[dom], c = id ? cfgCat(dom,id) : null;
   if(id && !c){ showToast("La categoría ya no existe", "warn"); return; }
   const nR = c ? D.rubros.filter(r=>r.catId===c.id).length : 0;
-  const ambito = dom==="proveedores" ? "Proveedores" : "Insumos";
+  const ambito = "Proveedores";
   cfgOpenPanel({
     lvl:"l1", id, title: c ? "Editar categoría" : "Nueva categoría",
     crumb: cfgCrumb([ambito, c ? c.nombre : "Nueva categoría"]),
@@ -4575,8 +4571,8 @@ function cfgOpenCatForm(dom, id){
       const T = CFG_DOM[dom].catTable;
       const r = c ? await sb.from(T).update({ nombre }).eq("id", c.id) : await sb.from(T).insert({ nombre });
       if(r.error){ cfgShowErr(cfgErrText(r.error, "una categoría")); return false; }
-      if(c){ if(c.nombre!==nombre) logHistorialConfig(`Editó una categoría de ${ambito.toLowerCase()}`, `“${c.nombre}” → “${nombre}”`); }
-      else logHistorialConfig(`Creó una categoría de ${ambito.toLowerCase()}`, `“${nombre}”`);
+      if(c){ if(c.nombre!==nombre) logHistorialConfig(`Editó una categoría`, `“${c.nombre}” → “${nombre}”`); }
+      else logHistorialConfig(`Creó una categoría`, `“${nombre}”`);
       await cfgReload();
       showToast(c ? "Categoría actualizada" : "Categoría creada");
       return true;
@@ -4588,7 +4584,7 @@ function cfgOpenCatForm(dom, id){
 function cfgOpenRubroForm(dom, id, presetCatId){
   const D = cfgData[dom], r = id ? cfgRub(dom,id) : null;
   if(id && !r){ showToast("El rubro ya no existe", "warn"); return; }
-  const ambito = dom==="proveedores" ? "Proveedores" : "Insumos";
+  const ambito = "Proveedores";
   if(!D.cats.length){
     cfgModal({ icon:"info", title:"Primero creá una categoría", body:`<p>Cada rubro pertenece a una categoría, y todavía no hay ninguna en ${ambito}.</p>`,
       actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Crear categoría", cls:"confirm-primary", fn:()=>cfgOpenCatForm(dom,null)}] });
@@ -4623,8 +4619,8 @@ function cfgOpenRubroForm(dom, id, presetCatId){
         const ch = [];
         if(r.nombre!==nombre) ch.push(`“${r.nombre}” → “${nombre}”`);
         if(r.catId!==catId) ch.push(`categoría: “${(cfgCat(dom,r.catId)||{}).nombre}” → “${catN}”`);
-        if(ch.length) logHistorialConfig(`Editó un rubro de ${ambito.toLowerCase()}`, `“${nombre}” · ${ch.join(" · ")}`);
-      } else logHistorialConfig(`Creó un rubro de ${ambito.toLowerCase()}`, `“${nombre}” en la categoría “${catN}”`);
+        if(ch.length) logHistorialConfig(`Editó un rubro`, `“${nombre}” · ${ch.join(" · ")}`);
+      } else logHistorialConfig(`Creó un rubro`, `“${nombre}” en la categoría “${catN}”`);
       cfgState[dom].collapsed.delete(catId);
       await cfgReload();
       showToast(r ? "Rubro actualizado" : "Rubro creado");
@@ -4720,15 +4716,15 @@ function cfgMsToggle(id){
 
 /* ===== Insumo: nombre › categoría › rubro › proveedores › presentaciones ===== */
 let cfgKeySeq = 0;
-function cfgNewPres(p){ return { key:++cfgKeySeq, id:p?p.id:null, bulto:p?(p.bulto||""):"", cant:p?String(cfgFmtNum(p.cantidad)).replace(/\./g,""):"", unidad:p?p.unidad:"kg" }; }
+function cfgNewPres(p){ return { key:++cfgKeySeq, id:p?p.id:null, cant:p?String(cfgFmtNum(p.cantidad)).replace(/\./g,""):"", unidad:p?p.unidad:"kg" }; }
 function cfgOpenInsumoForm(id, presetRubroId){
   const ins = id ? cfgIns(id) : null;
   if(id && !ins){ showToast("El insumo ya no existe", "warn"); return; }
   const D = cfgData.insumos;
   if(!D.rubros.length){
-    cfgModal({ icon:"info", title: D.cats.length ? "Primero creá un rubro de insumos" : "Primero creá una categoría y un rubro",
-      body:`<p>Los insumos se ordenan como <b>Categoría › Rubro › Insumo</b>. ${D.cats.length?"Ya tenés categorías, falta crear al menos un rubro.":"Todavía no hay categorías de insumos."}</p>`,
-      actions:[{label:"Cancelar", cls:"confirm-cancel"}, D.cats.length ? {label:"Crear rubro", cls:"confirm-primary", fn:()=>cfgOpenRubroForm('insumos',null,null)} : {label:"Crear categoría", cls:"confirm-primary", fn:()=>cfgOpenCatForm('insumos',null)}] });
+    cfgModal({ icon:"info", title:"Primero creá categorías y rubros",
+      body:`<p>Los insumos usan las categorías y rubros de la solapa <b>Proveedores</b>, y todavía no hay rubros cargados.</p>`,
+      actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Ir a Proveedores", cls:"confirm-primary", fn:()=>cfgGoView('proveedores')}] });
     return;
   }
   if(!cfgData.provs.length){ showToast("Primero cargá proveedores en la solapa Proveedores", "warn"); return; }
@@ -4744,7 +4740,7 @@ function cfgOpenInsumoForm(id, presetRubroId){
     });
   }
   if(!pvs.length) pvs.push({ key:++cfgKeySeq, provId:"", pres:[cfgNewPres()] });
-  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const cats = D.cats.filter(c=>D.rubros.some(r=>r.catId===c.id)).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
   const rubCat = rubroId ? cfgRub("insumos", rubroId) : null;
   cfgOpenPanel({
     lvl:"l3", hoja:"Insumo", wide:true, id, title: ins ? "Editar insumo" : "Crear nuevo insumo",
@@ -4755,8 +4751,9 @@ function cfgOpenInsumoForm(id, presetRubroId){
         <div class="field" id="cfgFldCat"><label>Categoría</label><select id="cfgFCat" onchange="cfgInsOnCat()">${catId?"":'<option value="">Elegí…</option>'}${cats.map(c=>`<option value="${c.id}"${c.id===catId?" selected":""}>${cfgEsc(c.nombre)}</option>`).join("")}</select></div>
         <div class="field" id="cfgFldRub"><label>Rubro</label><select id="cfgFRub" onchange="cfgInsOnRub()"></select></div>
       </div>
-      <div class="cfg-sec-title"><span class="n">2</span>Proveedores y presentaciones</div>
-      <div class="cfg-note">${CFG_IC.info}<div>Para cada proveedor indicá <b>cómo te entrega el insumo</b>: el contenido de cada bulto en <b>cantidad + unidad</b>. Podés cargar varias presentaciones por proveedor (ej. <i>Horma · 3,5 kg</i> y <i>Feteado · 1 kg</i>).<br>En <b>Costeo</b>, al cargar una compra (ej. $10.000 por 3,5 kg), el sistema va a calcular el costo por unidad de medida: <b>$2.857,14/kg</b>.</div></div>
+      <div class="cfg-note" style="margin-top:-4px">${CFG_IC.info}<div>La categoría y el rubro son los mismos de la solapa <b>Proveedores</b>.</div></div>
+      <div class="cfg-sec-title"><span class="n">2</span>Proveedores · cantidad y unidad de pedido</div>
+      <div class="cfg-note">${CFG_IC.info}<div>Para cada proveedor indicá <b>la cantidad y la unidad en la que se pide</b> el insumo (<b>kg</b>, <b>lts</b>, <b>un</b> o <b>pq</b>). Si un proveedor lo entrega de más de una forma, agregá otra línea.<br>En <b>Costeo</b> se convierte lo comprado a costo por unidad de medida (ej. $10.000 por 3,5 kg → <b>$2.857,14/kg</b>).</div></div>
       <div id="cfgPvCards"></div>
       <button type="button" class="cfg-add-prov" onclick="cfgInsAddProv()">${CFG_IC.plus} Agregar otro proveedor</button>
       <div class="cfg-sec-title"><span class="n">3</span>Notas <span class="opt">· opcional</span></div>
@@ -4793,10 +4790,9 @@ function cfgInsRenderCards(){
     const pv = g.provId ? cfgProv(g.provId) : null;
     const presRows = g.pres.map(p=>`
       <div class="cfg-pres-row" data-pkey="${p.key}">
-        <input type="text" maxlength="40" placeholder="Bulto (opcional): Horma, Caja…" value="${cfgEsc(p.bulto)}" oninput="cfgInsSetPres(${g.key},${p.key},'bulto',this.value)">
         <input type="text" class="num" inputmode="decimal" maxlength="12" placeholder="Cant." value="${cfgEsc(p.cant)}" oninput="cfgInsSetPres(${g.key},${p.key},'cant',this.value)">
-        <select onchange="cfgInsSetPres(${g.key},${p.key},'unidad',this.value)">${CFG_UNIDADES.map(u=>`<option value="${u.v}"${u.v===p.unidad?" selected":""}>${u.l} · ${u.n.toLowerCase()}</option>`).join("")}</select>
-        <button type="button" class="cfg-ibtn del" title="Quitar presentación" onclick="cfgInsDelPres(${g.key},${p.key})"${g.pres.length<2?' style="visibility:hidden"':""}>${CFG_IC.del}</button>
+        <select title="Unidad de pedido" onchange="cfgInsSetPres(${g.key},${p.key},'unidad',this.value)">${CFG_UNIDADES.map(u=>`<option value="${u.v}" title="${u.n}"${u.v===p.unidad?" selected":""}>${u.l}</option>`).join("")}</select>
+        <button type="button" class="cfg-ibtn del" title="Quitar esta línea" onclick="cfgInsDelPres(${g.key},${p.key})"${g.pres.length<2?' style="visibility:hidden"':""}>${CFG_IC.del}</button>
         <div class="cfg-pres-prev" id="cfgPrev${p.key}">${cfgPresPreview(p)}</div>
       </div>`).join("");
     return `<div class="cfg-pv-card" id="cfgPv${g.key}">
@@ -4811,16 +4807,16 @@ function cfgInsRenderCards(){
         </div>
         <button type="button" class="cfg-ibtn del" title="Quitar este proveedor" onclick="cfgInsDelProv(${g.key})"${pvs.length<2?' style="visibility:hidden"':""}>${CFG_IC.del}</button>
       </div>
-      <div class="cfg-pres-head"><span>Bulto</span><span style="text-align:right">Cant. por bulto</span><span>Un. por bulto</span><span></span></div>
+      <div class="cfg-pres-head"><span style="text-align:right">Cantidad</span><span>Unidad de pedido</span><span></span></div>
       ${presRows}
-      <button type="button" class="cfg-pres-add" onclick="cfgInsAddPres(${g.key})">${CFG_IC.plus} Agregar otra presentación</button>
+      <button type="button" class="cfg-pres-add" onclick="cfgInsAddPres(${g.key})">${CFG_IC.plus} Agregar otra forma de pedido</button>
     </div>`;
   }).join("");
 }
 function cfgPresPreview(p){
   const n = cfgParseNum(p.cant);
   if(!(n>0)) return "";
-  return `→ ${p.bulto.trim() ? "1 "+cfgEsc(p.bulto.trim()) : "Cada bulto"} = ${cfgFmtNum(n)} ${cfgEsc(cfgUnLabel(p.unidad))}`;
+  return `→ Se pide por ${cfgFmtNum(n)} ${cfgEsc(cfgUnLabel(p.unidad))}`;
 }
 function cfgInsG(gk){ return cfgPS.pvs.find(g=>g.key===gk); }
 function cfgInsSetPres(gk, pk, field, val){
@@ -4845,7 +4841,9 @@ function cfgComboOpts(inp){
   const usados = new Set(cfgPS.pvs.filter(g=>g.key!==gk && g.provId).map(g=>g.provId));
   const g = cfgInsG(gk), cur = g.provId ? cfgProv(g.provId) : null;
   const q = (cur && inp.value===cur.nombre) ? "" : cfgNorm(inp.value);
-  return cfgData.provs.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(p=>({ p, rubs:cfgRubrosDeProv(p.id).map(r=>r.nombre).join(", "), used:usados.has(p.id) }))
+  const rubSel = (document.getElementById("cfgFRub")||{}).value;
+  const delRubro = new Set(rubSel ? cfgData.links.filter(l=>l.rubro_id===rubSel).map(l=>l.proveedor_id) : []);
+  return cfgData.provs.slice().sort((a,b)=>(delRubro.has(b.id)-delRubro.has(a.id)) || cfgCmp(a.nombre,b.nombre)).map(p=>({ p, rubs:cfgRubrosDeProv(p.id).map(r=>r.nombre).join(", "), used:usados.has(p.id), top:delRubro.has(p.id) }))
     .filter(o=>!q || cfgNorm(o.p.nombre).includes(q) || cfgNorm(o.rubs).includes(q));
 }
 function cfgComboOpen(inp){
@@ -4853,7 +4851,7 @@ function cfgComboOpen(inp){
   const opts = cfgComboOpts(inp), q = inp.value;
   const g = cfgInsG(Number(inp.closest(".cfg-combo").dataset.gkey)), cur = g.provId ? cfgProv(g.provId) : null;
   const hq = (cur && q===cur.nombre) ? "" : q;
-  list.innerHTML = opts.length ? opts.map((o,i)=>`<div class="cfg-combo-opt${o.used?" dis":""}${i===0&&!o.used&&hq?" hl":""}" data-id="${o.p.id}" onmousedown="event.preventDefault();cfgComboPick(this)"><span>${cfgHi(o.p.nombre,hq)}</span><small>${o.used?"ya agregado":cfgEsc(o.rubs)}</small></div>`).join("")
+  list.innerHTML = opts.length ? opts.map((o,i)=>`<div class="cfg-combo-opt${o.used?" dis":""}${i===0&&!o.used&&hq?" hl":""}" data-id="${o.p.id}" onmousedown="event.preventDefault();cfgComboPick(this)"><span>${cfgHi(o.p.nombre,hq)}</span><small>${o.used?"ya agregado":(o.top?"★ del rubro elegido":cfgEsc(o.rubs))}</small></div>`).join("")
     : `<div class="cfg-combo-empty">No hay proveedores con “${cfgEsc(q)}”. Si es nuevo, crealo primero en la solapa Proveedores.</div>`;
   list.classList.add("show");
 }
@@ -4907,11 +4905,12 @@ async function cfgInsSubmit(ins){
     g.pres.forEach((p, pi)=>{
       const row = card.querySelector(`.cfg-pres-row[data-pkey="${p.key}"]`);
       const n = cfgParseNum(p.cant);
-      if(!(n>0)){ row.querySelectorAll("input")[1].classList.add("bad"); card.classList.add("err"); errs.push(`${pvName}: la cantidad de la presentación ${pi+1} tiene que ser un número mayor a 0.`); return; }
-      const sig = cfgNorm(p.bulto)+"|"+n+"|"+p.unidad;
-      if(seen.has(sig)){ row.querySelectorAll("input")[0].classList.add("bad"); card.classList.add("err"); errs.push(`${pvName}: hay dos presentaciones iguales (${cfgPresLabel({bulto:p.bulto.trim(), cantidad:n, unidad:p.unidad})}).`); return; }
+      if(!(n>0)){ row.querySelectorAll("input")[0].classList.add("bad"); card.classList.add("err"); errs.push(`${pvName}: la cantidad de la línea ${pi+1} tiene que ser un número mayor a 0.`); return; }
+      if(!CFG_UNIDADES.some(u=>u.v===p.unidad)){ card.classList.add("err"); errs.push(`${pvName}: elegí una unidad válida (kg, lts, un o pq).`); return; }
+      const sig = n+"|"+p.unidad;
+      if(seen.has(sig)){ row.querySelectorAll("input")[0].classList.add("bad"); card.classList.add("err"); errs.push(`${pvName}: hay dos líneas iguales (${cfgPresLabel({cantidad:n, unidad:p.unidad})}).`); return; }
       seen.add(sig);
-      pres.push({ id:p.id, proveedor_id:g.provId, bulto:p.bulto.trim(), cantidad:n, unidad:p.unidad, orden:orden++ });
+      pres.push({ id:p.id, proveedor_id:g.provId, bulto:"", cantidad:n, unidad:p.unidad, orden:orden++ });
     });
   });
   if(errs.length){ cfgShowErr(errs.map(cfgEsc).join("<br>")); return false; }
@@ -4976,17 +4975,16 @@ async function cfgDel(table, match, what){
 /* ===== Eliminar categoría ===== */
 function cfgDeleteCat(dom, id){
   const c = cfgCat(dom, id); if(!c) return;
-  const ambito = dom==="proveedores" ? "proveedores" : "insumos";
   const rubs = cfgData[dom].rubros.filter(r=>r.catId===id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
   if(rubs.length){
     cfgModal({ icon:"info", title:"No se puede eliminar todavía",
       body:`<p>La categoría <b>“${cfgEsc(c.nombre)}”</b> tiene <b>${rubs.length}</b> ${rubs.length===1?"rubro":"rubros"}. Para eliminarla, primero eliminá sus rubros o movelos a otra categoría (editando cada rubro).</p>${cfgLi(rubs.map(r=>r.nombre))}` });
     return;
   }
-  cfgModal({ title:"¿Eliminar categoría?", body:`<p>Vas a eliminar la categoría <b>“${cfgEsc(c.nombre)}”</b> de ${ambito}. Esta acción no se puede deshacer.</p>`,
+  cfgModal({ title:"¿Eliminar categoría?", body:`<p>Vas a eliminar la categoría <b>“${cfgEsc(c.nombre)}”</b> . Esta acción no se puede deshacer.</p>`,
     actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: async ()=>{
       if(!await cfgDel(CFG_DOM[dom].catTable, {id}, "la categoría")) return false;
-      logHistorialConfig(`Eliminó una categoría de ${ambito}`, `“${c.nombre}”`);
+      logHistorialConfig(`Eliminó una categoría`, `“${c.nombre}”`);
       await cfgReload(); showToast("Categoría eliminada");
     }}] });
 }
@@ -4995,13 +4993,14 @@ function cfgDeleteCat(dom, id){
 function cfgDeleteRubro(dom, id){
   const r = cfgRub(dom, id); if(!r) return;
   const catN = (cfgCat(dom, r.catId)||{}).nombre;
-  if(dom==="insumos"){
+  {
     const ins = cfgData.items.filter(i=>i.rubro_id===id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
     if(ins.length){
       cfgModal({ icon:"info", title:"No se puede eliminar todavía", body:`<p>El rubro <b>“${cfgEsc(r.nombre)}”</b> tiene <b>${ins.length}</b> ${ins.length===1?"insumo":"insumos"}. Movelos a otro rubro (editando cada insumo) o eliminalos primero.</p>${cfgLi(ins.map(i=>i.nombre))}` });
       return;
     }
-  } else {
+  }
+  {
     const provs = cfgProvsDeRubro(id);
     const huerfanos = provs.filter(p=>cfgRubrosDeProv(p.id).length===1);
     if(huerfanos.length){
@@ -5013,7 +5012,7 @@ function cfgDeleteRubro(dom, id){
         actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Desvincular y eliminar", cls:"confirm-delete", fn: async ()=>{
           if(!await cfgDel("cm_proveedor_rubros", {rubro_id:id}, "el rubro")) return false;
           if(!await cfgDel("cm_rubros", {id}, "el rubro")){ await cfgReload(); return false; }
-          logHistorialConfig("Eliminó un rubro de proveedores", `“${r.nombre}” (${catN}) · se desvincularon: ${provs.map(p=>p.nombre).join(", ")}`);
+          logHistorialConfig("Eliminó un rubro", `“${r.nombre}” (${catN}) · se desvincularon: ${provs.map(p=>p.nombre).join(", ")}`);
           await cfgReload(); showToast("Rubro eliminado");
         }}] });
       return;
@@ -5022,7 +5021,7 @@ function cfgDeleteRubro(dom, id){
   cfgModal({ title:"¿Eliminar rubro?", body:`<p>Vas a eliminar el rubro <b>“${cfgEsc(r.nombre)}”</b> de la categoría <b>${cfgEsc(catN)}</b>. Esta acción no se puede deshacer.</p>`,
     actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: async ()=>{
       if(!await cfgDel(CFG_DOM[dom].rubTable, {id}, "el rubro")) return false;
-      logHistorialConfig(`Eliminó un rubro de ${dom}`, `“${r.nombre}” (${catN})`);
+      logHistorialConfig(`Eliminó un rubro`, `“${r.nombre}” (${catN})`);
       await cfgReload(); showToast("Rubro eliminado");
     }}] });
 }
@@ -5062,7 +5061,7 @@ function cfgDeleteProv(provId, rubroCtx){
 function cfgDeleteInsumo(id){
   const ins = cfgIns(id); if(!ins) return;
   const pres = cfgPresDeIns(id);
-  cfgModal({ title:"¿Eliminar insumo?", body:`<p>Vas a eliminar <b>“${cfgEsc(ins.nombre)}”</b> junto con sus ${pres.length} ${pres.length===1?"presentación":"presentaciones"}. Esta acción no se puede deshacer.</p>`,
+  cfgModal({ title:"¿Eliminar insumo?", body:`<p>Vas a eliminar <b>“${cfgEsc(ins.nombre)}”</b> junto con sus ${pres.length} ${pres.length===1?"forma de pedido":"formas de pedido"}. Esta acción no se puede deshacer.</p>`,
     actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: async ()=>{
       if(!await cfgDel("cm_insumos", {id}, "el insumo")) return false;
       const rub = cfgRub("insumos", ins.rubro_id);
