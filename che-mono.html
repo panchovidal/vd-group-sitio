@@ -1186,6 +1186,19 @@
   .cfg-modal .confirm-primary{background:var(--blue);color:#fff;}
   @media (max-width:1100px){ .cfg-search{width:200px;} }
   .cfg-panel mark, .cfg-fpop mark, .cfg-combo-list mark{background:#FFF1B8;color:inherit;border-radius:3px;padding:0;}
+  .cfg-table td.c-l1{cursor:pointer;}
+  .cfg-table td.c-l1:hover{background:#F4F6FC;}
+  .cfg-table tr:has(td.is-collapsed) td{background:#fff;}
+  .cfg-table tr:has(td.is-collapsed):hover td{background:#F7F8FD;}
+  .cfg-collapsed-sum{display:flex;align-items:center;gap:14px;padding:12px 14px;font-size:12.3px;color:var(--text-3);font-weight:600;cursor:pointer;}
+  .cfg-collapsed-sum .rubs{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cfg-collapsed-sum .open{display:flex;align-items:center;gap:4px;font-weight:800;color:var(--blue);flex-shrink:0;opacity:.0;transition:opacity .12s ease;}
+  .cfg-collapsed-sum .open svg{width:12px;height:12px;}
+  .cfg-table tr:hover .cfg-collapsed-sum .open{opacity:1;}
+  .cfg-collapsed-sum:hover{color:var(--text-2);}
+  #cfgFNombre[autocapitalize="characters"]{text-transform:uppercase;letter-spacing:.02em;font-weight:600;}
+  #cfgFCatTxt{background:#F1F2F8 !important;color:var(--text-2);cursor:default;}
+  #cfgFRub:disabled{background:#F1F2F8 !important;color:var(--text-1) !important;opacity:1;}
 </style>
 </head>
 <body>
@@ -4068,6 +4081,11 @@ async function cfgLoadAll(){
   cfgData.insumos = cfgData.proveedores;
   cfgData.items  = res[4].data||[];
   cfgData.pres   = (res[5].data||[]).map(p=>Object.assign({}, p, { cantidad:Number(p.cantidad) }));
+  // categorías nuevas (creadas por otro usuario) entran contraídas
+  const ids = cfgData.proveedores.cats.map(c=>c.id);
+  if(cfgKnownCats) ids.forEach(id=>{ if(!cfgKnownCats.has(id)) cfgState.proveedores.collapsed.add(id); });
+  else ids.forEach(id=>cfgState.proveedores.collapsed.add(id));
+  cfgKnownCats = new Set(ids);
   cfgLoaded = true;
   cfgPruneFilters();
   return true;
@@ -4092,7 +4110,7 @@ function cfgBuildRows(dom){
       if(dom==="proveedores"){
         const ps = cfgProvsDeRubro(r.id);
         if(!ps.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:null, leaf:null, provs:[] }); return; }
-        ps.forEach(p=>rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:p.id, leaf:p.nombre, provs:[p.nombre], extra:[p.cuit,p.telefono,p.email].filter(Boolean).join(" ") }));
+        ps.forEach(p=>rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:p.id, leaf:p.nombre, provs:[p.nombre], extra:"" }));
       } else {
         const ins = cfgData.items.filter(i=>i.rubro_id===r.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
         if(!ins.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:null, leaf:null, provs:[] }); return; }
@@ -4151,7 +4169,10 @@ function cfgRenderAll(){
   cfgRenderDom("insumos");
   if(document.getElementById("cfgFilterPop").classList.contains("show")) cfgRenderFilterList();
 }
+function cfgCollapseAll(dom){ const s = cfgState[dom].collapsed; s.clear(); (cfgData[dom]||{cats:[]}).cats.forEach(c=>s.add(c.id)); }
+let cfgKnownCats = null;
 function cfgGoView(v){
+  if(v==="proveedores" && cfgView!=="proveedores" && cfgLoaded){ cfgCollapseAll("proveedores"); cfgRenderDom("proveedores"); }
   cfgView = v;
   document.querySelectorAll(".cfg-subtab").forEach(t=>t.classList.toggle("active", t.dataset.cview===v));
   document.getElementById("cfgViewProveedores").classList.toggle("active", v==="proveedores");
@@ -4223,7 +4244,7 @@ function cfgRenderDom(dom){
 
 function cfgColsDef(dom){
   return dom==="proveedores"
-    ? [ {k:"cat", w:"24%", lvl:"l1", n:"1"}, {k:"rubro", w:"25%", lvl:"l2", n:"2"}, {k:"prov", w:"29%", lvl:"l3", n:"3"}, {k:null, w:"22%", label:"Datos de contacto"} ]
+    ? [ {k:"cat", w:"30%", lvl:"l1", n:"1"}, {k:"rubro", w:"32%", lvl:"l2", n:"2"}, {k:"prov", w:"38%", lvl:"l3", n:"3"} ]
     : [ {k:"cat", w:"18%", lvl:"l1", n:"1"}, {k:"rubro", w:"19%", lvl:"l2", n:"2"}, {k:"ins", w:"21%", lvl:"l3", n:"3"}, {k:"prov", w:"42%", lvl:"l4", n:"", label:"Proveedores · cantidad y unidad de pedido"} ];
 }
 function cfgTheadOnly(dom){ return `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}</table>`; }
@@ -4271,14 +4292,14 @@ function cfgTableHtml(dom, rows){
     });
     const catMeta = `${totRub.length} ${totRub.length===1?"rubro":"rubros"} · ${leafIds.size} ${leafIds.size===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}`;
     const nRows = collapsed ? 1 : g.rubs.reduce((a,rg)=>a+rg.rows.length,0);
-    const catCell = `<td class="c-l1" rowspan="${nRows}"><div class="cfg-cell sticky" style="top:var(--cfg-th-h,41px)">
-        <button class="cfg-chev${collapsed?" collapsed":""}" onclick="cfgToggleGroup('${dom}','${g.catId}')" title="${collapsed?"Expandir":"Contraer"}"${filtering?' disabled style="opacity:.35;cursor:default"':''}>${CFG_IC.chev}</button>
+    const catCell = `<td class="c-l1${collapsed?" is-collapsed":""}" rowspan="${nRows}"${!filtering?` onclick="if(!event.target.closest('.cfg-acts'))cfgToggleGroup('${dom}','${g.catId}')"`:""}><div class="cfg-cell sticky" style="top:var(--cfg-th-h,41px)">
+        <button class="cfg-chev${collapsed?" collapsed":""}" onclick="event.stopPropagation();cfgToggleGroup('${dom}','${g.catId}')" title="${collapsed?"Expandir":"Contraer"}"${filtering?' disabled style="opacity:.35;cursor:default"':''}>${CFG_IC.chev}</button>
         <span class="cfg-dot" style="background:${cfgColor(g.catId)}"></span>
         <div class="txt"><div class="nm">${hiQ(g.cat,"cat")}</div><div class="meta">${catMeta}</div></div>
         ${isProv ? cfgActs([cfgBtn("plus","Agregar rubro en esta categoría",`cfgOpenRubroForm('${dom}',null,'${g.catId}')`), cfgBtn("edit","Editar categoría",`cfgOpenCatForm('${dom}','${g.catId}')`), cfgBtn("del","Eliminar categoría",`cfgDeleteCat('${dom}','${g.catId}')`)]) : ""}
       </div></td>`;
     if(collapsed){
-      html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('${dom}','${g.catId}')">Categoría contraída · ${catMeta} — click para ver</div></td></tr>`;
+      html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('${dom}','${g.catId}')"><span class="rubs">${cfgEsc(totRub.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(r=>r.nombre).join(" · ")) || "Sin rubros"}</span><span class="open">Ver ${CFG_IC.chev}</span></div></td></tr>`;
       return;
     }
     let firstInCat = true;
@@ -4313,11 +4334,6 @@ function cfgTableHtml(dom, rows){
           const also = otros.length ? `<div><span class="cfg-also" title="También está en: ${cfgEsc(otros.map(o=>o.nombre).join(", "))}">También en ${cfgEsc(otros.length===1?otros[0].nombre:otros.length+" rubros")}</span></div>` : "";
           html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(p.nombre,"prov")}</div>${also}</div>
               ${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar / quitar proveedor",`cfgDeleteProv('${p.id}','${r.rubroId}')`)])}</div></td>`;
-          const c = [];
-          if(p.cuit) c.push(`<div><span class="k">CUIT</span>${cfgHi(p.cuit,q)}</div>`);
-          if(p.telefono) c.push(`<div><span class="k">Tel.</span>${cfgHi(p.telefono,q)}</div>`);
-          if(p.email) c.push(`<div><span class="k">Email</span>${cfgHi(p.email,q)}</div>`);
-          html += `<td class="${endCls}"><div class="cfg-contact">${c.length?c.join(""):'<span class="none">—</span>'}</div></td>`;
         } else {
           const ins = cfgIns(r.leafId), pres = cfgPresDeIns(ins.id);
           html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(ins.nombre,"ins")}</div><div class="meta">${pres.length} ${pres.length===1?"forma de pedido":"formas de pedido"}</div></div>
@@ -4527,8 +4543,15 @@ function cfgErrText(error, que){
 function cfgShowErr(msg){ const b = document.getElementById("cfgErrBox"); if(b){ b.innerHTML = msg; b.classList.add("show"); b.scrollIntoView({block:"nearest", behavior:"smooth"}); } else showToast(msg, "warn"); }
 function cfgHideErr(){ const b = document.getElementById("cfgErrBox"); if(b) b.classList.remove("show"); }
 /* validación de nombre duplicado en vivo */
-function cfgNameField(label, value, placeholder){
-  return `<div class="field" id="cfgFldNombre"><label>${label}</label><input type="text" id="cfgFNombre" maxlength="90" value="${cfgEsc(value||"")}" placeholder="${cfgEsc(placeholder)}" data-autofocus autocomplete="off" oninput="cfgCheckName()" onkeydown="if(event.key==='Enter'&&this.closest('.cfg-panel:not(.wide)')){event.preventDefault();cfgPanelSubmit();}">
+/* Insumos: el nombre se escribe SIEMPRE en MAYÚSCULAS y sin tildes (la Ñ se respeta).
+   (Los semi-elaborados, cuando existan, irán siempre en minúsculas.) */
+function cfgInsNombre(v){ return String(v||"").replace(/[ñÑ]/g,"\u0001").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\u0001/g,"Ñ").toUpperCase(); }
+function cfgForceUpper(inp){
+  const v = cfgInsNombre(inp.value);
+  if(v!==inp.value){ const pos = inp.selectionStart; inp.value = v; try{ inp.setSelectionRange(pos,pos); }catch(e){} }
+}
+function cfgNameField(label, value, placeholder, upper){
+  return `<div class="field" id="cfgFldNombre"><label>${label}${upper?' <span class="hint">· se guarda en MAYÚSCULAS y sin tildes</span>':""}</label><input type="text" id="cfgFNombre" maxlength="90" value="${cfgEsc(value||"")}" placeholder="${cfgEsc(placeholder)}" ${upper?"":"data-autofocus "}autocomplete="off" ${upper?'autocapitalize="characters" ':""}oninput="${upper?"cfgForceUpper(this);":""}cfgCheckName()" onkeydown="if(event.key==='Enter'&&this.closest('.cfg-panel:not(.wide)')){event.preventDefault();cfgPanelSubmit();}">
     <div class="cfg-field-msg" id="cfgFNombreMsg"></div></div>`;
 }
 function cfgCheckName(){
@@ -4545,7 +4568,8 @@ function cfgCheckName(){
   return !dup;
 }
 function cfgReadName(){
-  const v = (document.getElementById("cfgFNombre").value||"").replace(/\s+/g," ").trim();
+  let v = (document.getElementById("cfgFNombre").value||"").replace(/\s+/g," ").trim();
+  if(cfgPS && cfgPS.hoja==="Insumo"){ v = cfgInsNombre(v); document.getElementById("cfgFNombre").value = v; }
   if(!v){ document.getElementById("cfgFldNombre").classList.add("error"); cfgShowErr("Completá el nombre."); return null; }
   document.getElementById("cfgFldNombre").classList.remove("error");
   if(!cfgCheckName()){ cfgShowErr("Ese nombre ya existe. Elegí otro."); return null; }
@@ -4653,11 +4677,6 @@ function cfgOpenProvForm(id, presetRubroId){
         <div class="cfg-ms-list" id="cfgMsList"></div>
       </div>
       ${nIns ? `<div class="cfg-note" style="margin-top:14px">${CFG_IC.info}<div>Este proveedor está asignado a <b>${nIns}</b> ${nIns===1?"insumo":"insumos"} en la solapa Insumos.</div></div>`:""}
-      <div class="cfg-sec-title"><span class="n">3</span>Datos de contacto <span class="opt">· opcionales</span></div>
-      <div class="field-row"><div class="field"><label>CUIT</label><input type="text" id="cfgFCuit" maxlength="20" placeholder="30-12345678-9" value="${cfgEsc(p&&p.cuit||"")}"></div>
-        <div class="field"><label>Teléfono</label><input type="text" id="cfgFTel" maxlength="40" placeholder="11 5555-5555" value="${cfgEsc(p&&p.telefono||"")}"></div></div>
-      <div class="field"><label>Email</label><input type="email" id="cfgFEmail" maxlength="120" placeholder="ventas@proveedor.com" value="${cfgEsc(p&&p.email||"")}"></div>
-      <div class="field"><label>Notas</label><textarea id="cfgFNotas" maxlength="600" placeholder="Días de entrega, contacto, condiciones de pago…">${cfgEsc(p&&p.notas||"")}</textarea></div>
       <div class="cfg-err-box" id="cfgErrBox"></div>`,
     saveLabel: p ? "Guardar cambios" : "Crear proveedor",
     nameList: ()=>cfgData.provs,
@@ -4669,10 +4688,9 @@ function cfgOpenProvForm(id, presetRubroId){
       const rubIds = [...cfgPS.msSel];
       document.getElementById("cfgMs").classList.toggle("err", !rubIds.length);
       if(!rubIds.length){ cfgShowErr("Asigná el proveedor a al menos un rubro."); return false; }
-      const email = document.getElementById("cfgFEmail").value.trim();
-      if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ cfgShowErr("El email no parece válido."); return false; }
-      const args = { p_id: p ? p.id : null, p_nombre: nombre, p_cuit: document.getElementById("cfgFCuit").value, p_telefono: document.getElementById("cfgFTel").value,
-        p_email: email, p_notas: document.getElementById("cfgFNotas").value, p_rubro_ids: rubIds };
+      // datos de contacto: fuera de uso por ahora (se conservan los que ya hubiera en la base)
+      const args = { p_id: p ? p.id : null, p_nombre: nombre, p_cuit: p ? (p.cuit||"") : "", p_telefono: p ? (p.telefono||"") : "",
+        p_email: p ? (p.email||"") : "", p_notas: p ? (p.notas||"") : "", p_rubro_ids: rubIds };
       const res = await sb.rpc("cm_guardar_proveedor", args);
       if(res.error){ cfgShowErr(cfgErrText(res.error, "un proveedor")); return false; }
       const rubN = ids => ids.map(i=>(cfgRub("proveedores",i)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
@@ -4681,12 +4699,11 @@ function cfgOpenProvForm(id, presetRubroId){
         const ch = [];
         if(p.nombre!==nombre) ch.push(`“${p.nombre}” → “${nombre}”`);
         if(rubN(antes)!==rubN(rubIds)) ch.push(`rubros: ${rubN(antes)} → ${rubN(rubIds)}`);
-        const campos = [["cuit","CUIT",args.p_cuit],["telefono","teléfono",args.p_telefono],["email","email",args.p_email],["notas","notas",args.p_notas]];
-        const cc = campos.filter(([k,,v])=>(p[k]||"")!==(v||"").trim()).map(x=>x[1]);
-        if(cc.length) ch.push("actualizó "+cc.join(", "));
         if(ch.length) logHistorialConfig("Editó un proveedor", `“${nombre}” · ${ch.join(" · ")}`);
       } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}`);
       await cfgReload();
+      rubIds.forEach(id=>{ const r = cfgRub("proveedores", id); if(r) cfgState.proveedores.collapsed.delete(r.catId); });
+      cfgRenderDom("proveedores");
       showToast(p ? "Proveedor actualizado" : "Proveedor creado");
       return true;
     }
@@ -4740,22 +4757,20 @@ function cfgOpenInsumoForm(id, presetRubroId){
     });
   }
   if(!pvs.length) pvs.push({ key:++cfgKeySeq, provId:"", pres:[cfgNewPres()] });
-  const cats = D.cats.filter(c=>D.rubros.some(r=>r.catId===c.id)).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
   const rubCat = rubroId ? cfgRub("insumos", rubroId) : null;
   cfgOpenPanel({
     lvl:"l3", hoja:"Insumo", wide:true, id, title: ins ? "Editar insumo" : "Crear nuevo insumo",
     crumb: cfgCrumb(["Insumos", catId ? (cfgCat("insumos",catId)||{}).nombre : "Categoría", rubCat ? rubCat.nombre : "Rubro", ins ? ins.nombre : "Nuevo insumo"]),
-    body: `<div class="cfg-sec-title"><span class="n">1</span>Insumo</div>
-      ${cfgNameField("Nombre del insumo", ins && ins.nombre, "Ej. Jamón cocido")}
-      <div class="field-row">
-        <div class="field" id="cfgFldCat"><label>Categoría</label><select id="cfgFCat" onchange="cfgInsOnCat()">${catId?"":'<option value="">Elegí…</option>'}${cats.map(c=>`<option value="${c.id}"${c.id===catId?" selected":""}>${cfgEsc(c.nombre)}</option>`).join("")}</select></div>
-        <div class="field" id="cfgFldRub"><label>Rubro</label><select id="cfgFRub" onchange="cfgInsOnRub()"></select></div>
-      </div>
-      <div class="cfg-note" style="margin-top:-4px">${CFG_IC.info}<div>La categoría y el rubro son los mismos de la solapa <b>Proveedores</b>.</div></div>
-      <div class="cfg-sec-title"><span class="n">2</span>Proveedores · cantidad y unidad de pedido</div>
-      <div class="cfg-note">${CFG_IC.info}<div>Para cada proveedor indicá <b>la cantidad y la unidad en la que se pide</b> el insumo (<b>kg</b>, <b>lts</b>, <b>un</b> o <b>pq</b>). Si un proveedor lo entrega de más de una forma, agregá otra línea.<br>En <b>Costeo</b> se convierte lo comprado a costo por unidad de medida (ej. $10.000 por 3,5 kg → <b>$2.857,14/kg</b>).</div></div>
+    body: `<div class="cfg-sec-title"><span class="n">1</span>Proveedores · cantidad y unidad de pedido</div>
+      <div class="cfg-note">${CFG_IC.info}<div>Empezá por el <b>proveedor</b>: la categoría y el rubro del insumo se completan solos. Para cada proveedor indicá <b>la cantidad y la unidad en la que se pide</b> (<b>kg</b>, <b>lts</b>, <b>un</b> o <b>pq</b>); si lo entrega de más de una forma, agregá otra línea.<br>En <b>Costeo</b> se convierte lo comprado a costo por unidad de medida (ej. $10.000 por 3,5 kg → <b>$2.857,14/kg</b>).</div></div>
       <div id="cfgPvCards"></div>
       <button type="button" class="cfg-add-prov" onclick="cfgInsAddProv()">${CFG_IC.plus} Agregar otro proveedor</button>
+      <div class="cfg-sec-title"><span class="n">2</span>Insumo</div>
+      ${cfgNameField("Nombre del insumo", ins && ins.nombre, "Ej. JAMON COCIDO", true)}
+      <div class="field-row">
+        <div class="field" id="cfgFldRub"><label>Rubro <span class="hint">· automático según el proveedor</span></label><select id="cfgFRub" onchange="cfgInsOnRub()"></select></div>
+        <div class="field" id="cfgFldCat"><label>Categoría</label><input type="text" id="cfgFCatTxt" readonly placeholder="Se completa con el rubro"></div>
+      </div>
       <div class="cfg-sec-title"><span class="n">3</span>Notas <span class="opt">· opcional</span></div>
       <div class="field"><textarea id="cfgFNotas" maxlength="600" placeholder="Marca preferida, calidad, observaciones…">${cfgEsc(ins&&ins.notas||"")}</textarea></div>
       <div class="cfg-err-box" id="cfgErrBox"></div>`,
@@ -4763,23 +4778,37 @@ function cfgOpenInsumoForm(id, presetRubroId){
     nameList: ()=>cfgData.items,
     dupHint: d=>{ const r = cfgRub("insumos", d.rubro_id); return r ? ` en el rubro “${cfgEsc(r.nombre)}”` : ""; },
     pvs, rubroId,
-    afterOpen: ()=>{ cfgInsFillRubros(rubroId); cfgInsRenderCards(); },
+    afterOpen: ()=>{ cfgInsRenderCards(); cfgInsFillRubros(rubroId, true); setTimeout(()=>{ const i = document.querySelector("#cfgPvCards .cfg-combo input"); if(i && !ins) i.focus(); }, 80); },
     submit: cfgInsSubmit.bind(null, ins)
   });
 }
-function cfgInsFillRubros(selId){
-  const catId = document.getElementById("cfgFCat").value;
-  const sel = document.getElementById("cfgFRub");
-  const rs = cfgData.insumos.rubros.filter(r=>r.catId===catId).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
-  if(!catId){ sel.innerHTML = '<option value="">Elegí la categoría primero</option>'; sel.disabled = true; return; }
-  sel.disabled = false;
-  sel.innerHTML = rs.length ? ((selId && rs.some(r=>r.id===selId)) ? "" : '<option value="">Elegí…</option>') + rs.map(r=>`<option value="${r.id}"${r.id===selId?" selected":""}>${cfgEsc(r.nombre)}</option>`).join("")
-    : '<option value="">Esta categoría no tiene rubros</option>';
+/* rubros posibles = rubros de los proveedores elegidos (primero los del proveedor 1) */
+function cfgInsCandidatos(){
+  const out = [];
+  (cfgPS ? cfgPS.pvs : []).forEach(g=>{ if(g.provId) cfgRubrosDeProv(g.provId).forEach(r=>{ if(!out.some(x=>x.id===r.id)) out.push(r); }); });
+  return out;
 }
-function cfgInsOnCat(){ cfgInsFillRubros(""); document.getElementById("cfgFldCat").classList.remove("error"); cfgInsCrumb(); cfgHideErr(); }
-function cfgInsOnRub(){ document.getElementById("cfgFldRub").classList.remove("error"); cfgInsCrumb(); cfgHideErr(); }
+function cfgInsFillRubros(selId, keepOutside){
+  const sel = document.getElementById("cfgFRub"); if(!sel) return;
+  const cands = cfgInsCandidatos();
+  if(keepOutside && selId && !cands.some(r=>r.id===selId)){ const r = cfgRub("proveedores", selId); if(r) cands.push(r); }
+  if(!cands.length){ sel.innerHTML = '<option value="">Elegí un proveedor primero</option>'; sel.disabled = true; }
+  else {
+    if(!selId || !cands.some(r=>r.id===selId)) selId = cands[0].id;
+    sel.disabled = cands.length===1;
+    sel.innerHTML = cands.map(r=>`<option value="${r.id}"${r.id===selId?" selected":""}>${cfgEsc(r.nombre)}</option>`).join("");
+    sel.title = cands.length===1 ? "El proveedor pertenece a un solo rubro" : "El proveedor está en más de un rubro: elegí a cuál corresponde este insumo";
+  }
+  cfgInsOnRub();
+}
+function cfgInsOnRub(){
+  const r = cfgRub("proveedores", (document.getElementById("cfgFRub")||{}).value);
+  const c = r ? cfgCat("proveedores", r.catId) : null;
+  const t = document.getElementById("cfgFCatTxt"); if(t) t.value = c ? c.nombre : "";
+  document.getElementById("cfgFldRub").classList.remove("error"); cfgInsCrumb(); cfgHideErr();
+}
 function cfgInsCrumb(){
-  const c = cfgCat("insumos", document.getElementById("cfgFCat").value), r = cfgRub("insumos", document.getElementById("cfgFRub").value);
+  const r = cfgRub("insumos", document.getElementById("cfgFRub").value), c = r ? cfgCat("insumos", r.catId) : null;
   const nm = (document.getElementById("cfgFNombre").value||"").trim();
   document.getElementById("cfgPanelCrumb").innerHTML = cfgCrumb(["Insumos", c?c.nombre:"Categoría", r?r.nombre:"Rubro", nm || (cfgPS&&cfgPS.id?"Insumo":"Nuevo insumo")]);
 }
@@ -4833,7 +4862,7 @@ function cfgInsAddProv(){
   const cards = document.querySelectorAll("#cfgPvCards .cfg-pv-card"); const last = cards[cards.length-1];
   if(last){ last.scrollIntoView({block:"nearest", behavior:"smooth"}); last.querySelector(".cfg-combo input").focus(); }
 }
-function cfgInsDelProv(gk){ if(cfgPS.pvs.length<2) return; cfgPS.pvs = cfgPS.pvs.filter(g=>g.key!==gk); cfgInsRenderCards(); }
+function cfgInsDelProv(gk){ if(cfgPS.pvs.length<2) return; cfgPS.pvs = cfgPS.pvs.filter(g=>g.key!==gk); cfgInsRenderCards(); cfgInsFillRubros(document.getElementById("cfgFRub").value); }
 
 /* combo buscable de proveedores */
 function cfgComboOpts(inp){
@@ -4861,6 +4890,7 @@ function cfgComboPick(opt){
   const inp = combo.querySelector("input"); inp.value = p.nombre;
   combo.querySelector(".cfg-combo-list").classList.remove("show");
   document.getElementById("cfgPv"+gk).classList.remove("err"); cfgHideErr();
+  cfgInsFillRubros(document.getElementById("cfgFRub").value);
   const next = document.querySelector(`#cfgPv${gk} .cfg-pres-row input`); if(next) next.focus();
 }
 function cfgComboKey(e, inp){
@@ -4884,16 +4914,15 @@ function cfgComboBlur(inp){
   if(!cur || inp.value!==cur.nombre){
     // si lo escrito coincide exactamente con un proveedor, se toma; si no, se vuelve al elegido
     const m = cfgData.provs.find(p=>cfgNorm(p.nombre)===cfgNorm(inp.value) && !cfgPS.pvs.some(x=>x!==g && x.provId===p.id));
-    if(m){ g.provId = m.id; inp.value = m.nombre; } else inp.value = cur ? cur.nombre : "";
+    if(m){ g.provId = m.id; inp.value = m.nombre; cfgInsFillRubros(document.getElementById("cfgFRub").value); } else inp.value = cur ? cur.nombre : "";
   }
 }
 
 async function cfgInsSubmit(ins){
   const nombre = cfgReadName(); if(!nombre) return false;
-  const catId = document.getElementById("cfgFCat").value, rubroId = document.getElementById("cfgFRub").value;
-  document.getElementById("cfgFldCat").classList.toggle("error", !catId);
+  const rubroId = document.getElementById("cfgFRub").value, catId = (cfgRub("insumos", rubroId)||{}).catId;
   document.getElementById("cfgFldRub").classList.toggle("error", !rubroId);
-  if(!catId || !rubroId){ cfgShowErr("Elegí la categoría y el rubro del insumo."); return false; }
+  if(!rubroId){ cfgShowErr("Elegí primero el proveedor: la categoría y el rubro se completan con él."); return false; }
   const errs = [], pres = [];
   let orden = 0;
   cfgPS.pvs.forEach((g, gi)=>{
@@ -5127,7 +5156,7 @@ async function cfgEnsureLoaded(){
   if(!cfgLoaded){
     ["Proveedores","Insumos"].forEach(s=>{ document.getElementById("cfgTable"+s).innerHTML = `<div class="cfg-nores"><strong>Cargando…</strong></div>`; });
     await cfgReload();
-  } else cfgRenderAll();
+  } else { cfgCollapseAll("proveedores"); cfgRenderAll(); }
 }
 function cfgOnEnterModule(){
   const act = document.querySelector("#configSubnav .pagos-tab.active");
