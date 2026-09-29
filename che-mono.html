@@ -1210,6 +1210,53 @@
   .cfg-sinprov b{display:block;font-size:13px;font-weight:800;color:var(--text-1);}
   .cfg-sinprov small{display:block;font-size:11.8px;color:var(--text-2);margin-top:2px;line-height:1.45;font-weight:500;}
   .cfg-noprov{align-self:flex-start;display:inline-flex;align-items:center;font-size:11.3px;font-weight:700;color:#8A5A00;background:#FFF6DF;border:1px dashed #E8C66A;border-radius:20px;padding:2px 10px;margin-top:2px;}
+  .cfg-days{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .cfg-day{min-width:52px;padding:9px 0;border-radius:10px;border:1.5px solid var(--border);background:#fff;color:var(--text-2);font-size:12.5px;font-weight:800;cursor:pointer;transition:all .12s ease;}
+  .cfg-day:hover{border-color:var(--gray);color:var(--text-1);}
+  .cfg-day.on{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 4px 10px rgba(38,47,76,.2);}
+  .cfg-ent-head{display:grid;grid-template-columns:110px 22px 170px 1fr;gap:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);padding:0 2px 4px;}
+  .cfg-ent-row{display:grid;grid-template-columns:110px 22px 170px 1fr;gap:8px;align-items:center;padding:6px 10px;background:#FAFBFF;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;}
+  .cfg-ent-row .ent{font-size:13px;font-weight:800;color:var(--navy);}
+  .cfg-ent-row .arr{color:var(--text-3);font-weight:800;text-align:center;}
+  .cfg-ent-row select{padding:7px 9px;border-radius:8px;border:1px solid var(--border);font-size:12.8px;background:#fff;outline:none;}
+  .cfg-ent-row select:focus{border-color:var(--sky);}
+  .cfg-ent-row .hint{font-size:11.3px;color:var(--text-3);font-weight:600;}
+  .cfg-ent-empty{font-size:12px;color:var(--text-3);font-style:italic;padding:2px 2px 4px;}
+  .cfg-plazo{display:flex;align-items:center;gap:12px;}
+  .cfg-plazo .stepper-input input{font-weight:800;font-size:14px;}
+  .cfg-plazo-suf{font-size:12.5px;font-weight:600;color:var(--text-2);}
+  .cfg-plazo-hint{font-size:11.8px;color:var(--text-2);margin-top:8px;}
+  .cfg-plazo-hint b{color:var(--navy);}
+  .cfg-kpi.btn{cursor:pointer;font-family:inherit;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;}
+  .cfg-kpi.btn:hover{border-color:var(--sky);background:#F7F9FF;}
+  .cfg-kpi.btn.active{background:var(--navy);border-color:var(--navy);color:#DDE2F5;box-shadow:0 4px 10px rgba(38,47,76,.2);}
+  .cfg-kpi.btn.active b{color:#fff;}
+  .cfg-kpi.static{background:transparent;border-style:dashed;}
+  .cfg-pmeta{display:flex;flex-wrap:wrap;gap:10px;margin-top:3px;font-size:11px;font-weight:700;color:var(--text-3);}
+  .cfg-pmeta span{display:inline-flex;align-items:center;gap:4px;}
+  .cfg-pmeta svg{width:12px;height:12px;}
+  .cfg-list .cfg-lrow{cursor:pointer;}
+  .cfg-list .cfg-lrow.flat{cursor:default;}
+  .cfg-list .cfg-lrow:hover td{background:#FAFBFF;}
+  .cfg-list .cfg-lrow.open td{background:#F4F7FF;border-bottom-color:#DCE4FA;}
+  .cfg-list .cfg-lrow .cfg-chev{margin:-1px 0 0 -6px;}
+  .cfg-list td{vertical-align:middle;}
+  .cfg-cell.stack{flex-direction:column;gap:3px;font-size:12.6px;color:var(--text-1);font-weight:600;}
+  .cfg-count{display:inline-flex;min-width:28px;justify-content:center;font-size:12px;font-weight:800;color:var(--blue);background:#EAF0FF;border-radius:20px;padding:3px 10px;font-variant-numeric:tabular-nums;}
+  .cfg-count.light{color:var(--text-2);background:#F1F2F8;}
+  .cfg-lsub td{background:#FBFCFF;padding:0;}
+  .cfg-sub{padding:6px 14px 10px 44px;display:flex;flex-direction:column;gap:2px;}
+  .cfg-sub-item{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:9px;position:relative;}
+  .cfg-sub-item:hover{background:#fff;box-shadow:var(--shadow-sm);}
+  .cfg-sub-item:hover .cfg-acts{opacity:1;}
+  .cfg-sub-item .nm{font-weight:700;font-size:13px;color:var(--text-1);min-width:220px;}
+  .cfg-sub-meta{display:flex;align-items:center;gap:10px;flex:1;min-width:0;flex-wrap:wrap;}
+  .cfg-ent-chips{display:flex;gap:5px;flex-wrap:wrap;}
+  .cfg-ent-chip{display:inline-flex;flex-direction:column;align-items:center;line-height:1.15;padding:3px 9px;border-radius:9px;background:#EEF1FB;border:1px solid #DDE3F5;}
+  .cfg-ent-chip b{font-size:11.5px;font-weight:800;color:var(--navy);}
+  .cfg-ent-chip i{font-style:normal;font-size:9.5px;font-weight:700;color:var(--text-3);}
+  .cfg-plazo-chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:800;color:#137B44;background:#E7F6EE;border-radius:20px;padding:3px 10px;white-space:nowrap;}
+  .cfg-dim{color:var(--gray);}
 </style>
 </head>
 <body>
@@ -1607,6 +1654,10 @@
                     <input type="text" id="cfgSearchProveedores" placeholder="Buscar categoría, rubro o proveedor…" oninput="cfgOnSearch('proveedores', this.value)" autocomplete="off">
                     <button class="x" id="cfgSearchXProveedores" onclick="cfgClearSearch('proveedores')" title="Borrar búsqueda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
                   </div>
+                  <button class="cfg-cta-ghost" onclick="cfgExportExcel('proveedores')" title="Descargar la lista completa en Excel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Excel
+                  </button>
                   <button class="cfg-cta-ghost" onclick="cfgToggleAllGroups('proveedores')" id="cfgToggleAllProveedores" title="Contraer / expandir todas las categorías">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 15 12 20 17 15"/><polyline points="7 9 12 4 17 9"/></svg><span>Contraer todo</span>
                   </button>
@@ -1637,6 +1688,10 @@
                     <input type="text" id="cfgSearchInsumos" placeholder="Buscar insumo, rubro o proveedor…" oninput="cfgOnSearch('insumos', this.value)" autocomplete="off">
                     <button class="x" id="cfgSearchXInsumos" onclick="cfgClearSearch('insumos')" title="Borrar búsqueda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
                   </div>
+                  <button class="cfg-cta-ghost" onclick="cfgExportExcel('insumos')" title="Descargar la lista completa en Excel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Excel
+                  </button>
                   <button class="cfg-cta" onclick="cfgOpenInsumoForm(null)">
                     <span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
                     Crear nuevo insumo
@@ -3988,8 +4043,8 @@ let cfgData = {
 let cfgLoaded = false, cfgLoading = null;
 let cfgView = "proveedores";
 const cfgState = {
-  proveedores: { search:"", collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), prov:cfgNewF() } },
-  insumos:     { search:"", collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), ins:cfgNewF(), prov:cfgNewF() } }
+  proveedores: { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), prov:cfgNewF() } },
+  insumos:     { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), ins:cfgNewF(), prov:cfgNewF() } }
 };
 function cfgNewF(){ return { text:"", sel:new Set() }; }
 
@@ -4055,8 +4110,22 @@ const CFG_IC = {
   cat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
   rub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
   prov:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  truck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+  excel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13l4 5M12 13l-4 5"/><line x1="15" y1="13" x2="16.5" y2="13"/><line x1="15" y1="17" x2="16.5" y2="17"/></svg>',
   box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>'
 };
+
+/* ---------- días de entrega / pedido y plazo de pago ---------- */
+const CFG_DIAS = ["", "Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const CFG_DIAS_C = ["", "Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+function cfgEntregas(p){ return (Array.isArray(p && p.entregas) ? p.entregas : []).filter(e=>e && e.entrega>=1 && e.entrega<=7).slice().sort((a,b)=>a.entrega-b.entrega); }
+function cfgEntregasTxt(p, largo){
+  const es = cfgEntregas(p); if(!es.length) return "";
+  const D = largo ? CFG_DIAS : CFG_DIAS_C;
+  return es.map(e=>`${D[e.entrega]} (pedido ${D[e.pedido]||"—"})`).join(" · ");
+}
+function cfgPlazoTxt(p){ const n = p ? p.plazo_pago_dias : null; if(n==null) return ""; return n===0 ? "Contado" : `${n} ${n===1?"día":"días"}`; }
 
 /* ---------- lookups ---------- */
 function cfgCat(dom, id){ return cfgData[dom].cats.find(c=>c.id===id); }
@@ -4078,7 +4147,7 @@ async function cfgLoadAll(){
   const res = await Promise.all([
     sb.from("cm_conceptos").select("id,nombre"),
     sb.from("cm_rubros").select("id,nombre,concepto_id"),
-    sb.from("cm_proveedores").select("id,nombre,cuit,telefono,email,notas"),
+    sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias,entregas"),
     sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
     sb.from("cm_insumos").select("id,nombre,rubro_id,notas"),
     sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden")
@@ -4220,23 +4289,37 @@ function cfgToggleAllGroups(dom){
   cfgRenderDom(dom);
 }
 
-function cfgKpi(n,s1,sn){ return `<span class="cfg-kpi"><b>${n}</b> ${n===1?s1:sn}</span>`; }
+function cfgKpi(n,s1,sn){ return `<span class="cfg-kpi static"><b>${n}</b> ${n===1?s1:sn}</span>`; }
+function cfgKpiBtn(dom, mode, n, s1, sn, tip){
+  const act = cfgState[dom].mode===mode;
+  return `<button type="button" class="cfg-kpi btn${act?" active":""}" onclick="cfgSetMode('${dom}','${mode}')" title="${cfgEsc(tip)}"><b>${n}</b> ${n===1?s1:sn}</button>`;
+}
+/* Vistas: "grupos" (categoría › rubro › hoja), "rubros" (lista de rubros) y "hojas" (lista de proveedores / insumos) */
+function cfgSetMode(dom, mode){
+  const st = cfgState[dom];
+  st.mode = mode;
+  if(mode==="grupos"){ cfgCollapseAll(dom); }
+  cfgCloseFloating();
+  cfgRenderDom(dom);
+  const sc = document.getElementById("cfgScroll"+(dom==="proveedores"?"Proveedores":"Insumos")); if(sc) sc.scrollTop = 0;
+}
+function cfgToggleRubOpen(dom, id){ const s = cfgState[dom].rubOpen; s.has(id) ? s.delete(id) : s.add(id); cfgRenderDom(dom); }
 function cfgRenderDom(dom){
   const suf = dom==="proveedores" ? "Proveedores" : "Insumos";
   const D = cfgData[dom], st = cfgState[dom];
   // KPIs
   const kp = document.getElementById("cfgKpis"+suf);
   if(dom==="proveedores"){
-    kp.innerHTML = cfgKpi(D.cats.length,"categoría","categorías")+cfgKpi(D.rubros.length,"rubro","rubros")+cfgKpi(cfgData.provs.length,"proveedor","proveedores");
+    kp.innerHTML = cfgKpiBtn(dom,"grupos",D.cats.length,"categoría","categorías","Vista por categoría (inicial)")+cfgKpiBtn(dom,"rubros",D.rubros.length,"rubro","rubros","Lista de todos los rubros")+cfgKpiBtn(dom,"hojas",cfgData.provs.length,"proveedor","proveedores","Lista de todos los proveedores");
   } else {
     const provVinc = new Set(cfgData.pres.map(p=>p.proveedor_id)).size;
     const rubUsados = new Set(cfgData.items.map(i=>i.rubro_id));
     const catUsadas = new Set([...rubUsados].map(r=>(cfgRub("proveedores",r)||{}).catId).filter(Boolean));
-    kp.innerHTML = cfgKpi(cfgData.items.length,"insumo","insumos")+cfgKpi(catUsadas.size,"categoría","categorías")+cfgKpi(rubUsados.size,"rubro","rubros")+cfgKpi(provVinc,"proveedor vinculado","proveedores vinculados");
+    kp.innerHTML = cfgKpiBtn(dom,"grupos",catUsadas.size,"categoría","categorías","Vista por categoría (inicial)")+cfgKpiBtn(dom,"rubros",rubUsados.size,"rubro","rubros","Lista de rubros con insumos")+cfgKpiBtn(dom,"hojas",cfgData.items.length,"insumo","insumos","Lista de todos los insumos")+cfgKpi(provVinc,"proveedor vinculado","proveedores vinculados");
   }
   // Toggle todo
   const tg = document.getElementById("cfgToggleAll"+suf);
-  if(tg){ tg.querySelector("span").textContent = (st.collapsed.size >= D.cats.length && D.cats.length) ? "Expandir todo" : "Contraer todo"; }
+  if(tg){ tg.style.display = st.mode==="grupos" ? "" : "none"; tg.querySelector("span").textContent = (st.collapsed.size >= D.cats.length && D.cats.length) ? "Expandir todo" : "Contraer todo"; }
 
   const allRows = cfgBuildRows(dom);
   const rows = cfgFilterRows(dom, allRows);
@@ -4248,7 +4331,9 @@ function cfgRenderDom(dom){
     host.innerHTML = `<div class="cfg-table-wrap">${cfgTheadOnly(dom)}<div class="cfg-nores">${CFG_IC.search.replace('<svg','<svg style="width:44px;height:44px"')}<strong>No hay resultados</strong><span>Ningún registro coincide con la búsqueda o los filtros aplicados.</span><br><button class="btn-ghost" onclick="cfgClearAll('${dom}')">Limpiar búsqueda y filtros</button></div></div>`;
     return;
   }
-  host.innerHTML = `<div class="cfg-table-wrap">${cfgTableHtml(dom, rows)}</div>`;
+  if(st.mode==="rubros") host.innerHTML = `<div class="cfg-table-wrap">${cfgRubrosListHtml(dom, rows)}</div>`;
+  else if(st.mode==="hojas") host.innerHTML = `<div class="cfg-table-wrap">${cfgHojasListHtml(dom, rows)}</div>`;
+  else host.innerHTML = `<div class="cfg-table-wrap">${cfgTableHtml(dom, rows)}</div>`;
   const th = host.querySelector("thead");
   if(th) host.style.setProperty("--cfg-th-h", th.offsetHeight+"px");
 }
@@ -4343,7 +4428,7 @@ function cfgTableHtml(dom, rows){
           const p = cfgProv(r.leafId);
           const otros = cfgRubrosDeProv(p.id).filter(x=>x.id!==r.rubroId);
           const also = otros.length ? `<div><span class="cfg-also" title="También está en: ${cfgEsc(otros.map(o=>o.nombre).join(", "))}">También en ${cfgEsc(otros.length===1?otros[0].nombre:otros.length+" rubros")}</span></div>` : "";
-          html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(p.nombre,"prov")}</div>${also}</div>
+          html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(p.nombre,"prov")}</div>${cfgProvMetaHtml(p)}${also}</div>
               ${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar / quitar proveedor",`cfgDeleteProv('${p.id}','${r.rubroId}')`)])}</div></td>`;
         } else {
           const ins = cfgIns(r.leafId), pres = cfgPresDeIns(ins.id);
@@ -4362,6 +4447,122 @@ function cfgTableHtml(dom, rows){
     });
   });
   return html + "</tbody></table>";
+}
+
+function cfgProvMetaHtml(p){
+  const es = cfgEntregas(p), pl = cfgPlazoTxt(p);
+  if(!es.length && !pl) return "";
+  return `<div class="cfg-pmeta">${es.length?`<span title="${cfgEsc(cfgEntregasTxt(p,true))}">${CFG_IC.truck} ${es.map(e=>CFG_DIAS_C[e.entrega]).join(", ")}</span>`:""}${pl?`<span title="Plazo de pago">${CFG_IC.card} ${cfgEsc(pl)}</span>`:""}</div>`;
+}
+function cfgEntregasCell(p){
+  const es = cfgEntregas(p);
+  if(!es.length) return '<span class="cfg-dim">—</span>';
+  return `<div class="cfg-ent-chips">${es.map(e=>`<span class="cfg-ent-chip" title="Pedido hasta el ${CFG_DIAS[e.pedido]} para recibir el ${CFG_DIAS[e.entrega]}"><b>${CFG_DIAS_C[e.entrega]}</b><i>pedido ${CFG_DIAS_C[e.pedido]}</i></span>`).join("")}</div>`;
+}
+function cfgPresPillsHtml(insId, hq){
+  const pres = cfgPresDeIns(insId);
+  if(!pres.length) return '<span class="cfg-noprov">Sin proveedor definido</span>';
+  const byProv = [];
+  pres.forEach(p=>{ let g = byProv.find(x=>x.id===p.proveedor_id); if(!g){ g={id:p.proveedor_id, pres:[]}; byProv.push(g);} g.pres.push(p); });
+  return byProv.map(bp=>{ const pv = cfgProv(bp.id); return `<div class="cfg-provline"><span class="pn">${cfgHi(pv?pv.nombre:"(proveedor eliminado)", hq)}</span><span class="cfg-pres-pills">${bp.pres.map(p=>`<span class="cfg-pill">${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}</span>`).join("")}</span></div>`; }).join("");
+}
+/* Vista "rubros": todos los rubros en orden alfabético, con su categoría y cantidad; click → se despliegan */
+function cfgRubrosListHtml(dom, rows){
+  const st = cfgState[dom], q = st.search, isProv = dom==="proveedores";
+  const ids = [...new Set(rows.filter(r=>r.rubroId).map(r=>r.rubroId))];
+  const rubs = ids.map(id=>cfgRub(dom,id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  let html = `<table class="cfg-table cfg-list"><colgroup><col style="width:34%"><col style="width:30%"><col style="width:${isProv?"18%":"14%"}"><col style="width:${isProv?"18%":"22%"}"></colgroup>
+    <thead><tr><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th>
+    <th><div class="cfg-th">${isProv?"Proveedores":"Insumos"}</div></th><th><div class="cfg-th">${isProv?"Insumos":"Proveedores vinculados"}</div></th></tr></thead><tbody>`;
+  rubs.forEach(r=>{
+    const c = cfgCat(dom, r.catId), open = st.rubOpen.has(r.id);
+    const leafIds = [...new Set(rows.filter(x=>x.rubroId===r.id && x.leafId).map(x=>x.leafId))];
+    const nProv = isProv ? leafIds.length : new Set(cfgData.pres.filter(p=>leafIds.includes(p.insumo_id)).map(p=>p.proveedor_id)).size;
+    const nIns = isProv ? cfgData.items.filter(i=>i.rubro_id===r.id).length : leafIds.length;
+    html += `<tr class="cfg-lrow${open?" open":""}" onclick="cfgToggleRubOpen('${dom}','${r.id}')">
+      <td><div class="cfg-cell"><button class="cfg-chev${open?"":" collapsed"}" tabindex="-1">${CFG_IC.chev}</button><div class="txt"><div class="nm">${cfgHi(r.nombre,q)}</div></div>
+        ${isProv?cfgActs([cfgBtn("plus","Agregar proveedor en este rubro",`cfgOpenProvForm(null,'${r.id}')`), cfgBtn("edit","Editar rubro",`cfgOpenRubroForm('proveedores','${r.id}')`), cfgBtn("del","Eliminar rubro",`cfgDeleteRubro('proveedores','${r.id}')`)]):cfgActs([cfgBtn("plus","Crear insumo en este rubro",`cfgOpenInsumoForm(null,'${r.id}')`)])}</div></td>
+      <td><div class="cfg-cell"><span class="cfg-dot" style="background:${cfgColor(r.catId)}"></span><div class="txt"><div class="nm" style="font-weight:600">${cfgHi(c?c.nombre:"",q)}</div></div></div></td>
+      <td><div class="cfg-cell"><span class="cfg-count">${isProv?nProv:nIns}</span></div></td>
+      <td><div class="cfg-cell"><span class="cfg-count light">${isProv?nIns:nProv}</span></div></td></tr>`;
+    if(open){
+      let inner = "";
+      if(isProv){
+        const ps = leafIds.map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+        inner = ps.length ? ps.map(p=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(p.nombre,q)}</span><span class="cfg-sub-meta">${cfgEntregasCell(p)}${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip" title="Plazo de pago">${CFG_IC.card.replace('<svg','<svg style="width:11px;height:11px;margin-right:4px"')}${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim" title="Sin plazo de pago">Sin plazo</span>'}</span>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`)])}</div>`).join("")
+          : `<div class="cfg-empty-cell">Sin proveedores asignados · <a onclick="cfgOpenProvForm(null,'${r.id}')">Agregar proveedor</a></div>`;
+      } else {
+        const is = leafIds.map(id=>cfgIns(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+        inner = is.map(i=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(i.nombre,q)}</span><span class="cfg-sub-meta" style="flex-direction:column;align-items:flex-start">${cfgPresPillsHtml(i.id,q)}</span>${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${i.id}')`)])}</div>`).join("");
+      }
+      html += `<tr class="cfg-lsub"><td colspan="4"><div class="cfg-sub">${inner}</div></td></tr>`;
+    }
+  });
+  return html + "</tbody></table>";
+}
+/* Vista "hojas": todos los proveedores / insumos en orden alfabético */
+function cfgHojasListHtml(dom, rows){
+  const st = cfgState[dom], q = st.search, isProv = dom==="proveedores";
+  const byLeaf = new Map();
+  rows.filter(r=>r.leafId).forEach(r=>{ if(!byLeaf.has(r.leafId)) byLeaf.set(r.leafId, []); byLeaf.get(r.leafId).push(r); });
+  const leaves = [...byLeaf.keys()].map(id=>isProv?cfgProv(id):cfgIns(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  if(!leaves.length) return `<div class="cfg-nores"><strong>No hay ${isProv?"proveedores":"insumos"} para mostrar</strong></div>`;
+  const cr = x => { // categoría / rubro (todas las del proveedor, no solo las filtradas)
+    const rs = isProv ? cfgRubrosDeProv(x.id) : [cfgRub(dom, x.rubro_id)].filter(Boolean);
+    return { cats: rs.map(r=>`<div>${cfgHi((cfgCat(dom,r.catId)||{}).nombre||"",q)}</div>`).join(""), rubs: rs.map(r=>`<div>${cfgHi(r.nombre,q)}</div>`).join("") };
+  };
+  let html;
+  if(isProv){
+    html = `<table class="cfg-table cfg-list"><colgroup><col style="width:24%"><col style="width:17%"><col style="width:19%"><col style="width:28%"><col style="width:12%"></colgroup>
+      <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Días de entrega · pedido</div></th><th><div class="cfg-th">Plazo de pago</div></th></tr></thead><tbody>`;
+    leaves.forEach(p=>{ const x = cr(p);
+      html += `<tr class="cfg-lrow flat"><td><div class="cfg-cell"><div class="txt"><div class="nm">${cfgHi(p.nombre,q)}</div></div>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar proveedor",`cfgDeleteProv('${p.id}',null)`)])}</div></td>
+        <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
+        <td><div class="cfg-cell">${cfgEntregasCell(p)}</div></td><td><div class="cfg-cell">${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip">${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim">—</span>'}</div></td></tr>`; });
+  } else {
+    html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:16%"><col style="width:46%"></colgroup>
+      <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Insumo</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Proveedores · cantidad y unidad de pedido</div></th></tr></thead><tbody>`;
+    leaves.forEach(i=>{ const x = cr(i);
+      html += `<tr class="cfg-lrow flat"><td><div class="cfg-cell"><div class="txt"><div class="nm">${cfgHi(i.nombre,q)}</div></div>${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${i.id}')`), cfgBtn("del","Eliminar insumo",`cfgDeleteInsumo('${i.id}')`)])}</div></td>
+        <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
+        <td><div class="cfg-provlist">${cfgPresPillsHtml(i.id,q)}</div></td></tr>`; });
+  }
+  return html + "</tbody></table>";
+}
+
+/* ---------- descarga a Excel (hoja "lista") ---------- */
+function cfgExportExcel(dom){
+  if(typeof XLSX==="undefined"){ showToast("No se pudo cargar el generador de Excel. Revisá la conexión.", "warn"); return; }
+  const D = cfgData[dom], out = [];
+  const rubs = D.rubros.slice().sort((a,b)=>cfgCmp((cfgCat(dom,a.catId)||{}).nombre,(cfgCat(dom,b.catId)||{}).nombre) || cfgCmp(a.nombre,b.nombre));
+  let cols;
+  if(dom==="proveedores"){
+    cols = ["Categoría","Rubro","Proveedor","Días de entrega","Días de pedido","Plazo de pago (días)"];
+    rubs.forEach(r=>{
+      const cat = (cfgCat(dom,r.catId)||{}).nombre||"", ps = cfgProvsDeRubro(r.id);
+      if(!ps.length) out.push([cat, r.nombre, "", "", "", ""]);
+      ps.forEach(p=>{ const es = cfgEntregas(p); out.push([cat, r.nombre, p.nombre, es.map(e=>CFG_DIAS[e.entrega]).join(", "), es.map(e=>CFG_DIAS[e.pedido]).join(", "), p.plazo_pago_dias==null?"":p.plazo_pago_dias]); });
+    });
+  } else {
+    cols = ["Categoría","Rubro","Insumo","Proveedor","Cantidad","Unidad","Notas"];
+    rubs.forEach(r=>{
+      const cat = (cfgCat(dom,r.catId)||{}).nombre||"";
+      cfgData.items.filter(i=>i.rubro_id===r.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre)).forEach(i=>{
+        const pres = cfgPresDeIns(i.id).slice().sort((a,b)=>cfgCmp((cfgProv(a.proveedor_id)||{}).nombre,(cfgProv(b.proveedor_id)||{}).nombre) || a.orden-b.orden);
+        if(!pres.length) out.push([cat, r.nombre, i.nombre, "Sin proveedor definido", "", "", i.notas||""]);
+        pres.forEach(p=>out.push([cat, r.nombre, i.nombre, (cfgProv(p.proveedor_id)||{}).nombre||"", Number(p.cantidad), cfgUnLabel(p.unidad), i.notas||""]));
+      });
+    });
+  }
+  if(!out.length){ showToast(`No hay ${dom} para descargar`, "warn"); return; }
+  const ws = XLSX.utils.aoa_to_sheet([cols].concat(out));
+  ws["!cols"] = cols.map((c,i)=>({ wch: Math.min(48, Math.max(c.length, ...out.map(r=>String(r[i]==null?"":r[i]).length)) + 2) }));
+  ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:out.length, c:cols.length-1} }) };
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "lista");
+  const hoy = new Date(), f = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}-${String(hoy.getDate()).padStart(2,"0")}`;
+  XLSX.writeFile(wb, `Che Mono - ${dom==="proveedores"?"Proveedores":"Insumos"} - ${f}.xlsx`);
+  showToast("Excel descargado");
 }
 
 function cfgRenderChips(dom, rows, allRows){
@@ -4688,20 +4889,34 @@ function cfgOpenProvForm(id, presetRubroId){
         <div class="cfg-ms-list" id="cfgMsList"></div>
       </div>
       ${nIns ? `<div class="cfg-note" style="margin-top:14px">${CFG_IC.info}<div>Este proveedor está asignado a <b>${nIns}</b> ${nIns===1?"insumo":"insumos"} en la solapa Insumos.</div></div>`:""}
+      <div class="cfg-sec-title"><span class="n">3</span>Días de entrega y de pedido <span class="opt">· opcional</span></div>
+      <div class="cfg-note">${CFG_IC.info}<div>Marcá los <b>días en que entrega</b>. Para cada uno, indicá <b>hasta qué día se le puede hacer el pedido</b> para recibirlo ese día.</div></div>
+      <div class="cfg-days" id="cfgDays">${[1,2,3,4,5,6,7].map(d=>`<button type="button" class="cfg-day" data-d="${d}" onclick="cfgToggleEntrega(${d})"><span>${CFG_DIAS_C[d]}</span></button>`).join("")}</div>
+      <div id="cfgEntregasRows"></div>
+      <div class="cfg-sec-title"><span class="n">4</span>Plazo de pago <span class="opt">· opcional</span></div>
+      <div class="cfg-plazo">
+        <div class="stepper-input" style="width:150px"><button type="button" class="stepper-btn" onclick="cfgPlazoStep(-1)">−</button><input type="text" id="cfgFPlazo" inputmode="numeric" maxlength="3" placeholder="—" value="${p && p.plazo_pago_dias!=null ? p.plazo_pago_dias : ""}" oninput="this.value=this.value.replace(/[^0-9]/g,'');cfgPlazoHint()"><button type="button" class="stepper-btn" onclick="cfgPlazoStep(1)">+</button></div>
+        <span class="cfg-plazo-suf">días desde la fecha de la factura</span>
+      </div>
+      <div class="cfg-plazo-hint" id="cfgPlazoHint"></div>
       <div class="cfg-err-box" id="cfgErrBox"></div>`,
     saveLabel: p ? "Guardar cambios" : "Crear proveedor",
     nameList: ()=>cfgData.provs,
     dupHint: d=>{ const rs = cfgRubrosDeProv(d.id).map(r=>r.nombre); return rs.length ? ` (en ${cfgEsc(rs.join(", "))}). Si también te vende en otro rubro, editalo y sumale el rubro` : ""; },
     msSel: sel,
-    afterOpen: ()=>cfgMsRender(),
+    entregas: cfgEntregas(p).map(e=>({ entrega:e.entrega, pedido:e.pedido })),
+    afterOpen: ()=>{ cfgMsRender(); cfgRenderEntregas(); cfgPlazoHint(); },
     submit: async ()=>{
       const nombre = cfgReadName(); if(!nombre) return false;
       const rubIds = [...cfgPS.msSel];
       document.getElementById("cfgMs").classList.toggle("err", !rubIds.length);
       if(!rubIds.length){ cfgShowErr("Asigná el proveedor a al menos un rubro."); return false; }
-      // datos de contacto: fuera de uso por ahora (se conservan los que ya hubiera en la base)
-      const args = { p_id: p ? p.id : null, p_nombre: nombre, p_cuit: p ? (p.cuit||"") : "", p_telefono: p ? (p.telefono||"") : "",
-        p_email: p ? (p.email||"") : "", p_notas: p ? (p.notas||"") : "", p_rubro_ids: rubIds };
+      const plazoTxt = document.getElementById("cfgFPlazo").value.trim();
+      const plazo = plazoTxt==="" ? null : parseInt(plazoTxt,10);
+      if(plazo!=null && (isNaN(plazo) || plazo<0 || plazo>365)){ cfgShowErr("El plazo de pago tiene que ser un número de días entre 0 y 365."); return false; }
+      const entregas = cfgPS.entregas.slice().sort((a,b)=>a.entrega-b.entrega);
+      if(entregas.some(e=>!e.pedido)){ cfgShowErr("Indicá el día de pedido para cada día de entrega."); return false; }
+      const args = { p_id: p ? p.id : null, p_nombre: nombre, p_rubro_ids: rubIds, p_plazo_pago: plazo, p_entregas: entregas };
       const res = await sb.rpc("cm_guardar_proveedor", args);
       if(res.error){ cfgShowErr(cfgErrText(res.error, "un proveedor")); return false; }
       const rubN = ids => ids.map(i=>(cfgRub("proveedores",i)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
@@ -4710,8 +4925,11 @@ function cfgOpenProvForm(id, presetRubroId){
         const ch = [];
         if(p.nombre!==nombre) ch.push(`“${p.nombre}” → “${nombre}”`);
         if(rubN(antes)!==rubN(rubIds)) ch.push(`rubros: ${rubN(antes)} → ${rubN(rubIds)}`);
+        const eA = cfgEntregasTxt(p, true), eD = cfgEntregasTxt({entregas}, true);
+        if(eA!==eD) ch.push(`entregas: ${eA||"—"} → ${eD||"—"}`);
+        if((p.plazo_pago_dias??null)!==plazo) ch.push(`plazo de pago: ${cfgPlazoTxt(p)||"—"} → ${cfgPlazoTxt({plazo_pago_dias:plazo})||"—"}`);
         if(ch.length) logHistorialConfig("Editó un proveedor", `“${nombre}” · ${ch.join(" · ")}`);
-      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}`);
+      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""}`);
       await cfgReload();
       rubIds.forEach(id=>{ const r = cfgRub("proveedores", id); if(r) cfgState.proveedores.collapsed.delete(r.catId); });
       cfgRenderDom("proveedores");
@@ -4734,6 +4952,32 @@ function cfgMsRender(){
     html += `<div class="cfg-ms-grp">${cfgHi(c.nombre, q)}</div>` + rs.map(r=>`<div class="cfg-ms-opt${sel.has(r.id)?" on":""}" onclick="cfgMsToggle('${r.id}')"><span class="ck">${CFG_IC.check}</span><span>${cfgHi(r.nombre, q)}</span></div>`).join("");
   });
   document.getElementById("cfgMsList").innerHTML = html || `<div class="cfg-combo-empty" style="padding:14px">No hay rubros que coincidan.</div>`;
+}
+function cfgToggleEntrega(d){
+  const es = cfgPS.entregas, i = es.findIndex(e=>e.entrega===d);
+  if(i>=0) es.splice(i,1); else es.push({ entrega:d, pedido: d===1 ? 7 : d-1 });
+  cfgRenderEntregas(); cfgHideErr();
+}
+function cfgSetPedido(d, v){ const e = cfgPS.entregas.find(x=>x.entrega===d); if(e) e.pedido = Number(v); cfgRenderEntregas(); }
+function cfgRenderEntregas(){
+  if(!cfgPS || !cfgPS.entregas) return;
+  const es = cfgPS.entregas.slice().sort((a,b)=>a.entrega-b.entrega);
+  document.querySelectorAll("#cfgDays .cfg-day").forEach(b=>b.classList.toggle("on", es.some(e=>e.entrega===Number(b.dataset.d))));
+  const host = document.getElementById("cfgEntregasRows");
+  host.innerHTML = es.length ? `<div class="cfg-ent-head"><span>Entrega</span><span></span><span>Pedido hasta el</span></div>` + es.map(e=>`
+    <div class="cfg-ent-row">
+      <span class="ent">${CFG_DIAS[e.entrega]}</span>
+      <span class="arr">←</span>
+      <select onchange="cfgSetPedido(${e.entrega}, this.value)">${[1,2,3,4,5,6,7].map(d=>`<option value="${d}"${d===e.pedido?" selected":""}>${CFG_DIAS[d]}</option>`).join("")}</select>
+      <span class="hint">${e.pedido===e.entrega ? "mismo día" : `pedís el ${CFG_DIAS[e.pedido].toLowerCase()}, recibís el ${CFG_DIAS[e.entrega].toLowerCase()}`}</span>
+    </div>`).join("") : `<div class="cfg-ent-empty">Sin días de entrega cargados.</div>`;
+}
+function cfgPlazoStep(d){ const i = document.getElementById("cfgFPlazo"); let n = parseInt(i.value||"0",10)||0; n = Math.max(0, Math.min(365, (i.value===""&&d>0?0:n) + d)); i.value = n; cfgPlazoHint(); }
+function cfgPlazoHint(){
+  const v = (document.getElementById("cfgFPlazo")||{}).value, h = document.getElementById("cfgPlazoHint"); if(!h) return;
+  if(v===""||v==null){ h.textContent = "Sin plazo cargado."; return; }
+  const n = parseInt(v,10);
+  h.innerHTML = n===0 ? "Se paga <b>de contado</b> (el mismo día de la factura)." : `Ej.: una factura del 1/10 vence el <b>${(()=>{ const d = new Date(2026,9,1); d.setDate(d.getDate()+n); return d.toLocaleDateString("es-AR"); })()}</b>. Se va a usar en las cuentas corrientes de proveedores.`;
 }
 function cfgMsToggle(id){
   const s = cfgPS.msSel; s.has(id) ? s.delete(id) : s.add(id);
@@ -5200,7 +5444,7 @@ async function cfgEnsureLoaded(){
   if(!cfgLoaded){
     ["Proveedores","Insumos"].forEach(s=>{ document.getElementById("cfgTable"+s).innerHTML = `<div class="cfg-nores"><strong>Cargando…</strong></div>`; });
     await cfgReload();
-  } else { cfgCollapseAll("proveedores"); cfgRenderAll(); }
+  } else { cfgState.proveedores.mode = "grupos"; cfgCollapseAll("proveedores"); cfgRenderAll(); }
 }
 function cfgOnEnterModule(){
   const act = document.querySelector("#configSubnav .pagos-tab.active");
