@@ -715,6 +715,23 @@
   .stack-item-row-simple{display:grid;grid-template-columns:14px 1fr 90px 140px;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
   .stack-item-row-simple:last-child{border-bottom:none;}
 
+  /* ---------- VENTAS: % de ocupación de canchas (mini-medidores Mañana/Tarde/Sábado por cancha) ---------- */
+  .ocup-legend-row{display:flex;gap:16px;margin-bottom:10px;padding-left:78px;}
+  .ocup-legend-row .lg-item{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);}
+  .ocup-legend-row .lg-swatch{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+  .ocup-row{display:grid;grid-template-columns:70px repeat(3,1fr);gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);}
+  .ocup-row:last-child{border-bottom:none;}
+  .ocup-cancha-name{font-size:12px;font-weight:800;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ocup-meter{display:flex;align-items:center;gap:6px;}
+  .ocup-meter-track{flex:1;height:8px;border-radius:4px;background:#EEF0F9;overflow:hidden;}
+  .ocup-meter-fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+  .ocup-meter-pct{font-size:10.5px;font-weight:800;color:var(--text-1);width:30px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;}
+  .ocup-cancelados-wrap{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+  .ocup-cancelados-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--text-3);margin-bottom:8px;}
+  .ocup-cancelados-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 14px;}
+  .ocup-cancelados-item{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-2);}
+  .ocup-cancelados-item b{color:var(--text-1);font-weight:800;}
+
   /* ---------- VENTAS: panel discreto de config. (índice de artículos + origen ATC), arriba a la derecha ---------- */
   .ventas-side-config{display:flex;flex-direction:column;gap:7px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:260px;max-width:380px;flex-shrink:0;}
   .ventas-side-config .vcfg-row{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-2);border-radius:6px;transition:background .12s ease;}
@@ -732,7 +749,17 @@
   .ventas-presets-row{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 18px 0;}
 
   /* ---------- VENTAS: resultados en 2 columnas ---------- */
-  .ventas-cols-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+  /* Ancho compartido por TODAS las filas de resultados (KPIs + tarjetas) para que
+     los cuadros queden alineados entre sí en vez de tener cada fila un ancho
+     distinto — antes el kpi-row y los rank-card traían un max-width:900px propio
+     de otros módulos (Pagos) que acá quedaba desalineado con la grilla de 2
+     columnas, que no tenía tope. Se pisa acá, con más especificidad, sin tocar
+     el comportamiento de esas clases en los demás módulos que las reutilizan. */
+  .ventas-resultados-wrap{max-width:1180px;}
+  .ventas-resultados-wrap .kpi-row{max-width:none;}
+  .ventas-resultados-wrap .kpi-tile{max-width:360px;}
+  .ventas-resultados-wrap .rank-card{max-width:none;margin-bottom:0;height:100%;box-sizing:border-box;}
+  .ventas-cols-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;}
   @media(max-width:900px){.ventas-cols-2{grid-template-columns:1fr;}}
 
   /* ---------- VENTAS: distribución A vs B (anillo) + tabla de métodos de Venta A ---------- */
@@ -1264,14 +1291,21 @@
               </div>
 
               <div id="ventasResultados" class="hidden" style="margin-top:10px;">
-                <div class="kpi-row">
-                  <div class="kpi-tile accent"><div class="lbl">Ventas totales</div><div class="val" id="vKpiTotal">$0</div></div>
-                  <div class="kpi-tile"><div class="lbl">Promedio por día trabajado</div><div class="val" id="vKpiPromedio">$0</div><div class="kpi-note" id="vKpiPromedioNote"></div></div>
-                </div>
+                <div class="ventas-resultados-wrap">
+                  <div class="kpi-row">
+                    <div class="kpi-tile accent"><div class="lbl">Ventas totales</div><div class="val" id="vKpiTotal">$0</div></div>
+                    <div class="kpi-tile"><div class="lbl">Promedio por día trabajado</div><div class="val" id="vKpiPromedio">$0</div><div class="kpi-note" id="vKpiPromedioNote"></div></div>
+                  </div>
 
-                <div class="ventas-cols-2">
-                  <div class="rank-card"><h3>Distribución de Ventas A vs B</h3><div id="ventasAB"></div></div>
-                  <div class="rank-card"><h3>Ventas por concepto</h3><div id="ventasPorConcepto"></div></div>
+                  <div class="ventas-cols-2">
+                    <div class="rank-card"><h3>Distribución de Ventas A vs B</h3><div id="ventasAB"></div></div>
+                    <div class="rank-card"><h3>Ventas por concepto</h3><div id="ventasPorConcepto"></div></div>
+                  </div>
+
+                  <div class="ventas-cols-2" style="margin-top:20px;">
+                    <div class="rank-card"><h3>Ventas por cancha</h3><div id="ventasPorCancha"></div></div>
+                    <div class="rank-card"><h3>% de ocupación de canchas</h3><div id="ocupacionCanchas"></div></div>
+                  </div>
                 </div>
               </div>
 
@@ -4669,7 +4703,7 @@ document.addEventListener("keydown",(e)=>{
      dinero real que entra o sale → se agrupan en "Otros movimientos de caja".
    ========================================================= */
 const VENTAS_LS_INDICE = "lf_ventas_indice_v1";
-let ventasFiles = { caja:null, ventas:null };
+let ventasFiles = { caja:null, ventas:null, reservas:null, cancelaciones:null };
 let ventasIndice = null; // {header, rows, savedAt, fileName}
 
 function vParseFlexDate(val){
@@ -5017,6 +5051,21 @@ async function vTryAutoLoadFromSupabase(){
     statusEl.title = "No se pudo conectar con Supabase para traer los datos automáticos ("+err.message+"). Cargalos manualmente mientras tanto.";
     if(!ventasManualOverride) toggleVentasManual();
   }
+  // Reservas / cancelaciones de ATC (para "% de ocupación de canchas"): carga
+  // best-effort, independiente del flujo principal de arriba — si todavía no
+  // llegó ninguna ingesta de estos tipos (o falla la conexión), la tarjeta de
+  // ocupación simplemente queda en su estado vacío, sin bloquear ni mostrar
+  // error en el resto del resumen de ventas.
+  try{
+    const [reservas, cancelaciones] = await Promise.all([
+      vFetchIngestaRango("factor_ocupacion"),
+      vFetchIngestaRango("reporte_cancelaciones")
+    ]);
+    ventasFiles.reservas = reservas ? {header:reservas.header, rows:reservas.rows, fileName:"Reservas (ATC)"} : null;
+    ventasFiles.cancelaciones = cancelaciones ? {header:cancelaciones.header, rows:cancelaciones.rows, fileName:"Cancelaciones (ATC)"} : null;
+  }catch(err){
+    ventasFiles.reservas = null; ventasFiles.cancelaciones = null;
+  }
   renderVentasZone("caja");
   renderVentasZone("ventas");
   checkVentasReady();
@@ -5182,10 +5231,12 @@ function computeVentasResumen(){
     const vHora = vFindColIndex(vH, ["Hora de movimiento"]);
     const vVentasCol = vFindColIndex(vH, ["Ventas"]);
     const vPeriodicidad = vFindColIndex(vH, ["Periodicidad"]);
+    const vCancha = vFindColIndex(vH, ["Cancha"]);
     if ([vConcepto,vFecha,vHora,vVentasCol,vPeriodicidad].includes(-1)) throw new Error("Compras-Ventas no tiene las columnas esperadas.");
 
     const porConcepto = new Map(); // bucket -> {total, count}
     const sinClasificarSet = new Set();
+    const porCancha = new Map(); // nombre de cancha (o "Mostrador/Salón") -> {total, count}
     ventasFiles.ventas.rows.forEach(r => {
       const fecha = vJornadaFecha(r[vFecha], r[vHora]);
       if (!vInRange(fecha, from, to)) return;
@@ -5202,11 +5253,28 @@ function computeVentasResumen(){
       if(!porConcepto.has(key)) porConcepto.set(key, {total:0, count:0});
       const e = porConcepto.get(key);
       e.total += monto; e.count += 1;
+      // Ventas por cancha: todo lo vendido bajo una cancha (sin importar la categoría del
+      // producto/servicio) va a esa cancha. Lo que no está atado a ninguna cancha real —
+      // sin cancha ("-") o mesas de living/juegos de mesa ("Mesa 1", "Mesa 2", etc.) — se
+      // agrupa en "Mostrador/Salón".
+      const canchaRaw = vCancha===-1 ? "" : (r[vCancha]||"").toString().trim();
+      const canchaKey = (!canchaRaw || canchaRaw==="-" || /mesa/i.test(canchaRaw)) ? "Mostrador/Salón" : canchaRaw;
+      if(!porCancha.has(canchaKey)) porCancha.set(canchaKey, {total:0, count:0});
+      const ec = porCancha.get(canchaKey);
+      ec.total += monto; ec.count += 1;
     });
 
     renderVentasKpis(totalVentas, promedioDiario, diasActivos);
     renderVentasPorConcepto(porConcepto, totalVentas, sinClasificarSet);
     renderVentasAB(facturado, efectivo, porMetodo);
+    renderVentasPorCancha(porCancha, totalVentas);
+
+    // % de ocupación de canchas: métrica aparte, con su propia fuente de datos
+    // (reservas/cancelaciones de ATC) todavía no siempre disponible. Se calcula
+    // en un try propio para que un problema acá nunca tire abajo el resto del
+    // resumen de ventas, que ya está validado.
+    try{ renderOcupacionCanchas(from, to); }
+    catch(errOcup){ console.error("Ocupación de canchas:", errOcup); renderOcupacionCanchasVacio(); }
 
     document.getElementById("ventasResultados").classList.remove("hidden");
   }catch(err){
@@ -5249,6 +5317,181 @@ function renderVentasPorConcepto(porConcepto, totalVentas, sinClasificarSet){
     <div class="stack-bar">${bar}</div>
     <div class="stack-legend">${legend}</div>
     ${notaSinClasificar}`;
+}
+
+function renderVentasPorCancha(porCancha, totalVentas){
+  const el = document.getElementById("ventasPorCancha");
+  const rows = Array.from(porCancha.entries()).map(([name,v])=>({name,...v})).sort((a,b)=>b.total-a.total);
+  if(!rows.length){ el.innerHTML = '<div class="empty-mini">Sin ventas asociadas a canchas en este rango.</div>'; return; }
+  const bar = rows.map((r,i)=>{
+    const pct = totalVentas ? (r.total/totalVentas*100) : 0;
+    const color = CATEGORICAL_PALETTE[i % CATEGORICAL_PALETTE.length];
+    return `<div class="stack-seg" style="width:${Math.max(pct,0)}%;background:${color}" title="${r.name}: ${fmtMoney(r.total)}"></div>`;
+  }).join("");
+  const legend = rows.map((r,i)=>{
+    const color = CATEGORICAL_PALETTE[i % CATEGORICAL_PALETTE.length];
+    const pct = totalVentas ? (r.total/totalVentas*100) : 0;
+    return `<div class="stack-item-row-simple">
+      <div class="stack-swatch" style="background:${color}"></div>
+      <div class="stack-item-name">${r.name}</div>
+      <div class="stack-item-metric"><div class="m-val">${pct.toFixed(1)}%</div><div class="m-lbl">del total</div></div>
+      <div class="stack-item-metric"><div class="m-val">${fmtMoney(r.total)}</div><div class="m-lbl">Monto</div></div>
+    </div>`;
+  }).join("");
+  const totalCanchas = rows.reduce((s,r)=>s+r.total,0);
+  el.innerHTML = `
+    <div class="stack-total-row">Total: <strong>${fmtMoney(totalCanchas)}</strong>${totalVentas ? " · "+(totalCanchas/totalVentas*100).toFixed(1)+"% de las Ventas totales" : ""}</div>
+    <div class="stack-bar">${bar}</div>
+    <div class="stack-legend">${legend}</div>`;
+}
+
+/* ---- % de ocupación de canchas — modelo definido con Pancho el 28/09/2026,
+   base de sábado confirmada el 29/09/2026 (ver reglas-metricas-ventas.md).
+   Fuente: reporte de reservas de ATC (tipo "factor_ocupacion") + cancelaciones
+   (tipo "reporte_cancelaciones"), NO desde Compras-Ventas (ese reporte no
+   trae duración de turno, confirmado con datos reales).
+   Reglas:
+   - Lunes a viernes: cada cancha tiene una base "mañana" (9h) y una base
+     "tarde" (7,5h) POR DÍA HÁBIL. La asignación de cada reserva a mañana o
+     tarde es por TIPO de reserva (Tipo_actividad), no por el horario real en
+     que cae: toda hora de "Profesores" suma a mañana, toda hora de "Normal"
+     (particulares) suma a tarde.
+   - Sábado: turno único para todo el día (sin separar mañana/tarde), base de
+     15 horas por sábado (08:00 a 23:00); particulares y profesores cuentan
+     por igual.
+   - Domingo: excluido por completo de esta tarjeta.
+   - "Torneo": sin base asignada todavía (no se definió a qué franja imputarlo
+     si algún día aparece uno en día de semana) — no se contabiliza acá.
+   - Un turno cancelado nunca cuenta como ocupado: al venir de un reporte
+     aparte (reporte_cancelaciones), esto ya está garantizado sin filtrar nada
+     de más en el reporte de reservas. Los cancelados se muestran en su propia
+     mini-tabla, filtrados al mismo rango y con el mismo criterio (domingo
+     excluido), solo a título informativo. ---- */
+const BASE_HORAS_MANANA_LV = 9;
+const BASE_HORAS_TARDE_LV = 7.5;
+const BASE_HORAS_SABADO = 15;
+
+function vContarDiasSemanaEnRango(from, to){
+  // counts[0]=domingo, counts[1]=lunes, ..., counts[6]=sábado
+  const counts = [0,0,0,0,0,0,0];
+  const d = new Date(from);
+  while (d <= to){
+    counts[d.getDay()]++;
+    d.setDate(d.getDate()+1);
+  }
+  return counts;
+}
+
+function renderOcupacionCanchasVacio(){
+  document.getElementById("ocupacionCanchas").innerHTML = '<div class="empty-mini">Todavía no llegó el reporte de reservas de ATC para este rango — en cuanto esté disponible, esta tarjeta se completa sola.</div>';
+}
+
+function renderOcupacionCanchas(from, to){
+  if(!ventasFiles.reservas){ renderOcupacionCanchasVacio(); return; }
+
+  const rH = ventasFiles.reservas.header;
+  const rFecha = vFindColIndex(rH, ["Fecha"]);
+  const rCancha = vFindColIndex(rH, ["Cancha"]);
+  const rDuracion = vFindColIndex(rH, ["Duracion","Duración"]);
+  const rTipoAct = vFindColIndex(rH, ["Tipo_actividad"]);
+  if ([rFecha,rCancha,rDuracion,rTipoAct].includes(-1)) throw new Error("El reporte de reservas no tiene las columnas esperadas.");
+
+  const diasSemana = vContarDiasSemanaEnRango(from, to);
+  const diasHabilesLV = diasSemana[1]+diasSemana[2]+diasSemana[3]+diasSemana[4]+diasSemana[5];
+  const nSabados = diasSemana[6];
+
+  const porCancha = new Map(); // "Cancha Padel N" -> {manana, tarde, sabado} (horas)
+  const getEntry = (cancha) => {
+    if(!porCancha.has(cancha)) porCancha.set(cancha, {manana:0, tarde:0, sabado:0});
+    return porCancha.get(cancha);
+  };
+
+  ventasFiles.reservas.rows.forEach(r => {
+    const canchaRaw = (r[rCancha]||"").toString().trim();
+    if (!/^Cancha Padel/i.test(canchaRaw)) return; // excluye Mesa 1/2 y similares: no son canchas de pádel
+    const fecha = vParseFlexDate(r[rFecha]);
+    if (!vInRange(fecha, from, to)) return;
+    const dow = fecha.getDay(); // 0=domingo
+    if (dow === 0) return; // domingo: excluido de esta tarjeta
+    const tipo = (r[rTipoAct]||"").toString().trim();
+    const duracion = Number(r[rDuracion]) || 0;
+    if (!duracion) return;
+    const e = getEntry(canchaRaw);
+    if (dow === 6){ // sábado: turno único, particulares y profesores cuentan por igual
+      if (tipo === "Normal" || tipo === "Profesores") e.sabado += duracion;
+      return;
+    }
+    // lunes a viernes: la asignación es por TIPO de reserva, no por el horario real
+    if (tipo === "Profesores") e.manana += duracion;
+    else if (tipo === "Normal") e.tarde += duracion;
+    // "Torneo" (u otro tipo no contemplado): sin base asignada todavía, no se contabiliza.
+  });
+
+  const cancelados = new Map(); // "Cancha Padel N" -> cantidad
+  if (ventasFiles.cancelaciones){
+    const cH = ventasFiles.cancelaciones.header;
+    const cCancha = vFindColIndex(cH, ["Cancha"]);
+    const cFecha = vFindColIndex(cH, ["Fecha"]);
+    if (cCancha !== -1 && cFecha !== -1){
+      ventasFiles.cancelaciones.rows.forEach(r => {
+        const canchaRaw = (r[cCancha]||"").toString().trim();
+        if (!/^Cancha Padel/i.test(canchaRaw)) return;
+        const fecha = vParseFlexDate(r[cFecha]);
+        if (!vInRange(fecha, from, to)) return;
+        if (fecha.getDay() === 0) return; // mismo criterio: domingo excluido
+        cancelados.set(canchaRaw, (cancelados.get(canchaRaw)||0)+1);
+      });
+    }
+  }
+
+  const canchas = Array.from(new Set([...porCancha.keys(), ...cancelados.keys()]))
+    .sort((a,b) => a.localeCompare(b, "es", {numeric:true}));
+
+  if (!canchas.length){ renderOcupacionCanchasVacio(); return; }
+
+  const COLOR_MANANA = CATEGORICAL_PALETTE[0];
+  const COLOR_TARDE = CATEGORICAL_PALETTE[1];
+  const COLOR_SABADO = CATEGORICAL_PALETTE[2];
+  const meter = (pct, color) => `<div class="ocup-meter">
+      <div class="ocup-meter-track"><div class="ocup-meter-fill" style="width:${Math.max(pct,0).toFixed(1)}%;background:${color}"></div></div>
+      <div class="ocup-meter-pct">${pct.toFixed(0)}%</div>
+    </div>`;
+
+  const legend = `<div class="ocup-legend-row">
+      <div class="lg-item"><span class="lg-swatch" style="background:${COLOR_MANANA}"></span>Mañana (L-V)</div>
+      <div class="lg-item"><span class="lg-swatch" style="background:${COLOR_TARDE}"></span>Tarde (L-V)</div>
+      <div class="lg-item"><span class="lg-swatch" style="background:${COLOR_SABADO}"></span>Sábado</div>
+    </div>`;
+
+  const rows = canchas.map(cancha => {
+    const e = porCancha.get(cancha) || {manana:0, tarde:0, sabado:0};
+    const pctManana = diasHabilesLV ? Math.min(e.manana/(diasHabilesLV*BASE_HORAS_MANANA_LV)*100, 100) : 0;
+    const pctTarde = diasHabilesLV ? Math.min(e.tarde/(diasHabilesLV*BASE_HORAS_TARDE_LV)*100, 100) : 0;
+    const pctSabado = nSabados ? Math.min(e.sabado/(nSabados*BASE_HORAS_SABADO)*100, 100) : 0;
+    const nombreCorto = cancha.replace("Cancha Padel ", "Padel ");
+    return `<div class="ocup-row">
+        <div class="ocup-cancha-name">${nombreCorto}</div>
+        ${meter(pctManana, COLOR_MANANA)}
+        ${meter(pctTarde, COLOR_TARDE)}
+        ${meter(pctSabado, COLOR_SABADO)}
+      </div>`;
+  }).join("");
+
+  let canceladosHtml = "";
+  if (cancelados.size){
+    const items = canchas
+      .filter(c => cancelados.has(c))
+      .map(c => `<div class="ocup-cancelados-item"><span>${c.replace("Cancha Padel ","Padel ")}</span><b>${cancelados.get(c)}</b></div>`)
+      .join("");
+    canceladosHtml = `<div class="ocup-cancelados-wrap">
+        <div class="ocup-cancelados-title">Turnos cancelados por cancha</div>
+        <div class="ocup-cancelados-grid">${items}</div>
+      </div>`;
+  }
+
+  const nota = `<div class="kpi-note" style="margin-top:12px;">La asignación a Mañana/Tarde es por tipo de reserva (clases de profesores vs. particulares), no por el horario real en que cae el turno. Domingos excluidos. Base: Mañana ${BASE_HORAS_MANANA_LV}h y Tarde ${BASE_HORAS_TARDE_LV}h por día hábil (${diasHabilesLV} día(s) hábiles en el rango), Sábado ${BASE_HORAS_SABADO}h por sábado (${nSabados} sábado(s) en el rango).</div>`;
+
+  document.getElementById("ocupacionCanchas").innerHTML = legend + rows + canceladosHtml + nota;
 }
 
 // Anillo SVG de 2 segmentos (Venta A / Venta B), sin librerías externas.
