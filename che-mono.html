@@ -785,6 +785,11 @@
 .sueldos-grid .row.drag-over{box-shadow:inset 0 2px 0 var(--blue);}
 /* ---- brackets de agrupación cocina/salón ---- */
 .list-scroll{position:relative;}
+/* ---- Esquema del personal: separa el scroll horizontal (header+filas juntos)
+   del vertical (header fijo arriba), para que al desplazar horizontalmente
+   la fila de títulos se mueva siempre junto con el resto de la tabla. ---- */
+#stabEsquema .emp-table-outer{flex:1;display:flex;flex-direction:column;min-height:0;overflow-x:auto;overflow-y:hidden;}
+#stabEsquema .list-scroll{flex:1;overflow-x:visible;overflow-y:auto;min-height:0;width:max-content;min-width:100%;}
 .emp-bracket-gutter{position:absolute;left:16px;top:0;width:44px;pointer-events:none;z-index:2;}
 .emp-bracket{position:absolute;left:0;width:44px;}
 .emp-bracket .eb-line{position:absolute;right:4px;top:6px;bottom:6px;width:9px;border-left:2px solid var(--c);border-top:2px solid var(--c);border-bottom:2px solid var(--c);border-top-left-radius:5px;border-bottom-left-radius:5px;}
@@ -1848,14 +1853,16 @@
                 </button>
               </div>
             </div>
-            <div class="list-scroll">
-              <div class="sueldos-grid col-head-row" id="sueldosColHeadRow"></div>
-              <div class="emp-bracket-gutter" id="empBracketGutter"></div>
-              <div class="list" id="empleadosBody"></div>
-              <div class="empty-state" id="empleadosEmptyState" style="display:none;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path></svg>
-                <strong>No hay empleados para mostrar</strong>
-                <span>Usá "Cargar nuevo empleado" para cargar el primero.</span>
+            <div class="emp-table-outer">
+              <div class="list-scroll">
+                <div class="sueldos-grid col-head-row" id="sueldosColHeadRow"></div>
+                <div class="emp-bracket-gutter" id="empBracketGutter"></div>
+                <div class="list" id="empleadosBody"></div>
+                <div class="empty-state" id="empleadosEmptyState" style="display:none;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path></svg>
+                  <strong>No hay empleados para mostrar</strong>
+                  <span>Usá "Cargar nuevo empleado" para cargar el primero.</span>
+                </div>
               </div>
             </div>
             <div class="filter-popover col-picker" id="sueldosColumnPickerPopover"></div>
