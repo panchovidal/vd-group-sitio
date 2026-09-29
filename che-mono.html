@@ -788,8 +788,16 @@
 /* ---- Esquema del personal: separa el scroll horizontal (header+filas juntos)
    del vertical (header fijo arriba), para que al desplazar horizontalmente
    la fila de títulos se mueva siempre junto con el resto de la tabla. ---- */
-#stabEsquema .emp-table-outer{flex:1;display:flex;flex-direction:column;min-height:0;overflow-x:auto;overflow-y:hidden;}
-#stabEsquema .list-scroll{flex:1;overflow-x:visible;overflow-y:auto;min-height:0;width:max-content;min-width:100%;}
+#stabEsquema .emp-table-outer{flex:1;display:flex;flex-direction:column;min-height:0;overflow-x:auto;overflow-y:hidden;transform:translateZ(0);}
+#stabEsquema .list-scroll{flex:1;overflow-x:visible;overflow-y:auto;min-height:0;width:max-content;min-width:100%;transform:translateZ(0);}
+/* Chrome puede desincronizar visualmente un position:sticky cuando el
+   scroll horizontal ocurre en un contenedor ANCESTRO distinto al que
+   define el "top" del sticky (bug de composición/repintado, no de layout:
+   el DOM queda perfectamente alineado, pero el frame pintado puede quedar
+   un instante atrás durante el scroll). Forzamos que la fila de títulos
+   viva en su propia capa de composición para que el navegador la vuelva a
+   pintar en cada frame de scroll en vez de reusar un frame cacheado. */
+#stabEsquema .col-head-row{will-change:transform;transform:translateZ(0);}
 .emp-bracket-gutter{position:absolute;left:16px;top:0;width:44px;pointer-events:none;z-index:2;}
 .emp-bracket{position:absolute;left:0;width:44px;}
 .emp-bracket .eb-line{position:absolute;right:4px;top:6px;bottom:6px;width:9px;border-left:2px solid var(--c);border-top:2px solid var(--c);border-bottom:2px solid var(--c);border-top-left-radius:5px;border-bottom-left-radius:5px;}
