@@ -8061,16 +8061,25 @@ function insumoCosts(){
 }
 function insUnidad(insId){ const p=cfgPresDeIns(insId)[0]; return p?p.unidad:"un"; }
 function insCost(insId){ const c=insumoCosts()[insId]; return c?c.unit:null; }
-function lineRef(l){ return l.insumo_id?{t:"i",id:l.insumo_id}:{t:"s",id:l.sub_semi_id}; }
-function refInfo(r){ if(r.t==="i"){ const i=cfgIns(r.id); return i?{nombre:i.nombre,unidad:insUnidad(i.id),semi:false}:null; } const s=D.semis.find(x=>x.id===r.id); return s?{nombre:s.nombre,unidad:s.rinde_unidad==="kg"?"kg":"porc.",semi:true}:null; }
+function lineRef(l){ return l.insumo_id?{t:"i",id:l.insumo_id}:l.sub_articulo_id?{t:"a",id:l.sub_articulo_id}:{t:"s",id:l.sub_semi_id}; }
+function refInfo(r){ if(r.t==="i"){ const i=cfgIns(r.id); return i?{nombre:i.nombre,unidad:insUnidad(i.id),tipo:"i"}:null; }
+  if(r.t==="a"){ const a=D.arts.find(x=>x.id===r.id); return a?{nombre:a.nombre.toLowerCase(),unidad:"porción",tipo:"a"}:null; }
+  const s=D.semis.find(x=>x.id===r.id); return s?{nombre:s.nombre.toLowerCase(),unidad:s.rinde_unidad==="kg"?"kg":"porción",tipo:"s"}:null; }
+/* insumos en MAYÚSCULAS, semi-elaborados en minúscula, artículos de venta en minúscula negrita */
+function refNameHtml(inf){ if(!inf) return "<em>eliminado</em>"; return inf.tipo==="a"?`<b>${esc(inf.nombre)}</b>`:esc(inf.nombre); }
+const refTipoTxt = t=>t==="a"?"Artículo de venta":t==="s"?"Semi-elaborado":"Insumo";
 function semiUnitCost(sid,seen=new Set()){ const s=D.semis.find(x=>x.id===sid); if(!s||seen.has(sid)) return null; seen.add(sid);
   const ls=D.lineas.filter(l=>l.semi_id===sid); if(!ls.length) return null; let t=0;
   for(const l of ls){ const u=refCost(lineRef(l),new Set(seen)); if(u==null) return null; t+=u*l.cantidad; } return s.rinde>0?t/s.rinde:null; }
-function refCost(r,seen){ return r.t==="i"?insCost(r.id):semiUnitCost(r.id,seen); }
+function refCost(r,seen){ if(r.t==="i") return insCost(r.id); if(r.t==="a"){ const a=D.arts.find(x=>x.id===r.id); return a?costoTotal(a,seen):null; } return semiUnitCost(r.id,seen); }
 function artLineas(a){ return D.lineas.filter(l=>l.articulo_id===a.id); }
-function recetaCost(a){ const ls=artLineas(a); if(!ls.length) return null; let t=0; for(const l of ls){ const u=refCost(lineRef(l)); if(u==null) return null; t+=u*l.cantidad; } return t/(a.porciones||1); }
+function recetaCost(a,seen=new Set()){ if(seen.has("a"+a.id)) return null; const sn=new Set(seen); sn.add("a"+a.id);
+  const ls=artLineas(a); if(!ls.length) return null; let t=0; for(const l of ls){ const u=refCost(lineRef(l),new Set(sn)); if(u==null) return null; t+=u*l.cantidad; } return t/(a.porciones||1); }
 function factorAmount(a,rc){ if(!a.factor_base||!a.factor_pct) return 0; const b=a.factor_base==="precio"?a.precio_actual:rc; return b==null?0:b*a.factor_pct/100; }
-function costoTotal(a){ const rc=recetaCost(a); if(rc==null) return null; return rc+factorAmount(a,rc); }
+function costoTotal(a,seen){ const rc=recetaCost(a,seen); if(rc==null) return null; return rc+factorAmount(a,rc); }
+/* ¿la receta del artículo "fromId" usa (directa o indirectamente) al artículo "targetId"? — evita recetas circulares */
+function artUsaArt(fromId,targetId,seen=new Set()){ if(fromId===targetId) return true; if(seen.has(fromId)) return false; seen.add(fromId);
+  return D.lineas.some(l=>l.articulo_id===fromId&&l.sub_articulo_id&&artUsaArt(l.sub_articulo_id,targetId,seen)); }
 function missingIns(a){ return artLineas(a).filter(l=>{ const r=lineRef(l); return refCost(r)==null; }).map(l=>{ const i=refInfo(lineRef(l)); return i?i.nombre:"?"; }); }
 
 /* ---------------- estado de pantalla ---------------- */
@@ -8348,7 +8357,7 @@ function recMatch(it,mode,q){ if(!q) return true; const n=norm(q); if(norm(it.no
 function renderRecetas(){
   const mode=ST.recMode; colsSeg($("#cxRecCols"),"recetas",renderRecetas);
   $$("#cxRecMode button").forEach(b=>b.classList.toggle("on",b.dataset.m===mode));
-  $("#cxRecSub").textContent = mode==="art" ? "Tocá un artículo para ver y editar su receta. El costo incluye el factor de ajuste, si tiene." : "Pre-elaboraciones propias (en minúsculas) que se usan como insumo dentro de otras recetas.";
+  $("#cxRecSub").innerHTML = mode==="art" ? "Tocá un artículo para ver y editar su receta. Puede combinar INSUMOS comprados, semi-elaborados y <b>artículos de venta</b> (por ejemplo, un plato del local + packaging para delivery). El costo incluye el factor de ajuste, si tiene." : "Pre-elaboraciones propias (en minúsculas) que se usan como insumo dentro de otras recetas.";
   $("#cxRecActions").innerHTML=(mode==="semi"?`<button type="button" class="cx-btn" id="cxSemiCats">Gestionar categorías</button><button type="button" class="cx-btn pri" id="cxSemiNew">${ICO.plus}Nuevo semi-elaborado</button>`:"")+`<button type="button" class="cx-btn" id="cxRecXl">${ICO.dl}Excel de recetas</button>`;
   if(mode==="semi"){ $("#cxSemiCats").onclick=semiCatsModal; $("#cxSemiNew").onclick=semiNewModal; }
   const C=recCats(mode), items=recItems(mode);
@@ -8379,7 +8388,7 @@ function recRowHtml(it,mode){ const open=ST.recOpen===it.id; const nl=itemLineas
   return `<div class="cx-rrow ${open?'open':''}" data-id="${it.id}" tabindex="0" role="button" aria-expanded="${open}"><span class="nm">${esc(it.nombre)}</span><span class="r">${fmtQ(it.rinde)} ${it.rinde_unidad==="kg"?"kg":"porc."}</span><span class="fx none">${nl}</span><span class="r"><b>${money0(c)}</b><small style="color:var(--text-3)">/${it.rinde_unidad==="kg"?"kg":"porc"}</small></span>${ICO.chev}</div>${open?recDetailHtml(it,"semi"):""}`; }
 function recDetailHtml(it,mode){ const ls=itemLineas(it,mode).sort((a,b)=>a.orden-b.orden);
   const lines=ls.map(l=>{ const r=lineRef(l); const inf=refInfo(r); const u=refCost(r); const sub=u==null?null:u*l.cantidad;
-    return `<tr><td class="${inf&&inf.semi?'semi':''}">${inf?esc(inf.nombre):"<em>eliminado</em>"}</td><td><input class="q" data-lq="${l.id}" value="${fmtQ(l.cantidad)}" inputmode="decimal" aria-label="Cantidad"></td><td style="color:var(--text-3)">${inf?esc(cfgUnLabel(inf.unidad)):""}</td><td title="${u==null&&inf&&!inf.semi?'Todavía no hay una compra completa de este insumo':''}">${u==null?'<span style="color:var(--cx-bad)">sin costo</span>':money(u)}</td><td><b>${money0(sub)}</b></td><td><button type="button" class="cx-ibtn del" data-ldel="${l.id}" title="Quitar">${ICO.del}</button></td></tr>`; }).join("");
+    return `<tr><td title="${inf?refTipoTxt(inf.tipo):''}">${refNameHtml(inf)}</td><td><input class="q" data-lq="${l.id}" value="${fmtQ(l.cantidad)}" inputmode="decimal" aria-label="Cantidad"></td><td style="color:var(--text-3)">${inf?esc(cfgUnLabel(inf.unidad)):""}</td><td title="${u==null&&inf?(inf.tipo==="i"?'Todavía no hay una compra completa de este insumo':'Su receta todavía no tiene costo completo'):''}">${u==null?'<span style="color:var(--cx-bad)">sin costo</span>':money(u)}</td><td><b>${money0(sub)}</b></td><td><button type="button" class="cx-ibtn del" data-ldel="${l.id}" title="Quitar">${ICO.del}</button></td></tr>`; }).join("");
   const tot=ls.reduce((s,l)=>{ const u=refCost(lineRef(l)); return s+(u==null?0:u*l.cantidad); },0);
   let head=mode==="art"?`<div class="cx-rmeta">Porciones que rinde la receta <input data-porc value="${fmtQ(it.porciones)}" inputmode="decimal"> <span style="color:var(--text-3)">· el costo se muestra por porción</span></div>`
     :`<div class="cx-rmeta">Rinde <input data-rinde value="${fmtQ(it.rinde)}" inputmode="decimal"> <select data-ru><option value="kg" ${it.rinde_unidad==="kg"?"selected":""}>kg</option><option value="porc" ${it.rinde_unidad==="porc"?"selected":""}>porciones</option></select> · categoría <select data-scat>${D.semiCats.map(c=>`<option value="${c.id}" ${c.id===it.categoria_id?"selected":""}>${esc(c.nombre)}</option>`).join("")}</select></div>`;
@@ -8390,30 +8399,33 @@ function recDetailHtml(it,mode){ const ls=itemLineas(it,mode).sort((a,b)=>a.orde
         <div class="row"><input data-fxp value="${it.factor_pct?fmtQ(it.factor_pct):""}" placeholder="0" inputmode="decimal" aria-label="Porcentaje"> <span>%</span>${it.factor_pct?`<button type="button" class="cx-lnk" data-fxclr style="margin-left:auto">Quitar factor</button>`:""}</div>
         <div class="hint">${base!=="precio"?`Base: costo total actual de la receta (${money0(rc)}). Útil para mermas o cocción.`:`Base: precio de venta actual (${money0(it.precio_actual)}). Pensado para delivery: packaging y comisión de la app.`}</div></div>
       <div class="cx-calc"><h6 style="margin:0 0 4px;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3)">Costo del artículo</h6>
-        <div><span>Insumos por porción</span><b>${money(rc)}</b></div>
+        <div><span>Ingredientes por porción</span><b>${money(rc)}</b></div>
         <div><span>Factor${it.factor_pct?` (${fmtQ(it.factor_pct)}% de ${money0(baseVal)})`:""}</span><b>${amt?"+ "+money(amt):"—"}</b></div>
         <div class="tot"><span>Costo total</span><span>${money(ct)}</span></div>
         <div><span>Precio vigente · incidencia</span><span>${money0(it.precio_actual)} · <span class="cx-inc ${incCls(ratio(ct,it.precio_actual))}">${pctPlain(ratio(ct,it.precio_actual))}</span></span></div></div></div>`; }
   return `<div class="cx-rdet" data-det="${it.id}" data-mode="${mode}">${head}
-    <table class="cx-rl"><thead><tr><th>Insumo</th><th>Cant.</th><th>Un.</th><th>$ / un.</th><th>Subtotal</th><th></th></tr></thead><tbody>${lines||`<tr><td colspan="6" style="color:var(--text-3);text-align:left">Todavía no hay insumos en esta receta.</td></tr>`}
-      <tr class="add"><td><input data-newi list="cxDlIngr" placeholder="Insumo o semi-elaborado…" autocomplete="off"><div class="cx-warnmsg" data-neww hidden>No coincide con ningún insumo ni semi-elaborado</div></td><td><input class="q" data-newq placeholder="0" inputmode="decimal"></td><td data-newu style="color:var(--text-3)">—</td><td data-newp>—</td><td></td><td><button type="button" class="cx-ibtn" data-newgo title="Agregar">${ICO.plus}</button></td></tr>
-      <tr><td colspan="4" style="text-align:right;color:var(--text-2);border:none">Total insumos</td><td style="border:none"><b>${money0(tot)}</b></td><td style="border:none"></td></tr>
+    <table class="cx-rl"><thead><tr><th>Ingrediente</th><th>Cant.</th><th>Un.</th><th>$ / un.</th><th>Subtotal</th><th></th></tr></thead><tbody>${lines||`<tr><td colspan="6" style="color:var(--text-3);text-align:left">Todavía no hay ingredientes en esta receta.</td></tr>`}
+      <tr class="add"><td><input data-newi list="cxDlIngr" placeholder="${mode==='art'?'Insumo, semi-elaborado o artículo…':'Insumo o semi-elaborado…'}" autocomplete="off"><div class="cx-warnmsg" data-neww hidden>No coincide con ${mode==='art'?'ningún insumo, semi-elaborado ni artículo':'ningún insumo ni semi-elaborado'}</div></td><td><input class="q" data-newq placeholder="0" inputmode="decimal"></td><td data-newu style="color:var(--text-3)">—</td><td data-newp>—</td><td></td><td><button type="button" class="cx-ibtn" data-newgo title="Agregar">${ICO.plus}</button></td></tr>
+      <tr><td colspan="4" style="text-align:right;color:var(--text-2);border:none">Total ingredientes</td><td style="border:none"><b>${money0(tot)}</b></td><td style="border:none"></td></tr>
     </tbody></table>${fx}
     ${mode==="semi"?`<div style="display:flex;justify-content:flex-end;margin-top:10px"><button type="button" class="cx-btn sm danger" data-semidel>${ICO.del}Eliminar semi-elaborado</button></div>`:""}</div>`; }
-function findRef(txt){ const t=String(txt).trim(); if(!t) return null; const i=cfgData.items.find(x=>norm(x.nombre)===norm(t)); if(i) return {t:"i",id:i.id}; const s=D.semis.find(x=>norm(x.nombre)===norm(t)); if(s) return {t:"s",id:s.id}; return null; }
+function findRef(txt,mode){ const t=String(txt).trim(); if(!t) return null; const i=cfgData.items.find(x=>norm(x.nombre)===norm(t)); if(i) return {t:"i",id:i.id}; const s=D.semis.find(x=>norm(x.nombre)===norm(t)); if(s) return {t:"s",id:s.id};
+  if(mode==="art"){ const a=artsActivos().find(x=>norm(x.nombre)===norm(t)); if(a) return {t:"a",id:a.id}; } return null; }
 function bindRecDetail(grid){ const det=$(".cx-rdet",grid); if(!det) return; const id=det.dataset.det, mode=det.dataset.mode; const it=(mode==="art"?D.arts:D.semis).find(x=>x.id===id); if(!it) return;
-  $("#cxDlIngr").innerHTML=cfgData.items.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(i=>`<option value="${esc(i.nombre)}">${esc(cfgUnLabel(insUnidad(i.id)))} · ${insCost(i.id)==null?"sin costo":money(insCost(i.id))}</option>`).join("")+D.semis.filter(s=>s.id!==id).map(s=>`<option value="${esc(s.nombre)}">semi-elaborado · ${s.rinde_unidad==="kg"?"kg":"porc."}</option>`).join("");
+  $("#cxDlIngr").innerHTML=cfgData.items.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(i=>`<option value="${esc(i.nombre)}">${esc(cfgUnLabel(insUnidad(i.id)))} · ${insCost(i.id)==null?"sin costo":money(insCost(i.id))}</option>`).join("")+D.semis.filter(s=>s.id!==id).map(s=>`<option value="${esc(s.nombre.toLowerCase())}">semi-elaborado · ${s.rinde_unidad==="kg"?"kg":"porción"}</option>`).join("")
+    +(mode==="art"?artsActivos().filter(a=>!artUsaArt(a.id,id)).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es")).map(a=>`<option value="${esc(a.nombre.toLowerCase())}">artículo de venta · ${esc(a.categoria)} · ${money(costoTotal(a))}</option>`).join(""):"");
   det.addEventListener("click",e=>e.stopPropagation());
   const own = mode==="art"?{articulo_id:id}:{semi_id:id};
   $$("[data-lq]",det).forEach(inp=>inp.onchange=async()=>{ const n=parseNum(inp.value); if(n==null||n<=0){ toast("Cantidad inválida","warn"); renderRecetas(); return; }
     const {error}=await sb.from("cm_receta_lineas").update({cantidad:n}).eq("id",inp.dataset.lq); if(error){ toast("No se pudo guardar","warn"); return; } D.lineas.find(l=>l.id===inp.dataset.lq).cantidad=n; renderRecetas(); });
   $$("[data-ldel]",det).forEach(b=>b.onclick=async()=>{ const {error}=await sb.from("cm_receta_lineas").delete().eq("id",b.dataset.ldel); if(error){ toast("No se pudo quitar","warn"); return; } D.lineas=D.lineas.filter(l=>l.id!==b.dataset.ldel); renderRecetas(); });
   const ni=$("[data-newi]",det), nq=$("[data-newq]",det);
-  const prev=()=>{ const r=findRef(ni.value); $("[data-neww]",det).hidden=!ni.value.trim()||!!r; const inf=r&&refInfo(r); $("[data-newu]",det).textContent=inf?cfgUnLabel(inf.unidad):"—"; const u=r?refCost(r):null; $("[data-newp]",det).textContent=r?(u==null?"sin costo":money(u)):"—"; };
+  const prev=()=>{ const r=findRef(ni.value,mode); $("[data-neww]",det).hidden=!ni.value.trim()||!!r; const inf=r&&refInfo(r); $("[data-newu]",det).textContent=inf?cfgUnLabel(inf.unidad):"—"; const u=r?refCost(r):null; $("[data-newp]",det).textContent=r?(u==null?"sin costo":money(u)):"—"; };
   ni.oninput=prev; ni.onchange=prev;
-  const add=async()=>{ const r=findRef(ni.value); const q=parseNum(nq.value); if(!r){ toast("Elegí un insumo o semi-elaborado de la lista","warn"); return; } if(!q||q<=0){ toast("Cargá la cantidad","warn"); nq.focus(); return; }
+  const add=async()=>{ const r=findRef(ni.value,mode); const q=parseNum(nq.value); if(!r){ toast("Elegí un ingrediente de la lista","warn"); return; }
+    if(r.t==="a"&&artUsaArt(r.id,id)){ toast("Ese artículo ya usa esta receta: no se puede agregar (sería circular)","warn"); return; } if(!q||q<=0){ toast("Cargá la cantidad","warn"); nq.focus(); return; }
     if(r.t==="s"&&r.id===id){ toast("Un semi-elaborado no puede usarse a sí mismo","warn"); return; }
-    const row={...own,insumo_id:r.t==="i"?r.id:null,sub_semi_id:r.t==="s"?r.id:null,cantidad:q,orden:itemLineas(it,mode).length,creado_por:uid()};
+    const row={...own,insumo_id:r.t==="i"?r.id:null,sub_semi_id:r.t==="s"?r.id:null,sub_articulo_id:r.t==="a"?r.id:null,cantidad:q,orden:itemLineas(it,mode).length,creado_por:uid()};
     const {data,error}=await sb.from("cm_receta_lineas").insert(row).select().single(); if(error){ toast("No se pudo agregar","warn"); console.warn(error); return; }
     D.lineas.push({...data,cantidad:Number(data.cantidad)}); renderRecetas(); setTimeout(()=>{ const x=$(".cx-rdet [data-newi]"); if(x) x.focus(); },0); };
   $("[data-newgo]",det).onclick=add; nq.onkeydown=e=>{ if(e.key==="Enter") add(); };
@@ -8450,9 +8462,9 @@ function exportRecetas(mode,ids){ const wb=XLSX.utils.book_new(); const used=new
     its.forEach(it=>{ const r0=aoa.length;
       if(mode==="art") aoa.push([it.nombre.toUpperCase(),"","","Porciones",it.porciones,"Costo total",nr2(costoTotal(it))]);
       else aoa.push([it.nombre.toUpperCase(),"","","Rinde",it.rinde,it.rinde_unidad==="kg"?"Costo por kg":"Costo por porción",nr2(semiUnitCost(it.id))]);
-      mc.push([r0,6]); aoa.push(["Insumo","Tipo","Cantidad","Unidad","$ / unidad","Subtotal",""]);
-      let tot=0; itemLineas(it,mode).sort((a,b)=>a.orden-b.orden).forEach(l=>{ const r=lineRef(l); const inf=refInfo(r)||{}; const u=refCost(r); const s=u==null?null:u*l.cantidad; tot+=s||0; aoa.push([inf.nombre,inf.semi?"Semi-elaborado":"Insumo",l.cantidad,cfgUnLabel(inf.unidad||""),nr2(u),nr2(s),""]); mc.push([aoa.length-1,4],[aoa.length-1,5]); });
-      aoa.push(["","","","","Total insumos",nr2(tot),""]); mc.push([aoa.length-1,5]);
+      mc.push([r0,6]); aoa.push(["Ingrediente","Tipo","Cantidad","Unidad","$ / unidad","Subtotal",""]);
+      let tot=0; itemLineas(it,mode).sort((a,b)=>a.orden-b.orden).forEach(l=>{ const r=lineRef(l); const inf=refInfo(r)||{}; const u=refCost(r); const s=u==null?null:u*l.cantidad; tot+=s||0; aoa.push([inf.nombre,refTipoTxt(inf.tipo),l.cantidad,cfgUnLabel(inf.unidad||""),nr2(u),nr2(s),""]); mc.push([aoa.length-1,4],[aoa.length-1,5]); });
+      aoa.push(["","","","","Total ingredientes",nr2(tot),""]); mc.push([aoa.length-1,5]);
       if(mode==="art"&&it.factor_pct){ const rc=recetaCost(it); aoa.push(["","","","",`Factor ${fmtQ(it.factor_pct)}% ${it.factor_base==="precio"?"sobre el precio de venta actual":"sobre el costo total actual"}`,nr2(factorAmount(it,rc)),""]); mc.push([aoa.length-1,5]); }
       merges.push({s:{r:r0,c:0},e:{r:r0,c:2}}); aoa.push([]); });
     const ws=XLSX.utils.aoa_to_sheet(aoa.length?aoa:[["Sin recetas"]]); ws["!merges"]=merges; ws["!cols"]=[{wch:34},{wch:15},{wch:10},{wch:10},{wch:34},{wch:14},{wch:14}];
