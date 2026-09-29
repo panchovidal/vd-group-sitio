@@ -1257,6 +1257,201 @@
   .cfg-ent-chip i{font-style:normal;font-size:9.5px;font-weight:700;color:var(--text-3);}
   .cfg-plazo-chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:800;color:#137B44;background:#E7F6EE;border-radius:20px;padding:3px 10px;white-space:nowrap;}
   .cfg-dim{color:var(--gray);}
+  /* =========================================================
+     PAGOS (Che Mono) — estilos propios del módulo (prefijo pg-)
+     ========================================================= */
+  .pg-live{margin-right:18px;}
+  /* encabezados de columna: el click abre el embudo de filtro (no ordena) */
+  #pagosSubnav .col-head{cursor:pointer;}
+  #pagosSubnav .col-head:hover{color:var(--text-1);background:#EEF0F9;}
+  #pagosSubnav .col-head.pg-open{background:#E9ECF8;color:var(--blue);}
+  #pagosSubnav .col-head .cfg-fbtn{margin-left:auto;height:20px;padding:0 5px;}
+  #pagosSubnav .col-head .cfg-fbtn span{font-size:9.5px;}
+  #pagosSubnav .col-head .pg-sort-ind{font-size:10px;color:var(--blue);flex-shrink:0;}
+  .cfg-fpop .fp-sort{display:flex;gap:6px;padding:0 14px 10px;}
+  .cfg-fpop .fp-sort button{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:#FAFBFF;font-size:11.3px;font-weight:700;color:var(--text-2);cursor:pointer;}
+  .cfg-fpop .fp-sort button:hover{background:#EEF0F9;}
+  .cfg-fpop .fp-sort button.on{background:rgba(58,69,112,.1);border-color:var(--blue);color:var(--blue);}
+  .cfg-fpop .fp-sort svg{width:11px;height:11px;}
+
+  /* clip de adjuntos: siempre visible, tenue sin archivos / intenso con archivos */
+  .pg-clip{display:inline-flex;align-items:center;gap:2px;flex-shrink:0;margin-right:6px;vertical-align:-2px;border-radius:6px;padding:1px 3px;transition:background .12s ease;}
+  .pg-clip svg{width:13px;height:13px;}
+  .pg-clip b{font-size:9.5px;font-weight:800;line-height:1;}
+  .pg-clip.off{color:#C9CCDD;opacity:.8;}
+  .pg-clip.off svg{stroke-width:1.8;}
+  .pg-clip.on{color:var(--blue);background:#E6EAF8;}
+  .pg-clip.on svg{stroke-width:2.8;}
+  .pg-clip.on.pay{color:#137B44;background:#DDF4E7;}
+  .row .cell.pg-flex{display:flex;align-items:center;gap:0;}
+  .row .cell.pg-flex .pg-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .row .cell .badge{min-width:70px;}
+  .pg-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+  .pg-tipo{font-size:11.5px;font-weight:700;color:var(--text-2);background:#F1F2FA;border-radius:6px;padding:3px 7px;}
+
+  /* métrica de plazo de pago (días restantes) */
+  .pg-plazo{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;padding:4px 10px 4px 8px;border-radius:20px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .pg-plazo i{width:7px;height:7px;border-radius:50%;background:currentColor;display:block;flex-shrink:0;}
+  .pg-plazo.ok{background:#E4F8ED;color:#137B44;}
+  .pg-plazo.warn{background:#FFF4D6;color:#8A6300;}
+  .pg-plazo.warn i{background:#E3A008;}
+  .pg-plazo.danger{background:#FDE3E4;color:#C62A33;}
+  .pg-plazo.vencida{background:#7A1219;color:#fff;}
+  .pg-plazo.vencida i{background:#FF9AA0;box-shadow:0 0 0 3px rgba(255,154,160,.25);}
+  .pg-plazo.muted{background:transparent;color:var(--text-3);font-weight:700;padding-left:0;}
+  .pg-plazo.muted i{display:none;}
+  .pg-plazo.paid{background:transparent;color:#1F9D5A;font-weight:700;padding-left:0;}
+  .pg-plazo.paid svg{width:13px;height:13px;}
+
+  /* adjuntos múltiples */
+  .pg-files{display:flex;flex-direction:column;gap:8px;}
+  .pg-file{display:flex;align-items:center;gap:11px;border:1px solid var(--border);background:#fff;border-radius:11px;padding:9px 10px 9px 12px;animation:pgIn .18s ease;}
+  @keyframes pgIn{from{opacity:0;transform:translateY(-3px);}to{opacity:1;transform:none;}}
+  .pg-file .pf-ic{width:32px;height:32px;border-radius:8px;background:#EAF0FF;color:var(--sky);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800;letter-spacing:.02em;}
+  .pg-file .pf-ic.pdf{background:#FDECEC;color:#C23434;}
+  .pg-file .pf-ic.img{background:#E6F6F1;color:#2E9E88;}
+  .pg-file .pf-ic svg{width:15px;height:15px;}
+  .pg-file .pf-tx{flex:1;min-width:0;}
+  .pg-file .pf-name{font-size:12.6px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pg-file .pf-sub{font-size:11px;color:var(--text-3);font-weight:600;}
+  .pg-file .pf-bar{height:3px;border-radius:3px;background:#EEF0F9;overflow:hidden;margin-top:5px;}
+  .pg-file .pf-bar span{display:block;height:100%;width:40%;background:var(--sky);border-radius:3px;animation:pgBar 1s ease-in-out infinite;}
+  @keyframes pgBar{0%{transform:translateX(-100%);}100%{transform:translateX(260%);}}
+  .pg-file .pf-act{display:flex;gap:5px;flex-shrink:0;}
+  .pg-file .az-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .pg-file .az-btn:hover{background:#F1F2FA;}
+  .pg-file .az-btn.danger:hover{background:#FFF1F1;color:#C23434;border-color:#FBD8D8;}
+  .pg-file .az-btn svg{width:14px;height:14px;}
+  .attach-zone.pg-add{padding:11px 14px;}
+  .attach-zone.pg-add .az-icon{width:30px;height:30px;}
+  .attach-zone.pg-add.compact .az-name{font-size:12.3px;color:var(--blue);}
+  .pg-files-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--blue);color:#fff;font-size:10px;font-weight:800;margin-left:6px;letter-spacing:0;vertical-align:1px;}
+  .field.pg-required .pg-files-wrap{border-radius:13px;box-shadow:0 0 0 2px #fff, 0 0 0 4px #E3A008;}
+  .field.pg-required.error .pg-files-wrap{box-shadow:0 0 0 2px #fff, 0 0 0 4px #D1414A;}
+  .field.pg-required > label{color:#93690A;}
+
+  .rl-warn{font-size:11.5px;font-weight:700;color:#B22A32;margin-top:6px;}
+  .pg-plazo-hint{display:flex;align-items:center;gap:10px;margin:-6px 0 18px;padding:10px 12px;border-radius:10px;background:#F7F8FD;border:1px dashed var(--border);font-size:12.3px;color:var(--text-2);font-weight:600;}
+  .pg-plazo-hint svg{width:15px;height:15px;color:var(--sky);flex-shrink:0;}
+  .pg-plazo-hint b{color:var(--text-1);}
+  .pg-plazo-hint .pg-plazo{margin-left:auto;}
+
+  /* panel: modo "registrar pago" desde Cuentas Corrientes */
+  .pg-pay-banner{display:none;margin:-4px 0 18px;padding:13px 14px;border-radius:12px;background:linear-gradient(135deg,#FFF8E6,#FFF3D6);border:1px solid #F4D58A;color:#6B4E00;font-size:12.6px;font-weight:600;line-height:1.45;gap:11px;align-items:flex-start;}
+  .pg-pay-banner svg{width:18px;height:18px;flex-shrink:0;color:#C98A00;margin-top:1px;}
+  .pg-pay-banner b{display:block;font-size:13px;color:#4A3600;margin-bottom:2px;}
+  .panel.pay-mode .pg-pay-banner{display:flex;}
+  .panel.pay-mode .panel-head{background:linear-gradient(180deg,#FFFBF0,#fff);}
+  .pg-panel-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+  .pg-panel-summary > div{background:#F7F8FD;border:1px solid var(--border);border-radius:11px;padding:10px 12px;min-width:0;}
+  .pg-panel-summary .l{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:4px;}
+  .pg-panel-summary .v{font-size:14px;font-weight:800;color:var(--text-1);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pg-sep{height:1px;background:var(--border);margin:6px 0 20px;}
+
+  /* =========================================================
+     CUENTAS CORRIENTES
+     ========================================================= */
+  .cc-wrap{max-width:1180px;}
+  .cc-period{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;}
+  .cc-seg{display:flex;background:#F1F2FA;border-radius:10px;padding:3px;gap:2px;}
+  .cc-seg button{border:none;background:transparent;padding:7px 14px;border-radius:8px;font-size:12.3px;font-weight:700;color:var(--text-2);cursor:pointer;transition:background .12s ease,color .12s ease;white-space:nowrap;}
+  .cc-seg button:hover{color:var(--text-1);}
+  .cc-seg button.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(2,11,45,.12);}
+  .cc-custom{display:none;align-items:center;gap:8px;}
+  .cc-custom.show{display:flex;}
+  .cc-custom input{padding:7px 9px;border-radius:8px;border:1px solid var(--border);font-size:12.5px;outline:none;color:var(--text-1);}
+  .cc-custom input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(89,119,210,.14);}
+  .cc-custom span{font-size:12px;color:var(--text-3);font-weight:700;}
+  .cc-range{font-size:12px;font-weight:700;color:var(--text-3);display:flex;align-items:center;gap:6px;}
+  .cc-range svg{width:14px;height:14px;}
+  .cc-period .search-wrap{margin-left:auto;max-width:260px;}
+  .cc-period .search-wrap input{padding:8px 12px 8px 34px;font-size:12.8px;}
+
+  .cc-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0;}
+  .cc-kpi{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;}
+  .cc-kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sky);}
+  .cc-kpi.k-pedido::before{background:var(--navy);}
+  .cc-kpi.k-pagar::before{background:#E3A008;}
+  .cc-kpi.k-cancel::before{background:#1F9D5A;}
+  .cc-kpi.k-venc::before{background:#9E1B24;}
+  .cc-kpi .lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:7px;}
+  .cc-kpi .val{font-size:23px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;letter-spacing:-.3px;}
+  .cc-kpi .sub{font-size:11.5px;font-weight:600;color:var(--text-3);margin-top:4px;}
+  .cc-kpi.k-venc .val{color:#9E1B24;}
+  .cc-kpi .eq{position:absolute;right:14px;top:14px;font-size:10.5px;font-weight:800;color:var(--text-3);background:#F1F2FA;border-radius:6px;padding:2px 6px;}
+
+  .cc-table{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .cc-head, .cc-row{display:grid;grid-template-columns:minmax(220px,1.7fr) repeat(3,minmax(120px,1fr)) minmax(150px,1fr) 44px;align-items:center;}
+  .cc-head{background:#F7F8FD;border-bottom:2px solid var(--border);}
+  .cc-head > div{padding:11px 14px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2);}
+  .cc-head .num, .cc-row .num{text-align:right;}
+  .cc-head .sortable{cursor:pointer;user-select:none;}
+  .cc-head .sortable:hover{color:var(--text-1);}
+  .cc-head .sortable.on{color:var(--blue);}
+  .cc-row{border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s ease;}
+  .cc-row:hover{background:#FAFBFF;}
+  .cc-row.open{background:#F4F6FD;}
+  .cc-row > div{padding:13px 14px;font-size:13.3px;min-width:0;}
+  .cc-prov{display:flex;align-items:center;gap:11px;}
+  .cc-av{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:#fff;flex-shrink:0;}
+  .cc-prov .nm{font-weight:800;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cc-prov .mt{font-size:11.3px;color:var(--text-3);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cc-prov .tx{min-width:0;flex:1;}
+  .cc-bar{height:4px;border-radius:4px;background:#FCEBC4;overflow:hidden;margin-top:6px;max-width:200px;}
+  .cc-bar span{display:block;height:100%;background:#1F9D5A;border-radius:4px;}
+  .cc-row .num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--text-1);}
+  .cc-row .num.pagar{color:#8A6300;}
+  .cc-row .num.cancel{color:#137B44;}
+  .cc-row .num.zero{color:var(--text-3);font-weight:600;}
+  .cc-chev{display:flex;align-items:center;justify-content:center;color:var(--text-3);}
+  .cc-chev svg{width:16px;height:16px;transition:transform .18s ease;}
+  .cc-row.open .cc-chev svg{transform:rotate(90deg);color:var(--blue);}
+  .cc-foot{display:grid;grid-template-columns:minmax(220px,1.7fr) repeat(3,minmax(120px,1fr)) minmax(150px,1fr) 44px;background:#F7F8FD;border-top:2px solid var(--border);}
+  .cc-foot > div{padding:12px 14px;font-size:12.5px;font-weight:800;color:var(--text-1);font-variant-numeric:tabular-nums;}
+  .cc-foot .num{text-align:right;}
+
+  /* planilla a doble cuenta */
+  .cc-detail{border-bottom:1px solid var(--border);background:linear-gradient(180deg,#F4F6FD 0%,#FAFBFF 100%);padding:4px 18px 20px;animation:pgIn .2s ease;}
+  .cc-detail-head{display:flex;align-items:center;gap:10px;padding:8px 2px 12px;font-size:12px;color:var(--text-2);font-weight:600;}
+  .cc-detail-head b{color:var(--text-1);}
+  .cc-detail-head .btn-ghost{margin-left:auto;padding:6px 10px;font-size:11.8px;}
+  .cc-ledger{display:grid;grid-template-columns:1fr 1fr;gap:0;background:#fff;border:1px solid var(--border);border-radius:13px;overflow:hidden;}
+  .cc-side{min-width:0;display:flex;flex-direction:column;}
+  .cc-side + .cc-side{border-left:2px solid var(--border);}
+  .cc-side-h{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--border);}
+  .cc-side-h .dot{width:9px;height:9px;border-radius:50%;}
+  .cc-side.left .cc-side-h{background:#F0FAF4;}
+  .cc-side.left .dot{background:#1F9D5A;}
+  .cc-side.right .cc-side-h{background:#FFF9EA;}
+  .cc-side.right .dot{background:#E3A008;}
+  .cc-side-h strong{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-1);}
+  .cc-side-h .cnt{font-size:11px;font-weight:700;color:var(--text-3);}
+  .cc-side-h .tot{margin-left:auto;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .cc-side.left .tot{color:#137B44;}
+  .cc-side.right .tot{color:#8A6300;}
+  .cc-lines{display:flex;flex-direction:column;flex:1;}
+  .cc-line{display:grid;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #F0F1F7;font-size:12.6px;cursor:pointer;transition:background .12s ease;}
+  .cc-line:last-child{border-bottom:none;}
+  .cc-line:hover{background:#FAFBFF;}
+  .cc-side.left .cc-line{grid-template-columns:minmax(0,1.2fr) 64px minmax(84px,1fr) 128px;}
+  .cc-side.right .cc-line{grid-template-columns:minmax(0,1.2fr) 64px minmax(84px,1fr) 124px 78px;}
+  .cc-line .fc{font-weight:800;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cc-line .fc small{display:block;font-size:10.5px;font-weight:700;color:var(--text-3);letter-spacing:.02em;}
+  .cc-line .fc.b{color:#5B34D6;}
+  .cc-line .fd{font-size:11.8px;font-weight:600;color:var(--text-3);font-variant-numeric:tabular-nums;}
+  .cc-line .fm{font-weight:800;text-align:right;font-variant-numeric:tabular-nums;color:var(--text-1);}
+  .cc-line .fm.neg{color:#B22A32;}
+  .cc-line .fp{font-size:11px;font-weight:700;color:#1F9D5A;display:flex;align-items:center;gap:4px;white-space:nowrap;justify-content:flex-end;}
+  .cc-line .fp .pg-clip{margin-right:0;}
+  .cc-pay{border:none;background:var(--blue);color:#fff;font-size:11.5px;font-weight:800;padding:7px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:filter .12s ease, transform .12s ease;}
+  .cc-pay:hover{filter:brightness(1.15);transform:translateY(-1px);}
+  .cc-pay svg{width:12px;height:12px;}
+  .cc-empty-side{padding:26px 14px;text-align:center;font-size:12.3px;color:var(--text-3);font-weight:600;font-style:italic;flex:1;display:flex;align-items:center;justify-content:center;}
+  .cc-sort{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:11.5px;font-weight:700;color:var(--text-3);}
+  .cc-sort .cc-seg button{padding:5px 11px;font-size:11.5px;}
+  .cc-note{font-size:11.5px;color:var(--text-3);font-weight:600;margin-left:auto;}
+  @media (max-width:1100px){ .cc-kpis{grid-template-columns:repeat(2,minmax(0,1fr));} .cc-ledger{grid-template-columns:1fr;} .cc-side + .cc-side{border-left:none;border-top:2px solid var(--border);} }
+
 </style>
 </head>
 <body>
@@ -1373,13 +1568,222 @@
 
     <!-- ===================== MÓDULO: PAGOS ===================== -->
     <section class="module-screen" id="modulePagos">
-      <div class="topbar">
-        <div><h1>Pagos</h1><div class="sub">Órdenes de pago a proveedores y resumen de cuentas.</div></div>
-      </div>
-      <div class="placeholder-card">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></div>
-        <h2>Módulo en construcción</h2>
-        <p>La estructura de &quot;Pagos&quot; ya está lista. El contenido y la lógica de este módulo se van a construir en un próximo chat, igual que en La Fortaleza pero con la información propia de Che Mono.</p>
+      <div class="pagos-shell" id="pagosSubnav">
+        <div class="pagos-topbar">
+          <div class="pagos-tab active" data-pane="lista" onclick="goPane('lista')">Lista de órdenes</div>
+          <div class="pagos-tab" data-pane="cuentas" onclick="goPane('cuentas')">Cuentas Corrientes</div>
+          <div class="spacer"></div>
+          <div class="cfg-live pg-live" id="pgLive" title="Los cambios que hagan otros usuarios se reflejan acá automáticamente"><i></i><span>Conectando…</span></div>
+          <a class="link-subtle" id="historialLink" onclick="verHistorialPagos()">Historial de cambios</a>
+          <button class="cta-nueva" id="ctaNuevaBtn" onclick="goPane('nueva')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva orden de pago
+          </button>
+        </div>
+
+        <div class="pagos-body">
+
+          <!-- PANE: LISTA DE ÓRDENES -->
+          <section class="pagos-pane active" id="paneLista">
+            <div class="topbar">
+              <div><h1>Lista de órdenes</h1><div class="sub" id="subtitle-count">Cargando…</div></div>
+              <div class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="searchInput" placeholder="Buscar por proveedor, categoría, rubro o comprobante…" oninput="renderList()">
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <div class="toolbar-inner">
+                <div class="checkbox" id="selectAllBox" onclick="toggleSelectAll()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="toolbar-default" id="toolbarDefault"><span id="filterLabel">Mostrando todas las órdenes</span></div>
+                <div class="toolbar-bulk" id="toolbarBulk">
+                  <span class="bulk-count"><span id="selCount">0</span> seleccionada(s)</span>
+                  <button class="btn-ghost" onclick="exportSelectedOrdenesExcel()" title="Descarga un Excel con las órdenes seleccionadas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Descargar
+                  </button>
+                  <button class="btn-ghost-danger" onclick="requestBulkDelete()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                    Eliminar
+                  </button>
+                  <button class="btn-ghost" onclick="clearSelection()">Cancelar</button>
+                </div>
+                <span class="active-filters-note" id="activeFiltersNote" style="display:none" onclick="clearAllColumnFilters()">Limpiar filtros de columna ✕</span>
+                <button class="btn-ghost" id="btnDescargarReporte" onclick="toggleReportPopover(event)" title="Descargá un Excel con las órdenes de un rango de fechas (por fecha de orden)" style="margin-left:auto;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Descargar reporte
+                </button>
+                <button class="btn-ghost" onclick="toggleColumnPicker(event)" title="Elegí, reordená y ajustá el ancho de las columnas">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+                  Columnas
+                </button>
+              </div>
+            </div>
+
+            <div class="list-scroll">
+              <div class="table-grid col-head-row" id="colHeadRow"></div>
+              <div class="list" id="listContainer"></div>
+            </div>
+          </section>
+
+          <!-- PANE: NUEVA ORDEN -->
+          <section class="pagos-pane" id="paneNueva">
+            <div class="screen-header">
+              <div class="back-btn" onclick="goPane('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+              <div><h1 style="font-size:20px;margin:0;font-weight:800;">Nueva orden de pago</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Completá los datos de la compra para generar la orden</div></div>
+            </div>
+            <div class="screen-scroll">
+              <div class="form-card">
+
+                <div class="form-section-title">Documento de compra</div>
+                <div class="field-row">
+                  <div class="field" id="fld-nFechaOrden">
+                    <label>Fecha de orden</label>
+                    <div class="date-field-wrap">
+                      <input type="text" id="nFechaOrden" placeholder="dd/mm/aaaa" maxlength="10">
+                      <button type="button" class="cal-btn" data-target="nFechaOrden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                    </div>
+                  </div>
+                  <div class="field" id="fld-nComprobanteTipo">
+                    <label>Tipo de compra</label>
+                    <select id="nComprobanteTipo" onchange="onComprobanteTipoChange()"><option value="">Seleccionar…</option><option>Compra B</option><option>Fc. A</option><option>Fc. C</option><option>NC</option></select>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field" id="fld-nFechaComprobante">
+                    <label>Fecha de la factura <span class="hint">(cuenta el plazo de pago)</span></label>
+                    <div class="date-field-wrap">
+                      <input type="text" id="nFechaComprobante" placeholder="dd/mm/aaaa" maxlength="10" oninput="pgUpdateNuevaPlazoHint()">
+                      <button type="button" class="cal-btn" data-target="nFechaComprobante"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                    </div>
+                  </div>
+                  <div class="field" id="fld-nComprobanteNro">
+                    <label>Nro. de comprobante</label>
+                    <input type="text" id="nComprobanteNro" placeholder="Ej: 0001-00000234">
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Adjuntar documento de compra <span class="hint">(opcional · podés cargar varios)</span></label>
+                  <div class="pg-files-wrap" id="nuevaAttachZone"></div>
+                </div>
+
+                <div class="form-section-title">Proveedor</div>
+                <div class="field" id="fld-nProveedor">
+                  <label>Proveedor</label>
+                  <input type="text" id="nProveedor" list="dlProveedoresPago" autocomplete="off" placeholder="Escribí para buscar…" oninput="onProveedorChange()" onchange="onProveedorChange()">
+                  <div class="rl-warn" id="nProveedorWarn" style="display:none;">No coincide con ningún proveedor cargado en Configuración</div>
+                </div>
+                <label class="check-inline">
+                  <input type="checkbox" id="nSinProveedor" onchange="onSinProveedorToggle()">
+                  No especifico proveedor
+                </label>
+                <div class="field-row">
+                  <div class="field"><label>Categoría <span class="hint">(automático)</span></label><input type="text" id="nConcepto" readonly placeholder="Se completa según el rubro"></div>
+                  <div class="field" id="fld-nRubroWrap">
+                    <label>Rubro <span class="hint" id="nRubroHint">(según el proveedor)</span></label>
+                    <select id="nRubro" onchange="onRubroManualChange()"><option value="">Elegí primero el proveedor</option></select>
+                  </div>
+                </div>
+                <div class="pg-plazo-hint" id="nPlazoHint" style="display:none;"></div>
+
+                <div class="form-section-title">Montos</div>
+                <div class="field-row">
+                  <div class="field" id="fld-nMontoFactura"><label>Monto de la factura</label><input type="text" id="nMontoFactura" placeholder="$0,00.-"></div>
+                  <div class="field"><label>Monto de retención <span class="hint">(solo Fc. A)</span></label><input type="text" id="nMontoRetencion" placeholder="$0,00.-" disabled></div>
+                </div>
+                <div class="field">
+                  <div class="monto-a-pagar-box">
+                    <div><div class="lbl">Monto a pagar</div><div class="formula">Factura − Retención</div></div>
+                    <div class="val" id="nMontoAPagar">$0,00.-</div>
+                  </div>
+                </div>
+
+                <div class="form-section-title">Notas</div>
+                <div class="field"><label>Observaciones <span class="hint">(opcional)</span></label><textarea id="nNotas" placeholder="Detalle adicional sobre esta orden…"></textarea></div>
+
+                <div class="form-section-title">Estado y pago</div>
+                <div class="field" id="fld-nEstado">
+                  <label>Estado</label>
+                  <div class="status-select-wrap" id="nEstadoChips">
+                    <div class="status-chip active" data-s="Pendiente" onclick="setNuevaEstado('Pendiente')">Pendiente</div>
+                    <div class="status-chip" data-s="Pagado" onclick="setNuevaEstado('Pagado')">Pagado</div>
+                    <div class="status-chip" data-s="Anulado" onclick="setNuevaEstado('Anulado')">Anulado</div>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field" id="fld-nMetodo"><label>Método de pago</label><select id="nMetodo"><option value="">Seleccionar…</option></select></div>
+                  <div class="field" id="fld-nFechaPago">
+                    <label>Fecha de pago <span class="hint">(opcional)</span></label>
+                    <div class="date-field-wrap">
+                      <input type="text" id="nFechaPago" placeholder="dd/mm/aaaa" maxlength="10">
+                      <button type="button" class="cal-btn" data-target="nFechaPago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Adjuntar comprobante de pago <span class="hint">(opcional · podés cargar varios)</span></label>
+                  <div class="pg-files-wrap" id="nuevaPagoAttachZone"></div>
+                </div>
+
+                <div class="form-footer">
+                  <button class="btn-primary" style="flex:1" id="btnGuardarNueva" onclick="saveNuevaOrden()">Guardar orden de pago</button>
+                  <button class="btn-primary secondary" onclick="goPane('lista')">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PANE: CUENTAS CORRIENTES -->
+          <section class="pagos-pane" id="paneCuentas">
+            <div class="screen-header">
+              <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Cuentas Corrientes</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Saldo por proveedor: lo pedido, lo cancelado y lo que queda por pagar, con el plazo que resta en cada factura</div></div>
+              <button class="btn-ghost" onclick="ccExportExcel()" title="Descarga un Excel con la tabla de cuentas corrientes y el detalle de cada factura">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Descargar Excel
+              </button>
+            </div>
+            <div class="screen-scroll">
+              <div class="cc-wrap">
+                <div class="cc-period">
+                  <div class="cc-seg" id="ccPresetSeg">
+                    <button data-preset="anio" onclick="ccSetPreset('anio')">Este año</button>
+                    <button data-preset="semestre" onclick="ccSetPreset('semestre')">Este semestre</button>
+                    <button data-preset="mes" class="active" onclick="ccSetPreset('mes')">Este mes</button>
+                    <button data-preset="custom" onclick="ccSetPreset('custom')">Personalizado</button>
+                  </div>
+                  <div class="cc-custom" id="ccCustom">
+                    <input type="date" id="ccDesde" onchange="ccOnCustomChange()">
+                    <span>a</span>
+                    <input type="date" id="ccHasta" onchange="ccOnCustomChange()">
+                  </div>
+                  <div class="cc-range" id="ccRangeLabel"></div>
+                  <div class="search-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="ccSearch" placeholder="Buscar proveedor…" oninput="ccRender()">
+                  </div>
+                </div>
+
+                <div class="cc-kpis" id="ccKpis"></div>
+
+                <div class="cc-sort">
+                  Ordenar por
+                  <div class="cc-seg" id="ccSortSeg">
+                    <button data-sort="urgencia" class="active" onclick="ccSetSort('urgencia')">Urgencia de pago</button>
+                    <button data-sort="pagar" onclick="ccSetSort('pagar')">Mayor saldo a pagar</button>
+                    <button data-sort="nombre" onclick="ccSetSort('nombre')">Nombre</button>
+                  </div>
+                  <span class="cc-note">Se toman las órdenes cuya <b>fecha de factura</b> cae en el período · las anuladas no suman</span>
+                </div>
+
+                <div class="cc-table" id="ccTable"></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
       </div>
     </section>
 
@@ -1779,6 +2183,105 @@
   </div>
   <div class="cal-grid" id="calGrid"></div>
   <button class="cal-today-btn" onclick="calGoToday()">Hoy</button>
+</div>
+
+
+<!-- ===================== PAGOS: panel de detalle, popovers y confirmación ===================== -->
+<datalist id="dlProveedoresPago"></datalist>
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="panel-head">
+    <div style="min-width:0;"><h2 id="panelProveedor">—</h2><span class="id-tag" id="panelId">OP-000</span></div>
+    <div class="panel-close" onclick="closePanel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+  </div>
+  <div class="panel-body" id="panelBody">
+    <div class="pg-pay-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <div><b>Registrar pago de esta factura</b>Revisá el método y la fecha de pago y <u>adjuntá el/los comprobantes de pago</u> — son obligatorios para marcarla como pagada. Al confirmar pasa a Canceladas.</div>
+    </div>
+    <div class="pg-panel-summary">
+      <div><div class="l">Monto a pagar</div><div class="v" id="pSumMonto">—</div></div>
+      <div><div class="l">Plazo de pago</div><div class="v" id="pSumPlazo">—</div></div>
+    </div>
+    <div class="field">
+      <label>Estado</label>
+      <div class="status-select-wrap" id="statusChips">
+        <div class="status-chip" data-s="Pendiente" onclick="setStatus('Pendiente',true)">Pendiente</div>
+        <div class="status-chip" data-s="Pagado" onclick="setStatus('Pagado',true)">Pagado</div>
+        <div class="status-chip" data-s="Anulado" onclick="setStatus('Anulado',true)">Anulado</div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field" id="fld-fMetodo"><label>Método de pago</label><select id="fMetodo"></select></div>
+      <div class="field" id="fld-fFechaPago"><label>Fecha de pago</label><input type="date" id="fFechaPago"></div>
+    </div>
+    <div class="field" id="fld-fAdjPago">
+      <label>Adjuntar comprobante de pago <span class="pg-files-count" id="fAdjPagoCount" style="display:none;"></span></label>
+      <div class="pg-files-wrap" id="panelPagoAttachZone"></div>
+    </div>
+    <div class="pg-sep"></div>
+    <div class="field" id="fld-fProveedor"><label>Proveedor / Beneficiario</label>
+      <input type="text" id="fProveedor" list="dlProveedoresPago" autocomplete="off" oninput="onPanelProveedorChange()" onchange="onPanelProveedorChange()">
+      <div class="rl-warn" id="fProveedorWarn" style="display:none;">No coincide con ningún proveedor cargado</div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Categoría</label><input type="text" id="fConcepto" readonly></div>
+      <div class="field"><label>Rubro</label><select id="fRubro" onchange="onPanelRubroChange()"></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Monto de factura</label><input type="text" id="fMontoFactura"></div>
+      <div class="field"><label>Monto de retención</label><input type="text" id="fMontoRetencion"></div>
+    </div>
+    <div class="field"><label>Monto a pagar</label><input type="text" id="fMontoAPagar" readonly></div>
+    <div class="field-row">
+      <div class="field"><label>Tipo de compra</label>
+        <select id="fComprobanteTipo"><option value="">—</option><option>Compra B</option><option>Fc. A</option><option>Fc. C</option><option>NC</option></select>
+      </div>
+      <div class="field"><label>N° de comprobante</label><input type="text" id="fComprobante"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Fecha de creación</label><input type="date" id="fFechaOrden"></div>
+      <div class="field"><label>Fecha de la factura</label><input type="date" id="fFechaComprobante" onchange="pgPanelRefreshPlazo()"></div>
+    </div>
+    <div class="field"><label>Observaciones</label><textarea id="fNotas"></textarea></div>
+    <div class="field">
+      <label>Adjuntar documento de compra <span class="pg-files-count" id="fAdjCount" style="display:none;"></span></label>
+      <div class="pg-files-wrap" id="panelAttachZone"></div>
+    </div>
+    <div class="field-row" style="margin-top:22px;padding-top:16px;border-top:1px solid var(--border);">
+      <div class="field" style="margin-bottom:0;"><label>Creado por</label><div id="fCreadoInfo" style="font-size:12.8px;font-weight:700;color:var(--text-2);">—</div></div>
+      <div class="field" style="margin-bottom:0;"><label>Última modificación</label><div id="fModificadoInfo" style="font-size:12.8px;font-weight:700;color:var(--text-2);">—</div></div>
+    </div>
+  </div>
+  <div class="panel-foot">
+    <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+      <button class="btn-primary" id="btnSaveOrder" onclick="saveOrder()">Guardar cambios</button>
+      <div class="saved-flash" id="savedFlash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Cambios guardados</div>
+    </div>
+    <div class="btn-icon-danger" id="btnDeleteOrder" onclick="requestSingleDelete()" title="Eliminar orden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- filtro por columna (embudo) — mismo formato que Configuración > Proveedores -->
+<div class="cfg-fpop" id="pgFilterPop"></div>
+<!-- selector de columnas -->
+<div class="filter-popover col-picker" id="columnPickerPopover"></div>
+<!-- reporte por rango de fechas -->
+<div class="filter-popover" id="reportPopover"></div>
+
+<!-- CONFIRMAR ELIMINACIÓN (Pagos) -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>
+    <h3 id="confirmTitle">¿Eliminar orden de pago?</h3>
+    <p id="confirmText">Esta acción no se puede deshacer.</p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="confirm-delete" id="confirmDeleteBtn" onclick="confirmDeleteAction()">Eliminar</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -3915,7 +4418,7 @@ function liqConfirmarLiquidar(){
   if(tot.totalA<=0 && tot.totalB<=0){ showToast("No hay montos para liquidar este mes.", "warn"); return; }
   var msg = "Vas a liquidar " + liqMesNombre(liqState.mes) + ":\n\n" +
     (tot.totalA>0 ? "• Parte A (Bco. Galicia): " + fmtMoney(tot.totalA) + "\n" : "") +
-    (tot.totalB>0 ? "• Parte B (Efectivo, con recibo): " + fmtMoney(tot.totalB) + "\n" : "") +
+    (tot.totalB>0 ? "• Parte B (Efectivo - Caja Mayor, con recibo): " + fmtMoney(tot.totalB) + "\n" : "") +
     (tot.totalAdelantos>0 ? "\n(Ya se descontaron " + fmtMoney(tot.totalAdelantos) + " en adelantos de sueldo pagados este mes, cargados desde Pagos)\n" : "") +
     "\nEsto va a crear la(s) orden(es) de pago en Pagos (como Pendiente) y va a descargar un .zip con los recibos de sueldo. ¿Confirmás?";
   if(!confirm(msg)) return;
@@ -3947,10 +4450,10 @@ async function liqEjecutarLiquidar(tot){
     }
     if(tot.totalB>0){
       var payloadB = {
-        fecha_orden: hoy, comprobante_tipo: "Pago B", fecha_comprobante: hoy, comprobante: "",
+        fecha_orden: hoy, comprobante_tipo: "Compra B", fecha_comprobante: hoy, comprobante: "",
         proveedor: "No especifica proveedor", concepto: "Sueldos y CS", rubro: "Sueldos",
         monto_factura: tot.totalB, monto_retencion: 0, monto: tot.totalB,
-        estado: "Pendiente", metodo: "Efectivo", fecha_venc: null, fecha_pago: null,
+        estado: "Pendiente", metodo: "Efectivo - Caja Mayor", fecha_venc: null, fecha_pago: null,
         notas: "Liquidación de sueldos — parte B — " + mesNombre + ".",
         unread: true, creado_por: creadoPorId, creado_por_nombre: creadoPorNombre,
         modificado_por: creadoPorId, modificado_por_nombre: creadoPorNombre, modificado_fecha: new Date().toISOString()
@@ -5470,12 +5973,1442 @@ function cfgStartRealtime(){
 }
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && cfgLoaded) cfgReload(); });
 
+
+/* =========================================================
+   PAGOS (Che Mono) — Lista de órdenes · Nueva orden · Cuentas Corrientes
+   Tomado del módulo Pagos de La Fortaleza y adaptado a Che Mono:
+   - Tablas propias: cm_ordenes / cm_conceptos (= Categorías) / cm_rubros /
+     cm_proveedores / cm_proveedor_rubros / cm_metodos_pago / cm_historial.
+     Un proveedor puede tener más de un rubro (a diferencia de La Fortaleza).
+   - Adjuntos MÚLTIPLES: documento(s) de compra (cm_ordenes.adjuntos) y
+     comprobante(s) de pago (cm_ordenes.adjuntos_pago), arrays de
+     {nombre,tamano,path} en el bucket privado cm-adjuntos.
+   - "Tipo de comprobante" pasa a llamarse "Tipo de compra" (Compra B, Fc. A,
+     Fc. C, NC) y "Adjuntar comprobante" → "Adjuntar documento de compra".
+   - Encabezados de columna: el click NO ordena; abre el embudo de filtro
+     (tildar valores o escribir con lectura inteligente, igual que
+     Configuración > Proveedores). El orden se elige dentro del mismo popover.
+   - Nueva columna "Plazo de pago": días que faltan para cumplir el plazo
+     máximo de pago del proveedor (Configuración > plazo_pago_dias), contados
+     desde la fecha de la factura. Si está pendiente y se pasó del plazo, la
+     orden se muestra como "Vencido" automáticamente.
+   - Método de pago "Efectivo" → "Efectivo - Caja Mayor".
+     ⚠ PENDIENTE PARA CAJA MAYOR (Che Mono): cuando se desarrolle Caja Mayor,
+     las órdenes que se generen como salida de caja NO deben autocompletar las
+     Observaciones con "Salida de Caja Mayor — cierre del dd/mm/aaaa (Pago N)."
+     (como hace La Fortaleza en cmEjecutarCierre); en Observaciones tiene que
+     quedar exactamente lo que el usuario escribió en ese momento.
+   ========================================================= */
+const ADJUNTOS_BUCKET = "cm-adjuntos";
+const PG_TIPOS_COMPRA = ["Compra B","Fc. A","Fc. C","NC"];
+const ESTADOS_FIJOS = ["Pendiente","Pagado","Vencido","Anulado"];
+const PG_SIN_PROV = "No especifica proveedor";
+// Semáforo del plazo de pago (días restantes)
+const PG_PLAZO_VERDE = 7;     // 7 días o más → verde
+const PG_PLAZO_AMARILLO = 4;  // 4 a 6 días → amarillo · 0 a 3 días → rojo · vencida → rojo oscuro
+
+let ordenes = [];
+let pgCats = [], pgRubros = [], pgProvs = [], pgLinks = [];
+let metodosPagoConfig = [];
+let pgProvByName = {};        // nombre → {id,nombre,plazo,rubros:[{id,nombre,cat}]}
+let pgLoaded = false, pgLoading = null;
+let selected = new Set();
+let openOrderId = null;
+let panelSnapshot = null;
+let pendingDelete = null;
+let pgPayMode = false;
+
+/* ---------- helpers ---------- */
+function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
+function fmtMoneyStrict(n){ return "$" + Math.max(Number(n||0),0).toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2}) + ".-"; }
+function fmtMoney2(n){ return "$" + Number(n||0).toLocaleString("es-AR",{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function isoToDMY2(iso){ if(!iso) return "—"; const [y,m,d]=String(iso).slice(0,10).split("-"); return `${d}/${m}/${y.slice(2)}`; }
+function fmtBytes(bytes){ if(bytes<1024) return bytes+" B"; if(bytes<1024*1024) return (bytes/1024).toFixed(0)+" KB"; return (bytes/(1024*1024)).toFixed(1)+" MB"; }
+function pgEsc(s){ return cfgEsc(s); }
+function pgAttr(s){ return String(s==null?"":s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/"/g,"&quot;"); }
+function populateSelect(sel, arr, placeholder){
+  const current = sel.value;
+  sel.innerHTML = "";
+  if(placeholder!=null){ const o=document.createElement("option"); o.value=""; o.textContent=placeholder; sel.appendChild(o); }
+  arr.forEach(v=>{ const o=document.createElement("option"); o.value=v; o.textContent=v; sel.appendChild(o); });
+  if(arr.includes(current)) sel.value = current;
+}
+function parseMoneyInput(str){ const digits = String(str).replace(/[^\d]/g,""); if(!digits) return 0; return Number(digits)/100; }
+function fmtMoneyFromDigits(digits){
+  digits = (digits||"").replace(/^0+(?=\d)/,"");
+  while(digits.length<3) digits="0"+digits;
+  let intPart = digits.slice(0,-2).replace(/^0+(?=\d)/,"");
+  const decPart = digits.slice(-2);
+  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g,".");
+  return "$"+intPart+","+decPart+".-";
+}
+function attachMoneyMask(id, onUpdate){
+  const el = document.getElementById(id);
+  el.addEventListener("input",()=>{
+    const digits = el.value.replace(/[^\d]/g,"");
+    el.value = digits ? fmtMoneyFromDigits(digits) : "";
+    if(onUpdate) onUpdate();
+  });
+}
+function markFieldError(fieldWrapId, bad){ const el = document.getElementById(fieldWrapId); if(el) el.classList.toggle("error", bad); }
+function uuidLike(){
+  if(window.crypto && typeof window.crypto.randomUUID === "function"){ try{ return window.crypto.randomUUID(); }catch(e){} }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c=>{ const r=Math.random()*16|0, v=c==="x"?r:(r&0x3|0x8); return v.toString(16); });
+}
+function pgAddDays(iso, n){ const d = new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function pgDiffDays(aISO, bISO){ return Math.round((new Date(aISO+"T00:00:00") - new Date(bISO+"T00:00:00"))/86400000); }
+function pgIniciales(n){ const p = String(n||"").replace(/[,.]/g," ").split(/\s+/).filter(Boolean); return ((p[0]||"?")[0] + (p[1]?p[1][0]:"")).toUpperCase(); }
+function pgTagHtml(cat){
+  if(!cat) return `<span class="pg-tag" style="background:#EEEFF5;color:#6D7191;">—</span>`;
+  const c = cfgColor(cat);
+  return `<span class="pg-tag" style="background:${c}1A;color:${c};">${pgEsc(cat)}</span>`;
+}
+const PG_CLIP_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>`;
+function pgClipHtml(files, kind){
+  const n = (files||[]).length;
+  const tit = n ? (kind==="pago" ? `Comprobante${n>1?"s":""} de pago adjunto${n>1?"s":""}: ` : `Documento${n>1?"s":""} de compra adjunto${n>1?"s":""}: `) + files.map(f=>f.nombre).join(", ")
+                : (kind==="pago" ? "Sin comprobante de pago adjunto" : "Sin documento de compra adjunto");
+  return `<span class="pg-clip ${n?"on":"off"}${kind==="pago"?" pay":""}" title="${pgEsc(tit)}">${PG_CLIP_SVG}${n>1?`<b>${n}</b>`:""}</span>`;
+}
+function pgLabelFactura(o){
+  if(o.comprobanteTipo==="Compra B") return "Compra B";
+  const t = o.comprobanteTipo || "Comprobante";
+  return o.comprobante ? `${t} ${o.comprobante}` : t;
+}
+
+/* ---------- plazo de pago (métrica) ---------- */
+function pgPlazoProveedor(nombre){ const p = pgProvByName[nombre]; return p && p.plazo!=null ? Number(p.plazo) : null; }
+function pgVencimiento(o){
+  const plazo = pgPlazoProveedor(o.proveedor);
+  const base = o.fechaComprobante || o.fechaOrden;
+  if(plazo==null || !base) return null;
+  return pgAddDays(base, plazo);
+}
+function pgDiasRestantes(o){ const v = pgVencimiento(o); return v ? pgDiffDays(v, todayISO()) : null; }
+function pgEstaPendiente(o){ return o.estado==="Pendiente" || o.estado==="Vencido"; }
+function pgPlazoInfo(o){
+  if(o.estado==="Anulado") return { kind:"muted", dias:null, bucket:"Anulada", label:"Anulada" };
+  if(o.estado==="Pagado") return { kind:"paid", dias:null, bucket:"Pagada", label:"Pagada" };
+  const d = pgDiasRestantes(o);
+  if(d==null){
+    const sinPlazo = pgPlazoProveedor(o.proveedor)==null;
+    return { kind:"muted", dias:null, bucket:"Sin plazo definido", label: sinPlazo ? "Sin plazo" : "Sin fecha" };
+  }
+  return pgInfoFromDias(d);
+}
+function pgInfoFromDias(d){
+  if(d<0) return { kind:"vencida", dias:d, bucket:"Vencida", label:`Vencida · ${-d} ${-d===1?"día":"días"}` };
+  if(d<PG_PLAZO_AMARILLO) return { kind:"danger", dias:d, bucket:"0 a 3 días", label: d===0 ? "Vence hoy" : `${d} ${d===1?"día":"días"}` };
+  if(d<PG_PLAZO_VERDE) return { kind:"warn", dias:d, bucket:"4 a 6 días", label:`${d} días` };
+  return { kind:"ok", dias:d, bucket:"7 días o más", label:`${d} días` };
+}
+function pgPlazoPill(info){
+  if(info.kind==="paid") return `<span class="pg-plazo paid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Pagada</span>`;
+  return `<span class="pg-plazo ${info.kind}"><i></i>${pgEsc(info.label)}</span>`;
+}
+function pgEstadoVista(o){
+  if(o.estado==="Vencido") return "Vencido";
+  if(o.estado==="Pendiente"){ const d = pgDiasRestantes(o); if(d!=null && d<0) return "Vencido"; }
+  return o.estado;
+}
+
+/* ---------- carga de datos ---------- */
+function mapOrdenRow(row){
+  const norm = arr => Array.isArray(arr) ? arr.filter(f=>f && f.nombre) : [];
+  let adj = norm(row.adjuntos), adjP = norm(row.adjuntos_pago);
+  // compatibilidad con el formato viejo de un solo adjunto
+  if(!adj.length && row.adjunto_nombre) adj = [{nombre:row.adjunto_nombre, tamano:row.adjunto_tamano, path:row.adjunto_path}];
+  if(!adjP.length && row.adjunto_pago_nombre) adjP = [{nombre:row.adjunto_pago_nombre, tamano:row.adjunto_pago_tamano, path:row.adjunto_pago_path}];
+  return {
+    id: row.id, fechaOrden: row.fecha_orden, comprobanteTipo: row.comprobante_tipo === "Pago B" ? "Compra B" : row.comprobante_tipo,
+    fechaComprobante: row.fecha_comprobante, comprobante: row.comprobante || "",
+    proveedor: row.proveedor || "", concepto: row.concepto || "", rubro: row.rubro || "",
+    montoFactura: Number(row.monto_factura||0), montoRetencion: Number(row.monto_retencion||0), monto: Number(row.monto||0),
+    estado: row.estado, metodo: row.metodo || "", fechaVenc: row.fecha_venc, fechaPago: row.fecha_pago, notas: row.notas || "",
+    adjuntos: adj, adjuntosPago: adjP,
+    unread: row.unread, creadoPor: row.creado_por_nombre, modificadoPor: row.modificado_por_nombre, modificadoFecha: row.modificado_fecha,
+  };
+}
+async function pgLoadMaster(){
+  const res = await Promise.all([
+    sb.from("cm_conceptos").select("id,nombre"),
+    sb.from("cm_rubros").select("id,nombre,concepto_id"),
+    sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias"),
+    sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
+    sb.from("cm_metodos_pago").select("id,nombre,created_at"),
+  ]);
+  const err = res.find(r=>r.error);
+  if(err){ console.warn("Pagos (datos maestros):", err.error); showToast("No se pudieron cargar proveedores y métodos de pago", "warn"); return false; }
+  pgCats = res[0].data||[];
+  const catById = {}; pgCats.forEach(c=>catById[c.id]=c.nombre);
+  pgRubros = (res[1].data||[]).map(r=>({ id:r.id, nombre:r.nombre, cat: catById[r.concepto_id]||"" }));
+  const rubById = {}; pgRubros.forEach(r=>rubById[r.id]=r);
+  pgLinks = res[3].data||[];
+  pgProvs = (res[2].data||[]).map(p=>({ id:p.id, nombre:p.nombre, plazo:p.plazo_pago_dias,
+    rubros: pgLinks.filter(l=>l.proveedor_id===p.id).map(l=>rubById[l.rubro_id]).filter(Boolean).sort((a,b)=>cfgCmp(a.cat+a.nombre,b.cat+b.nombre)) }))
+    .sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  pgProvByName = {}; pgProvs.forEach(p=>pgProvByName[p.nombre]=p);
+  const ORDEN_MET = ["Bco. Galicia","Mercado Pago","Efectivo - Caja Mayor","Tarjeta de crédito","Tarjeta de débito"];
+  metodosPagoConfig = (res[4].data||[]).map(m=>m.nombre).sort((a,b)=>{
+    const ia = ORDEN_MET.indexOf(a), ib = ORDEN_MET.indexOf(b);
+    return (ia<0?99:ia)-(ib<0?99:ib) || cfgCmp(a,b);
+  });
+  refreshProveedoresPagoDatalist();
+  return true;
+}
+async function loadOrdenes(){
+  try{
+    const { data, error } = await sb.from("cm_ordenes").select("*").order("created_at", {ascending:false});
+    if(error){ showToast("No se pudieron cargar las órdenes de pago", "warn"); return false; }
+    ordenes = (data||[]).map(mapOrdenRow);
+    return true;
+  }catch(e){ showToast("No se pudieron cargar las órdenes de pago", "warn"); return false; }
+}
+async function pgReload(){
+  if(pgLoading) return pgLoading;
+  pgLoading = (async ()=>{
+    const [a,b] = await Promise.all([pgLoadMaster(), loadOrdenes()]);
+    pgLoaded = a && b;
+    pgRenderActive();
+    return pgLoaded;
+  })().finally(()=>{ pgLoading = null; });
+  return pgLoading;
+}
+function pgRenderActive(){
+  const act = document.querySelector("#pagosSubnav .pagos-tab.active");
+  const pane = act ? act.dataset.pane : "lista";
+  if(document.getElementById("paneLista").classList.contains("active")) renderList();
+  if(document.getElementById("paneCuentas").classList.contains("active")) ccRender();
+  if(openOrderId) pgPanelRefreshPlazo();
+  return pane;
+}
+async function pgOnEnterModule(){
+  pgStartRealtime();
+  if(!pgLoaded){
+    document.getElementById("listContainer").innerHTML = `<div class="empty-state"><strong>Cargando órdenes…</strong></div>`;
+    await pgReload();
+  } else { pgRenderActive(); }
+}
+function refreshProveedoresPagoDatalist(){
+  const dl = document.getElementById("dlProveedoresPago");
+  if(!dl) return;
+  dl.innerHTML = pgProvs.map(p=>{
+    const det = p.rubros.length ? p.rubros.map(r=>`${r.cat} — ${r.nombre}`).join(" · ") : "Sin rubro asignado";
+    return `<option value="${pgEsc(p.nombre)}">${pgEsc(det)}</option>`;
+  }).join("");
+}
+function updateCounts(){}
+
+/* ---------- tiempo real: varios usuarios trabajando a la vez ---------- */
+let pgRT = null, pgRTTimer = null;
+function pgSetLive(on, txt){ const el = document.getElementById("pgLive"); if(!el) return; el.classList.toggle("on", !!on); el.querySelector("span").textContent = txt; }
+function pgStartRealtime(){
+  if(pgRT || !sb.channel) return;
+  try{
+    pgRT = sb.channel("cm-pagos");
+    ["cm_ordenes","cm_proveedores","cm_proveedor_rubros","cm_rubros","cm_conceptos"].forEach(t=>pgRT.on("postgres_changes", { event:"*", schema:"public", table:t }, ()=>{
+      clearTimeout(pgRTTimer);
+      pgRTTimer = setTimeout(()=>{ if(pgLoaded) pgReload(); }, 500);
+    }));
+    pgRT.subscribe(status=>{
+      if(status==="SUBSCRIBED") pgSetLive(true, "En vivo");
+      else if(status==="CHANNEL_ERROR" || status==="TIMED_OUT" || status==="CLOSED") pgSetLive(false, "Sin sincronización en vivo");
+    });
+  }catch(e){ pgSetLive(false, "Sin sincronización en vivo"); }
+}
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && pgLoaded && document.getElementById("modulePagos").classList.contains("active")) pgReload(); });
+
+/* ---------- historial ---------- */
+async function logHistorialOrden(accion, detalle){
+  try{
+    await sb.from("cm_historial").insert({
+      usuario_id: currentPerfil ? currentPerfil.id : null,
+      usuario_nombre: currentPerfil ? currentPerfil.nombre : "—",
+      accion, detalle: detalle||"", modulo: "pagos"
+    });
+  }catch(e){ console.warn("No se pudo registrar en el historial:", e); }
+}
+
+/* ---------- navegación ---------- */
+function goPane(pane){
+  const scope = document.getElementById("pagosSubnav");
+  scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.pane===pane));
+  scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
+  document.getElementById("pane"+pane.charAt(0).toUpperCase()+pane.slice(1)).classList.add("active");
+  document.getElementById("ctaNuevaBtn").style.display = (pane==="lista") ? "flex" : "none";
+  document.getElementById("historialLink").style.display = (pane==="lista") ? "inline" : "none";
+  pgCloseFilterPop(); closeColumnPicker(); closeReportPopover();
+  if(pane==="lista") renderList();
+  if(pane==="nueva") resetNuevaOrdenForm();
+  if(pane==="cuentas") ccInit();
+}
+function verHistorialPagos(){
+  goModule("config");
+  goConfigTab("actividad");
+  const f = document.getElementById("actFiltroModulo");
+  if(f){ f.value = "pagos"; renderActividad(); }
+}
+
+/* =========================================================
+   LISTA DE ÓRDENES — columnas
+   ========================================================= */
+const GRID_COLUMNS = [
+  { id:"fecha", label:"Fecha", defaultWidth:106, minWidth:74, maxWidth:160,
+    cell:o=>`<div class="cell c-fecha">${isoToDMY2(o.fechaOrden)}</div>`,
+    fvals:o=>[isoToDMY(o.fechaOrden)], sortVal:o=>o.fechaOrden||"" },
+  { id:"proveedor", label:"Proveedor", defaultWidth:196, minWidth:110, maxWidth:380,
+    cell:o=>`<div class="cell c-proveedor pg-flex">${pgClipHtml(o.adjuntos,"compra")}<span class="pg-txt">${pgEsc(o.proveedor)}</span></div>`,
+    fvals:o=>[o.proveedor], sortVal:o=>o.proveedor },
+  { id:"concepto", label:"Categoría", defaultWidth:160, minWidth:90, maxWidth:300,
+    cell:o=>`<div class="cell">${pgTagHtml(o.concepto)}</div>`,
+    fvals:o=>[o.concepto||"—"], sortVal:o=>o.concepto },
+  { id:"rubro", label:"Rubro", defaultWidth:150, minWidth:90, maxWidth:320,
+    cell:o=>`<div class="cell c-rubro">${pgEsc(o.rubro||"—")}</div>`,
+    fvals:o=>[o.rubro||"—"], sortVal:o=>o.rubro },
+  { id:"tipo", label:"Tipo de compra", defaultWidth:152, minWidth:90, maxWidth:180,
+    cell:o=>`<div class="cell">${o.comprobanteTipo?`<span class="pg-tipo">${pgEsc(o.comprobanteTipo)}</span>`:"—"}</div>`,
+    fvals:o=>[o.comprobanteTipo||"—"], sortVal:o=>o.comprobanteTipo||"" },
+  { id:"comprobante", label:"Nro. comprob.", defaultWidth:150, minWidth:90, maxWidth:280,
+    cell:o=>`<div class="cell c-comprobante">${pgEsc(o.comprobante||"—")}</div>`,
+    fvals:o=>[o.comprobante||"—"], sortVal:o=>o.comprobante||"" },
+  { id:"monto", label:"Monto a pagar", defaultWidth:152, minWidth:100, maxWidth:260, num:true,
+    cell:o=>`<div class="cell c-monto">${o.comprobanteTipo==="NC"?"−":""}${fmtMoney2(o.monto)}</div>`,
+    fvals:o=>[fmtMoney2(o.monto)], sortVal:o=>o.monto },
+  { id:"estado", label:"Estado", defaultWidth:142, minWidth:110, maxWidth:200,
+    cell:o=>{ const ev = pgEstadoVista(o); return `<div class="cell pg-flex">${pgClipHtml(o.adjuntosPago,"pago")}<span class="badge badge-${ev}">${ev==="Pagado"?"Pagado":ev}</span></div>`; },
+    fvals:o=>[pgEstadoVista(o)], sortVal:o=>ESTADOS_FIJOS.indexOf(pgEstadoVista(o)), fixedOpts:ESTADOS_FIJOS },
+  { id:"plazo", label:"Plazo de pago", defaultWidth:160, minWidth:110, maxWidth:220, num:true,
+    cell:o=>`<div class="cell">${pgPlazoPill(pgPlazoInfo(o))}</div>`,
+    fvals:o=>[pgPlazoInfo(o).bucket], sortVal:o=>{ const i=pgPlazoInfo(o); return i.dias!=null ? i.dias : (i.kind==="muted" && i.bucket==="Sin plazo definido" ? 90000 : 99999); },
+    fixedOpts:["Vencida","0 a 3 días","4 a 6 días","7 días o más","Sin plazo definido","Pagada","Anulada"] },
+  { id:"metodo", label:"Método de pago", defaultWidth:150, minWidth:100, maxWidth:260,
+    cell:o=>`<div class="cell c-rubro">${pgEsc(o.metodo||"—")}</div>`,
+    fvals:o=>[o.metodo||"—"], sortVal:o=>o.metodo||"" },
+  { id:"fechaPago", label:"Fecha de pago", defaultWidth:112, minWidth:90, maxWidth:180,
+    cell:o=>`<div class="cell c-fechapago">${o.fechaPago ? isoToDMY2(o.fechaPago) : "—"}</div>`,
+    fvals:o=>[o.fechaPago?isoToDMY(o.fechaPago):"—"], sortVal:o=>o.fechaPago||"" },
+  { id:"modificado", label:"Última modificación", defaultWidth:180, minWidth:130, maxWidth:340,
+    cell:o=>{
+      const fecha = o.modificadoFecha ? isoToDMY2(o.modificadoFecha.slice(0,10)) : "";
+      const full = (o.modificadoPor||"—") + (o.modificadoFecha ? " · "+fmtFechaHora(o.modificadoFecha) : "");
+      return `<div class="cell c-usuario" title="${pgEsc(full)}">${pgEsc(o.modificadoPor||"—")}${fecha?` · ${fecha}`:""}</div>`;
+    }, fvals:o=>[o.modificadoPor||"—"], sortVal:o=>o.modificadoFecha||"" },
+  { id:"notas", label:"Observaciones", defaultWidth:220, minWidth:120, maxWidth:480,
+    cell:o=>`<div class="cell c-notas" title="${pgEsc(o.notas||"")}">${pgEsc(o.notas||"—")}</div>`,
+    fvals:o=>[o.notas||"—"], sortVal:o=>o.notas||"" }
+];
+const PG_COL = id => GRID_COLUMNS.find(c=>c.id===id);
+let pgSort = { col:"fecha", dir:"desc" };
+let pgColFilters = {};   // colId → {text, sel:Set}
+function pgF(col){ if(!pgColFilters[col]) pgColFilters[col] = { text:"", sel:new Set() }; return pgColFilters[col]; }
+function pgFActive(col){ const f = pgColFilters[col]; return !!f && (f.sel.size>0 || !!cfgNorm(f.text)); }
+function pgPassCol(o, col){
+  if(!pgFActive(col)) return true;
+  const f = pgColFilters[col], vals = PG_COL(col).fvals(o);
+  if(f.sel.size) return vals.some(v=>f.sel.has(v));
+  const t = cfgNorm(f.text);
+  return vals.some(v=>cfgNorm(v).includes(t));
+}
+function pgPassSearch(o, q){
+  if(!q) return true;
+  return cfgNorm([o.id,o.proveedor,o.concepto,o.rubro,o.comprobante,o.comprobanteTipo,o.notas].join(" ")).includes(q);
+}
+function getFiltered(exceptCol){
+  const q = cfgNorm(document.getElementById("searchInput").value);
+  let list = ordenes.filter(o=>pgPassSearch(o,q) && GRID_COLUMNS.every(c=>c.id===exceptCol || pgPassCol(o,c.id)));
+  if(exceptCol) return list;
+  const col = PG_COL(pgSort.col) || PG_COL("fecha");
+  list = list.slice().sort((a,b)=>{
+    const va = col.sortVal(a), vb = col.sortVal(b);
+    let cmp = (typeof va==="number" && typeof vb==="number") ? va-vb : cfgCmp(va,vb);
+    if(cmp===0) cmp = String(a.id).localeCompare(String(b.id));
+    return pgSort.dir==="asc" ? cmp : -cmp;
+  });
+  return list;
+}
+function pgAnyColFilter(){ return GRID_COLUMNS.some(c=>pgFActive(c.id)); }
+
+function renderList(){
+  if(!document.getElementById("listContainer")) return;
+  const list = getFiltered();
+  const container = document.getElementById("listContainer");
+  const pend = ordenes.filter(o=>pgEstaPendiente(o));
+  const venc = pend.filter(o=>pgEstadoVista(o)==="Vencido").length;
+  document.getElementById("subtitle-count").textContent = pgLoaded
+    ? `${ordenes.length} órdenes en total · ${pend.length} pendientes de pago${venc?` · ${venc} vencida${venc===1?"":"s"}`:""}`
+    : "Cargando…";
+  const anyColFilter = pgAnyColFilter();
+  document.getElementById("activeFiltersNote").style.display = anyColFilter ? "flex" : "none";
+  document.getElementById("filterLabel").textContent = (anyColFilter || document.getElementById("searchInput").value.trim())
+    ? `Mostrando ${list.length} de ${ordenes.length} órdenes (filtros activos)` : "Mostrando todas las órdenes";
+  renderGridHeaderState();
+
+  if(list.length===0){
+    container.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+      ${ordenes.length ? `<strong>No hay órdenes para mostrar</strong><span>Probá limpiando algún filtro o el término de búsqueda.</span>`
+                       : `<strong>Todavía no hay órdenes de pago</strong><span>Creá la primera con “Nueva orden de pago”.</span>`}</div>`;
+  } else {
+    const cols = getVisibleColumnDefs();
+    container.innerHTML = list.map(o=>{
+      const isSel = selected.has(o.id);
+      return `<div class="row table-grid ${isSel?'selected':''} ${o.unread?'unread':''}" data-id="${o.id}" onclick="handleRowClick(event,'${o.id}')">
+        <div class="cell c-check"><div class="checkbox ${isSel?'checked':''}" onclick="toggleSelect(event,'${o.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        ${cols.map(col=>col.cell(o)).join("")}
+      </div>`;
+    }).join("");
+  }
+  updateToolbar();
+  updateSelectAllBox(list);
+}
+function updateSelectAllBox(list){
+  const box = document.getElementById("selectAllBox");
+  const ids = list.map(o=>o.id), selV = ids.filter(id=>selected.has(id));
+  box.classList.remove("checked","indeterminate");
+  if(ids.length>0 && selV.length===ids.length) box.classList.add("checked");
+  else if(selV.length>0) box.classList.add("indeterminate");
+}
+function toggleSelectAll(){
+  const ids = getFiltered().map(o=>o.id);
+  const allSel = ids.length && ids.every(id=>selected.has(id));
+  ids.forEach(id=> allSel ? selected.delete(id) : selected.add(id));
+  renderList();
+}
+function toggleSelect(ev,id){ ev.stopPropagation(); selected.has(id)?selected.delete(id):selected.add(id); renderList(); }
+function clearSelection(){ selected.clear(); renderList(); }
+function updateToolbar(){
+  const n = selected.size;
+  document.getElementById("selCount").textContent = n;
+  document.getElementById("toolbarBulk").classList.toggle("show", n>0);
+  document.getElementById("toolbarDefault").classList.toggle("hide", n>0);
+  document.getElementById("btnDescargarReporte").style.display = n>0 ? "none" : "";
+  if(n>0) closeReportPopover();
+}
+function handleRowClick(ev,id){ openPanel(id); }
+
+/* ---- estado de la grilla (columnas visibles, orden y anchos) ---- */
+const GRID_STATE_KEY = "cm_pagos_grid_state_v1";
+function defaultGridState(){
+  return { order: GRID_COLUMNS.map(c=>c.id), visible: Object.fromEntries(GRID_COLUMNS.map(c=>[c.id,true])), widths: Object.fromEntries(GRID_COLUMNS.map(c=>[c.id,c.defaultWidth])) };
+}
+let gridState = defaultGridState();
+function loadGridState(){
+  const def = defaultGridState();
+  try{
+    const saved = JSON.parse(localStorage.getItem(GRID_STATE_KEY)||"null");
+    if(saved){
+      const valid = new Set(GRID_COLUMNS.map(c=>c.id));
+      const order = (saved.order||[]).filter(id=>valid.has(id));
+      def.order.forEach(id=>{ if(!order.includes(id)) order.push(id); });
+      gridState = { order, visible:{...def.visible, ...(saved.visible||{})}, widths:{...def.widths, ...(saved.widths||{})} };
+    }
+  }catch(e){ gridState = def; }
+  applyWidthVars();
+}
+function persistGridState(){ try{ localStorage.setItem(GRID_STATE_KEY, JSON.stringify(gridState)); }catch(e){} }
+function applyWidthVars(){ Object.keys(gridState.widths).forEach(id=>document.documentElement.style.setProperty(`--pgw-${id}`, gridState.widths[id]+"px")); }
+function getVisibleColumnDefs(){ return gridState.order.filter(id=>gridState.visible[id]).map(PG_COL).filter(Boolean); }
+function applyGridTemplateColumns(){
+  const parts = ["36px"].concat(getVisibleColumnDefs().map(c=>`var(--pgw-${c.id}, ${c.defaultWidth}px)`));
+  document.getElementById("pagosSubnav").style.setProperty("--grid-template", parts.join(" "));
+}
+function renderGridHeader(){
+  const parts = [`<div class="col-head" data-col="__check"></div>`];
+  getVisibleColumnDefs().forEach(col=>{
+    parts.push(`<div class="col-head" data-col="${col.id}" onclick="pgOpenFilter(event,'${col.id}')" title="Filtrar por ${pgEsc(col.label.toLowerCase())}">
+      <span class="lbl">${col.label}</span><span class="pg-sort-ind" data-sortind="${col.id}"></span>
+      <button class="cfg-fbtn" data-pgcol="${col.id}" tabindex="-1">${CFG_IC.funnel}<span></span></button>
+      <div class="col-resize" data-col="${col.id}"></div></div>`);
+  });
+  document.getElementById("colHeadRow").innerHTML = parts.join("");
+  applyGridTemplateColumns();
+  initColumnResize();
+  renderGridHeaderState();
+}
+function renderGridHeaderState(){
+  document.querySelectorAll("#colHeadRow .cfg-fbtn").forEach(b=>{
+    const col = b.dataset.pgcol, f = pgColFilters[col], act = pgFActive(col);
+    b.classList.toggle("active", act);
+    b.querySelector("span").textContent = act ? (f.sel.size ? f.sel.size : "Aa") : "";
+  });
+  document.querySelectorAll("#colHeadRow .pg-sort-ind").forEach(s=>{
+    const esDefault = pgSort.col==="fecha" && pgSort.dir==="desc";
+    s.textContent = (!esDefault && s.dataset.sortind===pgSort.col) ? (pgSort.dir==="asc"?"↑":"↓") : "";
+  });
+}
+function initColumnResize(){
+  document.querySelectorAll("#colHeadRow .col-resize").forEach(handle=>{
+    handle.addEventListener("click", e=>e.stopPropagation());
+    handle.addEventListener("mousedown", (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      const id = handle.dataset.col, colDef = PG_COL(id);
+      if(!colDef) return;
+      const z = cfgZoom();
+      const startX = e.clientX, startWidth = handle.closest(".col-head").getBoundingClientRect().width / z;
+      handle.classList.add("active"); document.body.classList.add("col-resizing");
+      function onMove(ev){
+        const raw = Math.round(startWidth + (ev.clientX-startX)/z);
+        document.documentElement.style.setProperty(`--pgw-${id}`, Math.max(colDef.minWidth, Math.min(colDef.maxWidth, raw))+"px");
+      }
+      function onUp(){
+        document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp);
+        document.body.classList.remove("col-resizing"); handle.classList.remove("active");
+        gridState.widths[id] = parseInt(getComputedStyle(document.documentElement).getPropertyValue(`--pgw-${id}`)) || colDef.defaultWidth;
+        persistGridState();
+      }
+      document.addEventListener("mousemove", onMove); document.addEventListener("mouseup", onUp);
+    });
+  });
+}
+
+/* ---- selector de columnas ---- */
+let dragColId = null;
+function toggleColumnPicker(ev){
+  ev.stopPropagation();
+  const pop = document.getElementById("columnPickerPopover");
+  const wasOpen = pop.classList.contains("show");
+  pgCloseFilterPop(); closeReportPopover();
+  if(wasOpen){ pop.classList.remove("show"); return; }
+  renderColumnPicker();
+  cfgPlace(pop, ev.currentTarget, "right");
+}
+function closeColumnPicker(){ const p = document.getElementById("columnPickerPopover"); if(p) p.classList.remove("show"); }
+function renderColumnPicker(){
+  const pop = document.getElementById("columnPickerPopover");
+  pop.innerHTML = `<h4>Columnas de la lista</h4><div class="colpick-list">${gridState.order.map(id=>{
+    const col = PG_COL(id); if(!col) return "";
+    return `<div class="colpick-row" draggable="true" data-id="${id}" ondragstart="colPickDragStart(event)" ondragover="colPickDragOver(event)" ondragleave="colPickDragLeave(event)" ondrop="colPickDrop(event)" ondragend="colPickDragEnd(event)">
+      <span class="cp-handle" title="Arrastrá para reordenar">⠿⠿</span>
+      <label><input type="checkbox" ${gridState.visible[id]?"checked":""} onchange="toggleColumnVisible('${id}',this.checked)"><span>${col.label}</span></label></div>`;
+  }).join("")}</div>
+  <div class="filter-actions"><button class="fa-clear" onclick="resetGridColumns()">Restaurar</button><button class="fa-apply" onclick="closeColumnPicker()">Cerrar</button></div>`;
+}
+function toggleColumnVisible(id, checked){
+  const next = {...gridState.visible, [id]:checked};
+  if(Object.values(next).filter(Boolean).length===0){ showToast("Tiene que quedar al menos una columna visible", "warn"); renderColumnPicker(); return; }
+  gridState.visible[id] = checked; persistGridState(); renderGridHeader(); renderList();
+}
+function colPickDragStart(ev){ dragColId = ev.currentTarget.dataset.id; ev.currentTarget.classList.add("dragging"); ev.dataTransfer.effectAllowed = "move"; }
+function colPickDragOver(ev){ ev.preventDefault(); ev.currentTarget.classList.add("drag-over"); }
+function colPickDragLeave(ev){ ev.currentTarget.classList.remove("drag-over"); }
+function colPickDrop(ev){
+  ev.preventDefault(); ev.currentTarget.classList.remove("drag-over");
+  const targetId = ev.currentTarget.dataset.id;
+  if(!dragColId || dragColId===targetId) return;
+  const order = gridState.order.slice(), from = order.indexOf(dragColId), to = order.indexOf(targetId);
+  if(from<0||to<0) return;
+  order.splice(from,1); order.splice(to,0,dragColId);
+  gridState.order = order; persistGridState(); renderGridHeader(); renderList(); renderColumnPicker();
+}
+function colPickDragEnd(ev){ ev.currentTarget.classList.remove("dragging"); dragColId = null; }
+function resetGridColumns(){
+  gridState = defaultGridState(); persistGridState(); applyWidthVars();
+  renderGridHeader(); renderList(); renderColumnPicker();
+  showToast("Columnas restauradas a su configuración original");
+}
+
+/* ---- filtro por columna: embudo (tildar valores o escribir) ---- */
+let pgFP = { col:null, visible:[] };
+function pgOpenFilter(ev, col){
+  ev.stopPropagation();
+  if(ev.target.closest(".col-resize")) return;
+  const pop = document.getElementById("pgFilterPop");
+  if(pop.classList.contains("show") && pgFP.col===col){ pgCloseFilterPop(); return; }
+  pgCloseFilterPop(); closeColumnPicker(); closeReportPopover();
+  pgFP = { col, visible:[] };
+  pgRenderFilterPop();
+  const head = document.querySelector(`#colHeadRow .col-head[data-col="${col}"]`);
+  if(head){ head.classList.add("pg-open"); cfgPlace(pop, head, "left"); }
+  const inp = document.getElementById("pgFpInput");
+  if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+function pgCloseFilterPop(){
+  const pop = document.getElementById("pgFilterPop"); if(pop) pop.classList.remove("show");
+  document.querySelectorAll("#colHeadRow .col-head.pg-open").forEach(h=>h.classList.remove("pg-open"));
+  pgFP = { col:null, visible:[] };
+}
+function pgRenderFilterPop(){
+  const col = pgFP.col; if(!col) return;
+  const def = PG_COL(col), f = pgF(col);
+  const isNum = def.num || col==="fecha" || col==="fechaPago";
+  const lblAsc = isNum ? (col==="plazo" ? "Más urgente primero" : "Menor a mayor") : "A → Z";
+  const lblDesc = isNum ? (col==="plazo" ? "Menos urgente primero" : "Mayor a menor") : "Z → A";
+  const on = d => pgSort.col===col && pgSort.dir===d ? " on" : "";
+  document.getElementById("pgFilterPop").innerHTML = `
+    <div class="fp-head"><h4>Filtrar por ${pgEsc(def.label.toLowerCase())}</h4><span class="fp-mode" id="pgFpMode"></span></div>
+    <div class="fp-search">${CFG_IC.search}<input type="text" id="pgFpInput" placeholder="Escribí para filtrar…" value="${pgEsc(f.text)}" autocomplete="off"
+      oninput="pgFpOnInput(this.value)" onkeydown="if(event.key==='Enter'||event.key==='Escape'){pgCloseFilterPop();}"></div>
+    <div class="fp-sort">
+      <button class="${on("asc")}" onclick="pgSetSort('${col}','asc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>${lblAsc}</button>
+      <button class="${on("desc")}" onclick="pgSetSort('${col}','desc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>${lblDesc}</button>
+    </div>
+    <div class="fp-bulk"><a onclick="pgFpSelectVisible()">Tildar los visibles</a><span id="pgFpCount"></span><a onclick="pgFpSelectNone()">Destildar</a></div>
+    <div class="fp-list" id="pgFpList"></div>
+    <div class="fp-foot"><button class="fa-clear" onclick="pgClearColFilter('${col}')">Limpiar</button><button class="fa-apply" onclick="pgCloseFilterPop()">Listo</button></div>`;
+  pgRenderFilterList();
+}
+function pgFpOptions(){
+  const col = pgFP.col, def = PG_COL(col);
+  const rows = getFiltered(col);
+  const counts = new Map();
+  (def.fixedOpts||[]).forEach(v=>counts.set(v,0));
+  ordenes.forEach(o=>def.fvals(o).forEach(v=>{ if(!counts.has(v)) counts.set(v,0); }));
+  rows.forEach(o=>def.fvals(o).forEach(v=>counts.set(v,(counts.get(v)||0)+1)));
+  let opts = [...counts.entries()].map(([v,n])=>({v,n}));
+  if(def.fixedOpts) opts.sort((a,b)=>{ const ia=def.fixedOpts.indexOf(a.v), ib=def.fixedOpts.indexOf(b.v); return (ia<0?99:ia)-(ib<0?99:ib); });
+  else if(col==="fecha"||col==="fechaPago") opts.sort((a,b)=>cfgCmp(dmyToISO(b.v)||"",dmyToISO(a.v)||""));
+  else if(col==="monto") opts.sort((a,b)=>parseMoneyInput(a.v)-parseMoneyInput(b.v));
+  else opts.sort((a,b)=>cfgCmp(a.v,b.v));
+  return opts;
+}
+function pgRenderFilterList(){
+  const col = pgFP.col; if(!col) return;
+  const list = document.getElementById("pgFpList"); if(!list) return;
+  const f = pgF(col), t = cfgNorm(f.text);
+  const opts = pgFpOptions().filter(o=>!t || cfgNorm(o.v).includes(t));
+  list.innerHTML = opts.length ? opts.map(o=>`<div class="cfg-fopt${f.sel.has(o.v)?" on":""}${o.n===0&&!f.sel.has(o.v)?" zero":""}" data-v="${pgEsc(o.v)}" onclick="pgFpToggle(this.dataset.v)"><span class="ck">${CFG_IC.check}</span><span class="lb">${cfgHi(o.v, f.text)}</span><span class="ct">${o.n}</span></div>`).join("")
+    : `<div class="fp-empty">Sin coincidencias para “${pgEsc(f.text)}”</div>`;
+  const mode = document.getElementById("pgFpMode");
+  if(mode) mode.textContent = f.sel.size ? `${f.sel.size} tildado${f.sel.size===1?"":"s"}` : (t ? "Filtrando por texto" : "");
+  const cnt = document.getElementById("pgFpCount");
+  if(cnt) cnt.textContent = `${opts.length} opci${opts.length===1?"ón":"ones"}`;
+  pgFP.visible = opts.map(o=>o.v);
+}
+function pgFpOnInput(val){ pgF(pgFP.col).text = val; renderList(); pgRenderFilterList(); }
+function pgFpToggle(v){ const f = pgF(pgFP.col); f.sel.has(v) ? f.sel.delete(v) : f.sel.add(v); renderList(); pgRenderFilterList(); }
+function pgFpSelectVisible(){ const f = pgF(pgFP.col); pgFP.visible.forEach(v=>f.sel.add(v)); renderList(); pgRenderFilterList(); }
+function pgFpSelectNone(){ pgF(pgFP.col).sel.clear(); renderList(); pgRenderFilterList(); }
+function pgSetSort(col, dir){
+  pgSort = (pgSort.col===col && pgSort.dir===dir) ? { col:"fecha", dir:"desc" } : { col, dir };
+  renderList(); pgRenderFilterPop();
+}
+function pgClearColFilter(col){
+  const f = pgF(col); f.text=""; f.sel.clear();
+  renderList(); if(pgFP.col===col) pgRenderFilterPop();
+}
+function clearAllColumnFilters(){ pgColFilters = {}; pgCloseFilterPop(); renderList(); }
+document.addEventListener("mousedown", e=>{
+  const pop = document.getElementById("pgFilterPop");
+  if(pop && pop.classList.contains("show") && !pop.contains(e.target) && !e.target.closest("#colHeadRow .col-head")) pgCloseFilterPop();
+  const cp = document.getElementById("columnPickerPopover");
+  if(cp && cp.classList.contains("show") && !cp.contains(e.target) && !e.target.closest("[onclick=\"toggleColumnPicker(event)\"]")) closeColumnPicker();
+  const rp = document.getElementById("reportPopover");
+  if(rp && rp.classList.contains("show") && !rp.contains(e.target) && !e.target.closest("[onclick=\"toggleReportPopover(event)\"]")) closeReportPopover();
+});
+window.addEventListener("resize", ()=>{ pgCloseFilterPop(); closeColumnPicker(); closeReportPopover(); });
+
+/* =========================================================
+   ADJUNTOS MÚLTIPLES (documentos de compra / comprobantes de pago)
+   attachState[key] = [{uid,name,size,path,url,uploading,fresh}]
+   - "fresh": subido en esta edición (si se quita antes de guardar se borra ya del storage)
+   - los archivos ya guardados que se quitan en el panel se borran del storage recién al guardar
+   ========================================================= */
+let attachState = { panel:[], nueva:[], panelPago:[], nuevaPago:[] };
+let attachRemoved = { panel:[], panelPago:[] };
+const ATTACH_LABELS = {
+  panel:"Adjuntar documento de compra", nueva:"Adjuntar documento de compra",
+  panelPago:"Adjuntar comprobante de pago", nuevaPago:"Adjuntar comprobante de pago"
+};
+function pgFileKind(name){ const ext = String(name).split(".").pop().toLowerCase(); return ext==="pdf" ? "pdf" : (["jpg","jpeg","png","webp"].includes(ext) ? "img" : ""); }
+function renderAttachZone(key){
+  const wrap = document.getElementById(key+"AttachZone"); if(!wrap) return;
+  const files = attachState[key];
+  const items = files.map(st=>{
+    const kind = pgFileKind(st.name);
+    const ext = String(st.name).split(".").pop().toUpperCase().slice(0,4);
+    return `<div class="pg-file">
+      <div class="pf-ic ${kind}">${ext}</div>
+      <div class="pf-tx"><div class="pf-name" title="${pgEsc(st.name)}">${st.uploading?"Subiendo ":""}${pgEsc(st.name)}</div><div class="pf-sub">${pgEsc(st.size||"")}</div>${st.uploading?`<div class="pf-bar"><span></span></div>`:""}</div>
+      ${st.uploading?"":`<div class="pf-act">
+        <button type="button" class="az-btn" onclick="event.stopPropagation(); verAdjunto('${key}','${st.uid}')" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button type="button" class="az-btn danger" onclick="event.stopPropagation(); removeAttach('${key}','${st.uid}')" title="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+      </div>`}
+    </div>`;
+  }).join("");
+  const compact = files.length>0;
+  wrap.innerHTML = `<div class="pg-files">${items}
+    <div class="attach-zone pg-add${compact?" compact":""}" id="${key}DropZone" onclick="attachZoneClick('${key}')">
+      <div class="az-left">
+        <div class="az-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${compact?`<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`:`<path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>`}</svg></div>
+        <div class="az-text"><div class="az-name">${compact?"Agregar otro archivo":(ATTACH_LABELS[key]||"Adjuntar archivo")}</div><div class="az-sub">PDF, JPG o PNG · click o arrastrá uno o varios archivos acá</div></div>
+      </div>
+      <input type="file" id="${key}AttachInput" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple style="display:none">
+    </div></div>`;
+  wireAttachInput(key);
+  const cnt = key==="panel" ? "fAdjCount" : key==="panelPago" ? "fAdjPagoCount" : null;
+  if(cnt){ const el = document.getElementById(cnt); const n = files.filter(f=>!f.uploading).length; el.style.display = n ? "" : "none"; el.textContent = n; }
+}
+function wireAttachInput(key){
+  const inputEl = document.getElementById(key+"AttachInput");
+  inputEl.addEventListener("click", e=>e.stopPropagation());
+  inputEl.addEventListener("change", e=>{ const fs = Array.from(e.target.files||[]); if(fs.length) addAttachFiles(key, fs); });
+  const zone = document.getElementById(key+"DropZone");
+  zone.addEventListener("dragover",(e)=>{ e.preventDefault(); zone.classList.add("dragover"); });
+  zone.addEventListener("dragleave",()=> zone.classList.remove("dragover"));
+  zone.addEventListener("drop",(e)=>{
+    e.preventDefault(); e.stopPropagation(); zone.classList.remove("dragover");
+    const fs = Array.from(e.dataTransfer.files||[]); if(fs.length) addAttachFiles(key, fs);
+  });
+}
+function attachZoneClick(key){ document.getElementById(key+"AttachInput").click(); }
+function pgUploading(){ return Object.values(attachState).some(arr=>arr.some(f=>f.uploading)); }
+async function addAttachFiles(key, files){
+  const MAX_BYTES = 15*1024*1024;
+  const okTypes = /\.(pdf|jpe?g|png|webp)$/i;
+  const tasks = [];
+  files.forEach(file=>{
+    if(!okTypes.test(file.name)){ showToast(`"${file.name}" no es PDF/JPG/PNG`, "warn"); return; }
+    if(file.size > MAX_BYTES){ showToast(`"${file.name}" pesa más de 15 MB, no se puede subir`, "warn"); return; }
+    const st = { uid: uuidLike(), name:file.name, size:fmtBytes(file.size), uploading:true, fresh:true };
+    attachState[key].push(st);
+    tasks.push({ st, file });
+  });
+  renderAttachZone(key);
+  await Promise.all(tasks.map(async ({st, file})=>{
+    try{
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `ordenes/${uuidLike()}-${safeName}`;
+      const { error } = await sb.storage.from(ADJUNTOS_BUCKET).upload(path, file, { upsert:false });
+      if(error) throw error;
+      st.path = path; st.uploading = false;
+    }catch(e){
+      attachState[key] = attachState[key].filter(x=>x!==st);
+      showToast(`No se pudo subir "${file.name}": ${e.message||e}`, "warn");
+    }
+    renderAttachZone(key);
+  }));
+  if(key==="panelPago") markFieldError("fld-fAdjPago", false);
+}
+async function verAdjunto(key, uid){
+  const st = attachState[key].find(f=>f.uid===uid);
+  if(!st || !st.path) return;
+  const w = window.open("", "_blank");
+  const { data, error } = await sb.storage.from(ADJUNTOS_BUCKET).createSignedUrl(st.path, 3600);
+  if(error || !data){ if(w) w.close(); showToast("No se pudo abrir el archivo", "warn"); return; }
+  if(w) w.location.href = data.signedUrl; else window.open(data.signedUrl, "_blank", "noopener");
+}
+function removeAttach(key, uid){
+  const st = attachState[key].find(f=>f.uid===uid);
+  attachState[key] = attachState[key].filter(f=>f.uid!==uid);
+  renderAttachZone(key);
+  if(!st || !st.path) return;
+  if(st.fresh) sb.storage.from(ADJUNTOS_BUCKET).remove([st.path]).catch(()=>{});
+  else if(attachRemoved[key]) attachRemoved[key].push(st.path);
+}
+function pgFilesToState(files){ return (files||[]).map(f=>({ uid:uuidLike(), name:f.nombre, size:f.tamano, path:f.path, fresh:false })); }
+function pgStateToFiles(key){ return attachState[key].filter(f=>!f.uploading && f.path).map(f=>({ nombre:f.name, tamano:f.size, path:f.path })); }
+function pgDiscardFresh(keys){
+  const paths = [];
+  keys.forEach(k=>{ attachState[k].forEach(f=>{ if(f.fresh && f.path) paths.push(f.path); }); attachState[k] = []; });
+  if(paths.length) sb.storage.from(ADJUNTOS_BUCKET).remove(paths).catch(()=>{});
+}
+function collectAdjuntoPaths(ids){
+  const paths = [];
+  ids.forEach(id=>{ const o = ordenes.find(x=>x.id===id); if(!o) return;
+    o.adjuntos.concat(o.adjuntosPago).forEach(f=>{ if(f.path) paths.push(f.path); }); });
+  return paths;
+}
+
+/* =========================================================
+   PANEL DE DETALLE (ver / editar · modo "registrar pago")
+   ========================================================= */
+function pgFillRubroSelect(sel, proveedor, current){
+  const p = pgProvByName[proveedor];
+  let rubros = p && p.rubros.length ? p.rubros : pgRubros.slice().sort((a,b)=>cfgCmp(a.cat+a.nombre,b.cat+b.nombre));
+  sel.innerHTML = "";
+  const groups = {};
+  rubros.forEach(r=>{ (groups[r.cat||"Sin categoría"] = groups[r.cat||"Sin categoría"]||[]).push(r); });
+  const keys = Object.keys(groups);
+  if(!(p && p.rubros.length===1)){ const o = document.createElement("option"); o.value=""; o.textContent="Seleccionar rubro…"; sel.appendChild(o); }
+  keys.forEach(k=>{
+    const og = document.createElement("optgroup"); og.label = k;
+    groups[k].forEach(r=>{ const o=document.createElement("option"); o.value=r.id; o.textContent=r.nombre; o.dataset.cat=r.cat; o.dataset.nombre=r.nombre; og.appendChild(o); });
+    sel.appendChild(og);
+  });
+  // seleccionar el actual (por nombre de rubro + categoría)
+  if(current && current.rubro){
+    const opt = Array.from(sel.options).find(o=>o.dataset.nombre===current.rubro && (!current.concepto || o.dataset.cat===current.concepto))
+             || Array.from(sel.options).find(o=>o.dataset.nombre===current.rubro);
+    if(opt) sel.value = opt.value;
+    else { const o=document.createElement("option"); o.value="__cur"; o.textContent=current.rubro+" (actual)"; o.dataset.cat=current.concepto||""; o.dataset.nombre=current.rubro; sel.insertBefore(o, sel.firstChild); sel.value="__cur"; }
+  } else if(p && p.rubros.length===1){ sel.value = p.rubros[0].id; }
+}
+function pgSelRubro(sel){ const o = sel.options[sel.selectedIndex]; return o && o.value ? { rubro:o.dataset.nombre||"", concepto:o.dataset.cat||"" } : { rubro:"", concepto:"" }; }
+
+function openPanel(id, opts){
+  const o = ordenes.find(x=>x.id===id);
+  if(!o) return;
+  opts = opts || {};
+  pgCloseFilterPop();
+  if(o.unread){
+    o.unread = false;
+    sb.from("cm_ordenes").update({unread:false}).eq("id", id).then(({error})=>{ if(error) console.warn("No se pudo marcar como leída:", error); });
+  }
+  openOrderId = id;
+  pgPayMode = !!opts.pay;
+  const panel = document.getElementById("panel");
+  panel.classList.toggle("pay-mode", pgPayMode);
+  document.getElementById("panelBody").scrollTop = 0;
+
+  document.getElementById("fProveedor").value = o.proveedor;
+  document.getElementById("fProveedorWarn").style.display = "none";
+  pgFillRubroSelect(document.getElementById("fRubro"), o.proveedor, { rubro:o.rubro, concepto:o.concepto });
+  document.getElementById("fConcepto").value = o.concepto || "";
+  const metodos = metodosPagoConfig.slice(); if(o.metodo && !metodos.includes(o.metodo)) metodos.unshift(o.metodo);
+  populateSelect(document.getElementById("fMetodo"), metodos, "Seleccionar…");
+  document.getElementById("fMetodo").value = o.metodo || "";
+
+  document.getElementById("panelProveedor").textContent = o.proveedor;
+  document.getElementById("panelId").textContent = o.id + " · " + pgLabelFactura(o);
+  document.getElementById("fMontoFactura").value = fmtMoneyStrict(o.montoFactura);
+  document.getElementById("fMontoRetencion").value = fmtMoneyStrict(o.montoRetencion);
+  document.getElementById("fMontoAPagar").value = fmtMoneyStrict(o.monto);
+  document.getElementById("fComprobanteTipo").value = o.comprobanteTipo||"";
+  document.getElementById("fComprobante").value = o.comprobante||"";
+  document.getElementById("fFechaOrden").value = o.fechaOrden||"";
+  document.getElementById("fFechaComprobante").value = o.fechaComprobante||"";
+  document.getElementById("fFechaPago").value = o.fechaPago||"";
+  document.getElementById("fNotas").value = o.notas||"";
+  document.getElementById("savedFlash").classList.remove("show");
+  document.getElementById("fCreadoInfo").textContent = o.creadoPor || "—";
+  document.getElementById("fModificadoInfo").textContent = (o.modificadoPor||"—") + (o.modificadoFecha ? " · "+fmtFechaHora(o.modificadoFecha) : "");
+  document.getElementById("pSumMonto").textContent = (o.comprobanteTipo==="NC"?"−":"") + fmtMoney2(o.monto);
+  setStatus(o.estado==="Vencido" ? "Pendiente" : o.estado);
+
+  attachState.panel = pgFilesToState(o.adjuntos);
+  attachState.panelPago = pgFilesToState(o.adjuntosPago);
+  attachRemoved = { panel:[], panelPago:[] };
+  renderAttachZone("panel"); renderAttachZone("panelPago");
+  ["fld-fMetodo","fld-fFechaPago","fld-fAdjPago","fld-fProveedor"].forEach(i=>markFieldError(i,false));
+  document.getElementById("fld-fAdjPago").classList.toggle("pg-required", pgPayMode);
+  document.getElementById("btnSaveOrder").textContent = pgPayMode ? "Confirmar pago" : "Guardar cambios";
+  document.getElementById("btnDeleteOrder").style.display = pgPayMode ? "none" : "";
+
+  if(pgPayMode){
+    setStatus("Pagado");
+    if(!document.getElementById("fFechaPago").value) document.getElementById("fFechaPago").value = todayISO();
+  }
+  pgPanelRefreshPlazo();
+  panelSnapshot = deepClone(o);
+  document.getElementById("overlay").classList.add("show");
+  panel.classList.add("show");
+  if(document.getElementById("paneLista").classList.contains("active")) renderList();
+}
+function pgPanelRefreshPlazo(){
+  if(!openOrderId) return;
+  const o = ordenes.find(x=>x.id===openOrderId); if(!o) return;
+  const st = document.getElementById("panel").dataset.status || o.estado;
+  const tmp = Object.assign({}, o, {
+    proveedor: document.getElementById("fProveedor").value.trim() || o.proveedor,
+    fechaComprobante: document.getElementById("fFechaComprobante").value || o.fechaComprobante,
+    estado: pgPayMode ? "Pendiente" : st   // en modo pago se muestra el plazo que le quedaba a la factura
+  });
+  const info = pgPlazoInfo(tmp);
+  const plazo = pgPlazoProveedor(tmp.proveedor);
+  const venc = pgVencimiento(tmp);
+  document.getElementById("pSumPlazo").innerHTML = info.kind==="paid" ? pgPlazoPill(info)
+    : (plazo==null ? `<span style="color:var(--text-3);font-size:12.5px;">Sin plazo en Configuración</span>` : `${pgPlazoPill(info)}${venc?`<div style="font-size:11px;color:var(--text-3);font-weight:600;margin-top:4px;">${plazo} días · vence ${isoToDMY(venc)}</div>`:""}`);
+}
+function closePanel(){
+  if(pgUploading()){ showToast("Esperá a que terminen de subirse los archivos", "warn"); return; }
+  pgDiscardFresh(["panel","panelPago"]);
+  document.getElementById("overlay").classList.remove("show");
+  const panel = document.getElementById("panel");
+  panel.classList.remove("show","pay-mode");
+  openOrderId = null; pgPayMode = false;
+}
+function onPanelProveedorChange(){
+  const nombre = document.getElementById("fProveedor").value.trim();
+  const p = pgProvByName[nombre];
+  const valido = !!p || nombre===PG_SIN_PROV;
+  document.getElementById("fProveedorWarn").style.display = (nombre && !valido) ? "" : "none";
+  if(p){
+    const sel = document.getElementById("fRubro");
+    pgFillRubroSelect(sel, nombre, null);
+    const r = pgSelRubro(sel); document.getElementById("fConcepto").value = r.concepto;
+  }
+  pgPanelRefreshPlazo();
+}
+function onPanelRubroChange(){ document.getElementById("fConcepto").value = pgSelRubro(document.getElementById("fRubro")).concepto; }
+function setStatus(s, fromUser){
+  document.querySelectorAll("#statusChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===s));
+  document.getElementById("panel").dataset.status = s;
+  if(fromUser && s==="Pagado" && !document.getElementById("fFechaPago").value && openOrderId) document.getElementById("fFechaPago").value = todayISO();
+  if(openOrderId) pgPanelRefreshPlazo();
+}
+["fMontoFactura","fMontoRetencion"].forEach(id=>{
+  document.getElementById(id).addEventListener("input",(e)=>{
+    const digits = e.target.value.replace(/[^\d]/g,"");
+    e.target.value = fmtMoneyFromDigits(digits);
+    const fac = parseMoneyInput(document.getElementById("fMontoFactura").value);
+    const ret = parseMoneyInput(document.getElementById("fMontoRetencion").value);
+    document.getElementById("fMontoAPagar").value = fmtMoneyStrict(Math.max(fac-ret,0));
+  });
+});
+const ORDER_FIELD_LABELS = {
+  proveedor:"Proveedor", concepto:"Categoría", rubro:"Rubro", metodo:"Método de pago",
+  montoFactura:"Monto de la factura", montoRetencion:"Monto de retención",
+  comprobanteTipo:"Tipo de compra", comprobante:"N° de comprobante",
+  fechaOrden:"Fecha de creación", fechaComprobante:"Fecha de la factura", fechaPago:"Fecha de pago",
+  notas:"Observaciones", estado:"Estado",
+  adjuntos:"Documentos de compra", adjuntosPago:"Comprobantes de pago"
+};
+function fmtOrderFieldValue(field, val){
+  if(field==="montoFactura"||field==="montoRetencion") return fmtMoney(val||0);
+  if(field==="fechaOrden"||field==="fechaComprobante"||field==="fechaPago") return val ? isoToDMY(val) : "—";
+  if(field==="adjuntos"||field==="adjuntosPago") return (val&&val.length) ? val.map(f=>f.nombre).join(", ") : "—";
+  if(val===""||val==null) return "—";
+  return String(val);
+}
+function diffOrderFields(before, after){
+  const lines = [];
+  Object.keys(ORDER_FIELD_LABELS).forEach(f=>{
+    const a = before ? before[f] : undefined, b = after[f];
+    const changed = (f==="adjuntos"||f==="adjuntosPago")
+      ? JSON.stringify((a||[]).map(x=>x.path)) !== JSON.stringify((b||[]).map(x=>x.path))
+      : (a??"") !== (b??"");
+    if(changed) lines.push(`${ORDER_FIELD_LABELS[f]}: ${fmtOrderFieldValue(f,a)} → ${fmtOrderFieldValue(f,b)}`);
+  });
+  return lines;
+}
+async function saveOrder(){
+  if(!openOrderId) return;
+  const o = ordenes.find(x=>x.id===openOrderId);
+  if(!o) return;
+  if(pgUploading()){ showToast("Esperá a que terminen de subirse los archivos", "warn"); return; }
+
+  const proveedor = document.getElementById("fProveedor").value.trim() || o.proveedor;
+  const provOk = !!pgProvByName[proveedor] || proveedor===PG_SIN_PROV || proveedor===o.proveedor;
+  markFieldError("fld-fProveedor", !provOk);
+  if(!provOk){ showToast("El proveedor no coincide con ninguno cargado en Configuración", "warn"); return; }
+  const rsel = pgSelRubro(document.getElementById("fRubro"));
+  const rubro = rsel.rubro, concepto = rsel.concepto;
+  const metodo = document.getElementById("fMetodo").value;
+  const montoFactura = parseMoneyInput(document.getElementById("fMontoFactura").value);
+  const montoRetencion = parseMoneyInput(document.getElementById("fMontoRetencion").value);
+  const monto = Math.max(montoFactura - montoRetencion, 0);
+  const comprobanteTipo = document.getElementById("fComprobanteTipo").value;
+  const comprobante = document.getElementById("fComprobante").value.trim();
+  const fechaOrden = document.getElementById("fFechaOrden").value;
+  const fechaComprobante = document.getElementById("fFechaComprobante").value;
+  const fechaPago = document.getElementById("fFechaPago").value;
+  const notas = document.getElementById("fNotas").value;
+  const estado = document.getElementById("panel").dataset.status || o.estado;
+  const adjuntos = pgStateToFiles("panel");
+  const adjuntosPago = pgStateToFiles("panelPago");
+
+  if(pgPayMode){
+    let ok = true;
+    const falta = [];
+    if(!metodo){ ok=false; falta.push("método de pago"); } markFieldError("fld-fMetodo", !metodo);
+    if(!fechaPago){ ok=false; falta.push("fecha de pago"); } markFieldError("fld-fFechaPago", !fechaPago);
+    if(!adjuntosPago.length){ ok=false; falta.push("comprobante(s) de pago"); } markFieldError("fld-fAdjPago", !adjuntosPago.length);
+    if(estado!=="Pagado"){ ok=false; falta.push("estado Pagado"); }
+    if(!ok){
+      showToast("Para registrar el pago falta: " + falta.join(", "), "warn");
+      if(!adjuntosPago.length) document.getElementById("fld-fAdjPago").scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+  }
+
+  const btn = document.getElementById("btnSaveOrder");
+  btn.disabled = true;
+  const payload = {
+    proveedor, concepto, rubro, metodo: metodo||null,
+    monto_factura: montoFactura, monto_retencion: montoRetencion, monto,
+    comprobante_tipo: comprobanteTipo||null, comprobante,
+    fecha_orden: fechaOrden || null, fecha_comprobante: fechaComprobante || null,
+    fecha_pago: fechaPago || null,
+    notas, estado,
+    adjuntos, adjuntos_pago: adjuntosPago,
+    adjunto_nombre:null, adjunto_tamano:null, adjunto_path:null,
+    adjunto_pago_nombre:null, adjunto_pago_tamano:null, adjunto_pago_path:null,
+    modificado_por: currentPerfil ? currentPerfil.id : null,
+    modificado_por_nombre: currentPerfil ? currentPerfil.nombre : "—",
+    modificado_fecha: new Date().toISOString(),
+  };
+  const { data, error } = await sb.from("cm_ordenes").update(payload).eq("id", openOrderId).select().single();
+  btn.disabled = false;
+  if(error){ showToast("No se pudo guardar la orden de pago, intentá de nuevo", "warn"); return; }
+  Object.assign(o, mapOrdenRow(data));
+  // confirmado: los archivos nuevos dejan de ser "fresh" y se borran del storage los que se quitaron
+  ["panel","panelPago"].forEach(k=>{ attachState[k].forEach(f=>f.fresh=false); if(attachRemoved[k].length){ sb.storage.from(ADJUNTOS_BUCKET).remove(attachRemoved[k]).catch(()=>{}); attachRemoved[k]=[]; } });
+
+  const cambios = diffOrderFields(panelSnapshot, o);
+  const accion = pgPayMode ? "Registró el pago de una orden" : "Modificó una orden de pago";
+  logHistorialOrden(accion, `${o.id} (${o.proveedor})` + (cambios.length ? " — " + cambios.join("; ") : " — sin cambios en los campos"));
+  panelSnapshot = deepClone(o);
+  if(pgPayMode){
+    showToast(`${pgLabelFactura(o)} de ${o.proveedor} registrada como pagada`);
+    ccJustPaid = o.id;
+    closePanel();
+    pgRenderActive();
+    return;
+  }
+  document.getElementById("panelProveedor").textContent = o.proveedor;
+  document.getElementById("panelId").textContent = o.id + " · " + pgLabelFactura(o);
+  document.getElementById("fMontoAPagar").value = fmtMoneyStrict(o.monto);
+  document.getElementById("pSumMonto").textContent = (o.comprobanteTipo==="NC"?"−":"") + fmtMoney2(o.monto);
+  document.getElementById("fModificadoInfo").textContent = (o.modificadoPor||"—")+" · "+fmtFechaHora(o.modificadoFecha);
+  const flash = document.getElementById("savedFlash"); flash.classList.add("show"); setTimeout(()=>flash.classList.remove("show"), 2200);
+  pgRenderActive();
+  showToast("Orden "+o.id+" actualizada correctamente");
+}
+function requestSingleDelete(){
+  if(!openOrderId) return;
+  pendingDelete = {type:"single", id:openOrderId};
+  document.getElementById("confirmTitle").textContent = "¿Eliminar esta orden de pago?";
+  document.getElementById("confirmText").textContent = "Vas a eliminar "+openOrderId+" y sus archivos adjuntos de forma permanente. Esta acción no se puede deshacer.";
+  document.getElementById("confirmOverlay").classList.add("show");
+}
+function requestBulkDelete(){
+  if(selected.size===0) return;
+  pendingDelete = {type:"bulk", ids:Array.from(selected)};
+  document.getElementById("confirmTitle").textContent = "¿Eliminar "+selected.size+" orden(es) de pago?";
+  document.getElementById("confirmText").textContent = "Esta acción eliminará las órdenes seleccionadas (y sus adjuntos) de forma permanente y no se puede deshacer.";
+  document.getElementById("confirmOverlay").classList.add("show");
+}
+function closeConfirm(){ document.getElementById("confirmOverlay").classList.remove("show"); pendingDelete=null; }
+async function confirmDeleteAction(){
+  if(!pendingDelete) return;
+  const ids = pendingDelete.type==="single" ? [pendingDelete.id] : pendingDelete.ids;
+  const paths = collectAdjuntoPaths(ids);
+  const { error } = await sb.from("cm_ordenes").delete().in("id", ids);
+  if(error){ showToast("No se pudo eliminar", "warn"); closeConfirm(); return; }
+  if(paths.length) sb.storage.from(ADJUNTOS_BUCKET).remove(paths).catch(()=>{});
+  ids.forEach(id=>selected.delete(id));
+  ordenes = ordenes.filter(o=>!ids.includes(o.id));
+  if(pendingDelete.type==="single"){ attachState.panel=[]; attachState.panelPago=[]; closePanel(); }
+  logHistorialOrden(ids.length===1 ? "Eliminó una orden de pago" : "Eliminó "+ids.length+" órdenes de pago", ids.join(", "));
+  showToast(ids.length===1 ? "Orden "+ids[0]+" eliminada" : ids.length+" órdenes eliminadas");
+  closeConfirm(); pgRenderActive();
+}
+
+/* =========================================================
+   NUEVA ORDEN DE PAGO
+   ========================================================= */
+function recalcMontoAPagar(){
+  const fac = parseMoneyInput(document.getElementById("nMontoFactura").value);
+  const ret = parseMoneyInput(document.getElementById("nMontoRetencion").value);
+  document.getElementById("nMontoAPagar").textContent = fmtMoneyStrict(Math.max(fac-ret,0));
+}
+attachMoneyMask("nMontoFactura", recalcMontoAPagar);
+attachMoneyMask("nMontoRetencion", recalcMontoAPagar);
+function onComprobanteTipoChange(){
+  const tipo = document.getElementById("nComprobanteTipo").value;
+  const ret = document.getElementById("nMontoRetencion");
+  const esFacturaA = tipo === "Fc. A";
+  ret.disabled = !esFacturaA; if(!esFacturaA) ret.value = "";
+  recalcMontoAPagar();
+  const nro = document.getElementById("nComprobanteNro");
+  const esB = tipo === "Compra B";
+  nro.disabled = esB;
+  nro.placeholder = esB ? "No aplica para Compra B" : "Ej: 0001-00000234";
+  if(esB) nro.value = "";
+  markFieldError("fld-nComprobanteNro", false);
+  markFieldError("fld-nComprobanteTipo", false);
+}
+function onProveedorChange(){
+  const nombre = document.getElementById("nProveedor").value.trim();
+  const p = pgProvByName[nombre];
+  document.getElementById("nProveedorWarn").style.display = (nombre && !p) ? "" : "none";
+  const sel = document.getElementById("nRubro");
+  if(p){
+    pgFillRubroSelect(sel, nombre, null);
+    sel.disabled = p.rubros.length===1;
+    document.getElementById("nRubroHint").textContent = p.rubros.length>1 ? `(el proveedor tiene ${p.rubros.length} rubros, elegí uno)` : "(según el proveedor)";
+  } else {
+    sel.innerHTML = `<option value="">Elegí primero el proveedor</option>`; sel.disabled = true;
+    document.getElementById("nRubroHint").textContent = "(según el proveedor)";
+  }
+  document.getElementById("nConcepto").value = pgSelRubro(sel).concepto;
+  markFieldError("fld-nProveedor", false); markFieldError("fld-nRubroWrap", false);
+  pgUpdateNuevaPlazoHint();
+}
+function onSinProveedorToggle(){
+  const sin = document.getElementById("nSinProveedor").checked;
+  const prov = document.getElementById("nProveedor");
+  const sel = document.getElementById("nRubro");
+  prov.disabled = sin;
+  markFieldError("fld-nProveedor", false); markFieldError("fld-nRubroWrap", false);
+  if(sin){
+    prov.value = ""; document.getElementById("nProveedorWarn").style.display = "none";
+    pgFillRubroSelect(sel, "", null); sel.disabled = false;
+    document.getElementById("nRubroHint").textContent = "(elegí manualmente)";
+    document.getElementById("nConcepto").value = "";
+  } else {
+    onProveedorChange();
+  }
+  pgUpdateNuevaPlazoHint();
+}
+function onRubroManualChange(){
+  document.getElementById("nConcepto").value = pgSelRubro(document.getElementById("nRubro")).concepto;
+  markFieldError("fld-nRubroWrap", false);
+}
+function pgUpdateNuevaPlazoHint(){
+  const box = document.getElementById("nPlazoHint");
+  const nombre = document.getElementById("nProveedor").value.trim();
+  const p = pgProvByName[nombre];
+  if(!p || document.getElementById("nSinProveedor").checked){ box.style.display = "none"; return; }
+  const ic = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+  if(p.plazo==null){ box.innerHTML = `${ic}<span>${pgEsc(p.nombre)} no tiene plazo de pago cargado en Configuración.</span>`; box.style.display = "flex"; return; }
+  const fISO = dmyToISO(document.getElementById("nFechaComprobante").value);
+  if(!fISO){ box.innerHTML = `${ic}<span>Plazo de pago de <b>${pgEsc(p.nombre)}</b>: <b>${p.plazo===0?"contado":p.plazo+" días"}</b> desde la fecha de la factura.</span>`; box.style.display = "flex"; return; }
+  const info = pgPlazoInfo({ estado:"Pendiente", proveedor:p.nombre, fechaComprobante:fISO });
+  box.innerHTML = `${ic}<span>Plazo <b>${p.plazo===0?"contado":p.plazo+" días"}</b> · vence el <b>${isoToDMY(pgAddDays(fISO,p.plazo))}</b></span>${pgPlazoPill(info)}`;
+  box.style.display = "flex";
+}
+function setNuevaEstado(s){
+  document.querySelectorAll("#nEstadoChips .status-chip").forEach(c=>c.classList.toggle("active", c.dataset.s===s));
+  document.getElementById("paneNueva").dataset.status = s;
+  if(s==="Pagado" && !document.getElementById("nFechaPago").value) document.getElementById("nFechaPago").value = isoToDMY(todayISO());
+}
+function resetNuevaOrdenForm(){
+  pgDiscardFresh(["nueva","nuevaPago"]);
+  document.getElementById("nFechaOrden").value = isoToDMY(todayISO());
+  document.getElementById("nComprobanteTipo").value = "";
+  document.getElementById("nFechaComprobante").value = "";
+  document.getElementById("nComprobanteNro").value = "";
+  onComprobanteTipoChange();
+  refreshProveedoresPagoDatalist();
+  document.getElementById("nProveedor").value = "";
+  document.getElementById("nSinProveedor").checked = false;
+  document.getElementById("nProveedor").disabled = false;
+  onProveedorChange();
+  document.getElementById("nMontoFactura").value = "";
+  document.getElementById("nMontoRetencion").value = "";
+  document.getElementById("nMontoAPagar").textContent = "$0,00.-";
+  document.getElementById("nNotas").value = "";
+  document.getElementById("nFechaPago").value = "";
+  setNuevaEstado("Pendiente");
+  populateSelect(document.getElementById("nMetodo"), metodosPagoConfig, "Seleccionar…");
+  document.getElementById("nMetodo").value = "";
+  document.querySelectorAll("#paneNueva .field").forEach(f=>f.classList.remove("error"));
+  renderAttachZone("nueva"); renderAttachZone("nuevaPago");
+}
+async function saveNuevaOrden(){
+  if(pgUploading()){ showToast("Esperá a que terminen de subirse los archivos", "warn"); return; }
+  const fechaOrdenISO = dmyToISO(document.getElementById("nFechaOrden").value);
+  const comprobanteTipo = document.getElementById("nComprobanteTipo").value;
+  const fechaComprobanteISO = dmyToISO(document.getElementById("nFechaComprobante").value);
+  const comprobanteNro = document.getElementById("nComprobanteNro").value.trim();
+  const sinProveedor = document.getElementById("nSinProveedor").checked;
+  const rsel = pgSelRubro(document.getElementById("nRubro"));
+  const proveedor = sinProveedor ? PG_SIN_PROV : document.getElementById("nProveedor").value.trim();
+  const esFacturaA = comprobanteTipo === "Fc. A", esB = comprobanteTipo === "Compra B";
+  const montoFactura = parseMoneyInput(document.getElementById("nMontoFactura").value);
+  const montoRetencion = esFacturaA ? parseMoneyInput(document.getElementById("nMontoRetencion").value) : 0;
+  const estado = document.getElementById("paneNueva").dataset.status || "Pendiente";
+  const metodo = document.getElementById("nMetodo").value;
+  const notas = document.getElementById("nNotas").value.trim();
+  const fechaPagoISO = dmyToISO(document.getElementById("nFechaPago").value);
+
+  let ok = true;
+  const bad = (id, cond)=>{ markFieldError(id, cond); if(cond) ok=false; };
+  bad("fld-nFechaOrden", !fechaOrdenISO);
+  bad("fld-nComprobanteTipo", !comprobanteTipo);
+  bad("fld-nFechaComprobante", !fechaComprobanteISO);
+  bad("fld-nComprobanteNro", !esB && !comprobanteNro);
+  if(!sinProveedor) bad("fld-nProveedor", !pgProvByName[proveedor]);
+  bad("fld-nRubroWrap", !rsel.rubro);
+  bad("fld-nMontoFactura", montoFactura<=0);
+  bad("fld-nMetodo", !metodo);
+  if(!ok){ showToast("Completá los campos obligatorios marcados en rojo", "warn"); return; }
+
+  const ahora = new Date().toISOString();
+  const payload = {
+    fecha_orden: fechaOrdenISO, comprobante_tipo: comprobanteTipo, fecha_comprobante: fechaComprobanteISO, comprobante: esB ? "" : comprobanteNro,
+    proveedor, concepto: rsel.concepto, rubro: rsel.rubro,
+    monto_factura: montoFactura, monto_retencion: montoRetencion, monto: Math.max(montoFactura-montoRetencion,0),
+    estado, metodo, fecha_venc: null, fecha_pago: fechaPagoISO || null, notas,
+    adjuntos: pgStateToFiles("nueva"), adjuntos_pago: pgStateToFiles("nuevaPago"),
+    unread: true,
+    creado_por: currentPerfil ? currentPerfil.id : null, creado_por_nombre: currentPerfil ? currentPerfil.nombre : "—",
+    modificado_por: currentPerfil ? currentPerfil.id : null, modificado_por_nombre: currentPerfil ? currentPerfil.nombre : "—",
+    modificado_fecha: ahora,
+  };
+  const btn = document.getElementById("btnGuardarNueva"); btn.disabled = true;
+  const { data, error } = await sb.from("cm_ordenes").insert(payload).select().single();
+  btn.disabled = false;
+  if(error){ showToast("No se pudo crear la orden de pago, intentá de nuevo", "warn"); return; }
+  attachState.nueva = []; attachState.nuevaPago = []; // ya quedaron vinculados a la orden
+  const nueva = mapOrdenRow(data);
+  if(!ordenes.some(o=>o.id===nueva.id)) ordenes.unshift(nueva);
+  logHistorialOrden("Creó una orden de pago", `${nueva.id} (${proveedor}, ${fmtMoney(nueva.monto)})`);
+  showToast("Orden "+nueva.id+" creada correctamente");
+  goPane("lista");
+}
+
+/* =========================================================
+   EXCEL — Lista de órdenes (selección / rango de fechas)
+   ========================================================= */
+const ORDENES_REPORT_HEADER = [
+  "ID","Fecha de orden","Tipo de compra","Fecha de la factura","Nro. de comprobante",
+  "Proveedor","Categoría","Rubro","Monto de factura","Monto de retención","Monto a pagar",
+  "Método de pago","Estado","Plazo del proveedor (días)","Vencimiento","Días restantes","Fecha de pago","Observaciones",
+  "Documentos de compra","Comprobantes de pago","Creado por","Modificado por","Última modificación"
+];
+const ORDENES_REPORT_COL_WIDTHS = [
+  {wch:10},{wch:12},{wch:13},{wch:14},{wch:18},{wch:26},{wch:20},{wch:18},{wch:14},{wch:14},
+  {wch:14},{wch:18},{wch:11},{wch:12},{wch:12},{wch:12},{wch:13},{wch:32},{wch:30},{wch:30},{wch:16},{wch:16},{wch:18}
+];
+function buildOrdenesReportAOA(list){
+  const aoa = [ORDENES_REPORT_HEADER];
+  list.forEach(o=>{
+    const plazo = pgPlazoProveedor(o.proveedor), venc = pgVencimiento(o);
+    const dias = pgEstaPendiente(o) ? pgDiasRestantes(o) : null;
+    aoa.push([
+      o.id, isoToDMY(o.fechaOrden), o.comprobanteTipo||"", isoToDMY(o.fechaComprobante)||"", o.comprobante||"",
+      o.proveedor, o.concepto, o.rubro||"", o.montoFactura||0, o.montoRetencion||0, o.monto||0,
+      o.metodo||"", pgEstadoVista(o), plazo==null?"":plazo, venc?isoToDMY(venc):"", dias==null?"":dias, isoToDMY(o.fechaPago)||"", o.notas||"",
+      o.adjuntos.map(f=>f.nombre).join(", ")||"—", o.adjuntosPago.map(f=>f.nombre).join(", ")||"—",
+      o.creadoPor||"", o.modificadoPor||"", o.modificadoFecha ? fmtFechaHora(o.modificadoFecha) : ""
+    ]);
+  });
+  return aoa;
+}
+function downloadOrdenesReportExcel(list, suf){
+  if(typeof XLSX === "undefined"){ showToast("No se pudo cargar el módulo de Excel (revisá la conexión a internet)", "warn"); return; }
+  if(!list.length){ showToast("No hay órdenes para descargar con ese criterio", "warn"); return; }
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(buildOrdenesReportAOA(list));
+  ws["!cols"] = ORDENES_REPORT_COL_WIDTHS;
+  XLSX.utils.book_append_sheet(wb, ws, "ordenes");
+  XLSX.writeFile(wb, `ordenes_pago_chemono_${suf}.xlsx`);
+  showToast(list.length+" orden(es) descargada(s) en el Excel");
+}
+function exportSelectedOrdenesExcel(){
+  if(selected.size===0){ showToast("No hay órdenes seleccionadas", "warn"); return; }
+  const list = ordenes.filter(o=>selected.has(o.id)).sort((a,b)=>cfgCmp(a.fechaOrden,b.fechaOrden));
+  downloadOrdenesReportExcel(list, `seleccion_${todayISO()}`);
+}
+function toggleReportPopover(ev){
+  ev.stopPropagation();
+  const pop = document.getElementById("reportPopover");
+  const wasOpen = pop.classList.contains("show");
+  pgCloseFilterPop(); closeColumnPicker();
+  if(wasOpen){ pop.classList.remove("show"); return; }
+  pop.innerHTML = `<h4>Descargar reporte por fecha</h4>
+    <label style="font-size:11px;color:var(--text-3);font-weight:700;">Desde</label><input type="date" id="repDesde">
+    <label style="font-size:11px;color:var(--text-3);font-weight:700;">Hasta</label><input type="date" id="repHasta">
+    <div style="font-size:11px;color:var(--text-3);margin:-2px 0 8px 0;">Se filtra por Fecha de orden.</div>
+    <div class="filter-actions"><button class="fa-clear" onclick="closeReportPopover()">Cancelar</button><button class="fa-apply" onclick="exportOrdenesPorRango()">Descargar</button></div>`;
+  cfgPlace(pop, ev.currentTarget, "right");
+}
+function closeReportPopover(){ const p = document.getElementById("reportPopover"); if(p) p.classList.remove("show"); }
+function exportOrdenesPorRango(){
+  const desde = document.getElementById("repDesde").value, hasta = document.getElementById("repHasta").value;
+  if(!desde && !hasta){ showToast("Elegí al menos una fecha (Desde y/o Hasta)", "warn"); return; }
+  if(desde && hasta && desde>hasta){ showToast("La fecha 'Desde' no puede ser posterior a 'Hasta'", "warn"); return; }
+  const list = ordenes.filter(o=>(!desde || o.fechaOrden>=desde) && (!hasta || o.fechaOrden<=hasta)).sort((a,b)=>cfgCmp(a.fechaOrden,b.fechaOrden));
+  const suf = (desde?isoToDMY(desde).replace(/\//g,"-"):"inicio")+"_a_"+(hasta?isoToDMY(hasta).replace(/\//g,"-"):todayISO());
+  downloadOrdenesReportExcel(list, suf);
+  closeReportPopover();
+}
+
+/* =========================================================
+   CUENTAS CORRIENTES
+   - Período (fecha de la factura): Este año / Este semestre / Este mes (default) / Personalizado.
+   - Por proveedor: Total pedido = A pagar + Cancelado (las anuladas no suman; las NC restan).
+   - Plazo restante = la factura pendiente más urgente del proveedor.
+   - Click en el proveedor: planilla a doble cuenta (Canceladas | Pendientes).
+   - "Pagar" abre la orden en modo registrar pago (comprobante de pago obligatorio).
+   ========================================================= */
+let ccPreset = "mes", ccSort = "urgencia";
+let ccOpen = new Set();
+let ccJustPaid = null;
+function ccInit(){ ccApplyPreset(); ccRender(); }
+function ccRangeFor(preset){
+  const t = new Date(todayISO()+"T00:00:00"), y = t.getFullYear(), m = t.getMonth();
+  const iso = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  if(preset==="anio") return [ `${y}-01-01`, `${y}-12-31` ];
+  if(preset==="semestre") return m<6 ? [ `${y}-01-01`, `${y}-06-30` ] : [ `${y}-07-01`, `${y}-12-31` ];
+  if(preset==="mes") return [ iso(new Date(y,m,1)), iso(new Date(y,m+1,0)) ];
+  return [ document.getElementById("ccDesde").value || "", document.getElementById("ccHasta").value || "" ];
+}
+function ccApplyPreset(){
+  document.querySelectorAll("#ccPresetSeg button").forEach(b=>b.classList.toggle("active", b.dataset.preset===ccPreset));
+  document.getElementById("ccCustom").classList.toggle("show", ccPreset==="custom");
+  if(ccPreset!=="custom"){ const [d,h] = ccRangeFor(ccPreset); document.getElementById("ccDesde").value = d; document.getElementById("ccHasta").value = h; }
+}
+function ccSetPreset(p){ ccPreset = p; ccApplyPreset(); ccRender(); if(p==="custom") document.getElementById("ccDesde").focus(); }
+function ccOnCustomChange(){ ccRender(); }
+function ccSetSort(s){ ccSort = s; document.querySelectorAll("#ccSortSeg button").forEach(b=>b.classList.toggle("active", b.dataset.sort===s)); ccRender(); }
+function ccSigned(o){ return (o.comprobanteTipo==="NC" ? -1 : 1) * Number(o.monto||0); }
+function ccBuild(){
+  const [desde, hasta] = ccRangeFor(ccPreset);
+  const q = cfgNorm(document.getElementById("ccSearch").value);
+  const base = ordenes.filter(o=>{
+    if(o.estado==="Anulado") return false;
+    const f = o.fechaComprobante || o.fechaOrden;
+    if(desde && f<desde) return false;
+    if(hasta && f>hasta) return false;
+    return true;
+  });
+  const map = new Map();
+  base.forEach(o=>{
+    const key = o.proveedor || PG_SIN_PROV;
+    if(!map.has(key)) map.set(key, { nombre:key, pedido:0, pagar:0, cancelado:0, pend:[], canc:[], minDias:null, vencido:0 });
+    const e = map.get(key), m = ccSigned(o);
+    e.pedido += m;
+    if(o.estado==="Pagado"){ e.cancelado += m; e.canc.push(o); }
+    else {
+      e.pagar += m; e.pend.push(o);
+      const d = pgDiasRestantes(o);
+      if(d!=null && (e.minDias==null || d<e.minDias)) e.minDias = d;
+      if(d!=null && d<0) e.vencido += m;
+    }
+  });
+  let rows = [...map.values()];
+  const all = rows.slice();
+  if(q) rows = rows.filter(r=>cfgNorm(r.nombre).includes(q));
+  rows.forEach(r=>{
+    r.pend.sort((a,b)=>{ const da=pgDiasRestantes(a), db=pgDiasRestantes(b); return (da==null?1e9:da)-(db==null?1e9:db) || cfgCmp(a.fechaComprobante,b.fechaComprobante); });
+    r.canc.sort((a,b)=>cfgCmp(b.fechaPago||b.fechaComprobante||"", a.fechaPago||a.fechaComprobante||""));
+  });
+  const urg = r => r.pend.length ? (r.minDias==null ? 1e6 : r.minDias) : 1e9;
+  rows.sort((a,b)=>{
+    if(a.nombre===PG_SIN_PROV) return 1; if(b.nombre===PG_SIN_PROV) return -1;
+    if(ccSort==="pagar") return b.pagar-a.pagar || cfgCmp(a.nombre,b.nombre);
+    if(ccSort==="nombre") return cfgCmp(a.nombre,b.nombre);
+    return urg(a)-urg(b) || b.pagar-a.pagar || cfgCmp(a.nombre,b.nombre);
+  });
+  return { rows, all, desde, hasta };
+}
+function ccPlazoProvPill(r){
+  if(!r.pend.length) return `<span class="pg-plazo paid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Sin deuda</span>`;
+  if(r.minDias==null) return `<span class="pg-plazo muted"><i></i>${pgPlazoProveedor(r.nombre)==null?"Sin plazo":"Sin fecha"}</span>`;
+  return pgPlazoPill(pgInfoFromDias(r.minDias));
+}
+function ccMoney(n, cls){ return `<div class="num ${cls||""}${Math.abs(n)<0.005?" zero":""}">${n<0?"−":""}${fmtMoney2(Math.abs(n))}</div>`; }
+function ccRender(){
+  const table = document.getElementById("ccTable"); if(!table) return;
+  const { rows, all, desde, hasta } = ccBuild();
+  const cal = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+  document.getElementById("ccRangeLabel").innerHTML = (desde||hasta) ? `${cal}${desde?isoToDMY(desde):"…"} — ${hasta?isoToDMY(hasta):"…"}` : `${cal}Todo el historial`;
+
+  const T = rows.reduce((s,r)=>{ s.pedido+=r.pedido; s.pagar+=r.pagar; s.cancelado+=r.cancelado; s.vencido+=r.vencido; s.nPend+=r.pend.length; s.nCanc+=r.canc.length; s.nVenc+=r.pend.filter(o=>{const d=pgDiasRestantes(o); return d!=null&&d<0;}).length; return s; }, {pedido:0,pagar:0,cancelado:0,vencido:0,nPend:0,nCanc:0,nVenc:0});
+  const pct = T.pedido>0 ? Math.round(T.cancelado/T.pedido*100) : 0;
+  document.getElementById("ccKpis").innerHTML = `
+    <div class="cc-kpi k-pedido"><div class="lbl">Total pedido</div><div class="val">${fmtMoney2(T.pedido)}</div><div class="sub">${T.nPend+T.nCanc} factura${T.nPend+T.nCanc===1?"":"s"} · ${rows.length} proveedor${rows.length===1?"":"es"}</div></div>
+    <div class="cc-kpi k-pagar"><span class="eq">A pagar + Cancelado = Total</span><div class="lbl">A pagar</div><div class="val">${fmtMoney2(T.pagar)}</div><div class="sub">${T.nPend} pendiente${T.nPend===1?"":"s"}</div></div>
+    <div class="cc-kpi k-cancel"><div class="lbl">Cancelado</div><div class="val">${fmtMoney2(T.cancelado)}</div><div class="sub">${pct}% de lo pedido · ${T.nCanc} factura${T.nCanc===1?"":"s"}</div></div>
+    <div class="cc-kpi k-venc"><div class="lbl">Vencido</div><div class="val">${fmtMoney2(T.vencido)}</div><div class="sub">${T.nVenc ? `${T.nVenc} factura${T.nVenc===1?"":"s"} fuera de plazo` : "Nada fuera de plazo"}</div></div>`;
+
+  if(!pgLoaded){ table.innerHTML = `<div class="empty-state"><strong>Cargando…</strong></div>`; return; }
+  if(!rows.length){
+    table.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <strong>${all.length ? "Ningún proveedor coincide con la búsqueda" : "No hay órdenes en este período"}</strong><span>${all.length ? "Probá con otro nombre." : "Cambiá el período o cargá órdenes de pago desde Lista de órdenes."}</span></div>`;
+    return;
+  }
+  const head = `<div class="cc-head">
+    <div>Proveedor</div><div class="num">Total pedido</div><div class="num">A pagar</div><div class="num">Cancelado</div><div>Plazo restante</div><div></div></div>`;
+  const body = rows.map(r=>{
+    const open = ccOpen.has(r.nombre);
+    const color = cfgColor(r.nombre);
+    const p = pgProvByName[r.nombre];
+    const meta = p ? (p.rubros.length ? [...new Set(p.rubros.map(x=>x.cat))].join(" · ") : "Sin rubro") : (r.nombre===PG_SIN_PROV ? "Órdenes sin proveedor" : "No está en Configuración");
+    const plazoTxt = p && p.plazo!=null ? ` · plazo ${p.plazo===0?"contado":p.plazo+" d"}` : "";
+    const pctR = r.pedido>0 ? Math.max(0,Math.min(100, r.cancelado/r.pedido*100)) : 0;
+    const nm = pgAttr(r.nombre);
+    return `<div class="cc-row${open?" open":""}" onclick="ccToggle('${nm}')">
+      <div><div class="cc-prov"><div class="cc-av" style="background:${color};">${pgEsc(pgIniciales(r.nombre))}</div><div class="tx"><div class="nm">${pgEsc(r.nombre)}</div><div class="mt">${pgEsc(meta)}${plazoTxt}</div><div class="cc-bar" title="${Math.round(pctR)}% cancelado"><span style="width:${pctR}%"></span></div></div></div></div>
+      ${ccMoney(r.pedido)}${ccMoney(r.pagar,"pagar")}${ccMoney(r.cancelado,"cancel")}
+      <div>${ccPlazoProvPill(r)}${r.pend.length>1?`<div style="font-size:10.8px;color:var(--text-3);font-weight:700;margin-top:4px;">${r.pend.length} facturas pendientes</div>`:""}</div>
+      <div class="cc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>${open ? ccDetailHtml(r) : ""}`;
+  }).join("");
+  const foot = `<div class="cc-foot"><div>Total del período</div><div class="num">${fmtMoney2(T.pedido)}</div><div class="num" style="color:#8A6300;">${fmtMoney2(T.pagar)}</div><div class="num" style="color:#137B44;">${fmtMoney2(T.cancelado)}</div><div></div><div></div></div>`;
+  table.innerHTML = head + body + foot;
+  if(ccJustPaid){
+    const el = document.querySelector(`.cc-line[data-oid="${ccJustPaid}"]`);
+    if(el){ el.style.transition="background 1.2s ease"; el.style.background="#DDF4E7"; setTimeout(()=>{ el.style.background=""; }, 1400); }
+    ccJustPaid = null;
+  }
+}
+function ccDetailHtml(r){
+  const lineFc = o => {
+    const b = o.comprobanteTipo==="Compra B";
+    return `<div class="fc${b?" b":""}" title="${pgEsc(pgLabelFactura(o))}">${b ? "Compra B" : pgEsc(o.comprobante || "s/n")}<small>${b ? o.id : pgEsc(o.comprobanteTipo||"")+" · "+o.id}</small></div>`;
+  };
+  const money = o => { const m = ccSigned(o); return `<div class="fm${m<0?" neg":""}">${m<0?"−":""}${fmtMoney2(Math.abs(m))}</div>`; };
+  const left = r.canc.length ? r.canc.map(o=>`<div class="cc-line" data-oid="${o.id}" onclick="event.stopPropagation();openPanel('${o.id}')" title="Ver orden ${o.id}">
+      ${lineFc(o)}<div class="fd">${isoToDMY2(o.fechaComprobante||o.fechaOrden)}</div>${money(o)}
+      <div class="fp">${o.fechaPago?`Pagada ${isoToDMY2(o.fechaPago)}`:"Pagada"}${pgClipHtml(o.adjuntosPago,"pago")}</div></div>`).join("")
+    : `<div class="cc-empty-side">Sin facturas canceladas en el período</div>`;
+  const right = r.pend.length ? r.pend.map(o=>`<div class="cc-line" data-oid="${o.id}" onclick="event.stopPropagation();openPanel('${o.id}')" title="Ver orden ${o.id}">
+      ${lineFc(o)}<div class="fd">${isoToDMY2(o.fechaComprobante||o.fechaOrden)}</div>${money(o)}
+      <div>${pgPlazoPill(pgPlazoInfo(o))}</div>
+      <button class="cc-pay" onclick="event.stopPropagation();ccPagar('${o.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Pagar</button></div>`).join("")
+    : `<div class="cc-empty-side">No hay nada pendiente de pago 🎉</div>`;
+  const nm = pgAttr(r.nombre);
+  return `<div class="cc-detail" onclick="event.stopPropagation()">
+    <div class="cc-detail-head">Cuenta corriente de <b>${pgEsc(r.nombre)}</b> · ${r.canc.length+r.pend.length} factura${r.canc.length+r.pend.length===1?"":"s"} en el período
+      <button class="btn-ghost" onclick="ccExportExcel('${nm}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Excel de este proveedor</button></div>
+    <div class="cc-ledger">
+      <div class="cc-side left"><div class="cc-side-h"><span class="dot"></span><strong>Canceladas</strong><span class="cnt">${r.canc.length}</span><span class="tot">${r.cancelado<0?"−":""}${fmtMoney2(Math.abs(r.cancelado))}</span></div><div class="cc-lines">${left}</div></div>
+      <div class="cc-side right"><div class="cc-side-h"><span class="dot"></span><strong>Pendientes</strong><span class="cnt">${r.pend.length}</span><span class="tot">${r.pagar<0?"−":""}${fmtMoney2(Math.abs(r.pagar))}</span></div><div class="cc-lines">${right}</div></div>
+    </div></div>`;
+}
+function ccToggle(nombre){ ccOpen.has(nombre) ? ccOpen.delete(nombre) : ccOpen.add(nombre); ccRender(); }
+function ccPagar(id){ openPanel(id, { pay:true }); }
+function ccExportExcel(soloProveedor){
+  if(typeof XLSX === "undefined"){ showToast("No se pudo cargar el módulo de Excel (revisá la conexión a internet)", "warn"); return; }
+  let { rows, desde, hasta } = ccBuild();
+  if(soloProveedor) rows = rows.filter(r=>r.nombre===soloProveedor);
+  if(!rows.length){ showToast("No hay datos para descargar en este período", "warn"); return; }
+  const resumen = [["Proveedor","Total pedido","A pagar","Cancelado","Plazo restante (días)","Facturas pendientes","Facturas canceladas","Vencido"]];
+  rows.forEach(r=>resumen.push([r.nombre, r.pedido, r.pagar, r.cancelado, r.pend.length ? (r.minDias==null?"Sin plazo":r.minDias) : "Sin deuda", r.pend.length, r.canc.length, r.vencido]));
+  const T = rows.reduce((s,r)=>{ s[0]+=r.pedido; s[1]+=r.pagar; s[2]+=r.cancelado; s[3]+=r.vencido; return s; }, [0,0,0,0]);
+  resumen.push(["TOTAL", T[0], T[1], T[2], "", rows.reduce((s,r)=>s+r.pend.length,0), rows.reduce((s,r)=>s+r.canc.length,0), T[3]]);
+  const det = [["Proveedor","Lado","Factura","Tipo de compra","Nro. de comprobante","Fecha de la factura","Monto","Plazo del proveedor (días)","Vencimiento","Días restantes","Estado","Fecha de pago","Método de pago","Comprobantes de pago","Orden"]];
+  rows.forEach(r=>{
+    r.canc.concat(r.pend).forEach(o=>{
+      const pend = o.estado!=="Pagado", d = pend ? pgDiasRestantes(o) : null, v = pgVencimiento(o), pl = pgPlazoProveedor(o.proveedor);
+      det.push([r.nombre, pend?"Pendiente":"Cancelado", pgLabelFactura(o), o.comprobanteTipo||"", o.comprobante||"", isoToDMY(o.fechaComprobante||o.fechaOrden), ccSigned(o),
+        pl==null?"":pl, v?isoToDMY(v):"", d==null?"":d, pgEstadoVista(o), isoToDMY(o.fechaPago)||"", o.metodo||"", o.adjuntosPago.map(f=>f.nombre).join(", ")||"—", o.id]);
+    });
+  });
+  const wb = XLSX.utils.book_new();
+  const ws1 = XLSX.utils.aoa_to_sheet(resumen); ws1["!cols"] = [{wch:32},{wch:15},{wch:15},{wch:15},{wch:20},{wch:18},{wch:18},{wch:14}];
+  const ws2 = XLSX.utils.aoa_to_sheet(det); ws2["!cols"] = [{wch:28},{wch:11},{wch:22},{wch:13},{wch:18},{wch:15},{wch:14},{wch:14},{wch:12},{wch:13},{wch:11},{wch:13},{wch:20},{wch:30},{wch:10}];
+  [ws1, ws2].forEach(ws=>{ ws["!autofilter"] = { ref: ws["!ref"] }; });
+  XLSX.utils.book_append_sheet(wb, ws1, "cuentas corrientes");
+  XLSX.utils.book_append_sheet(wb, ws2, "detalle de facturas");
+  const r = (desde?isoToDMY(desde).replace(/\//g,"-"):"inicio")+"_a_"+(hasta?isoToDMY(hasta).replace(/\//g,"-"):"hoy");
+  const slug = soloProveedor ? "_"+cfgNorm(soloProveedor).replace(/[^a-z0-9]+/g,"-").slice(0,30) : "";
+  XLSX.writeFile(wb, `cuentas_corrientes_chemono${slug}_${r}.xlsx`);
+  showToast("Excel descargado correctamente");
+}
+
+/* ---------- Esc cierra lo que esté abierto en Pagos ---------- */
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Escape") return;
+  if(document.getElementById("confirmOverlay").classList.contains("show")){ closeConfirm(); return; }
+  if(document.getElementById("pgFilterPop").classList.contains("show")){ pgCloseFilterPop(); return; }
+  if(document.getElementById("panel").classList.contains("show")) closePanel();
+});
+
+/* el calendario compartido no dispara "input" al elegir un día: lo disparamos para que
+   se actualice el aviso de plazo de pago en Nueva orden */
+(function(){
+  const _sel = selectCalDay;
+  selectCalDay = function(d){ _sel(d); if(calTarget) calTarget.dispatchEvent(new Event("input", {bubbles:true})); };
+})();
+
+/* ---------- inicialización de la grilla y los adjuntos ---------- */
+loadGridState();
+renderGridHeader();
+["panel","nueva","panelPago","nuevaPago"].forEach(renderAttachZone);
+
 function goModule(mod){
   document.querySelectorAll(".module-nav-item").forEach(i=>i.classList.toggle("active", i.dataset.module===mod));
   document.querySelectorAll(".module-screen").forEach(s=>s.classList.remove("active"));
   const el = document.getElementById("module"+mod.charAt(0).toUpperCase()+mod.slice(1));
   if(el) el.classList.add("active");
   if(mod==="config") cfgOnEnterModule();
+  if(mod==="pagos") pgOnEnterModule();
+  if(mod==="sueldos" && !pgLoaded) pgReload(); // Liquidación lee los adelantos pagados desde Pagos
 }
 
 /* SESI\u00d3N REAL (Supabase Auth) \u2014 el login siempre ocurre en home.html;
