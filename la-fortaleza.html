@@ -466,14 +466,348 @@
   .user-menu .um-item.neutral:hover{background:#F1F2FA;}
   .user-menu .um-item svg{width:15px;height:15px;flex-shrink:0;}
 
-  /* ---------- CONFIGURACIÓN: chooser de listas (Compras) ---------- */
-  .compras-chooser{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:900px;}
-  .chooser-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 18px;cursor:pointer;text-align:left;transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease;}
-  .chooser-card:hover{border-color:var(--sky);transform:translateY(-2px);box-shadow:var(--shadow-md);}
-  .chooser-card .cc-ic{width:40px;height:40px;border-radius:11px;background:#EAF0FF;color:var(--sky);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
-  .chooser-card .cc-ic svg{width:20px;height:20px;}
-  .chooser-card h4{margin:0 0 4px 0;font-size:14px;font-weight:800;color:var(--text-1);}
-  .chooser-card span{font-size:12px;color:var(--text-2);line-height:1.4;}
+  /* =========================================================
+     CONFIGURACIÓN · COMPRAS (Proveedores) — alineado con Che Mono (01/10/2026)
+     Insumos queda afuera por ahora (se incorpora en la etapa de Costeo), pero
+     se dejan las clases cfg-combo, cfg-pv-card, cfg-pres-row, cfg-sinprov y
+     cfg-provlist sin usar todavía, listas para cuando se porte esa pantalla.
+     ========================================================= */
+  .cfg-util-bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:10px 32px 0 32px;flex-shrink:0;}
+  .cfg-subbar{display:flex;align-items:center;gap:6px;padding:10px 32px;background:#FAFBFF;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .cfg-subtab{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:9px;font-size:12.8px;font-weight:700;color:var(--text-2);cursor:pointer;user-select:none;border:1px solid transparent;transition:background .15s ease,color .15s ease,border-color .15s ease;}
+  .cfg-subtab svg{width:15px;height:15px;opacity:.75;}
+  .cfg-subtab:hover{background:#F0F2FA;color:var(--text-1);}
+  .cfg-subtab.active{background:#fff;color:var(--blue);border-color:var(--border);box-shadow:var(--shadow-sm);}
+  .cfg-subtab.active svg{opacity:1;}
+  .cfg-subtab .cnt{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;background:#EEF0F9;color:var(--text-2);font-variant-numeric:tabular-nums;}
+  .cfg-subtab.active .cnt{background:#EAF0FF;color:var(--blue);}
+  .cfg-subbar .spacer{flex:1;}
+  .cfg-live{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--text-3);}
+  .cfg-live i{width:7px;height:7px;border-radius:50%;background:#9AA0BF;display:block;}
+  .cfg-live.on i{background:#1F9D5A;box-shadow:0 0 0 3px rgba(31,157,90,.16);animation:cfgPulse 2.4s ease-in-out infinite;}
+  @keyframes cfgPulse{0%,100%{box-shadow:0 0 0 3px rgba(31,157,90,.16);}50%{box-shadow:0 0 0 6px rgba(31,157,90,.06);}}
+
+  .cfg-view{display:none;flex-direction:column;flex:1;min-height:0;}
+  .cfg-view.active{display:flex;}
+  .cfg-head{padding:20px 32px 0 32px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;flex-shrink:0;}
+  .cfg-head h1{font-size:21px;margin:0;font-weight:800;letter-spacing:-.2px;}
+  .cfg-kpis{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .cfg-kpi{display:flex;align-items:baseline;gap:5px;font-size:12px;font-weight:600;color:var(--text-2);background:#fff;border:1px solid var(--border);border-radius:20px;padding:4px 11px;}
+  .cfg-kpi b{font-size:13px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .cfg-head .spacer{flex:1;}
+  .cfg-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .cfg-search{position:relative;width:280px;}
+  .cfg-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text-3);}
+  .cfg-search input{width:100%;padding:10px 32px 10px 36px;border-radius:10px;border:1px solid var(--border);background:#fff;font-size:13px;outline:none;transition:border-color .15s ease,box-shadow .15s ease;}
+  .cfg-search input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(89,119,210,0.15);}
+  .cfg-search .x{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:22px;height:22px;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-radius:6px;display:none;align-items:center;justify-content:center;}
+  .cfg-search .x.show{display:flex;}
+  .cfg-search .x:hover{background:#F1F2FA;color:var(--text-1);}
+  .cfg-search .x svg{position:static;transform:none;width:12px;height:12px;}
+  .cfg-cta{display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(38,47,76,.22);transition:transform .15s ease,filter .15s ease,box-shadow .15s ease;white-space:nowrap;}
+  .cfg-cta:hover{filter:brightness(1.15);transform:translateY(-1px);box-shadow:0 10px 22px rgba(38,47,76,.28);}
+  .cfg-cta svg{width:16px;height:16px;}
+  .cfg-cta .plus{width:20px;height:20px;border-radius:6px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;}
+  .cfg-cta .plus svg{width:13px;height:13px;}
+  .cfg-cta .caret{width:13px;height:13px;opacity:.8;margin-left:2px;}
+  .cfg-cta-ghost{display:flex;align-items:center;gap:7px;background:#fff;color:var(--navy);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12.8px;font-weight:800;cursor:pointer;white-space:nowrap;transition:background .15s ease,border-color .15s ease;}
+  .cfg-cta-ghost:hover{background:#F5F6FB;border-color:var(--gray);}
+  .cfg-cta-ghost svg{width:14px;height:14px;}
+
+  .cfg-create-menu{position:fixed;width:340px;background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);border:1px solid var(--border);padding:8px;z-index:65;display:none;}
+  .cfg-create-menu.show{display:block;animation:cfgPop .14s ease;}
+  @keyframes cfgPop{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+  .cfg-create-menu .cm-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);padding:8px 10px 6px;}
+  .cfg-create-opt{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;cursor:pointer;transition:background .12s ease;}
+  .cfg-create-opt:hover{background:#F4F6FC;}
+  .cfg-create-opt .lvl{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:800;}
+  .cfg-create-opt .lvl svg{width:18px;height:18px;}
+  .cfg-create-opt .lvl.l1{background:#EEF0F9;color:var(--navy);}
+  .cfg-create-opt .lvl.l2{background:#EAF0FF;color:var(--blue);}
+  .cfg-create-opt .lvl.l3{background:#E7F6EE;color:#137B44;}
+  .cfg-create-opt strong{display:block;font-size:13.3px;font-weight:800;color:var(--text-1);}
+  .cfg-create-opt span{display:block;font-size:11.5px;color:var(--text-2);margin-top:1px;line-height:1.35;}
+  .cfg-create-opt .step{margin-left:auto;white-space:nowrap;padding-left:6px;font-size:10px;font-weight:800;color:var(--text-3);letter-spacing:.04em;}
+
+  .cfg-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 32px 0 32px;flex-shrink:0;min-height:0;}
+  .cfg-chips:empty{display:none;}
+  .cfg-chip{display:flex;align-items:center;gap:6px;background:#EAF0FF;color:var(--blue);border:1px solid #D6E2FA;border-radius:20px;padding:4px 6px 4px 11px;font-size:11.8px;font-weight:700;max-width:420px;}
+  .cfg-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cfg-chip b{font-weight:800;color:var(--navy);}
+  .cfg-chip button{width:18px;height:18px;border:none;border-radius:50%;background:rgba(58,69,112,.12);color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cfg-chip button:hover{background:var(--blue);color:#fff;}
+  .cfg-chip button svg{width:9px;height:9px;}
+  .cfg-chips .clear-all{font-size:11.8px;font-weight:700;color:var(--text-2);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+  .cfg-chips .clear-all:hover{color:#C23434;}
+  .cfg-chips .res{font-size:11.8px;font-weight:600;color:var(--text-3);}
+
+  .cfg-scroll{flex:1;overflow:auto;padding:14px 32px 90px 32px;}
+  .cfg-table-wrap{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:clip;box-shadow:var(--shadow-sm);min-width:760px;}
+  .cfg-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;}
+  .cfg-table thead th{position:sticky;top:0;z-index:4;background:#F7F8FD;border-bottom:2px solid var(--border);padding:0;text-align:left;}
+  .cfg-th{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);}
+  .cfg-th .lvl-dot{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;flex-shrink:0;}
+  .cfg-th .lvl-dot.l1{background:#E3E6F3;color:var(--navy);}
+  .cfg-th .lvl-dot.l2{background:#DCE6FF;color:var(--blue);}
+  .cfg-th .lvl-dot.l3{background:#D9F1E4;color:#137B44;}
+  .cfg-th .lvl-dot.l4{background:#FFF0DB;color:#A0620D;}
+  .cfg-fbtn{margin-left:auto;display:flex;align-items:center;gap:5px;height:24px;padding:0 8px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text-3);cursor:pointer;font-size:10.5px;font-weight:800;letter-spacing:.02em;text-transform:none;}
+  .cfg-fbtn svg{width:12px;height:12px;}
+  .cfg-fbtn:hover{background:#E9ECF8;color:var(--text-1);}
+  .cfg-fbtn.active{background:var(--blue);color:#fff;}
+  .cfg-fbtn.open{border-color:var(--sky);background:#fff;color:var(--blue);}
+  .cfg-table td{border-bottom:1px solid var(--border);padding:0;vertical-align:top;font-size:13.2px;}
+  .cfg-table tr:last-child td{border-bottom:none;}
+  .cfg-table td.c-l1{background:#FBFBFE;border-right:1px solid var(--border);}
+  .cfg-table td.c-l2{border-right:1px solid var(--border);background:#FEFEFF;}
+  .cfg-table td.grp-end{border-bottom:1px solid #D9DDEE;}
+  .cfg-cell{display:flex;align-items:flex-start;gap:9px;padding:11px 14px;min-width:0;position:relative;}
+  .cfg-cell.sticky{position:sticky;top:41px;}
+  .cfg-cell .nm{font-weight:700;color:var(--text-1);line-height:1.35;word-break:break-word;}
+  .c-l1 .cfg-cell .nm{font-weight:800;font-size:13.5px;}
+  .cfg-cell .meta{font-size:11px;font-weight:600;color:var(--text-3);margin-top:2px;}
+  .cfg-cell .txt{flex:1;min-width:0;}
+  .cfg-cell mark{background:#FFF1B8;color:inherit;border-radius:3px;padding:0 1px;}
+  .cfg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;margin-top:4px;}
+  .cfg-chev{width:20px;height:20px;border:none;background:transparent;color:var(--text-3);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin:-1px -4px 0 -6px;transition:transform .15s ease,background .12s ease;}
+  .cfg-chev:hover{background:#ECEEF8;color:var(--text-1);}
+  .cfg-chev svg{width:13px;height:13px;}
+  .cfg-chev.collapsed{transform:rotate(-90deg);}
+  .cfg-acts{display:flex;gap:2px;flex-shrink:0;opacity:0;transition:opacity .12s ease;margin:-3px -6px 0 0;}
+  .cfg-cell:hover .cfg-acts, .cfg-cell:focus-within .cfg-acts{opacity:1;}
+  .cfg-ibtn{width:26px;height:26px;border-radius:7px;border:none;background:transparent;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cfg-ibtn:hover{background:#ECEEF8;color:var(--text-1);}
+  .cfg-ibtn.add:hover{background:#E7F6EE;color:#137B44;}
+  .cfg-ibtn.del:hover{background:#FFF1F1;color:#C23434;}
+  .cfg-ibtn svg{width:14px;height:14px;}
+  .cfg-empty-cell{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:12.3px;color:var(--text-3);font-style:italic;}
+  .cfg-empty-cell a{font-style:normal;font-weight:700;color:var(--blue);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+  .cfg-empty-cell a:hover{text-decoration:underline;}
+  .cfg-collapsed-sum{padding:12px 14px;font-size:12.3px;color:var(--text-3);font-weight:600;cursor:pointer;}
+  .cfg-collapsed-sum:hover{color:var(--blue);}
+  .cfg-also{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:#5B34D6;background:#F1EDFF;border-radius:20px;padding:2px 8px;margin-top:4px;cursor:default;}
+  .cfg-contact{padding:11px 14px;font-size:11.8px;color:var(--text-2);line-height:1.55;min-width:0;}
+  .cfg-contact div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cfg-contact .k{color:var(--text-3);font-weight:700;margin-right:4px;}
+  .cfg-contact .none{color:var(--gray);}
+  .cfg-provlist{padding:8px 14px 9px 14px;display:flex;flex-direction:column;gap:6px;}
+  .cfg-provline{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+  .cfg-provline .pn{font-size:12.5px;font-weight:800;color:var(--text-1);min-width:0;padding-top:2px;}
+  .cfg-provline .pn::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--sky);margin-right:7px;vertical-align:1px;}
+  .cfg-pres-pills{display:flex;gap:5px;flex-wrap:wrap;}
+  .cfg-pill{display:inline-flex;align-items:center;gap:0;font-size:11.3px;font-weight:700;color:#8A560B;background:#FFF5E6;border:1px solid #FBE3BF;border-radius:20px;padding:2px 9px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .cfg-pill .b{color:#A0620D;font-weight:600;}
+  .cfg-pill .sep{margin:0 5px;opacity:.55;}
+  .cfg-nores{padding:60px 20px;text-align:center;color:var(--text-3);}
+  .cfg-nores svg{width:44px;height:44px;color:var(--gray);margin-bottom:10px;}
+  .cfg-nores strong{display:block;font-size:14px;color:var(--text-2);margin-bottom:4px;}
+  .cfg-nores span{font-size:12.5px;}
+  .cfg-nores .btn-ghost{display:inline-flex;margin-top:14px;}
+  .cfg-onboard{max-width:620px;margin:40px auto;text-align:center;}
+  .cfg-onboard .ic{width:64px;height:64px;border-radius:18px;background:#FFF5E6;color:#A0620D;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+  .cfg-onboard .ic svg{width:30px;height:30px;}
+  .cfg-onboard h2{font-size:19px;margin:0 0 8px;font-weight:800;}
+  .cfg-onboard p{font-size:13.3px;color:var(--text-2);line-height:1.6;margin:0 0 20px;}
+  .cfg-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:left;margin-bottom:22px;}
+  .cfg-steps div{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .cfg-steps b{display:block;font-size:10.5px;font-weight:800;color:var(--sky);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+  .cfg-steps span{font-size:12.5px;font-weight:700;color:var(--text-1);}
+  .cfg-onboard .row-btns{display:flex;gap:10px;justify-content:center;}
+
+  /* Popover de filtros (tildar / escribir) */
+  .cfg-fpop{position:fixed;width:290px;background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);border:1px solid var(--border);z-index:66;display:none;}
+  .cfg-fpop.show{display:block;animation:cfgPop .14s ease;}
+  .cfg-fpop .fp-head{padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;}
+  .cfg-fpop .fp-head h4{margin:0;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
+  .cfg-fpop .fp-mode{font-size:10.5px;font-weight:700;color:var(--sky);}
+  .cfg-fpop .fp-search{position:relative;margin:0 14px 8px;}
+  .cfg-fpop .fp-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-3);}
+  .cfg-fpop .fp-search input{width:100%;padding:9px 10px 9px 32px;border-radius:9px;border:1px solid var(--border);font-size:12.8px;outline:none;}
+  .cfg-fpop .fp-search input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(89,119,210,0.14);}
+  .cfg-fpop .fp-bulk{display:flex;justify-content:space-between;padding:0 14px 6px;font-size:11.3px;font-weight:700;}
+  .cfg-fpop .fp-bulk a{color:var(--blue);cursor:pointer;}
+  .cfg-fpop .fp-bulk a:hover{text-decoration:underline;}
+  .cfg-fpop .fp-bulk span{color:var(--text-3);}
+  .cfg-fpop .fp-list{max-height:260px;overflow-y:auto;padding:0 8px 8px;display:flex;flex-direction:column;gap:1px;}
+  .cfg-fopt{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:12.8px;color:var(--text-1);user-select:none;}
+  .cfg-fopt:hover{background:#F5F6FA;}
+  .cfg-fopt .ck{width:16px;height:16px;border-radius:5px;border:1.6px solid var(--gray);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;}
+  .cfg-fopt .ck svg{width:10px;height:10px;color:#fff;opacity:0;}
+  .cfg-fopt.on .ck{background:var(--blue);border-color:var(--blue);}
+  .cfg-fopt.on .ck svg{opacity:1;}
+  .cfg-fopt .lb{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cfg-fopt .lb mark{background:#FFF1B8;color:inherit;border-radius:3px;}
+  .cfg-fopt .ct{font-size:11px;font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;}
+  .cfg-fopt.zero{opacity:.45;}
+  .cfg-fpop .fp-empty{padding:14px;font-size:12.3px;color:var(--text-3);font-style:italic;text-align:center;}
+  .cfg-fpop .fp-foot{display:flex;gap:8px;padding:10px 14px 12px;border-top:1px solid var(--border);}
+  .cfg-fpop .fp-foot button{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;}
+
+  /* Panel lateral de alta / edición */
+  .cfg-panel{width:500px;}
+  .cfg-panel.wide{width:640px;}
+  .cfg-panel .panel-head .lvl-badge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:20px;margin-bottom:8px;}
+  .lvl-badge.l1{background:#EEF0F9;color:var(--navy);}
+  .lvl-badge.l2{background:#EAF0FF;color:var(--blue);}
+  .lvl-badge.l3{background:#E7F6EE;color:#137B44;}
+  .cfg-crumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11.5px;font-weight:700;color:var(--text-3);margin-top:4px;}
+  .cfg-crumb span.on{color:var(--blue);}
+  .cfg-crumb svg{width:10px;height:10px;}
+  .cfg-field-msg{font-size:11.5px;font-weight:700;margin-top:6px;display:none;align-items:center;gap:6px;}
+  .cfg-field-msg.show{display:flex;}
+  .cfg-field-msg.err{color:#C23434;}
+  .cfg-field-msg.ok{color:#137B44;}
+  .cfg-field-msg svg{width:13px;height:13px;flex-shrink:0;}
+  .field.dup input{border-color:#D1414A;background:#FFF6F6;}
+  .cfg-sec-title{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--sky);margin:24px 0 12px;}
+  .cfg-sec-title:first-child{margin-top:0;}
+  .cfg-sec-title .n{width:20px;height:20px;border-radius:6px;background:#EAF0FF;color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10.5px;}
+  .cfg-sec-title .opt{font-size:10.5px;color:var(--text-3);text-transform:none;letter-spacing:0;font-weight:600;}
+  .cfg-note{display:flex;gap:10px;background:#F5F8FF;border:1px solid #DDE6FA;border-radius:11px;padding:11px 13px;font-size:12px;color:var(--text-2);line-height:1.5;margin-bottom:16px;}
+  .cfg-note svg{width:16px;height:16px;color:var(--sky);flex-shrink:0;margin-top:1px;}
+  .cfg-note b{color:var(--navy);}
+
+  /* Multi-selección de rubros (proveedor) */
+  .cfg-ms{border:1px solid var(--border);border-radius:11px;background:#FBFBFE;overflow:hidden;}
+  .cfg-ms.err{border-color:#D1414A;}
+  .cfg-ms-sel{display:flex;flex-wrap:wrap;gap:6px;padding:10px 10px 0;}
+  .cfg-ms-sel:empty{display:none;}
+  .cfg-ms-tag{display:inline-flex;align-items:center;gap:5px;background:var(--blue);color:#fff;border-radius:20px;padding:3px 5px 3px 10px;font-size:11.5px;font-weight:700;}
+  .cfg-ms-tag small{opacity:.7;font-weight:600;}
+  .cfg-ms-tag button{width:16px;height:16px;border:none;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .cfg-ms-tag button svg{width:8px;height:8px;}
+  .cfg-ms-search{position:relative;padding:10px;}
+  .cfg-ms-search input{width:100%;padding:8px 10px 8px 30px !important;border-radius:8px !important;font-size:12.8px !important;background:#fff !important;}
+  .cfg-ms-search svg{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--text-3);}
+  .cfg-ms-list{max-height:230px;overflow-y:auto;border-top:1px solid var(--border);background:#fff;}
+  .cfg-ms-grp{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);padding:9px 12px 3px;background:#fff;position:sticky;top:0;}
+  .cfg-ms-opt{display:flex;align-items:center;gap:9px;padding:7px 12px;font-size:12.8px;cursor:pointer;color:var(--text-1);}
+  .cfg-ms-opt:hover{background:#F5F6FA;}
+  .cfg-ms-opt .ck{width:16px;height:16px;border-radius:5px;border:1.6px solid var(--gray);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;}
+  .cfg-ms-opt .ck svg{width:10px;height:10px;color:#fff;opacity:0;}
+  .cfg-ms-opt.on .ck{background:var(--blue);border-color:var(--blue);}
+  .cfg-ms-opt.on .ck svg{opacity:1;}
+
+  /* Combo buscable (proveedor dentro de insumo) */
+  .cfg-combo{position:relative;}
+  .cfg-combo input{padding-right:30px !important;}
+  .cfg-combo > svg{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-3);pointer-events:none;}
+  .cfg-combo-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);max-height:240px;overflow-y:auto;z-index:5;display:none;padding:4px;}
+  .cfg-combo-list.show{display:block;}
+  .cfg-combo-opt{padding:7px 10px;border-radius:7px;font-size:12.8px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;}
+  .cfg-combo-opt small{color:var(--text-3);font-weight:600;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%;}
+  .cfg-combo-opt:hover, .cfg-combo-opt.hl{background:#F1F4FD;}
+  .cfg-combo-opt.dis{opacity:.4;pointer-events:none;}
+  .cfg-combo-empty{padding:10px;font-size:12px;color:var(--text-3);font-style:italic;}
+
+  /* Tarjetas proveedor → presentaciones (insumo) */
+  .cfg-pv-card{border:1px solid var(--border);border-radius:13px;background:#fff;margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .cfg-pv-card.err{border-color:#E7A1A5;}
+  .cfg-pv-top{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 10px 14px;background:#FAFBFF;border-bottom:1px solid var(--border);}
+  .cfg-pv-top .idx{width:24px;height:24px;border-radius:7px;background:var(--navy);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:8px;}
+  .cfg-pv-top .field{flex:1;margin:0;}
+  .cfg-pv-top .field label{margin-bottom:5px;}
+  .cfg-pv-top .cfg-ibtn{margin-top:22px;}
+  .cfg-pres-head{display:grid;grid-template-columns:1fr 1fr 30px;gap:8px;padding:10px 14px 0;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+  .cfg-pres-row{display:grid;grid-template-columns:1fr 1fr 30px;gap:8px;padding:6px 14px;align-items:center;}
+  .cfg-pres-row input, .cfg-pres-row select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:13px;background:#FBFBFE;outline:none;color:var(--text-1);}
+  .cfg-pres-row input:focus, .cfg-pres-row select:focus{border-color:var(--sky);background:#fff;box-shadow:0 0 0 3px rgba(89,119,210,0.14);}
+  .cfg-pres-row input.bad, .cfg-pres-row select.bad{border-color:#D1414A;background:#FFF6F6;}
+  .cfg-pres-row input.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .cfg-pres-prev{grid-column:1 / -1;font-size:11px;font-weight:700;color:#8A560B;margin-top:-2px;padding-left:2px;}
+  .cfg-pres-add{display:inline-flex;align-items:center;gap:6px;margin:6px 14px 12px;font-size:12px;font-weight:800;color:var(--blue);cursor:pointer;background:none;border:none;padding:4px 0;}
+  .cfg-pres-add:hover{text-decoration:underline;}
+  .cfg-pres-add svg{width:13px;height:13px;}
+  .cfg-add-prov{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border:1.5px dashed var(--gray);border-radius:12px;background:#FAFBFF;color:var(--blue);font-size:12.8px;font-weight:800;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+  .cfg-add-prov:hover{border-color:var(--sky);background:#F1F5FF;}
+  .cfg-add-prov svg{width:15px;height:15px;}
+  .cfg-err-box{display:none;background:#FFF4F4;border:1px solid #F6CFCF;color:#B22A32;border-radius:10px;padding:10px 12px;font-size:12.3px;font-weight:600;margin-top:14px;line-height:1.5;}
+  .cfg-err-box.show{display:block;}
+  .cfg-panel .panel-foot .btn-primary[disabled]{opacity:.55;cursor:not-allowed;filter:none;}
+
+  /* Modal de confirmación / aviso */
+  .cfg-modal .confirm-box{width:420px;}
+  .cfg-modal .confirm-icon.info{background:#EAF0FF;color:var(--blue);}
+  .cfg-modal .confirm-box p b{color:var(--text-1);}
+  .cfg-modal .confirm-box ul{margin:-8px 0 18px;padding-left:18px;font-size:12.5px;color:var(--text-2);line-height:1.6;max-height:140px;overflow:auto;}
+  .cfg-modal .confirm-actions{flex-wrap:wrap;}
+  .cfg-modal .confirm-actions button{min-width:0;}
+  .cfg-modal .confirm-soft{background:#FFF1F1;color:#C23434;border:1px solid #FBD8D8 !important;}
+  .cfg-modal .confirm-soft:hover{background:#FFE4E4;}
+  .cfg-modal .confirm-primary{background:var(--blue);color:#fff;}
+  @media (max-width:1100px){ .cfg-search{width:200px;} }
+  .cfg-panel mark, .cfg-fpop mark, .cfg-combo-list mark{background:#FFF1B8;color:inherit;border-radius:3px;padding:0;}
+  .cfg-table td.c-l1{cursor:pointer;}
+  .cfg-table td.c-l1:hover{background:#F4F6FC;}
+  .cfg-table tr:has(td.is-collapsed) td{background:#fff;}
+  .cfg-table tr:has(td.is-collapsed):hover td{background:#F7F8FD;}
+  .cfg-collapsed-sum{display:flex;align-items:center;gap:14px;padding:12px 14px;font-size:12.3px;color:var(--text-3);font-weight:600;cursor:pointer;}
+  .cfg-collapsed-sum .rubs{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cfg-collapsed-sum .open{display:flex;align-items:center;gap:4px;font-weight:800;color:var(--blue);flex-shrink:0;opacity:.0;transition:opacity .12s ease;}
+  .cfg-collapsed-sum .open svg{width:12px;height:12px;}
+  .cfg-table tr:hover .cfg-collapsed-sum .open{opacity:1;}
+  .cfg-collapsed-sum:hover{color:var(--text-2);}
+  #cfgFNombre[autocapitalize="characters"]{text-transform:uppercase;letter-spacing:.02em;font-weight:600;}
+  #cfgFCatTxt{background:#F1F2F8 !important;color:var(--text-2);cursor:default;}
+  #cfgFRub:disabled{background:#F1F2F8 !important;color:var(--text-1) !important;opacity:1;}
+  .cfg-sinprov{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;margin-bottom:14px;transition:border-color .15s ease,background .15s ease;}
+  .cfg-sinprov:hover{border-color:var(--gray);}
+  .cfg-sinprov.on{border-color:var(--blue);background:#F4F7FF;}
+  .cfg-sinprov input{position:absolute;opacity:0;pointer-events:none;}
+  .cfg-sinprov .ck{width:18px;height:18px;border-radius:5px;border:1.6px solid var(--gray);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;margin-top:1px;}
+  .cfg-sinprov .ck svg{width:11px;height:11px;color:#fff;opacity:0;}
+  .cfg-sinprov.on .ck{background:var(--blue);border-color:var(--blue);}
+  .cfg-sinprov.on .ck svg{opacity:1;}
+  .cfg-sinprov b{display:block;font-size:13px;font-weight:800;color:var(--text-1);}
+  .cfg-sinprov small{display:block;font-size:11.8px;color:var(--text-2);margin-top:2px;line-height:1.45;font-weight:500;}
+  .cfg-noprov{align-self:flex-start;display:inline-flex;align-items:center;font-size:11.3px;font-weight:700;color:#8A5A00;background:#FFF6DF;border:1px dashed #E8C66A;border-radius:20px;padding:2px 10px;margin-top:2px;}
+  .cfg-days{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .cfg-day{min-width:52px;padding:9px 0;border-radius:10px;border:1.5px solid var(--border);background:#fff;color:var(--text-2);font-size:12.5px;font-weight:800;cursor:pointer;transition:all .12s ease;}
+  .cfg-day:hover{border-color:var(--gray);color:var(--text-1);}
+  .cfg-day.on{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 4px 10px rgba(38,47,76,.2);}
+  .cfg-ent-head{display:grid;grid-template-columns:110px 22px 170px 1fr;gap:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);padding:0 2px 4px;}
+  .cfg-ent-row{display:grid;grid-template-columns:110px 22px 170px 1fr;gap:8px;align-items:center;padding:6px 10px;background:#FAFBFF;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;}
+  .cfg-ent-row .ent{font-size:13px;font-weight:800;color:var(--navy);}
+  .cfg-ent-row .arr{color:var(--text-3);font-weight:800;text-align:center;}
+  .cfg-ent-row select{padding:7px 9px;border-radius:8px;border:1px solid var(--border);font-size:12.8px;background:#fff;outline:none;}
+  .cfg-ent-row select:focus{border-color:var(--sky);}
+  .cfg-ent-row .hint{font-size:11.3px;color:var(--text-3);font-weight:600;}
+  .cfg-ent-empty{font-size:12px;color:var(--text-3);font-style:italic;padding:2px 2px 4px;}
+  .cfg-plazo{display:flex;align-items:center;gap:12px;}
+  .cfg-plazo .stepper-input input{font-weight:800;font-size:14px;}
+  .cfg-plazo-suf{font-size:12.5px;font-weight:600;color:var(--text-2);}
+  .cfg-plazo-hint{font-size:11.8px;color:var(--text-2);margin-top:8px;}
+  .cfg-plazo-hint b{color:var(--navy);}
+  .cfg-kpi.btn{cursor:pointer;font-family:inherit;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;}
+  .cfg-kpi.btn:hover{border-color:var(--sky);background:#F7F9FF;}
+  .cfg-kpi.btn.active{background:var(--navy);border-color:var(--navy);color:#DDE2F5;box-shadow:0 4px 10px rgba(38,47,76,.2);}
+  .cfg-kpi.btn.active b{color:#fff;}
+  .cfg-kpi.static{background:transparent;border-style:dashed;}
+  .cfg-pmeta{display:flex;flex-wrap:wrap;gap:10px;margin-top:3px;font-size:11px;font-weight:700;color:var(--text-3);}
+  .cfg-pmeta span{display:inline-flex;align-items:center;gap:4px;}
+  .cfg-pmeta svg{width:12px;height:12px;}
+  .cfg-list .cfg-lrow{cursor:pointer;}
+  .cfg-list .cfg-lrow.flat{cursor:default;}
+  .cfg-list .cfg-lrow:hover td{background:#FAFBFF;}
+  .cfg-list .cfg-lrow.open td{background:#F4F7FF;border-bottom-color:#DCE4FA;}
+  .cfg-list .cfg-lrow .cfg-chev{margin:-1px 0 0 -6px;}
+  .cfg-list td{vertical-align:middle;}
+  .cfg-cell.stack{flex-direction:column;gap:3px;font-size:12.6px;color:var(--text-1);font-weight:600;}
+  .cfg-count{display:inline-flex;min-width:28px;justify-content:center;font-size:12px;font-weight:800;color:var(--blue);background:#EAF0FF;border-radius:20px;padding:3px 10px;font-variant-numeric:tabular-nums;}
+  .cfg-count.light{color:var(--text-2);background:#F1F2F8;}
+  .cfg-lsub td{background:#FBFCFF;padding:0;}
+  .cfg-sub{padding:6px 14px 10px 44px;display:flex;flex-direction:column;gap:2px;}
+  .cfg-sub-item{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:9px;position:relative;}
+  .cfg-sub-item:hover{background:#fff;box-shadow:var(--shadow-sm);}
+  .cfg-sub-item:hover .cfg-acts{opacity:1;}
+  .cfg-sub-item .nm{font-weight:700;font-size:13px;color:var(--text-1);min-width:220px;}
+  .cfg-sub-meta{display:flex;align-items:center;gap:10px;flex:1;min-width:0;flex-wrap:wrap;}
+  .cfg-ent-chips{display:flex;gap:5px;flex-wrap:wrap;}
+  .cfg-ent-chip{display:inline-flex;flex-direction:column;align-items:center;line-height:1.15;padding:3px 9px;border-radius:9px;background:#EEF1FB;border:1px solid #DDE3F5;}
+  .cfg-ent-chip b{font-size:11.5px;font-weight:800;color:var(--navy);}
+  .cfg-ent-chip i{font-style:normal;font-size:9.5px;font-weight:700;color:var(--text-3);}
+  .cfg-plazo-chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:800;color:#137B44;background:#E7F6EE;border-radius:20px;padding:3px 10px;white-space:nowrap;}
+  .cfg-dim{color:var(--gray);}
 
   /* ---------- COSTEO DE PRODUCTOS ---------- */
   .costeo-group-title{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--sky);margin:22px 0 10px 0;}
@@ -2090,82 +2424,71 @@
 
         <div class="pagos-body">
 
-          <!-- CONFIG > COMPRAS -->
+          <!-- CONFIG > COMPRAS (Proveedores, alineado con Che Mono 01/10/2026 — ver claude/alineacion-che-mono.md) -->
           <section class="pagos-pane active" id="ctabCompras">
-            <div class="screen-header" id="comprasHeaderChooser">
-              <div style="flex:1;"><h1 style="font-size:20px;margin:0;font-weight:800;">Configuración · Compras</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Elegí qué lista maestra querés gestionar</div></div>
+            <div class="cfg-util-bar">
               <button class="btn-ghost" onclick="exportBackup()" title="Descarga un archivo .json con todo lo cargado en este navegador">Exportar copia de seguridad</button>
               <button class="btn-ghost" onclick="document.getElementById('importBackupInput').click()" title="Carga un archivo .json exportado previamente">Importar copia de seguridad</button>
               <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none" onchange="importBackup(event)">
               <button class="btn-ghost" onclick="requestResetDemo()" title="Borra todo lo cargado y vuelve a los datos de ejemplo originales">Restaurar datos de ejemplo</button>
             </div>
-            <div class="screen-header" id="comprasHeaderList" style="display:none;">
-              <div class="back-btn" onclick="showComprasChooser()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
-              <div><h1 style="font-size:20px;margin:0;font-weight:800;" id="comprasListHeading">Lista</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);" id="comprasListSub"></div></div>
+            <div class="cfg-subbar">
+              <div class="cfg-subtab active" data-cview="proveedores" onclick="cfgSwitchComprasView('proveedores')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+                Proveedores <span class="cnt" id="cfgCntProveedores">·</span>
+              </div>
+              <div class="cfg-subtab" data-cview="metodos" onclick="cfgSwitchComprasView('metodos')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                Métodos de pago <span class="cnt" id="cfgCntMetodos">·</span>
+              </div>
+              <div class="spacer"></div>
+              <div class="cfg-live" id="cfgLive" title="Los cambios que hagan otros usuarios se reflejan acá automáticamente"><i></i><span>Conectando…</span></div>
             </div>
 
-            <div class="screen-scroll">
-
-              <div class="compras-chooser" id="comprasChooser">
-                <div class="chooser-card" onclick="selectComprasList('conceptos')">
-                  <div class="cc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
-                  <h4>Concepto</h4><span>Nivel más amplio de clasificación</span>
+            <!-- VISTA: PROVEEDORES (Categoría > Rubro > Proveedor, igual que Che Mono) -->
+            <div class="cfg-view active" id="cfgViewProveedores">
+              <div class="cfg-head">
+                <div>
+                  <h1>Proveedores</h1>
+                  <div class="cfg-kpis" id="cfgKpisProveedores"></div>
                 </div>
-                <div class="chooser-card" onclick="selectComprasList('rubros')">
-                  <div class="cc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v6H3z"/><path d="M3 15h18v6H3z"/></svg></div>
-                  <h4>Rubro</h4><span>Pertenece a un Concepto existente</span>
-                </div>
-                <div class="chooser-card" onclick="selectComprasList('proveedores')">
-                  <div class="cc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
-                  <h4>Proveedor</h4><span>Define Concepto y Rubro</span>
-                </div>
-                <div class="chooser-card" onclick="selectComprasList('metodos')">
-                  <div class="cc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-                  <h4>Método de pago</h4><span>Disponibles al crear órdenes</span>
+                <div class="spacer"></div>
+                <div class="cfg-actions">
+                  <div class="cfg-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="cfgSearchProveedores" placeholder="Buscar categoría, rubro o proveedor…" oninput="cfgOnSearch('proveedores', this.value)" autocomplete="off">
+                    <button class="x" id="cfgSearchXProveedores" onclick="cfgClearSearch('proveedores')" title="Borrar búsqueda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+                  </div>
+                  <button class="cfg-cta-ghost" onclick="cfgExportExcel('proveedores')" title="Descargar la lista completa en Excel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Excel
+                  </button>
+                  <button class="cfg-cta-ghost" onclick="cfgToggleAllGroups('proveedores')" id="cfgToggleAllProveedores" title="Contraer / expandir todas las categorías">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 15 12 20 17 15"/><polyline points="7 9 12 4 17 9"/></svg><span>Contraer todo</span>
+                  </button>
+                  <button class="cfg-cta" onclick="cfgOpenCreateMenu(this, 'proveedores')">
+                    <span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                    Crear nuevo
+                    <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
                 </div>
               </div>
+              <div class="cfg-chips" id="cfgChipsProveedores"></div>
+              <div class="cfg-scroll" id="cfgScrollProveedores">
+                <div id="cfgTableProveedores"></div>
+              </div>
+            </div>
 
-              <div id="comprasListWrap" style="display:none;">
-
-                <div class="config-panel" id="cfgPanel-conceptos">
-                  <p class="config-hint">Nivel más amplio de clasificación (ej. Servicios, Insumos, Sueldos). Cada Rubro pertenece a uno de estos conceptos. Ordenado alfabéticamente.</p>
-                  <div class="config-card" id="cfgList-conceptos"></div>
-                  <div class="config-card" style="margin-top:14px;"><div class="config-add-bar">
-                    <input type="text" id="cfgNewConcepto" placeholder="Nuevo concepto">
-                    <button onclick="addConcepto()">+ Agregar</button>
-                  </div></div>
-                </div>
-
-                <div class="config-panel" id="cfgPanel-rubros">
-                  <p class="config-hint">Cada Rubro pertenece a un Concepto ya existente. Un concepto puede no tener ningún rubro (ej. "Sueldos"). Ordenado alfabéticamente.</p>
-                  <div class="config-card" id="cfgList-rubros"></div>
-                  <div class="config-card" style="margin-top:14px;"><div class="config-add-bar">
-                    <select id="cfgNewRubroConcepto"></select>
-                    <input type="text" id="cfgNewRubro" placeholder="Nuevo rubro">
-                    <button onclick="addRubro()">+ Agregar</button>
-                  </div></div>
-                </div>
-
-                <div class="config-panel" id="cfgPanel-proveedores">
-                  <p class="config-hint">Cada proveedor pertenece a un Concepto y a un Rubro de ese concepto. Al elegirlo en "Nueva orden de pago", ambos se completan automáticamente. Ordenado alfabéticamente.</p>
-                  <div class="config-card" id="cfgList-proveedores"></div>
-                  <div class="config-card" style="margin-top:14px;"><div class="config-add-bar">
-                    <input type="text" id="cfgNewProvNombre" placeholder="Nombre del proveedor">
-                    <select id="cfgNewProvConcepto" onchange="onNewProvConceptoChange()"></select>
-                    <select id="cfgNewProvRubro"></select>
-                    <button onclick="addProveedorConfig()">+ Agregar</button>
-                  </div></div>
-                </div>
-
-                <div class="config-panel" id="cfgPanel-metodos">
-                  <p class="config-hint">Métodos de pago disponibles al crear o editar una orden. Ordenado alfabéticamente.</p>
-                  <div class="config-card" id="cfgList-metodos"></div>
-                  <div class="config-card" style="margin-top:14px;"><div class="config-add-bar">
-                    <input type="text" id="cfgNewMetodo" placeholder="Nuevo método de pago">
-                    <button onclick="addSimpleConfig('metodos')">+ Agregar</button>
-                  </div></div>
-                </div>
-
+            <!-- VISTA: MÉTODOS DE PAGO (sin cambios respecto a lo que ya tenía La Fortaleza; Che Mono no modela esto como pantalla propia) -->
+            <div class="cfg-view" id="cfgViewMetodos">
+              <div class="cfg-head"><div><h1>Métodos de pago</h1></div></div>
+              <div class="screen-scroll">
+                <p class="config-hint">Métodos de pago disponibles al crear o editar una orden. Ordenado alfabéticamente.</p>
+                <div class="config-card" id="cfgList-metodos"></div>
+                <div class="config-card" style="margin-top:14px;"><div class="config-add-bar">
+                  <input type="text" id="cfgNewMetodo" placeholder="Nuevo método de pago">
+                  <button onclick="addSimpleConfig('metodos')">+ Agregar</button>
+                </div></div>
               </div>
             </div>
           </section>
@@ -2312,6 +2635,34 @@
   </div>
   <div class="cal-grid" id="calGrid"></div>
   <button class="cal-today-btn" onclick="calGoToday()">Hoy</button>
+</div>
+
+<!-- CONFIGURACIÓN · COMPRAS: menú "Crear nuevo", popover de filtros, panel lateral y modal (alineado con Che Mono) -->
+<div class="cfg-create-menu" id="cfgCreateMenu"></div>
+<div class="cfg-fpop" id="cfgFilterPop"></div>
+<div class="overlay" id="cfgOverlay" onclick="cfgClosePanel()"></div>
+<aside class="panel cfg-panel" id="cfgPanel" aria-hidden="true">
+  <div class="panel-head">
+    <div style="min-width:0;">
+      <div id="cfgPanelBadge"></div>
+      <h2 id="cfgPanelTitle">—</h2>
+      <div class="cfg-crumb" id="cfgPanelCrumb"></div>
+    </div>
+    <button class="panel-close" onclick="cfgClosePanel()" title="Cerrar (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+  </div>
+  <div class="panel-body" id="cfgPanelBody"></div>
+  <div class="panel-foot">
+    <button class="btn-primary secondary" onclick="cfgClosePanel()">Cancelar</button>
+    <button class="btn-primary" id="cfgPanelSave" onclick="cfgPanelSubmit()">Guardar</button>
+  </div>
+</aside>
+<div class="confirm-overlay cfg-modal" id="cfgModal">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="cfgModalIcon"></div>
+    <h3 id="cfgModalTitle"></h3>
+    <div id="cfgModalBody"></div>
+    <div class="confirm-actions" id="cfgModalActions"></div>
+  </div>
 </div>
 
 <!-- CONFIRM DELETE MODAL -->
@@ -2498,6 +2849,1021 @@ async function logHistorialConfig(accion, detalle){
     });
   }catch(e){ console.warn("No se pudo registrar en el historial:", e); }
 }
+
+/* ===================== CONFIGURACIÓN · COMPRAS (Proveedores) — motor cfg* portado de Che Mono ===================== */
+/* =========================================================
+   CONFIGURACIÓN · COMPRAS — Proveedores (alineado con Che Mono, 01/10/2026)
+   ---------------------------------------------------------
+   Ref.: claude/alineacion-che-mono.md
+   Proveedores: Categoría (lf_conceptos) > Rubro (lf_rubros) > Proveedor
+     (lf_proveedores). Un proveedor puede estar en 1 o más rubros
+     (lf_proveedor_rubros), igual que en Che Mono.
+   IMPORTANTE (decisión de Pancho, 30/09): Pagos/Costeo/Stock todavía leen
+   el modelo VIEJO de un solo rubro por proveedor (lf_proveedores.concepto_id
+   /.rubro_id, vía proveedoresConfig[i].concepto/.rubro en loadMasterData()).
+   Para no romper esos ~40 lugares hasta que se migren en la etapa de Pagos/
+   Costeo, el RPC lf_guardar_proveedor sincroniza automáticamente esas dos
+   columnas viejas con el PRIMER rubro de la lista elegida acá. Por eso,
+   después de cualquier alta/baja/edición en esta pantalla, además de
+   cfgReload() siempre se llama a loadMasterData() para refrescar también
+   los arrays viejos (conceptosConfig/rubrosConfig/proveedoresConfig) que
+   usa el resto del sistema.
+   Insumos queda afuera de esta pantalla por ahora (se incorpora en la etapa
+   de Costeo, ver el documento de alineación) — cfgData.items/pres quedan
+   siempre vacíos, a propósito.
+   No puede haber nombres repetidos en ningún nivel (se valida acá en vivo
+   y en la base con índices únicos). Todas las altas/bajas/modificaciones
+   quedan en lf_historial (solapa Actividad) y se sincronizan entre usuarios
+   en tiempo real.
+   ========================================================= */
+const CFG_RT_TABLES = ["lf_conceptos","lf_rubros","lf_proveedores","lf_proveedor_rubros"];
+const CFG_DOM = {
+  proveedores: { catTable:"lf_conceptos", rubTable:"lf_rubros", rubFk:"concepto_id", hoja:"Proveedor", hojaPl:"proveedores", keys:["cat","rubro","prov"] }
+};
+const CFG_KEY_LABEL = { cat:"Categoría", rubro:"Rubro", prov:"Proveedor" };
+const CFG_PALETTE = ["#3A4570","#5977D2","#2E9E88","#C9812A","#B23D7C","#6B5BD2","#1477A6","#8C6A3F","#D0521F","#4C8C3A","#9C3FB5","#557089"];
+
+let cfgData = {
+  proveedores: { cats:[], rubros:[] },
+  provs:[], links:[],
+  items:[], pres:[] // reservado para Insumos (etapa de Costeo) — siempre vacío por ahora
+};
+let cfgLoaded = false, cfgLoading = null;
+const cfgState = {
+  proveedores: { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), prov:cfgNewF() } }
+};
+function cfgNewF(){ return { text:"", sel:new Set() }; }
+
+/* ---------- utilidades ---------- */
+function cfgEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function cfgNorm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim(); }
+function cfgCmp(a,b){ return String(a||"").localeCompare(String(b||""), "es", { sensitivity:"base", numeric:true }); }
+function cfgColor(id){ let h=0; const s=String(id); for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return CFG_PALETTE[h % CFG_PALETTE.length]; }
+/* resalta coincidencias ignorando tildes/mayúsculas */
+function cfgHi(text, q){
+  text = String(text==null?"":text);
+  const nq = cfgNorm(q);
+  if(!nq) return cfgEsc(text);
+  let flat = "", map = [];
+  for(let i=0;i<text.length;i++){
+    const n = text[i].normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+    for(let j=0;j<n.length;j++){ flat += n[j]; map.push(i); }
+  }
+  let out = "", last = 0, from = 0, idx;
+  while(nq && (idx = flat.indexOf(nq, from)) >= 0){
+    const s = map[idx], e = map[idx+nq.length-1]+1;
+    if(s < last){ from = idx+1; continue; }
+    out += cfgEsc(text.slice(last, s)) + "<mark>" + cfgEsc(text.slice(s, e)) + "</mark>";
+    last = e; from = idx + nq.length;
+  }
+  return out + cfgEsc(text.slice(last));
+}
+function cfgZoom(){ const z = parseFloat(document.documentElement.style.zoom); return (z && isFinite(z)) ? z : 1; }
+function cfgPlace(el, anchor, align){
+  const z = cfgZoom(), r = anchor.getBoundingClientRect();
+  const vw = window.innerWidth / z, vh = window.innerHeight / z;
+  el.style.visibility = "hidden"; el.classList.add("show");
+  const w = el.offsetWidth, h = el.offsetHeight;
+  let top = r.bottom/z + 8, left = align==="right" ? r.right/z - w : r.left/z;
+  if(left + w > vw - 12) left = vw - 12 - w;
+  if(left < 12) left = 12;
+  if(top + h > vh - 12) top = Math.max(12, r.top/z - h - 8);
+  el.style.top = top+"px"; el.style.left = left+"px"; el.style.visibility = "";
+}
+const CFG_IC = {
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+  del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  funnel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  cat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  rub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  prov:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  truck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+  excel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13l4 5M12 13l-4 5"/><line x1="15" y1="13" x2="16.5" y2="13"/><line x1="15" y1="17" x2="16.5" y2="17"/></svg>'
+};
+
+/* ---------- días de entrega / pedido y plazo de pago ---------- */
+const CFG_DIAS = ["", "Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const CFG_DIAS_C = ["", "Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+function cfgEntregas(p){ return (Array.isArray(p && p.entregas) ? p.entregas : []).filter(e=>e && e.entrega>=1 && e.entrega<=7).slice().sort((a,b)=>a.entrega-b.entrega); }
+function cfgEntregasTxt(p, largo){
+  const es = cfgEntregas(p); if(!es.length) return "";
+  const D = largo ? CFG_DIAS : CFG_DIAS_C;
+  return es.map(e=>`${D[e.entrega]} (pedido ${D[e.pedido]||"—"})`).join(" · ");
+}
+function cfgPlazoTxt(p){ const n = p ? p.plazo_pago_dias : null; if(n==null) return ""; return n===0 ? "Contado" : `${n} ${n===1?"día":"días"}`; }
+
+/* ---------- lookups ---------- */
+function cfgCat(dom, id){ return cfgData[dom].cats.find(c=>c.id===id); }
+function cfgRub(dom, id){ return cfgData[dom].rubros.find(r=>r.id===id); }
+function cfgProv(id){ return cfgData.provs.find(p=>p.id===id); }
+function cfgRubrosDeProv(provId){ return cfgData.links.filter(l=>l.proveedor_id===provId).map(l=>cfgRub("proveedores", l.rubro_id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre)); }
+function cfgProvsDeRubro(rubId){ return cfgData.links.filter(l=>l.rubro_id===rubId).map(l=>cfgProv(l.proveedor_id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre)); }
+function cfgInsumosDeProv(provId){ return []; /* Insumos todavía no está integrado a este proveedor (etapa de Costeo) */ }
+function cfgExists(list, nombre, exceptId){ const n = cfgNorm(nombre); return list.find(x=>x.id!==exceptId && cfgNorm(x.nombre)===n); }
+
+/* ---------- carga de datos (Supabase) ---------- */
+async function cfgLoadAll(){
+  const res = await Promise.all([
+    sb.from("lf_conceptos").select("id,nombre"),
+    sb.from("lf_rubros").select("id,nombre,concepto_id"),
+    sb.from("lf_proveedores").select("id,nombre,plazo_pago_dias,entregas"),
+    sb.from("lf_proveedor_rubros").select("proveedor_id,rubro_id")
+  ]);
+  const err = res.find(r=>r.error);
+  if(err){ console.warn("Config compras:", err.error); showToast("No se pudieron cargar los datos de Compras", "warn"); return false; }
+  cfgData.proveedores.cats   = (res[0].data||[]).map(c=>({ id:c.id, nombre:c.nombre }));
+  cfgData.proveedores.rubros = (res[1].data||[]).map(r=>({ id:r.id, nombre:r.nombre, catId:r.concepto_id }));
+  cfgData.provs  = res[2].data||[];
+  cfgData.links  = res[3].data||[];
+  // categorías nuevas (creadas por otro usuario) entran contraídas
+  const ids = cfgData.proveedores.cats.map(c=>c.id);
+  if(cfgKnownCats) ids.forEach(id=>{ if(!cfgKnownCats.has(id)) cfgState.proveedores.collapsed.add(id); });
+  else ids.forEach(id=>cfgState.proveedores.collapsed.add(id));
+  cfgKnownCats = new Set(ids);
+  cfgLoaded = true;
+  cfgPruneFilters();
+  return true;
+}
+async function cfgReload(){
+  if(cfgLoading) return cfgLoading;
+  cfgLoading = cfgLoadAll().finally(()=>{ cfgLoading = null; });
+  const ok = await cfgLoading;
+  if(ok) cfgRenderAll();
+  return ok;
+}
+
+/* ---------- filas planas (para filtros) ---------- */
+function cfgBuildRows(dom){
+  const rows = [], D = cfgData[dom];
+  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  cats.forEach(c=>{
+    const rubs = D.rubros.filter(r=>r.catId===c.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    if(!rubs.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:null, rubro:null, leafId:null, leaf:null, provs:[] }); return; }
+    rubs.forEach(r=>{
+      const ps = cfgProvsDeRubro(r.id);
+      if(!ps.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:null, leaf:null, provs:[] }); return; }
+      ps.forEach(p=>rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:p.id, leaf:p.nombre, provs:[p.nombre] }));
+    });
+  });
+  return rows;
+}
+function cfgRowVals(row, key){
+  if(key==="cat") return [row.cat];
+  if(key==="rubro") return row.rubro==null ? [] : [row.rubro];
+  if(key==="prov") return row.provs;
+  return [];
+}
+function cfgFActive(f){ return f.sel.size>0 || !!cfgNorm(f.text); }
+function cfgPassF(row, key, f){
+  if(!cfgFActive(f)) return true;
+  const vals = cfgRowVals(row, key);
+  if(!vals.length) return false;
+  if(f.sel.size) return vals.some(v=>f.sel.has(v));
+  const t = cfgNorm(f.text);
+  return vals.some(v=>cfgNorm(v).includes(t));
+}
+function cfgPassSearch(row, q){
+  if(!q) return true;
+  return [row.cat, row.rubro].concat(row.provs).some(v=>v && cfgNorm(v).includes(q));
+}
+function cfgFilterRows(dom, rows, exceptKey){
+  const st = cfgState[dom], q = cfgNorm(st.search);
+  return rows.filter(r=>cfgPassSearch(r,q) && CFG_DOM[dom].keys.every(k=>k===exceptKey || cfgPassF(r,k,st.filters[k])));
+}
+function cfgAnyFilter(dom){ const st=cfgState[dom]; return !!cfgNorm(st.search) || CFG_DOM[dom].keys.some(k=>cfgFActive(st.filters[k])); }
+function cfgPruneFilters(){
+  ["proveedores"].forEach(dom=>{
+    const rows = cfgBuildRows(dom);
+    CFG_DOM[dom].keys.forEach(k=>{
+      const f = cfgState[dom].filters[k]; if(!f.sel.size) return;
+      const all = new Set(); rows.forEach(r=>cfgRowVals(r,k).forEach(v=>all.add(v)));
+      [...f.sel].forEach(v=>{ if(!all.has(v)) f.sel.delete(v); });
+    });
+  });
+}
+
+/* ---------- render general ---------- */
+function cfgRenderAll(){
+  if(!cfgLoaded) return;
+  document.getElementById("cfgCntProveedores").textContent = cfgData.provs.length;
+  cfgRenderDom("proveedores");
+  if(document.getElementById("cfgFilterPop").classList.contains("show")) cfgRenderFilterList();
+}
+function cfgCollapseAll(dom){ const s = cfgState[dom].collapsed; s.clear(); (cfgData[dom]||{cats:[]}).cats.forEach(c=>s.add(c.id)); }
+let cfgKnownCats = null;
+
+/* ---------- Compras: Proveedores ↔ Métodos de pago (reemplaza al viejo cfgGoView de Che Mono,
+   que alternaba Proveedores/Insumos; acá alterna con la pantalla simple de Métodos de pago,
+   que La Fortaleza ya tenía y Che Mono no modela como pantalla propia) ---------- */
+function cfgSwitchComprasView(v){
+  document.querySelectorAll("#ctabCompras .cfg-subtab").forEach(t=>t.classList.toggle("active", t.dataset.cview===v));
+  document.getElementById("cfgViewProveedores").classList.toggle("active", v==="proveedores");
+  document.getElementById("cfgViewMetodos").classList.toggle("active", v==="metodos");
+  cfgCloseFloating();
+  if(v==="proveedores") cfgEnsureLoaded();
+  else renderMetodosList();
+}
+function cfgOnSearch(dom, val){
+  cfgState[dom].search = val;
+  document.getElementById("cfgSearchX"+(dom==="proveedores"?"Proveedores":"")).classList.toggle("show", !!val);
+  cfgRenderDom(dom);
+}
+function cfgClearSearch(dom){
+  cfgState[dom].search = "";
+  const inp = document.getElementById("cfgSearch"+(dom==="proveedores"?"Proveedores":"")); if(inp) inp.value = "";
+  document.getElementById("cfgSearchX"+(dom==="proveedores"?"Proveedores":"")).classList.remove("show");
+  cfgRenderDom(dom);
+}
+function cfgClearFilter(dom, key){ const f = cfgState[dom].filters[key]; f.text=""; f.sel.clear(); cfgRenderDom(dom); if(cfgFP.dom===dom && cfgFP.key===key) cfgRenderFilterPop(); }
+function cfgClearAll(dom){
+  cfgState[dom].search = "";
+  CFG_DOM[dom].keys.forEach(k=>{ const f=cfgState[dom].filters[k]; f.text=""; f.sel.clear(); });
+  const inp = document.getElementById("cfgSearch"+(dom==="proveedores"?"Proveedores":"")); if(inp) inp.value = "";
+  const x = document.getElementById("cfgSearchX"+(dom==="proveedores"?"Proveedores":"")); if(x) x.classList.remove("show");
+  cfgCloseFloating();
+  cfgRenderDom(dom);
+}
+function cfgToggleGroup(dom, catId){ const s = cfgState[dom].collapsed; s.has(catId) ? s.delete(catId) : s.add(catId); cfgRenderDom(dom); }
+function cfgToggleAllGroups(dom){
+  const st = cfgState[dom], D = cfgData[dom];
+  if(st.collapsed.size >= D.cats.length && D.cats.length) st.collapsed.clear();
+  else cfgCollapseAll(dom);
+  cfgRenderDom(dom);
+}
+function cfgKpi(n,s1,sn){ return `<span class="cfg-kpi static"><b>${n}</b> ${n===1?s1:sn}</span>`; }
+function cfgKpiBtn(dom, mode, n, s1, sn, tip){
+  const act = cfgState[dom].mode===mode;
+  return `<button type="button" class="cfg-kpi btn${act?" active":""}" onclick="cfgSetMode('${dom}','${mode}')" title="${cfgEsc(tip)}"><b>${n}</b> ${n===1?s1:sn}</button>`;
+}
+/* Vistas: "grupos" (categoría › rubro › proveedor), "rubros" (lista de rubros) y "hojas" (lista de proveedores) */
+function cfgSetMode(dom, mode){
+  const st = cfgState[dom];
+  st.mode = mode;
+  if(mode==="grupos"){ cfgCollapseAll(dom); }
+  cfgCloseFloating();
+  cfgRenderDom(dom);
+  const sc = document.getElementById("cfgScrollProveedores"); if(sc) sc.scrollTop = 0;
+}
+function cfgToggleRubOpen(dom, id){ const s = cfgState[dom].rubOpen; s.has(id) ? s.delete(id) : s.add(id); cfgRenderDom(dom); }
+
+function cfgRenderDom(dom){
+  const D = cfgData[dom], st = cfgState[dom];
+  const kp = document.getElementById("cfgKpisProveedores");
+  kp.innerHTML = cfgKpiBtn(dom,"grupos",D.cats.length,"categoría","categorías","Vista por categoría (inicial)")
+    + cfgKpiBtn(dom,"rubros",D.rubros.length,"rubro","rubros","Lista de todos los rubros")
+    + cfgKpiBtn(dom,"hojas",cfgData.provs.length,"proveedor","proveedores","Lista de todos los proveedores");
+  const tg = document.getElementById("cfgToggleAllProveedores");
+  if(tg){ tg.style.display = st.mode==="grupos" ? "" : "none"; tg.querySelector("span").textContent = (st.collapsed.size >= D.cats.length && D.cats.length) ? "Expandir todo" : "Contraer todo"; }
+
+  const allRows = cfgBuildRows(dom);
+  const rows = cfgFilterRows(dom, allRows);
+  cfgRenderChips(dom, rows, allRows);
+
+  const host = document.getElementById("cfgTableProveedores");
+  if(!D.cats.length){ host.innerHTML = cfgOnboardHtml(dom); return; }
+  if(!rows.length){
+    host.innerHTML = `<div class="cfg-table-wrap">${cfgTheadOnly(dom)}<div class="cfg-nores">${CFG_IC.search.replace('<svg','<svg style="width:44px;height:44px"')}<strong>No hay resultados</strong><span>Ningún registro coincide con la búsqueda o los filtros aplicados.</span><br><button class="btn-ghost" onclick="cfgClearAll('${dom}')">Limpiar búsqueda y filtros</button></div></div>`;
+    return;
+  }
+  if(st.mode==="rubros") host.innerHTML = `<div class="cfg-table-wrap">${cfgRubrosListHtml(dom, rows)}</div>`;
+  else if(st.mode==="hojas") host.innerHTML = `<div class="cfg-table-wrap">${cfgHojasListHtml(dom, rows)}</div>`;
+  else host.innerHTML = `<div class="cfg-table-wrap">${cfgTableHtml(dom, rows)}</div>`;
+  const th = host.querySelector("thead");
+  if(th) host.style.setProperty("--cfg-th-h", th.offsetHeight+"px");
+}
+
+function cfgColsDef(dom){
+  return [ {k:"cat", w:"30%", lvl:"l1", n:"1"}, {k:"rubro", w:"32%", lvl:"l2", n:"2"}, {k:"prov", w:"38%", lvl:"l3", n:"3"} ];
+}
+function cfgTheadOnly(dom){ return `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}</table>`; }
+function cfgColgroup(dom){ return "<colgroup>"+cfgColsDef(dom).map(c=>`<col style="width:${c.w}">`).join("")+"</colgroup>"; }
+function cfgThead(dom){
+  const st = cfgState[dom];
+  return "<thead><tr>"+cfgColsDef(dom).map(c=>{
+    const label = c.label || CFG_KEY_LABEL[c.k];
+    if(!c.k) return `<th><div class="cfg-th">${cfgEsc(label)}</div></th>`;
+    const f = st.filters[c.k], act = cfgFActive(f);
+    const badge = act ? (f.sel.size ? f.sel.size : "abc") : "";
+    const open = (cfgFP.dom===dom && cfgFP.key===c.k) ? " open" : "";
+    const dot = c.n ? `<span class="lvl-dot ${c.lvl}">${c.n}</span>` : `<span class="lvl-dot ${c.lvl}">${CFG_IC.prov.replace('<svg','<svg style="width:11px;height:11px"')}</span>`;
+    return `<th><div class="cfg-th">${dot}${cfgEsc(label)}<button class="cfg-fbtn${act?" active":""}${open}" data-fdom="${dom}" data-fkey="${c.k}" onclick="cfgOpenFilter(event,'${dom}','${c.k}')" title="Filtrar ${cfgEsc(CFG_KEY_LABEL[c.k].toLowerCase())}">${CFG_IC.funnel}${badge?`<span>${badge}</span>`:""}</button></div></th>`;
+  }).join("")+"</tr></thead>";
+}
+function cfgActs(btns){ return `<div class="cfg-acts">${btns.join("")}</div>`; }
+function cfgBtn(kind, title, onclick){ return `<button class="cfg-ibtn ${kind==="plus"?"add":kind}" title="${cfgEsc(title)}" onclick="event.stopPropagation();${onclick}">${CFG_IC[kind]}</button>`; }
+
+function cfgTableHtml(dom, rows){
+  const st = cfgState[dom], q = st.search, filtering = cfgAnyFilter(dom);
+  const fT = k => st.filters[k] && !st.filters[k].sel.size ? st.filters[k].text : "";
+  const hiQ = (txt, k) => cfgHi(txt, fT(k) || q);
+  const nCols = cfgColsDef(dom).length;
+  const groups = [];
+  rows.forEach(r=>{
+    let g = groups[groups.length-1];
+    if(!g || g.catId!==r.catId){ g = { catId:r.catId, cat:r.cat, rubs:[] }; groups.push(g); }
+    let rg = g.rubs[g.rubs.length-1];
+    if(!rg || rg.rubroId!==r.rubroId){ rg = { rubroId:r.rubroId, rubro:r.rubro, rows:[] }; g.rubs.push(rg); }
+    rg.rows.push(r);
+  });
+  let html = `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}<tbody>`;
+  groups.forEach(g=>{
+    const collapsed = !filtering && st.collapsed.has(g.catId);
+    const totRub = cfgData[dom].rubros.filter(r=>r.catId===g.catId);
+    const leafIds = new Set();
+    totRub.forEach(r=>{ cfgData.links.filter(l=>l.rubro_id===r.id).forEach(l=>leafIds.add(l.proveedor_id)); });
+    const catMeta = `${totRub.length} ${totRub.length===1?"rubro":"rubros"} · ${leafIds.size} ${leafIds.size===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}`;
+    const nRows = collapsed ? 1 : g.rubs.reduce((a,rg)=>a+rg.rows.length,0);
+    const catCell = `<td class="c-l1${collapsed?" is-collapsed":""}" rowspan="${nRows}"${!filtering?` onclick="if(!event.target.closest('.cfg-acts'))cfgToggleGroup('${dom}','${g.catId}')"`:""}><div class="cfg-cell sticky" style="top:var(--cfg-th-h,41px)">
+        <button class="cfg-chev${collapsed?" collapsed":""}" onclick="event.stopPropagation();cfgToggleGroup('${dom}','${g.catId}')" title="${collapsed?"Expandir":"Contraer"}"${filtering?' disabled style="opacity:.35;cursor:default"':''}>${CFG_IC.chev}</button>
+        <span class="cfg-dot" style="background:${cfgColor(g.catId)}"></span>
+        <div class="txt"><div class="nm">${hiQ(g.cat,"cat")}</div><div class="meta">${catMeta}</div></div>
+        ${cfgActs([cfgBtn("plus","Agregar rubro en esta categoría",`cfgOpenRubroForm('${dom}',null,'${g.catId}')`), cfgBtn("edit","Editar categoría",`cfgOpenCatForm('${dom}','${g.catId}')`), cfgBtn("del","Eliminar categoría",`cfgDeleteCat('${dom}','${g.catId}')`)])}
+      </div></td>`;
+    if(collapsed){
+      html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('${dom}','${g.catId}')"><span class="rubs">${cfgEsc(totRub.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(r=>r.nombre).join(" · ")) || "Sin rubros"}</span><span class="open">Ver ${CFG_IC.chev}</span></div></td></tr>`;
+      return;
+    }
+    let firstInCat = true;
+    g.rubs.forEach((rg, ri)=>{
+      const lastRub = ri===g.rubs.length-1;
+      rg.rows.forEach((r, i)=>{
+        const lastRow = lastRub && i===rg.rows.length-1;
+        html += `<tr${lastRow?' class="cat-end"':""}>`;
+        if(firstInCat){ html += catCell; firstInCat = false; }
+        if(rg.rubroId==null){
+          html += `<td colspan="${nCols-1}" class="${lastRow?"grp-end":""}"><div class="cfg-empty-cell">Sin rubros todavía · <a onclick="cfgOpenRubroForm('${dom}',null,'${g.catId}')">${CFG_IC.plus.replace('<svg','<svg style="width:12px;height:12px"')} Agregar rubro</a></div></td></tr>`;
+          return;
+        }
+        if(i===0){
+          const nLeaf = cfgData.links.filter(l=>l.rubro_id===rg.rubroId).length;
+          html += `<td class="c-l2${lastRub?" grp-end":""}" rowspan="${rg.rows.length}"><div class="cfg-cell">
+              <div class="txt"><div class="nm">${hiQ(rg.rubro,"rubro")}</div><div class="meta">${nLeaf} ${nLeaf===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}</div></div>
+              ${cfgActs([cfgBtn("plus","Agregar proveedor en este rubro",`cfgOpenProvForm(null,'${rg.rubroId}')`), cfgBtn("edit","Editar rubro",`cfgOpenRubroForm('${dom}','${rg.rubroId}')`), cfgBtn("del","Eliminar rubro",`cfgDeleteRubro('${dom}','${rg.rubroId}')`)])}
+            </div></td>`;
+        }
+        const endCls = lastRow ? "grp-end" : "";
+        if(r.leafId==null){
+          html += `<td colspan="${nCols-2}" class="${endCls}"><div class="cfg-empty-cell">Sin proveedores asignados · <a onclick="cfgOpenProvForm(null,'${r.rubroId}')">${CFG_IC.plus.replace('<svg','<svg style="width:12px;height:12px"')} Agregar proveedor</a></div></td></tr>`;
+          return;
+        }
+        const p = cfgProv(r.leafId);
+        const otros = cfgRubrosDeProv(p.id).filter(x=>x.id!==r.rubroId);
+        const also = otros.length ? `<div><span class="cfg-also" title="También está en: ${cfgEsc(otros.map(o=>o.nombre).join(", "))}">También en ${cfgEsc(otros.length===1?otros[0].nombre:otros.length+" rubros")}</span></div>` : "";
+        html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(p.nombre,"prov")}</div>${cfgProvMetaHtml(p)}${also}</div>
+            ${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar / quitar proveedor",`cfgDeleteProv('${p.id}','${r.rubroId}')`)])}</div></td>`;
+        html += `</tr>`;
+      });
+    });
+  });
+  return html + "</tbody></table>";
+}
+
+function cfgProvMetaHtml(p){
+  const es = cfgEntregas(p), pl = cfgPlazoTxt(p);
+  if(!es.length && !pl) return "";
+  return `<div class="cfg-pmeta">${es.length?`<span title="${cfgEsc(cfgEntregasTxt(p,true))}">${CFG_IC.truck} ${es.map(e=>CFG_DIAS_C[e.entrega]).join(", ")}</span>`:""}${pl?`<span title="Plazo de pago">${CFG_IC.card} ${cfgEsc(pl)}</span>`:""}</div>`;
+}
+function cfgEntregasCell(p){
+  const es = cfgEntregas(p);
+  if(!es.length) return '<span class="cfg-dim">—</span>';
+  return `<div class="cfg-ent-chips">${es.map(e=>`<span class="cfg-ent-chip" title="Pedido hasta el ${CFG_DIAS[e.pedido]} para recibir el ${CFG_DIAS[e.entrega]}"><b>${CFG_DIAS_C[e.entrega]}</b><i>pedido ${CFG_DIAS_C[e.pedido]}</i></span>`).join("")}</div>`;
+}
+
+/* Vista "rubros": todos los rubros en orden alfabético, con su categoría y cantidad de proveedores */
+function cfgRubrosListHtml(dom, rows){
+  const st = cfgState[dom], q = st.search;
+  const ids = [...new Set(rows.filter(r=>r.rubroId).map(r=>r.rubroId))];
+  const rubs = ids.map(id=>cfgRub(dom,id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  let html = `<table class="cfg-table cfg-list"><colgroup><col style="width:34%"><col style="width:30%"><col style="width:18%"><col style="width:18%"></colgroup>
+    <thead><tr><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th>
+    <th><div class="cfg-th">Proveedores</div></th><th><div class="cfg-th">&nbsp;</div></th></tr></thead><tbody>`;
+  rubs.forEach(r=>{
+    const c = cfgCat(dom, r.catId), open = st.rubOpen.has(r.id);
+    const leafIds = [...new Set(rows.filter(x=>x.rubroId===r.id && x.leafId).map(x=>x.leafId))];
+    const nProv = leafIds.length;
+    html += `<tr class="cfg-lrow${open?" open":""}" onclick="cfgToggleRubOpen('${dom}','${r.id}')">
+      <td><div class="cfg-cell"><button class="cfg-chev${open?"":" collapsed"}" tabindex="-1">${CFG_IC.chev}</button><div class="txt"><div class="nm">${cfgHi(r.nombre,q)}</div></div>
+        ${cfgActs([cfgBtn("plus","Agregar proveedor en este rubro",`cfgOpenProvForm(null,'${r.id}')`), cfgBtn("edit","Editar rubro",`cfgOpenRubroForm('proveedores','${r.id}')`), cfgBtn("del","Eliminar rubro",`cfgDeleteRubro('proveedores','${r.id}')`)])}</div></td>
+      <td><div class="cfg-cell"><span class="cfg-dot" style="background:${cfgColor(r.catId)}"></span><div class="txt"><div class="nm" style="font-weight:600">${cfgHi(c?c.nombre:"",q)}</div></div></div></td>
+      <td><div class="cfg-cell"><span class="cfg-count">${nProv}</span></div></td>
+      <td></td></tr>`;
+    if(open){
+      const ps = leafIds.map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+      const inner = ps.length ? ps.map(p=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(p.nombre,q)}</span><span class="cfg-sub-meta">${cfgEntregasCell(p)}${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip" title="Plazo de pago">${CFG_IC.card.replace('<svg','<svg style="width:11px;height:11px;margin-right:4px"')}${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim" title="Sin plazo de pago">Sin plazo</span>'}</span>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`)])}</div>`).join("")
+        : `<div class="cfg-empty-cell">Sin proveedores asignados · <a onclick="cfgOpenProvForm(null,'${r.id}')">Agregar proveedor</a></div>`;
+      html += `<tr class="cfg-lsub"><td colspan="4"><div class="cfg-sub">${inner}</div></td></tr>`;
+    }
+  });
+  return html + "</tbody></table>";
+}
+/* Vista "hojas": todos los proveedores en orden alfabético */
+function cfgHojasListHtml(dom, rows){
+  const st = cfgState[dom], q = st.search;
+  const byLeaf = new Map();
+  rows.filter(r=>r.leafId).forEach(r=>{ if(!byLeaf.has(r.leafId)) byLeaf.set(r.leafId, []); byLeaf.get(r.leafId).push(r); });
+  const leaves = [...byLeaf.keys()].map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  if(!leaves.length) return `<div class="cfg-nores"><strong>No hay proveedores para mostrar</strong></div>`;
+  const cr = x => { const rs = cfgRubrosDeProv(x.id); return { cats: rs.map(r=>`<div>${cfgHi((cfgCat(dom,r.catId)||{}).nombre||"",q)}</div>`).join(""), rubs: rs.map(r=>`<div>${cfgHi(r.nombre,q)}</div>`).join("") }; };
+  let html = `<table class="cfg-table cfg-list"><colgroup><col style="width:24%"><col style="width:17%"><col style="width:19%"><col style="width:28%"><col style="width:12%"></colgroup>
+    <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Días de entrega · pedido</div></th><th><div class="cfg-th">Plazo de pago</div></th></tr></thead><tbody>`;
+  leaves.forEach(p=>{ const x = cr(p);
+    html += `<tr class="cfg-lrow flat"><td><div class="cfg-cell"><div class="txt"><div class="nm">${cfgHi(p.nombre,q)}</div></div>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar proveedor",`cfgDeleteProv('${p.id}',null)`)])}</div></td>
+      <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
+      <td><div class="cfg-cell">${cfgEntregasCell(p)}</div></td><td><div class="cfg-cell">${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip">${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim">—</span>'}</div></td></tr>`; });
+  return html + "</tbody></table>";
+}
+
+/* ---------- descarga a Excel (hoja "lista") ---------- */
+function cfgExportExcel(dom){
+  if(typeof XLSX==="undefined"){ showToast("No se pudo cargar el generador de Excel. Revisá la conexión.", "warn"); return; }
+  const D = cfgData[dom], out = [];
+  const rubs = D.rubros.slice().sort((a,b)=>cfgCmp((cfgCat(dom,a.catId)||{}).nombre,(cfgCat(dom,b.catId)||{}).nombre) || cfgCmp(a.nombre,b.nombre));
+  const cols = ["Categoría","Rubro","Proveedor","Días de entrega","Días de pedido","Plazo de pago (días)"];
+  rubs.forEach(r=>{
+    const cat = (cfgCat(dom,r.catId)||{}).nombre||"", ps = cfgProvsDeRubro(r.id);
+    if(!ps.length) out.push([cat, r.nombre, "", "", "", ""]);
+    ps.forEach(p=>{ const es = cfgEntregas(p); out.push([cat, r.nombre, p.nombre, es.map(e=>CFG_DIAS[e.entrega]).join(", "), es.map(e=>CFG_DIAS[e.pedido]).join(", "), p.plazo_pago_dias==null?"":p.plazo_pago_dias]); });
+  });
+  if(!out.length){ showToast("No hay proveedores para descargar", "warn"); return; }
+  const ws = XLSX.utils.aoa_to_sheet([cols].concat(out));
+  ws["!cols"] = cols.map((c,i)=>({ wch: Math.min(48, Math.max(c.length, ...out.map(r=>String(r[i]==null?"":r[i]).length)) + 2) }));
+  ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:out.length, c:cols.length-1} }) };
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "lista");
+  const hoy = new Date(), f = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}-${String(hoy.getDate()).padStart(2,"0")}`;
+  XLSX.writeFile(wb, `La Fortaleza - Proveedores - ${f}.xlsx`);
+  showToast("Excel descargado");
+}
+
+function cfgRenderChips(dom, rows, allRows){
+  const el = document.getElementById("cfgChipsProveedores"), st = cfgState[dom];
+  if(!cfgAnyFilter(dom)){ el.innerHTML = ""; return; }
+  const chips = [];
+  if(cfgNorm(st.search)) chips.push(`<span class="cfg-chip"><span>Búsqueda: <b>“${cfgEsc(st.search.trim())}”</b></span><button onclick="cfgClearSearch('${dom}')" title="Quitar">${CFG_IC.x}</button></span>`);
+  CFG_DOM[dom].keys.forEach(k=>{
+    const f = st.filters[k]; if(!cfgFActive(f)) return;
+    const txt = f.sel.size ? [...f.sel].sort(cfgCmp).map(cfgEsc).join(", ") : `contiene “${cfgEsc(f.text.trim())}”`;
+    chips.push(`<span class="cfg-chip" title="${cfgEsc(CFG_KEY_LABEL[k])}"><span>${CFG_KEY_LABEL[k]}: <b>${txt}</b></span><button onclick="cfgClearFilter('${dom}','${k}')" title="Quitar filtro">${CFG_IC.x}</button></span>`);
+  });
+  const leafCount = new Set(rows.filter(r=>r.leafId).map(r=>r.leafId)).size;
+  const leafTotal = cfgData.provs.length;
+  el.innerHTML = chips.join("") + `<span class="res">Mostrando ${leafCount} de ${leafTotal} ${CFG_DOM[dom].hojaPl}</span><span class="clear-all" onclick="cfgClearAll('${dom}')">Limpiar todo</span>`;
+}
+
+function cfgOnboardHtml(dom){
+  return `<div class="cfg-onboard"><div class="ic" style="background:#EAF0FF;color:var(--blue)">${CFG_IC.prov}</div><h2>Todavía no hay proveedores</h2><p>Empezá creando una categoría, después sus rubros y por último los proveedores de cada rubro.</p>
+    <div class="row-btns"><button class="cfg-cta" onclick="cfgOpenCatForm('proveedores',null)"><span class="plus">${CFG_IC.plus}</span>Crear primera categoría</button></div></div>`;
+}
+
+/* ---------- popover de filtros: tildar o escribir (lectura inteligente) ---------- */
+let cfgFP = { dom:null, key:null, btn:null };
+function cfgOpenFilter(ev, dom, key){
+  ev.stopPropagation();
+  const pop = document.getElementById("cfgFilterPop");
+  if(pop.classList.contains("show") && cfgFP.dom===dom && cfgFP.key===key){ cfgCloseFloating(); return; }
+  cfgCloseFloating();
+  cfgFP = { dom, key };
+  cfgRenderFilterPop();
+  const btn = document.querySelector(`.cfg-fbtn[data-fdom="${dom}"][data-fkey="${key}"]`);
+  if(btn){ btn.classList.add("open"); cfgPlace(pop, btn, "left"); }
+  const inp = document.getElementById("cfgFpInput");
+  if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+function cfgRenderFilterPop(){
+  const { dom, key } = cfgFP; if(!dom) return;
+  const f = cfgState[dom].filters[key];
+  const pop = document.getElementById("cfgFilterPop");
+  pop.innerHTML = `
+    <div class="fp-head"><h4>Filtrar por ${cfgEsc(CFG_KEY_LABEL[key].toLowerCase())}</h4><span class="fp-mode" id="cfgFpMode"></span></div>
+    <div class="fp-search">${CFG_IC.search}<input type="text" id="cfgFpInput" placeholder="Escribí para filtrar…" value="${cfgEsc(f.text)}" autocomplete="off"
+      oninput="cfgFpOnInput(this.value)" onkeydown="if(event.key==='Enter'){cfgCloseFloating();} if(event.key==='Escape'){cfgCloseFloating();}"></div>
+    <div class="fp-bulk"><a onclick="cfgFpSelectVisible()">Tildar los visibles</a><span id="cfgFpCount"></span><a onclick="cfgFpSelectNone()">Destildar</a></div>
+    <div class="fp-list" id="cfgFpList"></div>
+    <div class="fp-foot"><button class="fa-clear" onclick="cfgClearFilter('${dom}','${key}')">Limpiar</button><button class="fa-apply" onclick="cfgCloseFloating()">Listo</button></div>`;
+  cfgRenderFilterList();
+}
+function cfgFpOptions(){
+  const { dom, key } = cfgFP;
+  const rows = cfgFilterRows(dom, cfgBuildRows(dom), key);
+  const counts = new Map();
+  rows.forEach(r=>cfgRowVals(r,key).forEach(v=>{
+    if(!counts.has(v)) counts.set(v, new Set());
+    if(r.leafId) counts.get(v).add(r.leafId);
+  }));
+  cfgBuildRows(dom).forEach(r=>cfgRowVals(r,key).forEach(v=>{ if(!counts.has(v)) counts.set(v, new Set()); }));
+  return [...counts.entries()].map(([v,s])=>({ v, n:s.size })).sort((a,b)=>cfgCmp(a.v,b.v));
+}
+function cfgRenderFilterList(){
+  const { dom, key } = cfgFP; if(!dom) return;
+  const list = document.getElementById("cfgFpList"); if(!list) return;
+  const f = cfgState[dom].filters[key], t = cfgNorm(f.text);
+  const opts = cfgFpOptions().filter(o=>!t || cfgNorm(o.v).includes(t));
+  const showCount = !(dom==="proveedores" && key==="prov");
+  list.innerHTML = opts.length ? opts.map(o=>`<div class="cfg-fopt${f.sel.has(o.v)?" on":""}${o.n===0&&showCount&&!f.sel.has(o.v)?" zero":""}" data-v="${cfgEsc(o.v)}" onclick="cfgFpToggle(this.dataset.v)"><span class="ck">${CFG_IC.check}</span><span class="lb">${cfgHi(o.v, f.text)}</span>${showCount?`<span class="ct">${o.n}</span>`:""}</div>`).join("")
+    : `<div class="fp-empty">Sin coincidencias para “${cfgEsc(f.text)}”</div>`;
+  const mode = document.getElementById("cfgFpMode");
+  if(mode) mode.textContent = f.sel.size ? `${f.sel.size} tildado${f.sel.size===1?"":"s"}` : (t ? "Filtrando por texto" : "");
+  const cnt = document.getElementById("cfgFpCount");
+  if(cnt) cnt.textContent = `${opts.length} opci${opts.length===1?"ón":"ones"}`;
+  cfgFP.visible = opts.map(o=>o.v);
+}
+function cfgFpOnInput(val){
+  const { dom, key } = cfgFP;
+  cfgState[dom].filters[key].text = val;
+  cfgRenderDom(dom); cfgRenderFilterList(); cfgReopenMark();
+}
+function cfgFpToggle(v){
+  const { dom, key } = cfgFP, f = cfgState[dom].filters[key];
+  f.sel.has(v) ? f.sel.delete(v) : f.sel.add(v);
+  cfgRenderDom(dom); cfgRenderFilterList(); cfgReopenMark();
+}
+function cfgFpSelectVisible(){
+  const { dom, key } = cfgFP, f = cfgState[dom].filters[key];
+  (cfgFP.visible||[]).forEach(v=>f.sel.add(v));
+  cfgRenderDom(dom); cfgRenderFilterList(); cfgReopenMark();
+}
+function cfgFpSelectNone(){
+  const { dom, key } = cfgFP; cfgState[dom].filters[key].sel.clear();
+  cfgRenderDom(dom); cfgRenderFilterList(); cfgReopenMark();
+}
+function cfgReopenMark(){
+  const b = document.querySelector(`.cfg-fbtn[data-fdom="${cfgFP.dom}"][data-fkey="${cfgFP.key}"]`);
+  if(b) b.classList.add("open");
+}
+
+/* ---------- menú "Crear nuevo" ---------- */
+function cfgOpenCreateMenu(btn, kind){
+  const m = document.getElementById("cfgCreateMenu");
+  const wasOpen = m.classList.contains("show") && m.dataset.kind===kind;
+  cfgCloseFloating();
+  if(wasOpen) return;
+  m.dataset.kind = kind;
+  const dom = "proveedores";
+  const opt = (lvl, n, ic, title, desc, fn) => `<div class="cfg-create-opt" onclick="cfgCloseFloating();${fn}"><span class="lvl ${lvl}">${ic}</span><div><strong>${title}</strong><span>${desc}</span></div><span class="step">${n}</span></div>`;
+  let html = `<div class="cm-title">¿Qué querés crear?</div>`;
+  html += opt("l1","NIVEL 1",CFG_IC.cat,"Categoría","Agrupa rubros. Ej. Servicio de cocina", `cfgOpenCatForm('${dom}',null)`);
+  html += opt("l2","NIVEL 2",CFG_IC.rub,"Rubro","Pertenece a una categoría. Ej. Almacén", `cfgOpenRubroForm('${dom}',null,null)`);
+  html += opt("l3","NIVEL 3",CFG_IC.prov,"Proveedor","Se asigna a uno o más rubros", `cfgOpenProvForm(null,null)`);
+  m.innerHTML = html;
+  cfgPlace(m, btn, "right");
+}
+function cfgCloseFloating(){
+  document.getElementById("cfgCreateMenu").classList.remove("show");
+  document.getElementById("cfgFilterPop").classList.remove("show");
+  document.querySelectorAll(".cfg-fbtn.open").forEach(b=>b.classList.remove("open"));
+  cfgFP = { dom:null, key:null };
+}
+document.addEventListener("mousedown", e=>{
+  const inPop = e.target.closest("#cfgFilterPop, #cfgCreateMenu, .cfg-fbtn, .cfg-cta, .cfg-cta-ghost");
+  if(!inPop) cfgCloseFloating();
+});
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Escape") return;
+  if(document.getElementById("cfgModal").classList.contains("show")){ cfgCloseModal(); return; }
+  if(document.getElementById("cfgFilterPop").classList.contains("show") || document.getElementById("cfgCreateMenu").classList.contains("show")){ cfgCloseFloating(); return; }
+  if(document.getElementById("cfgPanel").classList.contains("show")) cfgClosePanel();
+});
+window.addEventListener("resize", cfgCloseFloating);
+
+/* ---------- panel lateral (alta / edición) ---------- */
+let cfgPS = null; // estado del panel abierto
+function cfgOpenPanel(o){
+  cfgCloseFloating();
+  cfgPS = o;
+  const p = document.getElementById("cfgPanel");
+  p.classList.toggle("wide", !!o.wide);
+  const lvlTxt = { l1:"Nivel 1 · Categoría", l2:"Nivel 2 · Rubro", l3:"Nivel 3 · "+(o.hoja||"") }[o.lvl];
+  document.getElementById("cfgPanelBadge").innerHTML = `<span class="lvl-badge ${o.lvl}">${lvlTxt}</span>`;
+  document.getElementById("cfgPanelTitle").textContent = o.title;
+  document.getElementById("cfgPanelCrumb").innerHTML = o.crumb || "";
+  document.getElementById("cfgPanelBody").innerHTML = o.body;
+  const sv = document.getElementById("cfgPanelSave");
+  sv.textContent = o.saveLabel || "Guardar"; sv.disabled = false;
+  p.classList.add("show"); p.setAttribute("aria-hidden","false");
+  document.getElementById("cfgOverlay").classList.add("show");
+  if(o.afterOpen) o.afterOpen();
+  setTimeout(()=>{ const f = document.querySelector("#cfgPanelBody [data-autofocus]"); if(f) f.focus(); }, 60);
+}
+function cfgClosePanel(){
+  document.getElementById("cfgPanel").classList.remove("show");
+  document.getElementById("cfgPanel").setAttribute("aria-hidden","true");
+  document.getElementById("cfgOverlay").classList.remove("show");
+  cfgPS = null;
+}
+async function cfgPanelSubmit(){
+  if(!cfgPS || !cfgPS.submit) return;
+  const sv = document.getElementById("cfgPanelSave");
+  if(sv.disabled) return;
+  sv.disabled = true; const prev = sv.textContent; sv.textContent = "Guardando…";
+  try{
+    const ok = await cfgPS.submit();
+    if(ok){ cfgClosePanel(); }
+  } finally {
+    if(cfgPS){ sv.disabled = false; sv.textContent = prev; }
+  }
+}
+function cfgCrumb(parts){
+  return parts.map((t,i)=>`<span class="${i===parts.length-1?"on":""}">${cfgEsc(t)}</span>`).join(CFG_IC.arrow);
+}
+function cfgErrText(error, que){
+  const code = error && error.code;
+  if(code==="23505") return `Ya existe ${que} con ese nombre (puede haberlo creado otro usuario recién).`;
+  if(code==="23503") return "No se puede: está siendo usado por otros registros.";
+  if(code==="42501") return "No tenés permisos para modificar Configuración.";
+  if(code==="22023" && error.message) return error.message;
+  return "No se pudo guardar. Revisá la conexión e intentá de nuevo.";
+}
+function cfgShowErr(msg){ const b = document.getElementById("cfgErrBox"); if(b){ b.innerHTML = msg; b.classList.add("show"); b.scrollIntoView({block:"nearest", behavior:"smooth"}); } else showToast(msg, "warn"); }
+function cfgHideErr(){ const b = document.getElementById("cfgErrBox"); if(b) b.classList.remove("show"); }
+/* Insumos (etapa de Costeo) escribirá su nombre en MAYÚSCULAS sin tildes; categorías/rubros/proveedores no. */
+function cfgInsNombre(v){ return String(v||"").replace(/[ñÑ]/g,"\u0001").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\u0001/g,"Ñ").toUpperCase(); }
+function cfgForceUpper(inp){
+  const v = cfgInsNombre(inp.value);
+  if(v!==inp.value){ const pos = inp.selectionStart; inp.value = v; try{ inp.setSelectionRange(pos,pos); }catch(e){} }
+}
+function cfgNameField(label, value, placeholder, upper){
+  return `<div class="field" id="cfgFldNombre"><label>${label}${upper?' <span class="hint">· se guarda en MAYÚSCULAS y sin tildes</span>':""}</label><input type="text" id="cfgFNombre" maxlength="90" value="${cfgEsc(value||"")}" placeholder="${cfgEsc(placeholder)}" ${upper?"":"data-autofocus "}autocomplete="off" ${upper?'autocapitalize="characters" ':""}oninput="${upper?"cfgForceUpper(this);":""}cfgCheckName()" onkeydown="if(event.key==='Enter'&&this.closest('.cfg-panel:not(.wide)')){event.preventDefault();cfgPanelSubmit();}">
+    <div class="cfg-field-msg" id="cfgFNombreMsg"></div></div>`;
+}
+function cfgCheckName(){
+  if(!cfgPS || !cfgPS.nameList) return true;
+  const inp = document.getElementById("cfgFNombre"), msg = document.getElementById("cfgFNombreMsg"), fld = document.getElementById("cfgFldNombre");
+  const v = inp.value.trim();
+  const dup = v ? cfgExists(cfgPS.nameList(), v, cfgPS.id) : null;
+  fld.classList.toggle("dup", !!dup);
+  if(dup){ msg.className = "cfg-field-msg err show"; msg.innerHTML = `${CFG_IC.warn}<span>Ya existe “${cfgEsc(dup.nombre)}”${cfgPS.dupHint?cfgPS.dupHint(dup):""}. No puede haber dos iguales.</span>`; }
+  else if(v && cfgPS.id==null){ msg.className = "cfg-field-msg ok show"; msg.innerHTML = `${CFG_IC.ok}<span>Nombre disponible</span>`; }
+  else { msg.className = "cfg-field-msg"; msg.innerHTML = ""; }
+  cfgHideErr();
+  return !dup;
+}
+function cfgReadName(){
+  let v = (document.getElementById("cfgFNombre").value||"").replace(/\s+/g," ").trim();
+  if(!v){ document.getElementById("cfgFldNombre").classList.add("error"); cfgShowErr("Completá el nombre."); return null; }
+  document.getElementById("cfgFldNombre").classList.remove("error");
+  if(!cfgCheckName()){ cfgShowErr("Ese nombre ya existe. Elegí otro."); return null; }
+  return v;
+}
+
+/* ===== Categoría ===== */
+function cfgOpenCatForm(dom, id){
+  const D = cfgData[dom], c = id ? cfgCat(dom,id) : null;
+  if(id && !c){ showToast("La categoría ya no existe", "warn"); return; }
+  const nR = c ? D.rubros.filter(r=>r.catId===c.id).length : 0;
+  cfgOpenPanel({
+    lvl:"l1", id, title: c ? "Editar categoría" : "Nueva categoría",
+    crumb: cfgCrumb(["Proveedores", c ? c.nombre : "Nueva categoría"]),
+    body: `<div class="cfg-note">${CFG_IC.info}<div>La <b>categoría</b> es el nivel más amplio. Dentro de cada una vas a crear sus <b>rubros</b>, y en cada rubro, sus <b>proveedores</b>.${c?`<br>Esta categoría tiene <b>${nR}</b> ${nR===1?"rubro":"rubros"}.`:""}</div></div>
+      ${cfgNameField("Nombre de la categoría", c && c.nombre, "Ej. Servicio de cocina")}
+      <div class="cfg-err-box" id="cfgErrBox"></div>`,
+    saveLabel: c ? "Guardar cambios" : "Crear categoría",
+    nameList: ()=>cfgData[dom].cats,
+    submit: async ()=>{
+      const nombre = cfgReadName(); if(!nombre) return false;
+      const T = CFG_DOM[dom].catTable;
+      const r = c ? await sb.from(T).update({ nombre }).eq("id", c.id) : await sb.from(T).insert({ nombre });
+      if(r.error){ cfgShowErr(cfgErrText(r.error, "una categoría")); return false; }
+      if(c){ if(c.nombre!==nombre) logHistorialConfig(`Editó una categoría`, `“${c.nombre}” → “${nombre}”`); }
+      else logHistorialConfig(`Creó una categoría`, `“${nombre}”`);
+      await cfgReload();
+      await loadMasterData();
+      showToast(c ? "Categoría actualizada" : "Categoría creada");
+      return true;
+    }
+  });
+}
+
+/* ===== Rubro ===== */
+function cfgOpenRubroForm(dom, id, presetCatId){
+  const D = cfgData[dom], r = id ? cfgRub(dom,id) : null;
+  if(id && !r){ showToast("El rubro ya no existe", "warn"); return; }
+  if(!D.cats.length){
+    cfgModal({ icon:"info", title:"Primero creá una categoría", body:`<p>Cada rubro pertenece a una categoría, y todavía no hay ninguna en Proveedores.</p>`,
+      actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Crear categoría", cls:"confirm-primary", fn:()=>cfgOpenCatForm(dom,null)}] });
+    return;
+  }
+  const catSel = r ? r.catId : (presetCatId || "");
+  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const n = r ? cfgData.links.filter(l=>l.rubro_id===r.id).length : 0;
+  const catName = catSel ? (cfgCat(dom,catSel)||{}).nombre : null;
+  cfgOpenPanel({
+    lvl:"l2", id, title: r ? "Editar rubro" : "Nuevo rubro",
+    crumb: cfgCrumb(["Proveedores", catName || "Categoría", r ? r.nombre : "Nuevo rubro"]),
+    body: `<div class="field" id="cfgFldCat"><label>Categoría</label><select id="cfgFCat">${catSel?"":'<option value="">Elegí una categoría…</option>'}${cats.map(c=>`<option value="${c.id}"${c.id===catSel?" selected":""}>${cfgEsc(c.nombre)}</option>`).join("")}</select></div>
+      ${cfgNameField("Nombre del rubro", r && r.nombre, "Ej. Almacén")}
+      ${r && n ? `<div class="cfg-note">${CFG_IC.info}<div>Este rubro tiene <b>${n}</b> ${n===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}. Si lo cambiás de categoría, se mueven con él.</div></div>` : ""}
+      <div class="cfg-err-box" id="cfgErrBox"></div>`,
+    saveLabel: r ? "Guardar cambios" : "Crear rubro",
+    nameList: ()=>cfgData[dom].rubros,
+    dupHint: d=>` en la categoría “${cfgEsc((cfgCat(dom,d.catId)||{}).nombre||"")}”`,
+    afterOpen: ()=>{ if(catSel) setTimeout(()=>document.getElementById("cfgFNombre").focus(), 80); },
+    submit: async ()=>{
+      const catId = document.getElementById("cfgFCat").value;
+      document.getElementById("cfgFldCat").classList.toggle("error", !catId);
+      if(!catId){ cfgShowErr("Elegí a qué categoría pertenece el rubro."); return false; }
+      const nombre = cfgReadName(); if(!nombre) return false;
+      const payload = { nombre }; payload[CFG_DOM[dom].rubFk] = catId;
+      const T = CFG_DOM[dom].rubTable;
+      const res = r ? await sb.from(T).update(payload).eq("id", r.id) : await sb.from(T).insert(payload);
+      if(res.error){ cfgShowErr(cfgErrText(res.error, "un rubro")); return false; }
+      const catN = (cfgCat(dom,catId)||{}).nombre;
+      if(r){
+        const ch = [];
+        if(r.nombre!==nombre) ch.push(`“${r.nombre}” → “${nombre}”`);
+        if(r.catId!==catId) ch.push(`categoría: “${(cfgCat(dom,r.catId)||{}).nombre}” → “${catN}”`);
+        if(ch.length) logHistorialConfig(`Editó un rubro`, `“${nombre}” · ${ch.join(" · ")}`);
+      } else logHistorialConfig(`Creó un rubro`, `“${nombre}” en la categoría “${catN}”`);
+      cfgState[dom].collapsed.delete(catId);
+      await cfgReload();
+      await loadMasterData();
+      showToast(r ? "Rubro actualizado" : "Rubro creado");
+      return true;
+    }
+  });
+}
+
+/* ===== Proveedor =====
+   Guarda con el RPC lf_guardar_proveedor (equivalente a cm_guardar_proveedor de Che Mono),
+   que además sincroniza concepto_id/rubro_id (modelo viejo) con el PRIMER rubro elegido,
+   para no romper Pagos/Costeo/Stock hasta que se migren (ver comentario al inicio del bloque). */
+function cfgOpenProvForm(id, presetRubroId){
+  const p = id ? cfgProv(id) : null;
+  if(id && !p){ showToast("El proveedor ya no existe", "warn"); return; }
+  if(!cfgData.proveedores.rubros.length){
+    cfgModal({ icon:"info", title:"Primero creá un rubro", body:`<p>Cada proveedor se asigna a uno o más rubros, y todavía no hay rubros cargados.</p>`,
+      actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Crear rubro", cls:"confirm-primary", fn:()=>cfgOpenRubroForm('proveedores',null,null)}] });
+    return;
+  }
+  const sel = new Set(p ? cfgRubrosDeProv(p.id).map(r=>r.id) : (presetRubroId ? [presetRubroId] : []));
+  const preRub = presetRubroId ? cfgRub("proveedores", presetRubroId) : null;
+  cfgOpenPanel({
+    lvl:"l3", hoja:"Proveedor", id, title: p ? "Editar proveedor" : "Nuevo proveedor",
+    crumb: cfgCrumb(preRub && !p ? ["Proveedores", (cfgCat("proveedores",preRub.catId)||{}).nombre, preRub.nombre, "Nuevo proveedor"] : ["Proveedores", p ? p.nombre : "Nuevo proveedor"]),
+    body: `<div class="cfg-sec-title"><span class="n">1</span>Identificación</div>
+      ${cfgNameField("Nombre o razón social", p && p.nombre, "Ej. Castello Ponte")}
+      <div class="cfg-sec-title"><span class="n">2</span>Rubros <span class="opt">· uno o más</span></div>
+      <div class="cfg-ms" id="cfgMs">
+        <div class="cfg-ms-sel" id="cfgMsSel"></div>
+        <div class="cfg-ms-search">${CFG_IC.search}<input type="text" id="cfgMsQ" placeholder="Buscar rubro o categoría…" oninput="cfgMsRender()" autocomplete="off" style="border:1px solid var(--border);outline:none;"></div>
+        <div class="cfg-ms-list" id="cfgMsList"></div>
+      </div>
+      <div class="cfg-sec-title"><span class="n">3</span>Días de entrega y de pedido <span class="opt">· opcional</span></div>
+      <div class="cfg-note">${CFG_IC.info}<div>Marcá los <b>días en que entrega</b>. Para cada uno, indicá <b>hasta qué día se le puede hacer el pedido</b> para recibirlo ese día.</div></div>
+      <div class="cfg-days" id="cfgDays">${[1,2,3,4,5,6,7].map(d=>`<button type="button" class="cfg-day" data-d="${d}" onclick="cfgToggleEntrega(${d})"><span>${CFG_DIAS_C[d]}</span></button>`).join("")}</div>
+      <div id="cfgEntregasRows"></div>
+      <div class="cfg-sec-title"><span class="n">4</span>Plazo de pago <span class="opt">· opcional</span></div>
+      <div class="cfg-plazo">
+        <div class="stepper-input" style="width:150px"><button type="button" class="stepper-btn" onclick="cfgPlazoStep(-1)">−</button><input type="text" id="cfgFPlazo" inputmode="numeric" maxlength="3" placeholder="—" value="${p && p.plazo_pago_dias!=null ? p.plazo_pago_dias : ""}" oninput="this.value=this.value.replace(/[^0-9]/g,'');cfgPlazoHint()"><button type="button" class="stepper-btn" onclick="cfgPlazoStep(1)">+</button></div>
+        <span class="cfg-plazo-suf">días desde la fecha de la factura</span>
+      </div>
+      <div class="cfg-plazo-hint" id="cfgPlazoHint"></div>
+      <div class="cfg-err-box" id="cfgErrBox"></div>`,
+    saveLabel: p ? "Guardar cambios" : "Crear proveedor",
+    nameList: ()=>cfgData.provs,
+    dupHint: d=>{ const rs = cfgRubrosDeProv(d.id).map(r=>r.nombre); return rs.length ? ` (en ${cfgEsc(rs.join(", "))}). Si también te vende en otro rubro, editalo y sumale el rubro` : ""; },
+    msSel: sel,
+    entregas: cfgEntregas(p).map(e=>({ entrega:e.entrega, pedido:e.pedido })),
+    afterOpen: ()=>{ cfgMsRender(); cfgRenderEntregas(); cfgPlazoHint(); },
+    submit: async ()=>{
+      const nombre = cfgReadName(); if(!nombre) return false;
+      const rubIds = [...cfgPS.msSel];
+      document.getElementById("cfgMs").classList.toggle("err", !rubIds.length);
+      if(!rubIds.length){ cfgShowErr("Asigná el proveedor a al menos un rubro."); return false; }
+      const plazoTxt = document.getElementById("cfgFPlazo").value.trim();
+      const plazo = plazoTxt==="" ? null : parseInt(plazoTxt,10);
+      if(plazo!=null && (isNaN(plazo) || plazo<0 || plazo>365)){ cfgShowErr("El plazo de pago tiene que ser un número de días entre 0 y 365."); return false; }
+      const entregas = cfgPS.entregas.slice().sort((a,b)=>a.entrega-b.entrega);
+      if(entregas.some(e=>!e.pedido)){ cfgShowErr("Indicá el día de pedido para cada día de entrega."); return false; }
+      const args = { p_id: p ? p.id : null, p_nombre: nombre, p_rubro_ids: rubIds, p_plazo_pago: plazo, p_entregas: entregas };
+      const res = await sb.rpc("lf_guardar_proveedor", args);
+      if(res.error){ cfgShowErr(cfgErrText(res.error, "un proveedor")); return false; }
+      const rubN = ids => ids.map(i=>(cfgRub("proveedores",i)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
+      if(p){
+        const antes = cfgRubrosDeProv(p.id).map(r=>r.id);
+        const ch = [];
+        if(p.nombre!==nombre) ch.push(`“${p.nombre}” → “${nombre}”`);
+        if(rubN(antes)!==rubN(rubIds)) ch.push(`rubros: ${rubN(antes)} → ${rubN(rubIds)}`);
+        const eA = cfgEntregasTxt(p, true), eD = cfgEntregasTxt({entregas}, true);
+        if(eA!==eD) ch.push(`entregas: ${eA||"—"} → ${eD||"—"}`);
+        if((p.plazo_pago_dias??null)!==plazo) ch.push(`plazo de pago: ${cfgPlazoTxt(p)||"—"} → ${cfgPlazoTxt({plazo_pago_dias:plazo})||"—"}`);
+        if(ch.length) logHistorialConfig("Editó un proveedor", `“${nombre}” · ${ch.join(" · ")}`);
+      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""}`);
+      await cfgReload();
+      await loadMasterData();
+      rubIds.forEach(id=>{ const r = cfgRub("proveedores", id); if(r) cfgState.proveedores.collapsed.delete(r.catId); });
+      cfgRenderDom("proveedores");
+      showToast(p ? "Proveedor actualizado" : "Proveedor creado");
+      return true;
+    }
+  });
+}
+function cfgMsRender(){
+  if(!cfgPS || !cfgPS.msSel) return;
+  const sel = cfgPS.msSel, q = cfgNorm((document.getElementById("cfgMsQ")||{}).value);
+  const D = cfgData.proveedores;
+  document.getElementById("cfgMsSel").innerHTML = [...sel].map(id=>cfgRub("proveedores",id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre))
+    .map(r=>`<span class="cfg-ms-tag">${cfgEsc(r.nombre)} <small>${cfgEsc((cfgCat("proveedores",r.catId)||{}).nombre||"")}</small><button onclick="cfgMsToggle('${r.id}')" title="Quitar">${CFG_IC.x}</button></span>`).join("");
+  let html = "";
+  D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).forEach(c=>{
+    const catHit = q && cfgNorm(c.nombre).includes(q);
+    const rs = D.rubros.filter(r=>r.catId===c.id && (!q || catHit || cfgNorm(r.nombre).includes(q))).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    if(!rs.length) return;
+    html += `<div class="cfg-ms-grp">${cfgHi(c.nombre, q)}</div>` + rs.map(r=>`<div class="cfg-ms-opt${sel.has(r.id)?" on":""}" onclick="cfgMsToggle('${r.id}')"><span class="ck">${CFG_IC.check}</span><span>${cfgHi(r.nombre, q)}</span></div>`).join("");
+  });
+  document.getElementById("cfgMsList").innerHTML = html || `<div class="cfg-combo-empty" style="padding:14px">No hay rubros que coincidan.</div>`;
+}
+function cfgToggleEntrega(d){
+  const es = cfgPS.entregas, i = es.findIndex(e=>e.entrega===d);
+  if(i>=0) es.splice(i,1); else es.push({ entrega:d, pedido: d===1 ? 7 : d-1 });
+  cfgRenderEntregas(); cfgHideErr();
+}
+function cfgSetPedido(d, v){ const e = cfgPS.entregas.find(x=>x.entrega===d); if(e) e.pedido = Number(v); cfgRenderEntregas(); }
+function cfgRenderEntregas(){
+  if(!cfgPS || !cfgPS.entregas) return;
+  const es = cfgPS.entregas.slice().sort((a,b)=>a.entrega-b.entrega);
+  document.querySelectorAll("#cfgDays .cfg-day").forEach(b=>b.classList.toggle("on", es.some(e=>e.entrega===Number(b.dataset.d))));
+  const host = document.getElementById("cfgEntregasRows");
+  host.innerHTML = es.length ? `<div class="cfg-ent-head"><span>Entrega</span><span></span><span>Pedido hasta el</span></div>` + es.map(e=>`
+    <div class="cfg-ent-row">
+      <span class="ent">${CFG_DIAS[e.entrega]}</span>
+      <span class="arr">←</span>
+      <select onchange="cfgSetPedido(${e.entrega}, this.value)">${[1,2,3,4,5,6,7].map(d=>`<option value="${d}"${d===e.pedido?" selected":""}>${CFG_DIAS[d]}</option>`).join("")}</select>
+      <span class="hint">${e.pedido===e.entrega ? "mismo día" : `pedís el ${CFG_DIAS[e.pedido].toLowerCase()}, recibís el ${CFG_DIAS[e.entrega].toLowerCase()}`}</span>
+    </div>`).join("") : `<div class="cfg-ent-empty">Sin días de entrega cargados.</div>`;
+}
+function cfgPlazoStep(d){ const i = document.getElementById("cfgFPlazo"); let n = parseInt(i.value||"0",10)||0; n = Math.max(0, Math.min(365, (i.value===""&&d>0?0:n) + d)); i.value = n; cfgPlazoHint(); }
+function cfgPlazoHint(){
+  const v = (document.getElementById("cfgFPlazo")||{}).value, h = document.getElementById("cfgPlazoHint"); if(!h) return;
+  if(v===""||v==null){ h.textContent = "Sin plazo cargado."; return; }
+  const n = parseInt(v,10);
+  h.innerHTML = n===0 ? "Se paga <b>de contado</b> (el mismo día de la factura)." : `Ej.: una factura del 1/10 vence el <b>${(()=>{ const d = new Date(2026,9,1); d.setDate(d.getDate()+n); return d.toLocaleDateString("es-AR"); })()}</b>. Se va a usar en las cuentas corrientes de proveedores.`;
+}
+function cfgMsToggle(id){
+  const s = cfgPS.msSel; s.has(id) ? s.delete(id) : s.add(id);
+  document.getElementById("cfgMs").classList.remove("err"); cfgHideErr();
+  const list = document.getElementById("cfgMsList"), st = list.scrollTop;
+  cfgMsRender(); list.scrollTop = st;
+}
+
+/* ---------- modal de confirmación / aviso ---------- */
+function cfgModal(o){
+  cfgCloseFloating();
+  const ic = document.getElementById("cfgModalIcon");
+  ic.className = "confirm-icon" + (o.icon==="info" ? " info" : "");
+  ic.innerHTML = o.icon==="info" ? CFG_IC.info : CFG_IC.del;
+  document.getElementById("cfgModalTitle").textContent = o.title;
+  document.getElementById("cfgModalBody").innerHTML = o.body || "";
+  const acts = document.getElementById("cfgModalActions");
+  acts.innerHTML = "";
+  (o.actions||[{label:"Entendido", cls:"confirm-cancel"}]).forEach(a=>{
+    const b = document.createElement("button");
+    b.className = a.cls || "confirm-cancel"; b.textContent = a.label;
+    if(a.disabled){ b.disabled = true; b.style.opacity = ".45"; b.style.cursor = "not-allowed"; b.title = a.disabledTitle||""; }
+    b.onclick = async ()=>{
+      if(a.fn){
+        b.disabled = true; const t = b.textContent; b.textContent = "Procesando…";
+        const keep = await a.fn();
+        b.disabled = false; b.textContent = t;
+        if(keep===false) return;
+      }
+      cfgCloseModal();
+      if(a.after) a.after();
+    };
+    acts.appendChild(b);
+  });
+  document.getElementById("cfgModal").classList.add("show");
+}
+function cfgCloseModal(){ document.getElementById("cfgModal").classList.remove("show"); }
+function cfgLi(items, max){ max = max||12; const more = items.length>max ? `<li>… y ${items.length-max} más</li>` : ""; return `<ul>${items.slice(0,max).map(x=>`<li>${cfgEsc(x)}</li>`).join("")}${more}</ul>`; }
+async function cfgDel(table, match, what){
+  let q = sb.from(table).delete();
+  Object.keys(match).forEach(k=>{ q = q.eq(k, match[k]); });
+  const r = await q;
+  if(r.error){ showToast(cfgErrText(r.error, what), "warn"); return false; }
+  return true;
+}
+
+/* ===== Eliminar categoría ===== */
+function cfgDeleteCat(dom, id){
+  const c = cfgCat(dom, id); if(!c) return;
+  const rubs = cfgData[dom].rubros.filter(r=>r.catId===id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  if(rubs.length){
+    cfgModal({ icon:"info", title:"No se puede eliminar todavía",
+      body:`<p>La categoría <b>“${cfgEsc(c.nombre)}”</b> tiene <b>${rubs.length}</b> ${rubs.length===1?"rubro":"rubros"}. Para eliminarla, primero eliminá sus rubros o movelos a otra categoría (editando cada rubro).</p>${cfgLi(rubs.map(r=>r.nombre))}` });
+    return;
+  }
+  cfgModal({ title:"¿Eliminar categoría?", body:`<p>Vas a eliminar la categoría <b>“${cfgEsc(c.nombre)}”</b>. Esta acción no se puede deshacer.</p>`,
+    actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: async ()=>{
+      if(!await cfgDel(CFG_DOM[dom].catTable, {id}, "la categoría")) return false;
+      logHistorialConfig(`Eliminó una categoría`, `“${c.nombre}”`);
+      await cfgReload(); await loadMasterData(); showToast("Categoría eliminada");
+    }}] });
+}
+
+/* ===== Eliminar rubro ===== */
+function cfgDeleteRubro(dom, id){
+  const r = cfgRub(dom, id); if(!r) return;
+  const catN = (cfgCat(dom, r.catId)||{}).nombre;
+  {
+    const provs = cfgProvsDeRubro(id);
+    const huerfanos = provs.filter(p=>cfgRubrosDeProv(p.id).length===1);
+    if(huerfanos.length){
+      cfgModal({ icon:"info", title:"No se puede eliminar todavía", body:`<p>El rubro <b>“${cfgEsc(r.nombre)}”</b> es el único rubro de ${huerfanos.length===1?"este proveedor":"estos proveedores"}. Asignales otro rubro o eliminalos primero:</p>${cfgLi(huerfanos.map(p=>p.nombre))}` });
+      return;
+    }
+    if(provs.length){
+      cfgModal({ title:"¿Eliminar rubro?", body:`<p>Vas a eliminar el rubro <b>“${cfgEsc(r.nombre)}”</b> (${cfgEsc(catN)}). ${provs.length===1?"Este proveedor":"Estos proveedores"} también ${provs.length===1?"está":"están"} en otros rubros, así que solo se ${provs.length===1?"desvincula":"desvinculan"} de este:</p>${cfgLi(provs.map(p=>p.nombre))}`,
+        actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Desvincular y eliminar", cls:"confirm-delete", fn: async ()=>{
+          if(!await cfgDel("lf_proveedor_rubros", {rubro_id:id}, "el rubro")) return false;
+          if(!await cfgDel("lf_rubros", {id}, "el rubro")){ await cfgReload(); return false; }
+          logHistorialConfig("Eliminó un rubro", `“${r.nombre}” (${catN}) · se desvincularon: ${provs.map(p=>p.nombre).join(", ")}`);
+          await cfgReload(); await loadMasterData(); showToast("Rubro eliminado");
+        }}] });
+      return;
+    }
+  }
+  cfgModal({ title:"¿Eliminar rubro?", body:`<p>Vas a eliminar el rubro <b>“${cfgEsc(r.nombre)}”</b> de la categoría <b>${cfgEsc(catN)}</b>. Esta acción no se puede deshacer.</p>`,
+    actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: async ()=>{
+      if(!await cfgDel(CFG_DOM[dom].rubTable, {id}, "el rubro")) return false;
+      logHistorialConfig(`Eliminó un rubro`, `“${r.nombre}” (${catN})`);
+      await cfgReload(); await loadMasterData(); showToast("Rubro eliminado");
+    }}] });
+}
+
+/* ===== Eliminar / quitar proveedor ===== */
+function cfgDeleteProv(provId, rubroCtx){
+  const p = cfgProv(provId); if(!p) return;
+  const rubs = cfgRubrosDeProv(provId), rubCtx = rubroCtx ? cfgRub("proveedores", rubroCtx) : null;
+  const delAll = async ()=>{
+    if(!await cfgDel("lf_proveedores", {id:provId}, "el proveedor")) return false;
+    logHistorialConfig("Eliminó un proveedor", `“${p.nombre}” · rubros: ${rubs.map(r=>r.nombre).join(", ")||"—"}`);
+    await cfgReload(); await loadMasterData(); showToast("Proveedor eliminado");
+  };
+  if(rubs.length > 1 && rubCtx){
+    cfgModal({ title:"¿Quitar o eliminar?", body:`<p><b>“${cfgEsc(p.nombre)}”</b> está en ${rubs.length} rubros: ${cfgEsc(rubs.map(r=>r.nombre).join(", "))}. Podés quitarlo solo de <b>“${cfgEsc(rubCtx.nombre)}”</b> o eliminar el proveedor de todos lados.</p>`,
+      actions:[{label:"Cancelar", cls:"confirm-cancel"},
+        {label:`Quitar de “${rubCtx.nombre}”`, cls:"confirm-soft", fn: async ()=>{
+          if(!await cfgDel("lf_proveedor_rubros", {proveedor_id:provId, rubro_id:rubCtx.id}, "el proveedor")) return false;
+          logHistorialConfig("Quitó un proveedor de un rubro", `“${p.nombre}” ya no está en “${rubCtx.nombre}”`);
+          await cfgReload(); await loadMasterData(); showToast("Proveedor quitado del rubro");
+        }},
+        {label:"Eliminar proveedor", cls:"confirm-delete", fn: delAll}] });
+    return;
+  }
+  cfgModal({ title:"¿Eliminar proveedor?", body:`<p>Vas a eliminar <b>“${cfgEsc(p.nombre)}”</b>${rubs.length?` (${cfgEsc(rubs.map(r=>r.nombre).join(", "))})`:""}. Esta acción no se puede deshacer.</p>`,
+    actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Eliminar", cls:"confirm-delete", fn: delAll}] });
+}
+
+/* ---------- entrada al módulo / carga perezosa ---------- */
+async function cfgEnsureLoaded(){
+  cfgStartRealtime();
+  if(!cfgLoaded){
+    document.getElementById("cfgTableProveedores").innerHTML = `<div class="cfg-nores"><strong>Cargando…</strong></div>`;
+    await cfgReload();
+  } else { cfgState.proveedores.mode = "grupos"; cfgCollapseAll("proveedores"); cfgRenderAll(); }
+}
+/* Llamado desde goModule('config') y goConfigTab(ctab): decide qué refrescar según la subpestaña activa de Configuración. */
+function cfgOnEnterModule(){
+  const act = document.querySelector("#configSubnav .pagos-tab.active");
+  const ctab = act ? act.dataset.ctab : "compras";
+  if(ctab==="actividad") renderActividad();
+  else if(ctab==="compras"){
+    const sub = document.querySelector("#ctabCompras .cfg-subtab.active");
+    if(sub && sub.dataset.cview==="metodos") renderMetodosList();
+    else cfgEnsureLoaded();
+  }
+}
+
+/* ---------- tiempo real: cambios de otros usuarios ---------- */
+let cfgRT = null, cfgRTTimer = null;
+function cfgSetLive(on, txt){ const el = document.getElementById("cfgLive"); if(!el) return; el.classList.toggle("on", !!on); el.querySelector("span").textContent = txt; }
+function cfgStartRealtime(){
+  if(cfgRT || !sb.channel) return;
+  try{
+    cfgRT = sb.channel("lf-config-compras");
+    CFG_RT_TABLES.forEach(t=>cfgRT.on("postgres_changes", { event:"*", schema:"public", table:t }, ()=>{
+      clearTimeout(cfgRTTimer);
+      cfgRTTimer = setTimeout(()=>{ if(cfgLoaded) cfgReload(); }, 450);
+    }));
+    cfgRT.subscribe(status=>{
+      if(status==="SUBSCRIBED") cfgSetLive(true, "Sincronizado en tiempo real");
+      else if(status==="CHANNEL_ERROR" || status==="TIMED_OUT" || status==="CLOSED") cfgSetLive(false, "Sin sincronización en vivo");
+    });
+  }catch(e){ cfgSetLive(false, "Sin sincronización en vivo"); }
+}
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && cfgLoaded && document.querySelector("#ctabCompras .cfg-view#cfgViewProveedores.active")) cfgReload(); });
+/* ===================== FIN motor cfg* ===================== */
+
 async function logHistorialOrden(accion, detalle){
   try{
     await sb.from("lf_historial").insert({
@@ -2614,7 +3980,6 @@ function resetDemoData(){
   renderList();
   renderComprasLists();
   renderActividad();
-  showComprasChooser();
 }
 function exportBackup(){
   const payload = { ordenes, conceptosConfig, rubrosConfig, proveedoresConfig, metodosPagoConfig, perfilesConfig, historialCambios, exportadoEl: new Date().toISOString() };
@@ -2645,7 +4010,6 @@ function importBackup(ev){
       renderList();
       renderComprasLists();
       renderActividad();
-      showComprasChooser();
       showToast("Copia de seguridad importada correctamente");
     }catch(e){
       showToast("Ese archivo no es una copia de seguridad válida", "warn");
@@ -2971,7 +4335,7 @@ function goModule(mod){
   document.querySelectorAll(".module-nav-item").forEach(i=>i.classList.toggle("active", i.dataset.module===mod));
   document.querySelectorAll(".module-screen").forEach(s=>s.classList.remove("active"));
   document.getElementById("module"+mod.charAt(0).toUpperCase()+mod.slice(1)).classList.add("active");
-  if(mod==="config"){ showComprasChooser(); renderComprasLists(); renderActividad(); }
+  if(mod==="config"){ cfgOnEnterModule(); }
   if(mod==="ventas"){ initVentasResumen(); }
   if(mod==="cajaMayor"){ cmInit(); }
   if(mod==="costeo"){ initCosteo(); }
@@ -3000,8 +4364,7 @@ function goConfigTab(ctab){
   scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.ctab===ctab));
   scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
   document.getElementById("ctab"+ctab.charAt(0).toUpperCase()+ctab.slice(1)).classList.add("active");
-  if(ctab==="compras"){ showComprasChooser(); renderComprasLists(); }
-  if(ctab==="actividad") renderActividad();
+  cfgOnEnterModule();
 }
 function verHistorialPagos(){
   goModule("config");
@@ -4062,65 +5425,20 @@ document.addEventListener("click",(e)=>{
    CONFIGURACIÓN — módulo propio, con chooser "Compras" + Perfiles
    ========================================================= */
 let editingState = {}; // {tab: index} fila actualmente en edición por tab
-let comprasListView = null; // 'conceptos'|'rubros'|'proveedores'|'metodos'|null (null = chooser)
-const COMPRAS_LIST_META = {
-  conceptos:{titulo:"Conceptos", sub:"Nivel más amplio de clasificación"},
-  rubros:{titulo:"Rubros", sub:"Cada uno pertenece a un Concepto existente"},
-  proveedores:{titulo:"Proveedores", sub:"Definen Concepto y Rubro"},
-  metodos:{titulo:"Métodos de pago", sub:"Disponibles al crear o editar órdenes"},
-};
-
-function showComprasChooser(){
-  comprasListView = null;
-  document.getElementById("comprasHeaderChooser").style.display = "flex";
-  document.getElementById("comprasHeaderList").style.display = "none";
-  document.getElementById("comprasChooser").style.display = "grid";
-  document.getElementById("comprasListWrap").style.display = "none";
-}
-function selectComprasList(key){
-  comprasListView = key;
-  document.getElementById("comprasHeaderChooser").style.display = "none";
-  document.getElementById("comprasHeaderList").style.display = "flex";
-  document.getElementById("comprasChooser").style.display = "none";
-  document.getElementById("comprasListWrap").style.display = "block";
-  document.getElementById("comprasListHeading").textContent = COMPRAS_LIST_META[key].titulo;
-  document.getElementById("comprasListSub").textContent = COMPRAS_LIST_META[key].sub;
-  document.querySelectorAll("#comprasListWrap .config-panel").forEach(p=>p.classList.toggle("active", p.id==="cfgPanel-"+key));
-  renderComprasLists();
-}
 function refreshConfigTab(tab){ renderComprasLists(); }
 function startEdit(tab, i){ editingState = {}; editingState[tab]=i; refreshConfigTab(tab); }
 function cancelEdit(tab){ editingState[tab]=null; refreshConfigTab(tab); }
 
 function renderComprasLists(){
-  renderConceptosList();
-  renderRubrosList();
-  renderProveedoresList();
   renderMetodosList();
-  populateSelect(document.getElementById("cfgNewRubroConcepto"), conceptosConfig);
-  populateSelect(document.getElementById("cfgNewProvConcepto"), conceptosConfig);
-  onNewProvConceptoChange();
-}
-function onNewProvConceptoChange(){
-  const concepto = document.getElementById("cfgNewProvConcepto").value;
-  populateSelect(document.getElementById("cfgNewProvRubro"), rubrosDeConcepto(concepto));
 }
 
 /* ---- Confirmación de eliminación en dos pasos (exclusiva de Configuración) ---- */
+/* ---- Confirmación de eliminación en dos pasos (exclusiva de Configuración: Métodos de pago y reset de demo;
+   Conceptos/Rubros/Proveedores usan ahora el modal cfgModal del nuevo motor de Configuración) ---- */
 function requestConfigDelete(kind, i){
   let title, text;
-  if(kind==="concepto"){
-    const c = conceptosConfig[i];
-    if(rubrosDeConcepto(c).length>0){ showToast("No se puede eliminar: tiene rubros asociados. Eliminalos primero.", "warn"); return; }
-    title = "¿Eliminar este concepto?"; text = `Vas a eliminar el concepto "${c}".`;
-  } else if(kind==="rubro"){
-    const r = rubrosConfig[i];
-    if(proveedoresConfig.some(p=>p.rubro===r.nombre)){ showToast("No se puede eliminar: tiene proveedores asociados. Eliminalos primero.", "warn"); return; }
-    title = "¿Eliminar este rubro?"; text = `Vas a eliminar el rubro "${r.nombre}".`;
-  } else if(kind==="proveedor"){
-    const p = proveedoresConfig[i];
-    title = "¿Eliminar este proveedor?"; text = `Vas a eliminar a "${p.nombre}" de la lista de proveedores.`;
-  } else if(kind==="metodo"){
+  if(kind==="metodo"){
     const m = metodosPagoConfig[i];
     title = "¿Eliminar este método de pago?"; text = `Vas a eliminar "${m}" de los métodos disponibles.`;
   }
@@ -4131,31 +5449,7 @@ function requestConfigDelete(kind, i){
   document.getElementById("confirmOverlay").classList.add("show");
 }
 async function executeConfigDelete(kind, i){
-  if(kind==="concepto"){
-    const c = conceptosConfig[i];
-    const { error } = await sb.from("lf_conceptos").delete().eq("id", conceptosIdByNombre[c]);
-    if(error){ showToast("No se pudo eliminar el concepto", "warn"); return; }
-    await loadMasterData(); renderComprasLists();
-    logHistorialConfig("Eliminó un concepto", `"${c}"`);
-    showToast("Concepto eliminado");
-  }
-  else if(kind==="rubro"){
-    const r = rubrosConfig[i];
-    const { error } = await sb.from("lf_rubros").delete().eq("id", r.id);
-    if(error){ showToast("No se pudo eliminar el rubro", "warn"); return; }
-    await loadMasterData(); renderComprasLists();
-    logHistorialConfig("Eliminó un rubro", `"${r.nombre}" (${r.concepto})`);
-    showToast("Rubro eliminado");
-  }
-  else if(kind==="proveedor"){
-    const p = proveedoresConfig[i];
-    const { error } = await sb.from("lf_proveedores").delete().eq("id", p.id);
-    if(error){ showToast("No se pudo eliminar el proveedor", "warn"); return; }
-    await loadMasterData(); renderComprasLists();
-    logHistorialConfig("Eliminó un proveedor", `"${p.nombre}"`);
-    showToast("Proveedor eliminado de la lista");
-  }
-  else if(kind==="metodo"){
+  if(kind==="metodo"){
     const m = metodosPagoConfig[i];
     const { error } = await sb.from("lf_metodos_pago").delete().eq("id", metodosIdByNombre[m]);
     if(error){ showToast("No se pudo eliminar el método de pago", "warn"); return; }
@@ -4171,208 +5465,6 @@ function requestResetDemo(){
   document.getElementById("confirmText").textContent = "Se va a borrar todo lo que cargaste en este navegador (órdenes, listas y perfiles) y se van a restaurar los datos de ejemplo originales.";
   document.getElementById("confirmDeleteBtn").textContent = "Continuar";
   document.getElementById("confirmOverlay").classList.add("show");
-}
-
-/* ---- Conceptos ---- */
-function renderConceptosList(){
-  conceptosConfig.sort((a,b)=>a.localeCompare(b,"es"));
-  document.getElementById("cfgList-conceptos").innerHTML = conceptosConfig.map((c,i)=>{
-    if(editingState.conceptos===i){
-      return `<div class="config-list-row editing">
-        <input class="edit-input" id="editConcepto${i}" value="${c}">
-        <div class="row-actions">
-          <button class="icon-btn" onclick="saveEditConcepto(${i})" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
-          <button class="icon-btn" onclick="cancelEdit('conceptos')" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-        </div></div>`;
-    }
-    const nRubros = rubrosDeConcepto(c).length;
-    return `<div class="config-list-row">
-      <span class="main-txt">${c}</span>
-      <span class="sub-txt">${nRubros?nRubros+" rubro(s)":"sin rubros"}</span>
-      <div class="row-actions">
-        <button class="icon-btn" onclick="startEdit('conceptos',${i})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
-        <button class="icon-btn del-btn" onclick="requestConfigDelete('concepto',${i})" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
-      </div></div>`;
-  }).join("") || `<div class="empty-mini">Todavía no hay conceptos cargados.</div>`;
-}
-async function addConcepto(){
-  const input = document.getElementById("cfgNewConcepto");
-  const val = input.value.trim();
-  if(!val){ showToast("Escribí un nombre de concepto", "warn"); return; }
-  if(conceptosConfig.includes(val)){ showToast("Ese concepto ya existe", "warn"); return; }
-  const { error } = await sb.from("lf_conceptos").insert({ nombre: val });
-  if(error){ showToast(error.code==="23505" ? "Ese concepto ya existe" : "No se pudo crear el concepto", "warn"); return; }
-  input.value="";
-  await loadMasterData(); renderComprasLists();
-  logHistorialConfig("Creó un concepto", `"${val}"`);
-  showToast("Concepto agregado correctamente");
-}
-async function saveEditConcepto(i){
-  const oldVal = conceptosConfig[i];
-  const newVal = document.getElementById("editConcepto"+i).value.trim();
-  if(!newVal){ showToast("El nombre no puede estar vacío", "warn"); return; }
-  if(newVal!==oldVal && conceptosConfig.includes(newVal)){ showToast("Ya existe un concepto con ese nombre", "warn"); return; }
-  const { error } = await sb.from("lf_conceptos").update({ nombre: newVal }).eq("id", conceptosIdByNombre[oldVal]);
-  if(error){ showToast(error.code==="23505" ? "Ya existe un concepto con ese nombre" : "No se pudo actualizar el concepto", "warn"); return; }
-  if(newVal!==oldVal){
-    // rubros/proveedores usan concepto_id (FK), así que se resuelven solos al recargar con loadMasterData();
-    // acá solo propagamos el cambio de nombre a las órdenes en memoria (todavía no migradas a Supabase).
-    ordenes.forEach(o=>{ if(o.concepto===oldVal) o.concepto=newVal; });
-  }
-  editingState.conceptos = null;
-  await loadMasterData(); renderComprasLists(); renderList();
-  logHistorialConfig("Editó un concepto", oldVal!==newVal ? `"${oldVal}" → "${newVal}"` : `"${newVal}"`);
-  showToast("Concepto actualizado (se propagó a rubros, proveedores y órdenes existentes)");
-}
-
-/* ---- Rubros ---- */
-function renderRubrosList(){
-  conceptosConfig.sort((a,b)=>a.localeCompare(b,"es"));
-  rubrosConfig.sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
-  if(!rubrosConfig.length){ document.getElementById("cfgList-rubros").innerHTML = `<div class="empty-mini">Todavía no hay rubros cargados.</div>`; return; }
-  let html = "";
-  conceptosConfig.forEach(concepto=>{
-    const items = rubrosConfig.map((r,i)=>({...r,i})).filter(r=>r.concepto===concepto);
-    if(!items.length) return;
-    html += `<div class="concepto-group-title">${concepto}</div>`;
-    items.forEach(r=>{
-      const i = r.i;
-      if(editingState.rubros===i){
-        html += `<div class="config-list-row editing">
-          <select class="edit-select" id="editRubroConcepto${i}">${conceptosConfig.map(c=>`<option ${c===r.concepto?'selected':''}>${c}</option>`).join("")}</select>
-          <input class="edit-input" id="editRubro${i}" value="${r.nombre}">
-          <div class="row-actions">
-            <button class="icon-btn" onclick="saveEditRubro(${i})" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
-            <button class="icon-btn" onclick="cancelEdit('rubros')" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-          </div></div>`;
-      } else {
-        const nProv = proveedoresConfig.filter(p=>p.rubro===r.nombre).length;
-        html += `<div class="config-list-row">
-          <span class="main-txt">${r.nombre}</span>
-          <span class="sub-txt">${nProv?nProv+" proveedor(es)":"sin proveedores"}</span>
-          <div class="row-actions">
-            <button class="icon-btn" onclick="startEdit('rubros',${i})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
-            <button class="icon-btn del-btn" onclick="requestConfigDelete('rubro',${i})" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
-          </div></div>`;
-      }
-    });
-  });
-  document.getElementById("cfgList-rubros").innerHTML = html;
-}
-async function addRubro(){
-  const concepto = document.getElementById("cfgNewRubroConcepto").value;
-  const input = document.getElementById("cfgNewRubro");
-  const val = input.value.trim();
-  if(!concepto){ showToast("Primero creá un concepto", "warn"); return; }
-  if(!val){ showToast("Escribí un nombre de rubro", "warn"); return; }
-  if(rubrosConfig.some(r=>r.nombre===val)){ showToast("Ya existe un rubro con ese nombre", "warn"); return; }
-  const { error } = await sb.from("lf_rubros").insert({ nombre: val, concepto_id: conceptosIdByNombre[concepto] });
-  if(error){ showToast(error.code==="23505" ? "Ya existe un rubro con ese nombre" : "No se pudo crear el rubro", "warn"); return; }
-  input.value="";
-  await loadMasterData(); renderComprasLists();
-  logHistorialConfig("Creó un rubro", `"${val}" (${concepto})`);
-  showToast("Rubro agregado correctamente");
-}
-async function saveEditRubro(i){
-  const r = rubrosConfig[i];
-  const oldNombre = r.nombre;
-  const newNombre = document.getElementById("editRubro"+i).value.trim();
-  const newConcepto = document.getElementById("editRubroConcepto"+i).value;
-  if(!newNombre){ showToast("El nombre no puede estar vacío", "warn"); return; }
-  if(newNombre!==oldNombre && rubrosConfig.some(x=>x.nombre===newNombre)){ showToast("Ya existe un rubro con ese nombre", "warn"); return; }
-  const { error } = await sb.from("lf_rubros").update({ nombre: newNombre, concepto_id: conceptosIdByNombre[newConcepto] }).eq("id", r.id);
-  if(error){ showToast(error.code==="23505" ? "Ya existe un rubro con ese nombre" : "No se pudo actualizar el rubro", "warn"); return; }
-  if(newNombre!==oldNombre){
-    // proveedores usan rubro_id (FK), se resuelven solos al recargar con loadMasterData();
-    // acá solo propagamos el cambio de nombre a las órdenes en memoria (todavía no migradas a Supabase).
-    ordenes.forEach(o=>{ if(o.rubro===oldNombre){ o.rubro=newNombre; o.concepto=newConcepto; } });
-  } else {
-    ordenes.forEach(o=>{ if(o.rubro===newNombre) o.concepto=newConcepto; });
-  }
-  editingState.rubros = null;
-  await loadMasterData(); renderComprasLists(); renderList();
-  logHistorialConfig("Editó un rubro", oldNombre!==newNombre ? `"${oldNombre}" → "${newNombre}"` : `"${newNombre}"`);
-  showToast("Rubro actualizado (se propagó a proveedores y órdenes existentes)");
-}
-
-/* ---- Proveedores ---- */
-function renderProveedorRow(p, i){
-  if(editingState.proveedores===i){
-    const rubrosDisponibles = rubrosDeConcepto(p.concepto);
-    return `<div class="config-list-row editing">
-      <input class="edit-input" id="editProvNombre${i}" value="${p.nombre}">
-      <select class="edit-select" id="editProvConcepto${i}" onchange="onEditProvConceptoChange(${i})">${conceptosConfig.map(c=>`<option ${c===p.concepto?'selected':''}>${c}</option>`).join("")}</select>
-      <select class="edit-select" id="editProvRubro${i}">${rubrosDisponibles.map(r=>`<option ${r===p.rubro?'selected':''}>${r}</option>`).join("")}</select>
-      <div class="row-actions">
-        <button class="icon-btn" onclick="saveEditProveedor(${i})" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
-        <button class="icon-btn" onclick="cancelEdit('proveedores')" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div></div>`;
-  }
-  return `<div class="config-list-row">
-    <span class="main-txt">${p.nombre}</span>
-    <span class="sub-txt">${p.concepto}</span>
-    <div class="row-actions">
-      <button class="icon-btn" onclick="startEdit('proveedores',${i})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
-      <button class="icon-btn del-btn" onclick="requestConfigDelete('proveedor',${i})" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
-    </div></div>`;
-}
-function renderProveedoresList(){
-  proveedoresConfig.sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
-  rubrosConfig.sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
-  if(!proveedoresConfig.length){ document.getElementById("cfgList-proveedores").innerHTML = `<div class="empty-mini">Todavía no hay proveedores cargados.</div>`; return; }
-  let html = "";
-  // Agrupados por rubro (orden alfabético), análogo a cómo se agrupan los rubros por concepto.
-  rubrosConfig.forEach(rubro=>{
-    const items = proveedoresConfig.map((p,i)=>({...p,i})).filter(p=>p.rubro===rubro.nombre);
-    if(!items.length) return;
-    html += `<div class="concepto-group-title">${rubro.nombre}</div>`;
-    items.forEach(p=> html += renderProveedorRow(p, p.i));
-  });
-  // Proveedores cuyo rubro ya no existe en la lista de rubros (caso borde, ej. datos viejos)
-  const rubrosConocidos = new Set(rubrosConfig.map(r=>r.nombre));
-  const huerfanos = proveedoresConfig.map((p,i)=>({...p,i})).filter(p=>!rubrosConocidos.has(p.rubro));
-  if(huerfanos.length){
-    html += `<div class="concepto-group-title">Sin rubro asignado</div>`;
-    huerfanos.forEach(p=> html += renderProveedorRow(p, p.i));
-  }
-  document.getElementById("cfgList-proveedores").innerHTML = html;
-}
-function onEditProvConceptoChange(i){
-  const concepto = document.getElementById("editProvConcepto"+i).value;
-  populateSelect(document.getElementById("editProvRubro"+i), rubrosDeConcepto(concepto));
-}
-async function addProveedorConfig(){
-  const nombre = document.getElementById("cfgNewProvNombre").value.trim();
-  const concepto = document.getElementById("cfgNewProvConcepto").value;
-  const rubro = document.getElementById("cfgNewProvRubro").value;
-  if(!nombre){ showToast("Escribí el nombre del proveedor", "warn"); return; }
-  if(!concepto){ showToast("Primero creá un concepto", "warn"); return; }
-  if(!rubro){ showToast("Ese concepto todavía no tiene rubros — creá uno primero", "warn"); return; }
-  if(proveedoresConfig.some(p=>p.nombre.toLowerCase()===nombre.toLowerCase())){ showToast("Ese proveedor ya existe", "warn"); return; }
-  const rubroRow = rubrosConfig.find(r=>r.nombre===rubro);
-  const { error } = await sb.from("lf_proveedores").insert({ nombre, concepto_id: conceptosIdByNombre[concepto], rubro_id: rubroRow?rubroRow.id:null });
-  if(error){ showToast(error.code==="23505" ? "Ese proveedor ya existe" : "No se pudo crear el proveedor", "warn"); return; }
-  document.getElementById("cfgNewProvNombre").value = "";
-  await loadMasterData(); renderComprasLists();
-  logHistorialConfig("Creó un proveedor", `"${nombre}" (${concepto} · ${rubro})`);
-  showToast("Proveedor agregado correctamente");
-}
-async function saveEditProveedor(i){
-  const p = proveedoresConfig[i];
-  const oldNombre = p.nombre;
-  const newNombre = document.getElementById("editProvNombre"+i).value.trim();
-  const newConcepto = document.getElementById("editProvConcepto"+i).value;
-  const newRubro = document.getElementById("editProvRubro"+i).value;
-  if(!newNombre){ showToast("El nombre no puede estar vacío", "warn"); return; }
-  if(newNombre!==oldNombre && proveedoresConfig.some(x=>x.nombre.toLowerCase()===newNombre.toLowerCase())){ showToast("Ya existe un proveedor con ese nombre", "warn"); return; }
-  const rubroRow = rubrosConfig.find(r=>r.nombre===newRubro);
-  const { error } = await sb.from("lf_proveedores").update({ nombre: newNombre, concepto_id: conceptosIdByNombre[newConcepto], rubro_id: rubroRow?rubroRow.id:null }).eq("id", p.id);
-  if(error){ showToast(error.code==="23505" ? "Ya existe un proveedor con ese nombre" : "No se pudo actualizar el proveedor", "warn"); return; }
-  if(newNombre!==oldNombre){ ordenes.forEach(o=>{ if(o.proveedor===oldNombre) o.proveedor=newNombre; }); }
-  editingState.proveedores = null;
-  await loadMasterData(); renderComprasLists(); renderList();
-  logHistorialConfig("Editó un proveedor", oldNombre!==newNombre ? `"${oldNombre}" → "${newNombre}"` : `"${newNombre}"`);
-  showToast("Proveedor actualizado correctamente");
 }
 
 /* ---- Métodos de pago ---- */
