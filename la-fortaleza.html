@@ -314,6 +314,18 @@
   .form-footer{display:flex;gap:10px;margin-top:28px;max-width:760px;}
   .form-footer .btn-primary{flex:0 0 auto;padding:13px 28px;}
 
+  /* ---- Alineación con Che Mono (30/09): horas esperadas / jornada partida en "Cargar nuevo empleado" ---- */
+  .stepper-input{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:9px;background:#FBFBFE;overflow:hidden;}
+  .stepper-input input{border:none !important;border-radius:0 !important;text-align:center;background:transparent !important;box-shadow:none !important;padding:10px 4px;}
+  .stepper-input input:focus{box-shadow:none !important;}
+  .stepper-btn{flex:0 0 34px;border:none;background:#F1F2F8;color:var(--text-2);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s ease, color .12s ease;}
+  .stepper-btn:hover{background:var(--sky);color:#fff;}
+  .stepper-btn:first-child{border-right:1px solid var(--border);}
+  .stepper-btn:last-child{border-left:1px solid var(--border);}
+  .field-checkbox{display:flex;align-items:center;gap:8px;padding:10px 0 0 0;}
+  .field-checkbox input{width:auto !important;margin:0;}
+  .field-checkbox label{margin:0;font-size:13px;font-weight:600;color:var(--text-1);text-transform:none;letter-spacing:0;cursor:pointer;}
+
   /* ---------- CONFIG SCREEN ---------- */
   .config-tabs{display:flex;gap:6px;padding:0 32px;margin-top:16px;border-bottom:1px solid var(--border);flex-shrink:0;}
   .config-tab{padding:11px 16px;font-size:13px;font-weight:700;color:var(--text-2);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;}
@@ -790,6 +802,15 @@
 .cta-outline:hover{background:rgba(89,119,210,0.08);}
 .cta-outline.active{background:var(--blue);border-color:var(--blue);color:#fff;}
 .masa-subtitle{color:var(--text-2);font-size:14px;margin-top:4px;}
+/* ---- Alineación con Che Mono (30/09): actualización de sueldos en 2 pasos (pendiente -> confirmada) ---- */
+.actualizacion-pendiente-banner{background:#FFF6E5;border:1px solid #F0C766;border-radius:8px;padding:6px 12px;color:#8A5A00;gap:10px!important;}
+.actualizacion-pendiente-banner #pendienteActualizacionInfo{font-weight:700;}
+.actualizacion-pendiente-banner .btn-ghost{background:#fff;border-color:#F0C766;color:#8A5A00;padding:5px 10px;font-size:11.8px;white-space:nowrap;}
+.actualizacion-pendiente-banner .btn-ghost:hover{background:#FFEFC7;}
+.actualizacion-pendiente-banner .pendiente-confirmar{background:#8A5A00;color:#fff;border-color:#8A5A00;}
+.actualizacion-pendiente-banner .pendiente-confirmar:hover{background:#734b00;}
+.actualizacion-pendiente-banner .pendiente-anular{color:#B3261E;border-color:#E3B3AF;}
+.actualizacion-pendiente-banner .pendiente-anular:hover{background:#FBE9E7;}
 .sueldos-grid{display:grid;grid-template-columns:var(--grid-template-sueldos, 56px 1fr);align-items:center;width:max-content;min-width:100%;}
 .sueldos-grid .cell{padding:13px 8px;font-size:13.3px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sueldos-grid .c-num-emp{font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center;padding:13px 4px;}
@@ -1590,6 +1611,12 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/></svg>
                   Anular última actualización
                 </button>
+                <div class="toolbar-default actualizacion-pendiente-banner" id="pendienteActualizacionBanner" style="display:none;">
+                  <span id="pendienteActualizacionInfo"></span>
+                  <button class="btn-ghost pendiente-confirmar" onclick="confirmarActualizacionPendiente()" title="Aplica los sueldos propuestos a los empleados">Confirmar</button>
+                  <button class="btn-ghost" onclick="toggleActualizacionSueldos()" title="Editá la propuesta antes de confirmarla">Modificar</button>
+                  <button class="btn-ghost pendiente-anular" onclick="anularActualizacionPendiente()" title="Descarta la propuesta sin modificar ningún sueldo">Anular pendiente</button>
+                </div>
                 <button class="btn-ghost" onclick="toggleSueldosColumnPicker(event)" title="Elegí, reordená y ajustá el ancho de las columnas">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="3" width="7" height="18" rx="1"></rect></svg>
                   Columnas
@@ -1607,7 +1634,7 @@
             </div>
             <div class="filter-popover col-picker" id="sueldosColumnPickerPopover"></div>
 <div class="actualizacion-footer" id="actualizacionFooter">
-              <div class="actualizacion-hint">Editá el SUELDO de cada empleado. Los porcentajes se recalculan en vivo a medida que escribís. Los cambios quedan definitivos recién al presionar "Guardar cambios".</div>
+              <div class="actualizacion-hint">Editá el SUELDO de cada empleado. Los porcentajes se recalculan en vivo a medida que escribís. Al presionar "Guardar cambios" se guarda una actualización preliminar pendiente de confirmación: los sueldos recién se modifican de verdad cuando la confirmés.</div>
               <div class="actualizacion-buttons">
                 <button class="btn-primary" onclick="guardarActualizacionSueldos()">Guardar cambios</button>
                 <button class="btn-primary secondary" onclick="cancelarActualizacionSueldos()">Cancelar</button>
@@ -1720,6 +1747,23 @@
                   </div>
                 </div>
                 <div class="field" id="fld-eSueldo"><label>SUELDO</label><input type="text" id="eSueldo" placeholder="$0" oninput="onNuevoEmpleadoSueldoInput(this)"></div>
+              </div>
+              <div class="form-section-title">Presentismo (para Liquidación)</div>
+              <div class="field-row">
+                <div class="field" id="fld-eHorasEsperadas" style="max-width:200px;"><label>Horas promedio esperadas por jornada</label>
+                  <div class="stepper-input">
+                    <button type="button" class="stepper-btn" onclick="stepHorasEsperadas(-1)">−</button>
+                    <input type="text" id="eHorasEsperadas" value="8" inputmode="numeric" oninput="onHorasEsperadasInput(this)">
+                    <button type="button" class="stepper-btn" onclick="stepHorasEsperadas(1)">+</button>
+                  </div>
+                </div>
+                <div class="field" id="fld-eJornadaPartida">
+                  <label>Jornada</label>
+                  <div class="field-checkbox">
+                    <input type="checkbox" id="eJornadaPartida">
+                    <label for="eJornadaPartida">Tiene corte (turno partido, con pausa)</label>
+                  </div>
+                </div>
               </div>
               <div class="form-footer">
                 <button class="btn-primary" style="flex:1" onclick="guardarNuevoEmpleado()">Guardar empleado</button>
@@ -5587,6 +5631,8 @@ function resetNuevoEmpleadoForm(){
   document.getElementById("ePuesto").value = "";
   document.getElementById("eInicioActividades").value = "";
   document.getElementById("eSueldo").value = "";
+  document.getElementById("eHorasEsperadas").value = "8";
+  document.getElementById("eJornadaPartida").checked = false;
 }
 
 function parseSueldoInput(str){
@@ -5604,6 +5650,18 @@ function onNuevoEmpleadoSueldoInput(el){
   el.value = formatearPesosVivo(Number(digits));
 }
 
+/* ---- horas promedio esperadas: input numérico + flechas -1/+1 (alineado con Che Mono, 30/09) ---- */
+function onHorasEsperadasInput(el){
+  var v = el.value.replace(/[^\d.,]/g,"").replace(",", ".");
+  el.value = v;
+}
+function stepHorasEsperadas(delta){
+  var el = document.getElementById("eHorasEsperadas");
+  var n = parseFloat(String(el.value).replace(",", ".")) || 0;
+  n = Math.max(0, Math.min(24, n + delta));
+  el.value = String(n);
+}
+
 async function guardarNuevoEmpleado(){
   var condicion = document.getElementById("eCondicion").value;
   var nombre = document.getElementById("eNombreCompleto").value.trim();
@@ -5611,6 +5669,8 @@ async function guardarNuevoEmpleado(){
   var puesto = document.getElementById("ePuesto").value;
   var inicioDMY = document.getElementById("eInicioActividades").value.trim();
   var sueldo = parseSueldoInput(document.getElementById("eSueldo").value);
+  var horasEsperadas = parseFloat(String(document.getElementById("eHorasEsperadas").value).replace(",", ".")) || 0;
+  var jornadaPartida = document.getElementById("eJornadaPartida").checked;
 
   if(!condicion || !nombre || !turno || !puesto){
     alert("Completá todos los campos obligatorios antes de guardar.");
@@ -5627,6 +5687,8 @@ async function guardarNuevoEmpleado(){
     /* El sueldo anterior "en este momento" (antes de cualquier actualización real) queda
        igual al sueldo actual, para que %/comparación siempre tengan una base. */
     sueldo_anterior: sueldo,
+    horas_esperadas: horasEsperadas,
+    jornada_partida: jornadaPartida,
     creado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null
   };
 
@@ -5659,6 +5721,7 @@ async function loadEmpleados(){
     sueldosPendientes = {};
     renderEmpleadosTable();
     if(typeof cargarUltimaActualizacionSueldos === "function") cargarUltimaActualizacionSueldos();
+    if(typeof cargarPendienteActualizacionSueldos === "function") cargarPendienteActualizacionSueldos();
   }catch(e){ console.warn("No se pudieron cargar los empleados", e); }
 }
 
@@ -5698,6 +5761,8 @@ var SUELDOS_GRID_COLUMNS = [
     cell:function(e){ return "<div class=\"cell\">" + e.turno + "</div>"; } },
   { id:"puesto", label:"Puesto", sortField:"puesto", defaultWidth:160, minWidth:100, maxWidth:260,
     cell:function(e){ return "<div class=\"cell\">" + e.puesto + "</div>"; } },
+  { id:"horasEsperadas", label:"Hs. esperadas", sortField:"horas_esperadas", defaultWidth:120, minWidth:90, maxWidth:160,
+    cell:function(e){ return "<div class=\"cell\">" + (e.horas_esperadas!=null ? e.horas_esperadas+"h"+(e.jornada_partida?" · con corte":"") : "—") + "</div>"; } },
   { id:"inicio", label:"Inicio de actividades", sortField:"inicio_actividades", defaultWidth:160, minWidth:110, maxWidth:220,
     cell:function(e){ return "<div class=\"cell c-fecha-emp\">" + (e.inicio_actividades ? isoToDMY(e.inicio_actividades) : "—") + "</div>"; } },
   { id:"sueldo", label:"SUELDO", sortField:"sueldo", defaultWidth:150, minWidth:110, maxWidth:220,
@@ -6014,6 +6079,13 @@ function toggleActualizacionSueldos(){
   sueldosPendientes = {};
   if(modoActualizacionSueldos){
     sueldosFrozenOrder = getSortedEmpleados().map(function(e){ return e.id; });
+    // Si ya existe una actualización preliminar pendiente de confirmación, "Actualización de
+    // sueldos"/"Modificar" reabren esa misma propuesta (en vez de arrancar en blanco desde los
+    // sueldos vigentes) para poder seguir editándola antes de confirmarla.
+    var lotePendiente = pendienteActualizacionSueldos;
+    if(lotePendiente && !lotePendiente.anulada && lotePendiente.estado==="pendiente"){
+      (lotePendiente.detalle||[]).forEach(function(d){ sueldosPendientes[d.empleado_id] = d.sueldo_nuevo; });
+    }
   } else {
     sueldosFrozenOrder = null;
   }
@@ -6021,6 +6093,7 @@ function toggleActualizacionSueldos(){
   document.getElementById("actualizacionFooter").style.display = modoActualizacionSueldos ? "flex" : "none";
   renderEmpleadosTable();
   renderUltimaActualizacionInfo();
+  renderPendienteActualizacionInfo();
 }
 
 function cancelarActualizacionSueldos(){
@@ -6031,8 +6104,14 @@ function cancelarActualizacionSueldos(){
   document.getElementById("actualizacionFooter").style.display = "none";
   renderEmpleadosTable();
   renderUltimaActualizacionInfo();
+  renderPendienteActualizacionInfo();
 }
 
+/* Alineado con Che Mono (30/09): "Guardar cambios" ya NO aplica el sueldo directo — guarda una
+   actualización PRELIMINAR pendiente de confirmación (estado:"pendiente"), sin tocar lf_empleados
+   todavía. Si ya existía una propuesta pendiente (se venía "Modificando"), se actualiza esa misma
+   fila en vez de crear una nueva. Recién se aplica de verdad al confirmarla (ver
+   confirmarActualizacionPendiente). */
 async function guardarActualizacionSueldos(){
   var ids = Object.keys(sueldosPendientes);
   var cambios = ids.filter(function(id){
@@ -6043,7 +6122,11 @@ async function guardarActualizacionSueldos(){
     cancelarActualizacionSueldos();
     return;
   }
-  if(!confirm("Vas a actualizar el sueldo de " + cambios.length + " empleado(s). ¿Confirmás?")) return;
+  var lotePendiente = pendienteActualizacionSueldos;
+  var esModificacion = !!(lotePendiente && !lotePendiente.anulada && lotePendiente.estado==="pendiente");
+  var msjConfirm = (esModificacion ? "Vas a actualizar la propuesta preliminar" : "Vas a guardar una actualización preliminar") +
+    " de sueldos para " + cambios.length + " empleado(s), pendiente de confirmación. Ningún sueldo se modifica todavía. ¿Confirmás?";
+  if(!confirm(msjConfirm)) return;
 
   var fechaActualizacion = new Date().toISOString();
   var detalleLote = [];
@@ -6052,18 +6135,6 @@ async function guardarActualizacionSueldos(){
     var emp = empleadosCache.find(function(e){ return e.id===id; });
     var nuevo = sueldosPendientes[id];
     var anterior = Number(emp.sueldo||0);
-    var res = await sb.from("lf_empleados").update({
-      sueldo: nuevo,
-      sueldo_anterior: anterior,
-      modificado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
-      modificado_fecha: fechaActualizacion
-    }).eq("id", id);
-    if(res.error){
-      alert("No se pudo actualizar el sueldo de " + emp.nombre_completo + ": " + res.error.message);
-      continue;
-    }
-    /* Guardamos el estado previo completo (no solo el sueldo) para poder anular este lote
-       más adelante y dejar todo exactamente como estaba antes de esta actualización. */
     detalleLote.push({
       empleado_id: id,
       nombre_completo: emp.nombre_completo,
@@ -6073,16 +6144,36 @@ async function guardarActualizacionSueldos(){
       modificado_por_previo: emp.modificado_por || null,
       modificado_fecha_previo: emp.modificado_fecha || null
     });
-    await logHistorialSueldos("Actualización de sueldo", emp.nombre_completo + ": " + fmtMoney(anterior) + " -> " + fmtMoney(nuevo) + ".");
   }
 
-  if(detalleLote.length){
-    await sb.from("lf_sueldos_actualizaciones").insert({
+  if(!detalleLote.length){
+    showToast("No se pudo armar la propuesta de actualización.", "warn");
+    return;
+  }
+
+  var usuarioId = (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null;
+  var usuarioNombre = (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.nombre : "—";
+
+  if(esModificacion){
+    var resUpd = await sb.from("lf_sueldos_actualizaciones").update({
       fecha: fechaActualizacion,
-      usuario_id: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
-      usuario_nombre: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.nombre : "—",
+      usuario_id: usuarioId,
+      usuario_nombre: usuarioNombre,
       detalle: detalleLote
+    }).eq("id", lotePendiente.id);
+    if(resUpd.error){ showToast("No se pudo guardar la propuesta: " + resUpd.error.message, "warn"); return; }
+    await logHistorialSueldos("Modificación de propuesta de sueldos", "Se actualizó la propuesta preliminar pendiente (" + detalleLote.length + " empleado(s)).");
+  } else {
+    var resIns = await sb.from("lf_sueldos_actualizaciones").insert({
+      fecha: fechaActualizacion,
+      usuario_id: usuarioId,
+      usuario_nombre: usuarioNombre,
+      detalle: detalleLote,
+      estado: "pendiente",
+      anulada: false
     });
+    if(resIns.error){ showToast("No se pudo guardar la propuesta: " + resIns.error.message, "warn"); return; }
+    await logHistorialSueldos("Propuesta de actualización de sueldos", "Se propuso una actualización preliminar para " + detalleLote.length + " empleado(s), pendiente de confirmación.");
   }
 
   modoActualizacionSueldos = false;
@@ -6090,8 +6181,131 @@ async function guardarActualizacionSueldos(){
   sueldosFrozenOrder = null;
   document.getElementById("btnActualizarSueldos").classList.remove("active");
   document.getElementById("actualizacionFooter").style.display = "none";
+  await cargarPendienteActualizacionSueldos();
+  showToast(esModificacion ? "Propuesta actualizada correctamente" : "Propuesta guardada, pendiente de confirmación");
+}
+
+/* ---------- actualización preliminar pendiente de confirmación (alineado con Che Mono, 30/09) ---------- */
+var pendienteActualizacionSueldos = null;
+
+async function cargarPendienteActualizacionSueldos(){
+  try{
+    var res = await sb.from("lf_sueldos_actualizaciones").select("*").eq("estado","pendiente").eq("anulada", false).order("fecha", { ascending:false }).limit(1).maybeSingle();
+    pendienteActualizacionSueldos = (res && !res.error) ? res.data : null;
+  }catch(e){
+    console.warn("No se pudo cargar la actualización de sueldos pendiente", e);
+    pendienteActualizacionSueldos = null;
+  }
+  renderPendienteActualizacionInfo();
+  renderEmpleadosTable();
+}
+
+function renderPendienteActualizacionInfo(){
+  var wrap = document.getElementById("pendienteActualizacionBanner");
+  var info = document.getElementById("pendienteActualizacionInfo");
+  if(!wrap || !info) return;
+  var lote = pendienteActualizacionSueldos;
+  if(!lote || lote.anulada || lote.estado!=="pendiente"){
+    wrap.style.display = "none";
+    return;
+  }
+  var n = (lote.detalle||[]).length;
+  info.textContent = "Actualización preliminar pendiente: " + fmtFechaHora(lote.fecha) + " · " + (lote.usuario_nombre||"—") + " · " + n + " empleado" + (n===1?"":"s") + " · esperando confirmación";
+  wrap.style.display = modoActualizacionSueldos ? "none" : "flex";
+}
+
+/* Aplica de verdad a lf_empleados los montos propuestos en la actualización preliminar pendiente,
+   y marca esa misma fila como "confirmada" (pasa a ser la "última actualización" a los efectos de
+   anularUltimaActualizacionSueldos). */
+async function confirmarActualizacionPendiente(){
+  var lote = pendienteActualizacionSueldos;
+  if(!lote || lote.anulada || lote.estado!=="pendiente"){
+    showToast("No hay ninguna actualización preliminar pendiente para confirmar.", "warn");
+    return;
+  }
+  var detalle = lote.detalle || [];
+  var nombres = detalle.map(function(d){ return d.nombre_completo + " (" + fmtMoney(d.sueldo_previo) + " → " + fmtMoney(d.sueldo_nuevo) + ")"; }).join("\n");
+  if(!confirm("Vas a confirmar la actualización preliminar de sueldos, que va a afectar a " + detalle.length + " empleado(s):\n\n" + nombres + "\n\n¿Confirmás?")) return;
+
+  var fechaAplicacion = new Date().toISOString();
+  var aplicados = [];
+  for(var i=0;i<detalle.length;i++){
+    var d = detalle[i];
+    var emp = empleadosCache.find(function(e){ return e.id===d.empleado_id; });
+    if(!emp){
+      showToast("El empleado " + d.nombre_completo + " ya no existe; se omite de la confirmación.", "warn");
+      continue;
+    }
+    var anteriorActual = Number(emp.sueldo||0);
+    var res = await sb.from("lf_empleados").update({
+      sueldo: d.sueldo_nuevo,
+      sueldo_anterior: anteriorActual,
+      modificado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
+      modificado_fecha: fechaAplicacion
+    }).eq("id", d.empleado_id);
+    if(res.error){
+      showToast("No se pudo actualizar el sueldo de " + d.nombre_completo + ": " + res.error.message, "warn");
+      continue;
+    }
+    aplicados.push({
+      empleado_id: d.empleado_id,
+      nombre_completo: d.nombre_completo,
+      sueldo_previo: anteriorActual,
+      sueldo_nuevo: d.sueldo_nuevo,
+      sueldo_anterior_previo: emp.sueldo_anterior!=null ? Number(emp.sueldo_anterior) : null,
+      modificado_por_previo: emp.modificado_por || null,
+      modificado_fecha_previo: emp.modificado_fecha || null
+    });
+    await logHistorialSueldos("Actualización de sueldo", d.nombre_completo + ": " + fmtMoney(anteriorActual) + " -> " + fmtMoney(d.sueldo_nuevo) + ".");
+  }
+
+  if(!aplicados.length){
+    showToast("No se pudo aplicar ningún cambio de la propuesta.", "warn");
+    return;
+  }
+
+  var usuarioId = (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null;
+  var usuarioNombre = (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.nombre : "—";
+  await sb.from("lf_sueldos_actualizaciones").update({
+    estado: "confirmada",
+    detalle: aplicados,
+    fecha: fechaAplicacion,
+    confirmada_en: fechaAplicacion,
+    confirmada_por: usuarioId,
+    confirmada_por_nombre: usuarioNombre
+  }).eq("id", lote.id);
+
+  await logHistorialSueldos("Confirmación de actualización de sueldo", "Se confirmó la actualización preliminar pendiente (" + aplicados.length + " empleado(s)).");
+
   await loadEmpleados();
   await cargarUltimaActualizacionSueldos();
+  await cargarPendienteActualizacionSueldos();
+  showToast("Actualización de sueldos confirmada correctamente");
+}
+
+/* Descarta la propuesta pendiente sin tocar lf_empleados (nunca se había llegado a aplicar). */
+async function anularActualizacionPendiente(){
+  var lote = pendienteActualizacionSueldos;
+  if(!lote || lote.anulada || lote.estado!=="pendiente"){
+    showToast("No hay ninguna actualización preliminar pendiente para anular.", "warn");
+    return;
+  }
+  var detalle = lote.detalle || [];
+  var nombres = detalle.map(function(d){ return d.nombre_completo + " (propuesto: " + fmtMoney(d.sueldo_nuevo) + ")"; }).join("\n");
+  if(!confirm("Vas a anular la propuesta preliminar de sueldos del " + fmtFechaHora(lote.fecha) + ", que afectaba a " + detalle.length + " empleado(s):\n\n" + nombres + "\n\nNingún sueldo fue modificado todavía, así que esto solo descarta la propuesta. ¿Confirmás?")) return;
+
+  var res = await sb.from("lf_sueldos_actualizaciones").update({
+    anulada: true,
+    anulada_en: new Date().toISOString(),
+    anulada_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null,
+    anulada_por_nombre: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.nombre : "—"
+  }).eq("id", lote.id);
+  if(res.error){ showToast("No se pudo anular la propuesta: " + res.error.message, "warn"); return; }
+
+  await logHistorialSueldos("Anulación de propuesta de sueldos", "Se anuló la propuesta preliminar del " + fmtFechaHora(lote.fecha) + " (" + detalle.length + " empleado(s)), sin aplicar cambios.");
+
+  await cargarPendienteActualizacionSueldos();
+  showToast("Propuesta anulada correctamente");
 }
 
 /* ---------- anular la última actualización de sueldos (un solo nivel hacia atrás) ---------- */
@@ -6099,7 +6313,7 @@ var ultimaActualizacionSueldos = null;
 
 async function cargarUltimaActualizacionSueldos(){
   try{
-    var res = await sb.from("lf_sueldos_actualizaciones").select("*").order("fecha", { ascending:false }).limit(1).maybeSingle();
+    var res = await sb.from("lf_sueldos_actualizaciones").select("*").eq("estado","confirmada").order("fecha", { ascending:false }).limit(1).maybeSingle();
     ultimaActualizacionSueldos = (res && !res.error) ? res.data : null;
   }catch(e){
     console.warn("No se pudo cargar la última actualización de sueldos", e);
@@ -6167,19 +6381,37 @@ async function anularUltimaActualizacionSueldos(){
    órdenes de pago en Pagos. Primera versión ("primera prueba"), ver limitaciones conocidas al
    pie de este bloque.
 */
-var LIQ_EXPECTED_HOURS = {
-  Dari: { horasEsperadas: 10, horario: "cortado" },
-  Karen: { horasEsperadas: 8, horario: "intermedio" },
-  Leo: { horasEsperadas: 12, horario: "intermedio" },
-  Cele: { horasEsperadas: 8.5, horario: "manana" }, // 8:00 a 16:30 (actualizado 07/09/2026, antes 8h)
-  Lizak: { horasEsperadas: 8, horario: "manana" },
-  Liz: { horasEsperadas: 8, horario: "manana" },
-  Martu: { horasEsperadas: 8, horario: "tarde" }
-};
-// Mapeo clave corta (columna "Nombres" del reporte de marcaciones) -> nombre_completo real en
-// lf_empleados. Limitación conocida: si se suma un nuevo empleado con fichadas, hay que agregarlo
-// también acá (y a LIQ_EXPECTED_HOURS) a mano.
-var LIQ_NOMBRE_COMPLETO = { Dari:"Dario Samaniego", Karen:"Karen Ortega", Leo:"Leonardo Rial", Cele:"Celeste Khouri", Lizak:"Liza Ojeda", Liz:"Liz Paredes", Martu:"Martina Oddo" };
+// Alineado con Che Mono (30/09/2026, ver claude/alineacion-che-mono.md): horas esperadas y jornada
+// partida ya NO viven hardcodeadas acá — son columnas de lf_empleados (horas_esperadas,
+// jornada_partida), editables desde "Cargar nuevo empleado". Así, un empleado nuevo con fichadas
+// se toma automáticamente para presentismo, sin tocar código (antes había que agregarlo a mano a
+// LIQ_EXPECTED_HOURS/LIQ_NOMBRE_COMPLETO, que ya no existen).
+function liqEmpleadoPorNombreCorto(nombreCorto){
+  var key = String(nombreCorto||"").trim().toLowerCase();
+  if(!key) return null;
+  var candidatos = (empleadosCache||[]).filter(function(e){
+    var nombre = String(e.nombre_completo||"").trim().toLowerCase();
+    if(!nombre) return false;
+    if(nombre.indexOf(key)===0) return true;               // empieza igual: "juan perez" vs "juan"
+    if((" "+nombre).indexOf(" "+key)!==-1) return true;     // aparece como palabra suelta
+    if(key.indexOf(nombre)===0) return true;                // el reporte trae más texto que el nombre
+    return false;
+  });
+  if(candidatos.length===1) return candidatos[0];
+  if(candidatos.length>1){
+    var exacto = candidatos.filter(function(e){ return String(e.nombre_completo||"").trim().toLowerCase()===key; })[0];
+    if(exacto) return exacto;
+    var prefijo = candidatos.filter(function(e){ return String(e.nombre_completo||"").trim().toLowerCase().indexOf(key)===0; })[0];
+    return prefijo || candidatos[0];
+  }
+  return null;
+}
+function liqCfgParaEmpleado(emp){
+  return {
+    horasEsperadas: Number(emp && emp.horas_esperadas!=null ? emp.horas_esperadas : 8),
+    horario: (emp && emp.jornada_partida) ? "cortado" : "continuo"
+  };
+}
 var LIQ_DEDUP_WINDOW_MIN = 60;
 var LIQ_FLIP_MAX_DIFF_MIN = 215;
 var LIQ_DOW_ABBR = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
@@ -6341,9 +6573,9 @@ function liqPromedioIntervaloPosicion(diasResueltos, posicion, jornadaExcluida){
   });
   return count ? total/count : null;
 }
-function liqProcesarEmpleado(nombre, jornadasRaw){
-  var cfg = LIQ_EXPECTED_HOURS[nombre];
-  if(!cfg) return null;
+function liqProcesarEmpleado(emp, jornadasRaw){
+  if(!emp) return null;
+  var cfg = liqCfgParaEmpleado(emp);
   var esperadoMin = cfg.horasEsperadas*60;
   var longitudCanonica = cfg.horario==="cortado" ? 4 : 2;
   var medianas = liqConstruirEstadisticasHorarios(jornadasRaw, longitudCanonica);
@@ -6552,8 +6784,10 @@ async function liqProcesarArchivo(parsed, fileName){
   }
 
   var presentismo = {};
-  Object.keys(LIQ_EXPECTED_HOURS).forEach(function(key){
-    presentismo[key] = liqProcesarEmpleado(key, grupos[key] || {});
+  Object.keys(grupos).forEach(function(nombreCorto){
+    var emp = liqEmpleadoPorNombreCorto(nombreCorto);
+    if(!emp) return;
+    presentismo[nombreCorto] = liqProcesarEmpleado(emp, grupos[nombreCorto] || {});
   });
 
   // Si ya existía un draft guardado para este mes (mismo archivo re-subido, o se había arrancado a
@@ -6592,11 +6826,12 @@ function liqDiasDelMes(mesISO){
   for(var d=1; d<=cant; d++){ out.push(mesISO.slice(0,8)+String(d).padStart(2,"0")); }
   return out;
 }
+/* Adaptado (30/09): en vez de recorrer un mapa fijo de nombres, matchea cada nombre corto que
+   quedó registrado en liqState.presentismo contra empleadosCache en el momento (liqEmpleadoPorNombreCorto). */
 function liqEmpleadosPorKey(){
   var out = {};
-  Object.keys(LIQ_NOMBRE_COMPLETO).forEach(function(key){
-    var nombre = LIQ_NOMBRE_COMPLETO[key];
-    out[key] = (empleadosCache||[]).find(function(e){ return e.nombre_completo===nombre; }) || null;
+  Object.keys(liqState.presentismo||{}).forEach(function(key){
+    out[key] = liqEmpleadoPorNombreCorto(key);
   });
   return out;
 }
@@ -6686,11 +6921,12 @@ function liqRenderTablaPresentismo(){
   });
   thead += "</tr></thead>";
 
+  var porKey = liqEmpleadosPorKey();
   var tbody = "<tbody>";
-  Object.keys(LIQ_EXPECTED_HOURS).forEach(function(key){
-    var cfg = LIQ_EXPECTED_HOURS[key];
-    var emp = liqEmpleadosPorKey()[key];
-    var nombre = emp ? emp.nombre_completo : (LIQ_NOMBRE_COMPLETO[key]||key);
+  Object.keys(liqState.presentismo||{}).forEach(function(key){
+    var emp = porKey[key];
+    var cfg = liqCfgParaEmpleado(emp);
+    var nombre = emp ? emp.nombre_completo : key;
     var row = "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(nombre)+"<span class=\"liq-col-esperado\">"+cfg.horasEsperadas+"h · "+cfg.horario+"</span></td>";
     var datosEmp = (liqState.presentismo && liqState.presentismo[key]) || {};
     dias.forEach(function(j){
@@ -6737,15 +6973,15 @@ function liqCalcularAgregados(key){
 }
 function liqRenderTablaLiquidacion(){
   var porKey = liqEmpleadosPorKey();
-  // Filas: los 7 empleados con presentismo (con datos reales de lf_empleados si ya cargaron) +
-  // el resto de empleados de lf_empleados que no tienen fichadas (ej. Vanina, administrativa).
-  var keysConPresentismo = Object.keys(LIQ_NOMBRE_COMPLETO);
-  var nombresConPresentismo = keysConPresentismo.map(function(k){ return LIQ_NOMBRE_COMPLETO[k]; });
+  // Filas: los empleados que matchearon en el reporte de marcaciones (con presentismo) +
+  // el resto de empleados de lf_empleados que no matchearon ningún nombre (ej. Vanina, administrativa).
+  var keysConPresentismo = Object.keys(liqState.presentismo||{});
+  var nombresConPresentismo = keysConPresentismo.map(function(k){ var e=porKey[k]; return e?e.nombre_completo:null; }).filter(Boolean);
   var otros = (empleadosCache||[]).filter(function(e){ return nombresConPresentismo.indexOf(e.nombre_completo)===-1; });
 
   var filas = keysConPresentismo.map(function(key){
     var emp = porKey[key];
-    return {key:key, emp:emp, nombre: emp?emp.nombre_completo:LIQ_NOMBRE_COMPLETO[key], tienePresentismo:true};
+    return {key:key, emp:emp, nombre: emp?emp.nombre_completo:key, tienePresentismo:true};
   }).concat(otros.map(function(e){
     return {key:"emp_"+e.id, emp:e, nombre:e.nombre_completo, tienePresentismo:false};
   }));
@@ -6886,8 +7122,8 @@ function liqParseMontoInput(str){
 /* ---------- totales (usado por persistencia y por Liquidar) ---------- */
 function liqComputeTotales(){
   var porKey = liqEmpleadosPorKey();
-  var keysConPresentismo = Object.keys(LIQ_NOMBRE_COMPLETO);
-  var nombresConPresentismo = keysConPresentismo.map(function(k){ return LIQ_NOMBRE_COMPLETO[k]; });
+  var keysConPresentismo = Object.keys(liqState.presentismo||{});
+  var nombresConPresentismo = keysConPresentismo.map(function(k){ var e=porKey[k]; return e?e.nombre_completo:null; }).filter(Boolean);
   var otros = (empleadosCache||[]).filter(function(e){ return nombresConPresentismo.indexOf(e.nombre_completo)===-1; });
   var filas = keysConPresentismo.map(function(key){
     return {key:key, emp:porKey[key], tienePresentismo:true};
@@ -6976,7 +7212,11 @@ async function liqOnTabOpen(){
       liqState.ordenBId = row.orden_b_id;
       var grupos = liqAgruparPorEmpleadoYJornada(liqState.marcacionesRows);
       var presentismo = {};
-      Object.keys(LIQ_EXPECTED_HOURS).forEach(function(key){ presentismo[key] = liqProcesarEmpleado(key, grupos[key]||{}); });
+      Object.keys(grupos).forEach(function(nombreCorto){
+        var emp = liqEmpleadoPorNombreCorto(nombreCorto);
+        if(!emp) return;
+        presentismo[nombreCorto] = liqProcesarEmpleado(emp, grupos[nombreCorto]||{});
+      });
       liqState.presentismo = presentismo;
       liqRenderZone();
       liqRenderTodo();
