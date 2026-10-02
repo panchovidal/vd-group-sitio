@@ -447,23 +447,21 @@ const PROYECTOS = [
 // vive en RLS en Supabase, esto solo arma el checklist).
 const SECTIONS_BY_PROYECTO = {
   fortaleza: [
-    {id:"ventas", nombre:"Ventas"},
+    {id:"ventas", nombre:"Reporte de Ventas/Utilidades"},
     {id:"cajaMayor", nombre:"Caja Mayor"},
     {id:"pagos", nombre:"Pagos / Compras"},
     {id:"costeo", nombre:"Costeo de productos"},
     {id:"stock", nombre:"Stock"},
     {id:"sueldos", nombre:"Sueldos"},
-    {id:"reportes", nombre:"Reportes"},
     {id:"config", nombre:"Configuración"},
   ],
   chemono: [
-    {id:"ventas", nombre:"Ventas"},
+    {id:"ventas", nombre:"Reporte de Ventas/Utilidades"},
     {id:"cajaMayor", nombre:"Caja Mayor"},
     {id:"pagos", nombre:"Pagos / Compras"},
     {id:"costeo", nombre:"Costeo de productos"},
     {id:"stock", nombre:"Stock"},
     {id:"sueldos", nombre:"Sueldos"},
-    {id:"reportes", nombre:"Reportes"},
     {id:"config", nombre:"Configuración"},
   ],
 };
@@ -551,6 +549,22 @@ function applySession(perfil){
   const isOwner = perfil.rol === "dueño";
   document.getElementById("gmPerfilesItem").classList.toggle("hidden", !isOwner);
   document.getElementById("gmLockNote").classList.toggle("hidden", isOwner);
+  aplicarAccesoProyectos(perfil);
+}
+/* Cada perfil solo ve los proyectos a los que tiene acceso (proyecto tildado y al menos una sección
+   habilitada); los "Próximamente" y "Otros proyectos" solo los ve el dueño — pedido de Pancho, 02/10/2026. */
+function aplicarAccesoProyectos(perfil){
+  const isOwner = perfil.rol === "dueño";
+  const puede = id => isOwner || ((perfil.proyectos||[]).includes(id) && (perfil.secciones||[]).some(s=>s.startsWith(id+":")));
+  const cards = { fortaleza:".card-fortaleza", chemono:".card-chemono" };
+  let visibles = 0;
+  Object.entries(cards).forEach(([id,sel])=>{ const el=document.querySelector(sel); if(!el) return; const ok=puede(id); el.classList.toggle("hidden", !ok); if(ok) visibles++; });
+  [".card-casona",".card-vidal",".card-other"].forEach(sel=>{ const el=document.querySelector(sel); if(el) el.classList.toggle("hidden", !isOwner); });
+  let empty = document.getElementById("noProjectsMsg");
+  if(!visibles && !isOwner){
+    if(!empty){ empty=document.createElement("div"); empty.id="noProjectsMsg"; empty.className="project-card card-other"; empty.style.cursor="default"; empty.innerHTML="<strong>Todavía no tenés proyectos habilitados</strong><span>Pedile al dueño que te habilite el acceso.</span>"; document.querySelector(".cards-grid").appendChild(empty); }
+    empty.classList.remove("hidden");
+  } else if(empty) empty.classList.add("hidden");
 }
 async function doLogout(){
   document.getElementById("gearMenu").classList.remove("show");
@@ -589,6 +603,7 @@ document.getElementById("loginClave").addEventListener("keydown", e=>{ if(e.key=
    NAVEGACIÓN A MÓDULOS
    ========================================================= */
 function goProject(id){
+  if(currentPerfil && currentPerfil.rol!=="dueño" && !((currentPerfil.proyectos||[]).includes(id))) return;
   if(id==="fortaleza"){ window.location.href = "la-fortaleza.html"; return; }
   if(id==="chemono"){ window.location.href = "che-mono.html"; return; }
 }

@@ -718,6 +718,10 @@
 
   /* ---------- VENTAS: fuentes de datos (respaldo manual, oculto por defecto) ---------- */
   .hidden{display:none !important;}
+  /* Hasta aplicar los permisos del perfil no se muestra ningún módulo: cada usuario solo ve lo que tiene
+     habilitado (pedido de Pancho, 02/10/2026). aplicarGatingDeSecciones() agrega body.gated. */
+  body:not(.gated) .module-nav-item[data-module], body:not(.gated) .module-main{visibility:hidden;}
+  .module-nav-item .nav-label{line-height:1.2;}
   .ventas-datasource-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:900px;margin-bottom:18px;}
   @media(max-width:760px){.ventas-datasource-grid{grid-template-columns:1fr;}}
 
@@ -1023,8 +1027,8 @@
   .cfg-thgrp th{position:sticky;top:0;z-index:5;height:22px;padding:3px 14px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);background:#EEF0F7;border-bottom:1px solid var(--border);text-align:left;}
   .cfg-thgrp-costeo{background:#E9F3EC !important;color:#2a6b3f !important;}
   table:has(.cfg-thgrp) thead tr:nth-child(2) th{top:22px;}
-  th.grp-start, td.grp-start{box-shadow:inset 3px 0 0 0 rgba(42,107,63,0.30);}
-  .cfg-costeo-cell{color:#2a6b3f;font-weight:700;font-variant-numeric:tabular-nums;}
+  th.grp-start, td.grp-start{box-shadow:none;}
+  .cfg-costeo-cell{color:var(--text-1);font-weight:400;font-variant-numeric:tabular-nums;}
   .cfg-merma-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:800;background:#E9F3EC;color:#2a6b3f;}
   .cfg-merma-chip.zero{background:#F0F1F6;color:var(--text-3);font-weight:600;}
   .cfg-table td.c-sub{border-bottom:1px dashed #EEF0F7;}
@@ -1785,7 +1789,7 @@
     <div class="module-label">Secciones</div>
     <div class="module-nav-item active" data-module="ventas" onclick="goModule('ventas')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-      <span class="nav-label">Ventas</span>
+      <span class="nav-label">Reporte de Ventas/Utilidades</span>
     </div>
     <div class="module-nav-item" data-module="cajaMayor" onclick="goModule('cajaMayor')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="11" rx="1.6"/><path d="M7 9V6.5A2.5 2.5 0 019.5 4h5A2.5 2.5 0 0117 6.5V9"/><line x1="3" y1="13" x2="21" y2="13"/></svg>
@@ -1806,10 +1810,6 @@
     <div class="module-nav-item" data-module="sueldos" onclick="goModule('sueldos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span class="nav-label">Sueldos</span>
-    </div>
-    <div class="module-nav-item" data-module="reportes" onclick="goModule('reportes')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
-      <span class="nav-label">Reportes</span>
     </div>
     <div class="module-nav-item" data-module="config" onclick="goModule('config')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -1839,7 +1839,7 @@
     <!-- ===================== MÓDULO: VENTAS ===================== -->
     <section class="module-screen active" id="moduleVentas">
       <div class="topbar">
-        <div><h1>Ventas</h1><div class="sub">Resumen de ventas del día, la semana y el mes.</div></div>
+        <div><h1>Reporte de Ventas/Utilidades</h1><div class="sub">Resumen de ventas del día, la semana y el mes.</div></div>
       </div>
       <div class="placeholder-card">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></div>
@@ -2383,17 +2383,6 @@
       </div>
     </section>
 
-    <!-- ===================== MÓDULO: REPORTES ===================== -->
-    <section class="module-screen" id="moduleReportes">
-      <div class="topbar">
-        <div><h1>Reportes</h1><div class="sub">Reportes consolidados de la operación.</div></div>
-      </div>
-      <div class="placeholder-card">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></div>
-        <h2>Módulo en construcción</h2>
-        <p>La estructura de &quot;Reportes&quot; ya está lista. El contenido y la lógica de este módulo se van a construir en un próximo chat, igual que en La Fortaleza pero con la información propia de Che Mono.</p>
-      </div>
-    </section>
 
     <!-- ===================== MÓDULO: CONFIGURACIÓN ===================== -->
     <section class="module-screen" id="moduleConfig">
@@ -2715,13 +2704,14 @@ function applyPerfilSession(perfil){
 /* Secciones del proyecto "chemono" (deben coincidir con
    SECTIONS_BY_PROYECTO.chemono en home.html y con los
    data-module de la barra lateral de aqu\u00ed abajo). */
-const CHEMONO_SECCIONES = ["ventas","cajaMayor","pagos","costeo","stock","sueldos","reportes","config"];
+const CHEMONO_SECCIONES = ["ventas","cajaMayor","pagos","costeo","stock","sueldos","config"];
 function tieneSeccionChemono(mod){
   if(!currentPerfil) return false;
   if(currentPerfil.rol === "due\u00f1o") return true;
   return (currentPerfil.secciones||[]).includes("chemono:"+mod);
 }
 function aplicarGatingDeSecciones(){
+  document.body.classList.add("gated");
   let algunaVisible = false;
   let primeraVisible = null;
   document.querySelectorAll(".module-nav-item[data-module]").forEach(item=>{
@@ -5080,9 +5070,9 @@ const CFG_UNIDADES = [
 const CFG_RT_TABLES = ["cm_conceptos","cm_rubros","cm_proveedores","cm_proveedor_rubros","cm_insumos","cm_insumo_presentaciones"];
 const CFG_DOM = {
   proveedores: { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Proveedor", hojaPl:"proveedores", keys:["cat","rubro","prov"] },
-  insumos:     { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Insumo", hojaPl:"insumos", keys:["cat","rubro","ins","prov","cantidad","unidad","merma"] }
+  insumos:     { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Insumo", hojaPl:"insumos", keys:["cat","rubro","ins","prov","cantidad","merma"] }
 };
-const CFG_KEY_LABEL = { cat:"Categoría", rubro:"Rubro", prov:"Proveedor", ins:"Insumo", cantidad:"Cantidad", unidad:"Unidad", merma:"Factor de merma" };
+const CFG_KEY_LABEL = { cat:"Categoría", rubro:"Rubro", prov:"Proveedor", ins:"Insumo", cantidad:"Cantidad / Unidad", merma:"Factor de merma" };
 const CFG_PALETTE = ["#3A4570","#5977D2","#2E9E88","#C9812A","#B23D7C","#6B5BD2","#1477A6","#8C6A3F","#D0521F","#4C8C3A","#9C3FB5","#557089"];
 
 let cfgData = {
@@ -5094,7 +5084,7 @@ let cfgLoaded = false, cfgLoading = null;
 let cfgView = "proveedores";
 const cfgState = {
   proveedores: { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), prov:cfgNewF() } },
-  insumos:     { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), ins:cfgNewF(), prov:cfgNewF(), cantidad:cfgNewF(), unidad:cfgNewF(), merma:cfgNewF() } }
+  insumos:     { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), ins:cfgNewF(), prov:cfgNewF(), cantidad:cfgNewF(), merma:cfgNewF() } }
 };
 function cfgNewF(){ return { text:"", sel:new Set() }; }
 
@@ -5251,7 +5241,7 @@ function cfgBuildRows(dom){
           const provNames = [...new Set(cfgPresDeIns(i.id).map(p=>(cfgProv(p.proveedor_id)||{}).nombre).filter(Boolean))];
           const pres = cfgPresDeIns(i.id);
           rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:i.id, leaf:i.nombre, provs:provNames.length ? provNames : ["— Sin proveedor definido —"],
-            cants:[...new Set(pres.map(p=>cfgFmtNum(p.cantidad)))], unids:[...new Set(pres.map(p=>cfgUnLabel(p.unidad)))], merma:cfgMermaTxt(i) });
+            cants:[...new Set(pres.map(p=>cfgPresLabel(p)))], merma:cfgMermaTxt(i) });
         });
       }
     });
@@ -5264,7 +5254,6 @@ function cfgRowVals(row, key){
   if(key==="prov") return row.provs;
   if(key==="ins") return row.leaf==null ? [] : [row.leaf];
   if(key==="cantidad") return row.cants || [];
-  if(key==="unidad") return row.unids || [];
   if(key==="merma") return row.leaf==null ? [] : [row.merma];
   return [];
 }
@@ -5399,14 +5388,15 @@ function cfgRenderDom(dom){
 function cfgColsDef(dom){
   return dom==="proveedores"
     ? [ {k:"cat", w:"30%", lvl:"l1", n:"1"}, {k:"rubro", w:"32%", lvl:"l2", n:"2"}, {k:"prov", w:"38%", lvl:"l3", n:"3"} ]
-    : [ {k:"cat", w:"14%", lvl:"l1", n:"1", grp:"cat"}, {k:"rubro", w:"14%", lvl:"l2", n:"2", grp:"cat"}, {k:"ins", w:"20%", lvl:"l3", n:"3", grp:"cat"}, {k:"prov", w:"19%", lvl:"l4", n:"4", grp:"cat"},
-        {k:"cantidad", w:"10%", label:"Cantidad", grp:"costeo"}, {k:"unidad", w:"10%", label:"Unidad", grp:"costeo"}, {k:"merma", w:"13%", label:"Factor de merma", grp:"costeo"} ];
+    : [ {k:"cat", w:"14%", lvl:"l1", n:"1", grp:"cat"}, {k:"rubro", w:"14%", lvl:"l2", n:"2", grp:"cat"}, {k:"ins", w:"20%", lvl:"l3", n:"3", grp:"cat"}, {k:"prov", w:"21%", lvl:"l4", n:"4", grp:"cat"},
+        {k:"cantidad", w:"13%", label:"Cantidad / Unidad", grp:"costeo"}, {k:"merma", w:"13%", label:"Factor de merma", grp:"costeo"} ];
 }
 function cfgTheadOnly(dom){ return `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}</table>`; }
 function cfgColgroup(dom){ return "<colgroup>"+cfgColsDef(dom).map(c=>`<col style="width:${c.w}">`).join("")+"</colgroup>"; }
 /* Fila extra de encabezado que agrupa las columnas en "claustros" (Categorización / Costeo del
    insumo) — mismo diseño que La Fortaleza. Solo aplica a dominios cuyas columnas definen c.grp. */
 function cfgTheadGroupRow(dom){
+  return ""; // sin bandas de agrupación: Pancho prefiere la lectura limpia de La Fortaleza (02/10/2026)
   const cols = cfgColsDef(dom);
   if(!cols.some(c=>c.grp)) return "";
   const GRP_LABEL = { cat:"Categorización", costeo:"Costeo del insumo" };
@@ -5514,7 +5504,7 @@ function cfgTableHtml(dom, rows){
           const mermaCell = `<td class="${endCls}" rowspan="${span}"><div class="cfg-cell">${cfgMermaChip(ins, t=>hiQ(t,"merma"))}</div></td>`;
           if(!pres.length){
             html += `<td class="${endCls}"><div class="cfg-cell"><span class="cfg-noprov">Sin proveedor definido</span></div></td>`;
-            html += `<td class="grp-start ${endCls}"><div class="cfg-cell"><span class="cfg-dim">—</span></div></td><td class="${endCls}"><div class="cfg-cell"><span class="cfg-dim">—</span></div></td>${mermaCell}</tr>`;
+            html += `<td class="${endCls}"><div class="cfg-cell"><span class="cfg-dim">—</span></div></td>${mermaCell}</tr>`;
             return;
           }
           // proveedor: una celda por proveedor (rowspan = sus formas de pedido)
@@ -5528,8 +5518,7 @@ function cfgTableHtml(dom, rows){
               const touchesEnd = lastRow && (pi+n===sorted.length);
               html += `<td class="${touchesEnd?"grp-end":(pi+n===sorted.length?"":"c-sub")}" rowspan="${n}"><div class="cfg-cell"><div class="txt"><div class="nm" style="font-weight:600">${hiQ(pv?pv.nombre:"(proveedor eliminado)","prov")}</div></div></div></td>`;
             }
-            html += `<td class="grp-start ${subEnd}"><div class="cfg-cell"><span class="cfg-costeo-cell">${hiQ(cfgFmtNum(p.cantidad),"cantidad")}</span></div></td>`;
-            html += `<td class="${subEnd}"><div class="cfg-cell"><span class="cfg-pill">${hiQ(cfgUnLabel(p.unidad),"unidad")}</span></div></td>`;
+            html += `<td class="${subEnd}"><div class="cfg-cell"><span class="cfg-costeo-cell">${hiQ(cfgPresLabel(p),"cantidad")}</span></div></td>`;
             if(pi===0) html += mermaCell;
             html += `</tr>`;
           });
@@ -5613,13 +5602,17 @@ function cfgHojasListHtml(dom, rows){
         <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
         <td><div class="cfg-cell">${cfgEntregasCell(p)}</div></td><td><div class="cfg-cell">${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip">${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim">—</span>'}</div></td></tr>`; });
   } else {
-    html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:15%"><col style="width:15%"><col style="width:35%"><col style="width:13%"></colgroup>
-      <thead><tr class="cfg-thgrp"><th colspan="3" class="cfg-thgrp-cat">Categorización</th><th colspan="2" class="cfg-thgrp-costeo grp-start">Costeo del insumo</th></tr>
-      <tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Insumo</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th class="grp-start"><div class="cfg-th">Proveedor · cantidad y unidad</div></th><th><div class="cfg-th">Factor de merma</div></th></tr></thead><tbody>`;
+    html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:20%"><col style="width:14%"><col style="width:14%"><col style="width:15%"><col style="width:15%"></colgroup>
+      <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Insumo</div></th><th><div class="cfg-th"><span class="lvl-dot l4">4</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Cantidad / Unidad</div></th><th><div class="cfg-th">Factor de merma</div></th></tr></thead><tbody>`;
     leaves.forEach(i=>{ const x = cr(i);
+      const pres = cfgPresDeIns(i.id).slice().sort((a,b)=>cfgCmp((cfgProv(a.proveedor_id)||{}).nombre,(cfgProv(b.proveedor_id)||{}).nombre) || a.orden-b.orden);
+      const provs = pres.length ? pres.map((p,k)=>`<div>${k>0 && pres[k-1].proveedor_id===p.proveedor_id ? '<span class="cfg-dim">″</span>' : cfgHi((cfgProv(p.proveedor_id)||{}).nombre||"(proveedor eliminado)",q)}</div>`).join("") : '<span class="cfg-noprov">Sin proveedor definido</span>';
+      const cants = pres.length ? pres.map(p=>`<div>${cfgEsc(cfgPresLabel(p))}</div>`).join("") : '<span class="cfg-dim">—</span>';
       html += `<tr class="cfg-lrow flat"><td><div class="cfg-cell"><div class="txt"><div class="nm">${cfgHi(i.nombre,q)}</div></div>${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${i.id}')`), cfgBtn("del","Eliminar insumo",`cfgDeleteInsumo('${i.id}')`)])}</div></td>
+        <td><div class="cfg-cell stack" style="font-weight:400">${provs}</div></td>
         <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
-        <td class="grp-start"><div class="cfg-provlist">${cfgPresPillsHtml(i.id,q)}</div></td><td><div class="cfg-cell">${cfgMermaChip(i)}</div></td></tr>`; });
+        <td><div class="cfg-cell stack" style="font-weight:400">${cants}</div></td>
+        <td><div class="cfg-cell">${cfgMermaChip(i)}</div></td></tr>`; });
   }
   return html + "</tbody></table>";
 }
@@ -8144,7 +8137,9 @@ function insCost(insId){ const c=insumoCosts()[insId]; if(!c) return null; const
 function lineRef(l){ return l.insumo_id?{t:"i",id:l.insumo_id}:l.sub_articulo_id?{t:"a",id:l.sub_articulo_id}:{t:"s",id:l.sub_semi_id}; }
 function refInfo(r){ if(r.t==="i"){ const i=cfgIns(r.id); return i?{nombre:i.nombre,unidad:insUnidad(i.id),tipo:"i"}:null; }
   if(r.t==="a"){ const a=D.arts.find(x=>x.id===r.id); return a?{nombre:a.nombre.toLowerCase(),unidad:"porción",tipo:"a"}:null; }
-  const s=D.semis.find(x=>x.id===r.id); return s?{nombre:s.nombre.toLowerCase(),unidad:s.rinde_unidad==="kg"?"kg":"porción",tipo:"s"}:null; }
+  const s=D.semis.find(x=>x.id===r.id); return s?{nombre:s.nombre.toLowerCase(),unidad:semiUn(s),tipo:"s"}:null; }
+/* unidad en la que rinde un semi-elaborado: kg, lts o porciones */
+function semiUn(s,short){ return s.rinde_unidad==="kg"?"kg":s.rinde_unidad==="lts"?"lts":(short?"porc.":"porción"); }
 /* insumos en MAYÚSCULAS, semi-elaborados en minúscula, artículos de venta en minúscula negrita */
 function refNameHtml(inf){ if(!inf) return "<em>eliminado</em>"; return inf.tipo==="a"?`<b>${esc(inf.nombre)}</b>`:esc(inf.nombre); }
 const refTipoTxt = t=>t==="a"?"Artículo de venta":t==="s"?"Semi-elaborado":"Insumo";
@@ -8465,13 +8460,13 @@ function recRowHtml(it,mode){ const open=ST.recOpen===it.id; const nl=itemLineas
   if(mode==="art"){ const rc=recetaCost(it), ct=costoTotal(it); const fx=it.factor_base&&it.factor_pct?`${fmtQ(it.factor_pct)}% ${it.factor_base==="precio"?"PV":"costo"}`:"—"; const miss=nl&&rc==null?missingIns(it):[];
     return `<div class="cx-rrow ${open?'open':''}" data-id="${it.id}" tabindex="0" role="button" aria-expanded="${open}"><span class="nm">${esc(it.nombre)}${!nl?"<small>Sin receta cargada</small>":miss.length?`<small>Sin costo: ${esc(miss.slice(0,2).join(", "))}${miss.length>2?"…":""}</small>`:""}</span><span class="r">${money0(rc)}</span><span class="fx ${fx==="—"?'none':''}">${fx}</span><span class="r"><b>${money0(ct)}</b></span>${ICO.chev}</div>${open?recDetailHtml(it,"art"):""}`; }
   const c=semiUnitCost(it.id);
-  return `<div class="cx-rrow ${open?'open':''}" data-id="${it.id}" tabindex="0" role="button" aria-expanded="${open}"><span class="nm">${esc(it.nombre)}</span><span class="r">${fmtQ(it.rinde)} ${it.rinde_unidad==="kg"?"kg":"porc."}</span><span class="fx none">${nl}</span><span class="r"><b>${money0(c)}</b><small style="color:var(--text-3)">/${it.rinde_unidad==="kg"?"kg":"porc"}</small></span>${ICO.chev}</div>${open?recDetailHtml(it,"semi"):""}`; }
+  return `<div class="cx-rrow ${open?'open':''}" data-id="${it.id}" tabindex="0" role="button" aria-expanded="${open}"><span class="nm">${esc(it.nombre)}</span><span class="r">${fmtQ(it.rinde)} ${semiUn(it,true)}</span><span class="fx none">${nl}</span><span class="r"><b>${money0(c)}</b><small style="color:var(--text-3)">/${semiUn(it,true).replace(".","")}</small></span>${ICO.chev}</div>${open?recDetailHtml(it,"semi"):""}`; }
 function recDetailHtml(it,mode){ const ls=itemLineas(it,mode).sort((a,b)=>a.orden-b.orden);
   const lines=ls.map(l=>{ const r=lineRef(l); const inf=refInfo(r); const u=refCost(r); const sub=u==null?null:u*l.cantidad;
     return `<tr><td title="${inf?refTipoTxt(inf.tipo):''}">${refNameHtml(inf)}</td><td><input class="q" data-lq="${l.id}" value="${fmtQ(l.cantidad)}" inputmode="decimal" aria-label="Cantidad"></td><td style="color:var(--text-3)">${inf?esc(cfgUnLabel(inf.unidad)):""}</td><td title="${u==null&&inf?(inf.tipo==="i"?'Todavía no hay una compra completa de este insumo':'Su receta todavía no tiene costo completo'):(inf&&inf.tipo==="i"&&insMerma(r.id)?'Incluye '+fmtQ(insMerma(r.id))+'% de merma':'')}">${u==null?'<span style="color:var(--cx-bad)">sin costo</span>':money(u)}${u!=null&&inf&&inf.tipo==="i"&&insMerma(r.id)?`<div style="font-size:10px;color:var(--cx-ok);font-weight:700">+${fmtQ(insMerma(r.id))}% merma</div>`:""}</td><td><b>${money0(sub)}</b></td><td><button type="button" class="cx-ibtn del" data-ldel="${l.id}" title="Quitar">${ICO.del}</button></td></tr>`; }).join("");
   const tot=ls.reduce((s,l)=>{ const u=refCost(lineRef(l)); return s+(u==null?0:u*l.cantidad); },0);
   let head=mode==="art"?`<div class="cx-rmeta">Porciones que rinde la receta <input data-porc value="${fmtQ(it.porciones)}" inputmode="decimal"> <span style="color:var(--text-3)">· el costo se muestra por porción</span></div>`
-    :`<div class="cx-rmeta">Rinde <input data-rinde value="${fmtQ(it.rinde)}" inputmode="decimal"> <select data-ru><option value="kg" ${it.rinde_unidad==="kg"?"selected":""}>kg</option><option value="porc" ${it.rinde_unidad==="porc"?"selected":""}>porciones</option></select> · categoría <select data-scat>${D.semiCats.map(c=>`<option value="${c.id}" ${c.id===it.categoria_id?"selected":""}>${esc(c.nombre)}</option>`).join("")}</select></div>`;
+    :`<div class="cx-rmeta">Rinde <input data-rinde value="${fmtQ(it.rinde)}" inputmode="decimal"> <select data-ru><option value="kg" ${it.rinde_unidad==="kg"?"selected":""}>kg</option><option value="lts" ${it.rinde_unidad==="lts"?"selected":""}>lts</option><option value="porc" ${it.rinde_unidad==="porc"?"selected":""}>porciones</option></select> · categoría <select data-scat>${D.semiCats.map(c=>`<option value="${c.id}" ${c.id===it.categoria_id?"selected":""}>${esc(c.nombre)}</option>`).join("")}</select></div>`;
   let fx="";
   if(mode==="art"){ const rc=recetaCost(it); const base=it.factor_base||"costo"; const amt=factorAmount(it,rc); const ct=costoTotal(it); const baseVal=base==="precio"?it.precio_actual:rc;
     fx=`<div class="cx-fxbox"><div class="cx-fxctl"><h6>Factor de ajuste del costo</h6>
@@ -8492,7 +8487,7 @@ function recDetailHtml(it,mode){ const ls=itemLineas(it,mode).sort((a,b)=>a.orde
 function findRef(txt,mode){ const t=String(txt).trim(); if(!t) return null; const i=cfgData.items.find(x=>norm(x.nombre)===norm(t)); if(i) return {t:"i",id:i.id}; const s=D.semis.find(x=>norm(x.nombre)===norm(t)); if(s) return {t:"s",id:s.id};
   if(mode==="art"){ const a=artsActivos().find(x=>norm(x.nombre)===norm(t)); if(a) return {t:"a",id:a.id}; } return null; }
 function bindRecDetail(grid){ const det=$(".cx-rdet",grid); if(!det) return; const id=det.dataset.det, mode=det.dataset.mode; const it=(mode==="art"?D.arts:D.semis).find(x=>x.id===id); if(!it) return;
-  $("#cxDlIngr").innerHTML=cfgData.items.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(i=>`<option value="${esc(i.nombre)}">${esc(cfgUnLabel(insUnidad(i.id)))} · ${insCost(i.id)==null?"sin costo":money(insCost(i.id))}</option>`).join("")+D.semis.filter(s=>s.id!==id).map(s=>`<option value="${esc(s.nombre.toLowerCase())}">semi-elaborado · ${s.rinde_unidad==="kg"?"kg":"porción"}</option>`).join("")
+  $("#cxDlIngr").innerHTML=cfgData.items.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(i=>`<option value="${esc(i.nombre)}">${esc(cfgUnLabel(insUnidad(i.id)))} · ${insCost(i.id)==null?"sin costo":money(insCost(i.id))}</option>`).join("")+D.semis.filter(s=>s.id!==id).map(s=>`<option value="${esc(s.nombre.toLowerCase())}">semi-elaborado · ${semiUn(s)}</option>`).join("")
     +(mode==="art"?artsActivos().filter(a=>!artUsaArt(a.id,id)).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es")).map(a=>`<option value="${esc(a.nombre.toLowerCase())}">artículo de venta · ${esc(a.categoria)} · ${money(costoTotal(a))}</option>`).join(""):"");
   det.addEventListener("click",e=>e.stopPropagation());
   const own = mode==="art"?{articulo_id:id}:{semi_id:id};
@@ -8531,7 +8526,7 @@ function semiCatsModal(){ const draw=()=>{ const m=modal(`<div class="cx-mh"><di
   $("#cxCAdd",m).onclick=add; $("#cxCNew",m).onkeydown=e=>{ if(e.key==="Enter") add(); }; }; draw(); }
 function semiNewModal(){ if(!D.semiCats.length){ toast("Primero creá una categoría","warn"); semiCatsModal(); return; }
   const m=modal(`<div class="cx-mh"><div><h3>Nuevo semi-elaborado</h3><p>El nombre se guarda en minúsculas. Después cargás su receta.</p></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
-  <div class="cx-mb" style="display:grid;gap:10px"><input class="cx-field" id="cxSnN" placeholder="Nombre (ej. salsa criolla)"><div style="display:flex;gap:8px;flex-wrap:wrap"><select class="cx-field" id="cxSnC">${D.semiCats.map(c=>`<option value="${c.id}" ${ST.focus.recetas===c.id?"selected":""}>${esc(c.nombre)}</option>`).join("")}</select><input class="cx-field" style="width:110px" id="cxSnR" placeholder="Rinde" inputmode="decimal"><select class="cx-field" id="cxSnU"><option value="kg">kg</option><option value="porc">porciones</option></select></div></div>
+  <div class="cx-mb" style="display:grid;gap:10px"><input class="cx-field" id="cxSnN" placeholder="Nombre (ej. salsa criolla)"><div style="display:flex;gap:8px;flex-wrap:wrap"><select class="cx-field" id="cxSnC">${D.semiCats.map(c=>`<option value="${c.id}" ${ST.focus.recetas===c.id?"selected":""}>${esc(c.nombre)}</option>`).join("")}</select><input class="cx-field" style="width:110px" id="cxSnR" placeholder="Rinde" inputmode="decimal"><select class="cx-field" id="cxSnU"><option value="kg">kg</option><option value="lts">lts</option><option value="porc">porciones</option></select></div></div>
   <div class="cx-mf"><button type="button" class="cx-btn" data-close>Cancelar</button><button type="button" class="cx-btn pri" id="cxSnGo">Crear</button></div>`);
   $("#cxSnN",m).focus();
   $("#cxSnGo",m).onclick=async()=>{ const n=$("#cxSnN",m).value.trim().toLowerCase(); const r=parseNum($("#cxSnR",m).value); if(!n){ toast("Escribí un nombre","warn"); return; } if(D.semis.some(s=>norm(s.nombre)===norm(n))){ toast("Ya existe un semi-elaborado con ese nombre","warn"); return; } if(!r||r<=0){ toast("Cargá cuánto rinde","warn"); return; }
@@ -8541,7 +8536,7 @@ function exportRecetas(mode,ids){ const wb=XLSX.utils.book_new(); const used=new
   ids.forEach(cid=>{ const c=C.find(x=>x.id===cid); const its=recItems(mode).filter(x=>itemCat(x,mode)===cid).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es")); const aoa=[]; const merges=[]; const mc=[];
     its.forEach(it=>{ const r0=aoa.length;
       if(mode==="art") aoa.push([it.nombre.toUpperCase(),"","","Porciones",it.porciones,"Costo total",nr2(costoTotal(it))]);
-      else aoa.push([it.nombre.toUpperCase(),"","","Rinde",it.rinde,it.rinde_unidad==="kg"?"Costo por kg":"Costo por porción",nr2(semiUnitCost(it.id))]);
+      else aoa.push([it.nombre.toUpperCase(),"","","Rinde",it.rinde,it.rinde_unidad==="kg"?"Costo por kg":it.rinde_unidad==="lts"?"Costo por lts":"Costo por porción",nr2(semiUnitCost(it.id))]);
       mc.push([r0,6]); aoa.push(["Ingrediente","Tipo","Cantidad","Unidad","$ / unidad","Subtotal",""]);
       let tot=0; itemLineas(it,mode).sort((a,b)=>a.orden-b.orden).forEach(l=>{ const r=lineRef(l); const inf=refInfo(r)||{}; const u=refCost(r); const s=u==null?null:u*l.cantidad; tot+=s||0; aoa.push([inf.nombre,refTipoTxt(inf.tipo),l.cantidad,cfgUnLabel(inf.unidad||""),nr2(u),nr2(s),""]); mc.push([aoa.length-1,4],[aoa.length-1,5]); });
       aoa.push(["","","","","Total ingredientes",nr2(tot),""]); mc.push([aoa.length-1,5]);
