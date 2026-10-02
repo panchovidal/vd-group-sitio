@@ -1017,6 +1017,17 @@
   .cfg-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;}
   .cfg-table thead th{position:sticky;top:0;z-index:4;background:#F7F8FD;border-bottom:2px solid var(--border);padding:0;text-align:left;}
   .cfg-th{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);}
+  /* ---- Insumos: separa visualmente "Categorización" de "Costeo del insumo" (cantidad / unidad /
+     factor de merma), como dos claustros dentro de la misma tabla — igual que La Fortaleza (01/10/2026),
+     portado a Che Mono a pedido de Pancho (02/10/2026) ---- */
+  .cfg-thgrp th{position:sticky;top:0;z-index:5;height:22px;padding:3px 14px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);background:#EEF0F7;border-bottom:1px solid var(--border);text-align:left;}
+  .cfg-thgrp-costeo{background:#E9F3EC !important;color:#2a6b3f !important;}
+  table:has(.cfg-thgrp) thead tr:nth-child(2) th{top:22px;}
+  th.grp-start, td.grp-start{box-shadow:inset 3px 0 0 0 rgba(42,107,63,0.30);}
+  .cfg-costeo-cell{color:#2a6b3f;font-weight:700;font-variant-numeric:tabular-nums;}
+  .cfg-merma-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:800;background:#E9F3EC;color:#2a6b3f;}
+  .cfg-merma-chip.zero{background:#F0F1F6;color:var(--text-3);font-weight:600;}
+  .cfg-table td.c-sub{border-bottom:1px dashed #EEF0F7;}
   .cfg-th .lvl-dot{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;flex-shrink:0;}
   .cfg-th .lvl-dot.l1{background:#E3E6F3;color:var(--navy);}
   .cfg-th .lvl-dot.l2{background:#DCE6FF;color:var(--blue);}
@@ -5069,9 +5080,9 @@ const CFG_UNIDADES = [
 const CFG_RT_TABLES = ["cm_conceptos","cm_rubros","cm_proveedores","cm_proveedor_rubros","cm_insumos","cm_insumo_presentaciones"];
 const CFG_DOM = {
   proveedores: { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Proveedor", hojaPl:"proveedores", keys:["cat","rubro","prov"] },
-  insumos:     { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Insumo", hojaPl:"insumos", keys:["cat","rubro","ins","prov"] }
+  insumos:     { catTable:"cm_conceptos", rubTable:"cm_rubros", rubFk:"concepto_id", hoja:"Insumo", hojaPl:"insumos", keys:["cat","rubro","ins","prov","cantidad","unidad","merma"] }
 };
-const CFG_KEY_LABEL = { cat:"Categoría", rubro:"Rubro", prov:"Proveedor", ins:"Insumo" };
+const CFG_KEY_LABEL = { cat:"Categoría", rubro:"Rubro", prov:"Proveedor", ins:"Insumo", cantidad:"Cantidad", unidad:"Unidad", merma:"Factor de merma" };
 const CFG_PALETTE = ["#3A4570","#5977D2","#2E9E88","#C9812A","#B23D7C","#6B5BD2","#1477A6","#8C6A3F","#D0521F","#4C8C3A","#9C3FB5","#557089"];
 
 let cfgData = {
@@ -5083,7 +5094,7 @@ let cfgLoaded = false, cfgLoading = null;
 let cfgView = "proveedores";
 const cfgState = {
   proveedores: { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), prov:cfgNewF() } },
-  insumos:     { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), ins:cfgNewF(), prov:cfgNewF() } }
+  insumos:     { search:"", mode:"grupos", rubOpen:new Set(), collapsed:new Set(), filters:{ cat:cfgNewF(), rubro:cfgNewF(), ins:cfgNewF(), prov:cfgNewF(), cantidad:cfgNewF(), unidad:cfgNewF(), merma:cfgNewF() } }
 };
 function cfgNewF(){ return { text:"", sel:new Set() }; }
 
@@ -5178,6 +5189,9 @@ function cfgInsumosDeProv(provId){
   const ids = new Set(cfgData.pres.filter(p=>p.proveedor_id===provId).map(p=>p.insumo_id));
   return cfgData.items.filter(i=>ids.has(i.id)).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
 }
+function cfgMermaOf(ins){ return ins ? (Number(ins.factor_merma)||0) : 0; }
+function cfgMermaTxt(ins){ return cfgFmtNum(cfgMermaOf(ins))+"%"; }
+function cfgMermaChip(ins, hiFn){ const m = cfgMermaOf(ins), t = cfgMermaTxt(ins); return `<span class="cfg-merma-chip${m===0?" zero":""}">${hiFn?hiFn(t):cfgEsc(t)}</span>`; }
 function cfgPresLabel(p){ return cfgFmtNum(p.cantidad) + " " + cfgUnLabel(p.unidad); }
 function cfgExists(list, nombre, exceptId){ const n = cfgNorm(nombre); return list.find(x=>x.id!==exceptId && cfgNorm(x.nombre)===n); }
 
@@ -5188,7 +5202,7 @@ async function cfgLoadAll(){
     sb.from("cm_rubros").select("id,nombre,concepto_id"),
     sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias,entregas"),
     sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
-    sb.from("cm_insumos").select("id,nombre,rubro_id,notas"),
+    sb.from("cm_insumos").select("id,nombre,rubro_id,notas,factor_merma"),
     sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden")
   ]);
   const err = res.find(r=>r.error);
@@ -5198,7 +5212,7 @@ async function cfgLoadAll(){
   cfgData.provs  = res[2].data||[];
   cfgData.links  = res[3].data||[];
   cfgData.insumos = cfgData.proveedores;
-  cfgData.items  = res[4].data||[];
+  cfgData.items  = (res[4].data||[]).map(i=>Object.assign({}, i, { factor_merma:Number(i.factor_merma)||0 }));
   cfgData.pres   = (res[5].data||[]).map(p=>Object.assign({}, p, { cantidad:Number(p.cantidad) }));
   // categorías nuevas (creadas por otro usuario) entran contraídas
   const ids = cfgData.proveedores.cats.map(c=>c.id);
@@ -5235,7 +5249,9 @@ function cfgBuildRows(dom){
         if(!ins.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:null, leaf:null, provs:[] }); return; }
         ins.forEach(i=>{
           const provNames = [...new Set(cfgPresDeIns(i.id).map(p=>(cfgProv(p.proveedor_id)||{}).nombre).filter(Boolean))];
-          rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:i.id, leaf:i.nombre, provs:provNames.length ? provNames : ["— Sin proveedor definido —"] });
+          const pres = cfgPresDeIns(i.id);
+          rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:i.id, leaf:i.nombre, provs:provNames.length ? provNames : ["— Sin proveedor definido —"],
+            cants:[...new Set(pres.map(p=>cfgFmtNum(p.cantidad)))], unids:[...new Set(pres.map(p=>cfgUnLabel(p.unidad)))], merma:cfgMermaTxt(i) });
         });
       }
     });
@@ -5247,6 +5263,9 @@ function cfgRowVals(row, key){
   if(key==="rubro") return row.rubro==null ? [] : [row.rubro];
   if(key==="prov") return row.provs;
   if(key==="ins") return row.leaf==null ? [] : [row.leaf];
+  if(key==="cantidad") return row.cants || [];
+  if(key==="unidad") return row.unids || [];
+  if(key==="merma") return row.leaf==null ? [] : [row.merma];
   return [];
 }
 function cfgFActive(f){ return f.sel.size>0 || !!cfgNorm(f.text); }
@@ -5380,20 +5399,33 @@ function cfgRenderDom(dom){
 function cfgColsDef(dom){
   return dom==="proveedores"
     ? [ {k:"cat", w:"30%", lvl:"l1", n:"1"}, {k:"rubro", w:"32%", lvl:"l2", n:"2"}, {k:"prov", w:"38%", lvl:"l3", n:"3"} ]
-    : [ {k:"cat", w:"18%", lvl:"l1", n:"1"}, {k:"rubro", w:"19%", lvl:"l2", n:"2"}, {k:"ins", w:"21%", lvl:"l3", n:"3"}, {k:"prov", w:"42%", lvl:"l4", n:"", label:"Proveedores · cantidad y unidad de pedido"} ];
+    : [ {k:"cat", w:"14%", lvl:"l1", n:"1", grp:"cat"}, {k:"rubro", w:"14%", lvl:"l2", n:"2", grp:"cat"}, {k:"ins", w:"20%", lvl:"l3", n:"3", grp:"cat"}, {k:"prov", w:"19%", lvl:"l4", n:"4", grp:"cat"},
+        {k:"cantidad", w:"10%", label:"Cantidad", grp:"costeo"}, {k:"unidad", w:"10%", label:"Unidad", grp:"costeo"}, {k:"merma", w:"13%", label:"Factor de merma", grp:"costeo"} ];
 }
 function cfgTheadOnly(dom){ return `<table class="cfg-table">${cfgColgroup(dom)}${cfgThead(dom)}</table>`; }
 function cfgColgroup(dom){ return "<colgroup>"+cfgColsDef(dom).map(c=>`<col style="width:${c.w}">`).join("")+"</colgroup>"; }
+/* Fila extra de encabezado que agrupa las columnas en "claustros" (Categorización / Costeo del
+   insumo) — mismo diseño que La Fortaleza. Solo aplica a dominios cuyas columnas definen c.grp. */
+function cfgTheadGroupRow(dom){
+  const cols = cfgColsDef(dom);
+  if(!cols.some(c=>c.grp)) return "";
+  const GRP_LABEL = { cat:"Categorización", costeo:"Costeo del insumo" };
+  const groups = [];
+  cols.forEach(c=>{ const g = groups[groups.length-1]; if(!g || g.grp!==c.grp) groups.push({ grp:c.grp, n:1 }); else g.n++; });
+  return "<tr class=\"cfg-thgrp\">"+groups.map(g=>`<th colspan="${g.n}" class="cfg-thgrp-${cfgEsc(g.grp)}${g.grp==="costeo"?" grp-start":""}">${cfgEsc(GRP_LABEL[g.grp]||"")}</th>`).join("")+"</tr>";
+}
 function cfgThead(dom){
   const st = cfgState[dom];
-  return "<thead><tr>"+cfgColsDef(dom).map(c=>{
+  const cols = cfgColsDef(dom);
+  return "<thead>"+cfgTheadGroupRow(dom)+"<tr>"+cols.map((c,i)=>{
     const label = c.label || CFG_KEY_LABEL[c.k];
-    if(!c.k) return `<th><div class="cfg-th">${cfgEsc(label)}</div></th>`;
+    const gs = (c.grp && i>0 && cols[i-1].grp!==c.grp) ? ' class="grp-start"' : "";
+    if(!c.k) return `<th${gs}><div class="cfg-th">${cfgEsc(label)}</div></th>`;
     const f = st.filters[c.k], act = cfgFActive(f);
     const badge = act ? (f.sel.size ? f.sel.size : "abc") : "";
     const open = (cfgFP.dom===dom && cfgFP.key===c.k) ? " open" : "";
-    const dot = c.n ? `<span class="lvl-dot ${c.lvl}">${c.n}</span>` : `<span class="lvl-dot ${c.lvl}">${CFG_IC.prov.replace('<svg','<svg style="width:11px;height:11px"')}</span>`;
-    return `<th><div class="cfg-th">${dot}${cfgEsc(label)}<button class="cfg-fbtn${act?" active":""}${open}" data-fdom="${dom}" data-fkey="${c.k}" onclick="cfgOpenFilter(event,'${dom}','${c.k}')" title="Filtrar ${cfgEsc(CFG_KEY_LABEL[c.k].toLowerCase())}">${CFG_IC.funnel}${badge?`<span>${badge}</span>`:""}</button></div></th>`;
+    const dot = c.n ? `<span class="lvl-dot ${c.lvl}">${c.n}</span>` : (c.lvl ? `<span class="lvl-dot ${c.lvl}">${CFG_IC.prov.replace('<svg','<svg style="width:11px;height:11px"')}</span>` : "");
+    return `<th${gs}><div class="cfg-th">${dot}${cfgEsc(label)}<button class="cfg-fbtn${act?" active":""}${open}" data-fdom="${dom}" data-fkey="${c.k}" onclick="cfgOpenFilter(event,'${dom}','${c.k}')" title="Filtrar ${cfgEsc(CFG_KEY_LABEL[c.k].toLowerCase())}">${CFG_IC.funnel}${badge?`<span>${badge}</span>`:""}</button></div></th>`;
   }).join("")+"</tr></thead>";
 }
 
@@ -5407,6 +5439,9 @@ function cfgTableHtml(dom, rows){
   const isProv = dom==="proveedores";
   const leafKey = isProv ? "prov" : "ins";
   const nCols = cfgColsDef(dom).length;
+  // Insumos: cada forma de pedido (proveedor · cantidad · unidad) ocupa una sub-fila; el insumo y su
+  // factor de merma abarcan todas sus sub-filas (rowspan).
+  const spanOf = r => (isProv || r.leafId==null) ? 1 : Math.max(1, cfgPresDeIns(r.leafId).length);
   // agrupar
   const groups = [];
   rows.forEach(r=>{
@@ -5426,7 +5461,7 @@ function cfgTableHtml(dom, rows){
       else cfgData.items.filter(i=>i.rubro_id===r.id).forEach(i=>leafIds.add(i.id));
     });
     const catMeta = `${totRub.length} ${totRub.length===1?"rubro":"rubros"} · ${leafIds.size} ${leafIds.size===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}`;
-    const nRows = collapsed ? 1 : g.rubs.reduce((a,rg)=>a+rg.rows.length,0);
+    const nRows = collapsed ? 1 : g.rubs.reduce((a,rg)=>a+rg.rows.reduce((b,r)=>b+spanOf(r),0),0);
     const catCell = `<td class="c-l1${collapsed?" is-collapsed":""}" rowspan="${nRows}"${!filtering?` onclick="if(!event.target.closest('.cfg-acts'))cfgToggleGroup('${dom}','${g.catId}')"`:""}><div class="cfg-cell sticky" style="top:var(--cfg-th-h,41px)">
         <button class="cfg-chev${collapsed?" collapsed":""}" onclick="event.stopPropagation();cfgToggleGroup('${dom}','${g.catId}')" title="${collapsed?"Expandir":"Contraer"}"${filtering?' disabled style="opacity:.35;cursor:default"':''}>${CFG_IC.chev}</button>
         <span class="cfg-dot" style="background:${cfgColor(g.catId)}"></span>
@@ -5452,7 +5487,7 @@ function cfgTableHtml(dom, rows){
           const nLeaf = isProv ? cfgData.links.filter(l=>l.rubro_id===rg.rubroId).length : cfgData.items.filter(x=>x.rubro_id===rg.rubroId).length;
           const addTitle = isProv ? "Agregar proveedor en este rubro" : "Crear insumo en este rubro";
           const addFn = isProv ? `cfgOpenProvForm(null,'${rg.rubroId}')` : `cfgOpenInsumoForm(null,'${rg.rubroId}')`;
-          html += `<td class="c-l2${lastRub?" grp-end":""}" rowspan="${rg.rows.length}"><div class="cfg-cell">
+          html += `<td class="c-l2${lastRub?" grp-end":""}" rowspan="${rg.rows.reduce((b,x)=>b+spanOf(x),0)}"><div class="cfg-cell">
               <div class="txt"><div class="nm">${hiQ(rg.rubro,"rubro")}</div><div class="meta">${nLeaf} ${nLeaf===1?CFG_DOM[dom].hoja.toLowerCase():CFG_DOM[dom].hojaPl}${isProv ? (n=>n?` · ${n} ${n===1?"insumo":"insumos"}`:"")(cfgData.items.filter(x=>x.rubro_id===rg.rubroId).length) : ""}</div></div>
               ${isProv ? cfgActs([cfgBtn("plus",addTitle,addFn), cfgBtn("edit","Editar rubro",`cfgOpenRubroForm('${dom}','${rg.rubroId}')`), cfgBtn("del","Eliminar rubro",`cfgDeleteRubro('${dom}','${rg.rubroId}')`)]) : cfgActs([cfgBtn("plus",addTitle,addFn)])}
             </div></td>`;
@@ -5470,16 +5505,35 @@ function cfgTableHtml(dom, rows){
           html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(p.nombre,"prov")}</div>${cfgProvMetaHtml(p)}${also}</div>
               ${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar / quitar proveedor",`cfgDeleteProv('${p.id}','${r.rubroId}')`)])}</div></td>`;
         } else {
-          const ins = cfgIns(r.leafId), pres = cfgPresDeIns(ins.id);
-          html += `<td class="${endCls}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(ins.nombre,"ins")}</div><div class="meta">${pres.length ? `${pres.length} ${pres.length===1?"forma de pedido":"formas de pedido"}` : "Proveedor pendiente"}</div></div>
+          const ins = cfgIns(r.leafId), pres = cfgPresDeIns(ins.id), span = Math.max(1, pres.length);
+          const nProvs = new Set(pres.map(p=>p.proveedor_id)).size;
+          // si el insumo ocupa varias sub-filas, la clase de fin de grupo va en la última
+          if(span>1 && lastRow) html = html.replace(/<tr class="cat-end">(?![\s\S]*<tr)/, "<tr>");
+          html += `<td class="${endCls}" rowspan="${span}"><div class="cfg-cell"><div class="txt"><div class="nm">${hiQ(ins.nombre,"ins")}</div><div class="meta">${pres.length ? `${nProvs} ${nProvs===1?"proveedor":"proveedores"} · ${pres.length} ${pres.length===1?"forma de pedido":"formas de pedido"}` : "Proveedor pendiente"}</div>${ins.notas?`<div class="meta" title="${cfgEsc(ins.notas)}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cfgEsc(ins.notas)}</div>`:""}</div>
               ${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${ins.id}')`), cfgBtn("del","Eliminar insumo",`cfgDeleteInsumo('${ins.id}')`)])}</div></td>`;
-          const byProv = [];
-          pres.forEach(p=>{ let g2 = byProv.find(x=>x.id===p.proveedor_id); if(!g2){ g2={id:p.proveedor_id, pres:[]}; byProv.push(g2);} g2.pres.push(p); });
-          const lines = byProv.map(bp=>{
-            const pv = cfgProv(bp.id);
-            return `<div class="cfg-provline"><span class="pn">${hiQ(pv?pv.nombre:"(proveedor eliminado)","prov")}</span><span class="cfg-pres-pills">${bp.pres.map(p=>`<span class="cfg-pill" title="Se pide por ${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}">${cfgFmtNum(p.cantidad)} ${cfgEsc(cfgUnLabel(p.unidad))}</span>`).join("")}</span></div>`;
-          }).join("");
-          html += `<td class="${endCls}"><div class="cfg-provlist">${lines || '<span class="cfg-noprov">Sin proveedor definido</span>'}</div></td>`;
+          const mermaCell = `<td class="${endCls}" rowspan="${span}"><div class="cfg-cell">${cfgMermaChip(ins, t=>hiQ(t,"merma"))}</div></td>`;
+          if(!pres.length){
+            html += `<td class="${endCls}"><div class="cfg-cell"><span class="cfg-noprov">Sin proveedor definido</span></div></td>`;
+            html += `<td class="grp-start ${endCls}"><div class="cfg-cell"><span class="cfg-dim">—</span></div></td><td class="${endCls}"><div class="cfg-cell"><span class="cfg-dim">—</span></div></td>${mermaCell}</tr>`;
+            return;
+          }
+          // proveedor: una celda por proveedor (rowspan = sus formas de pedido)
+          const sorted = pres.slice().sort((a,b)=>cfgCmp((cfgProv(a.proveedor_id)||{}).nombre,(cfgProv(b.proveedor_id)||{}).nombre) || a.orden-b.orden);
+          sorted.forEach((p, pi)=>{
+            const lastSub = pi===sorted.length-1, subEnd = lastRow && lastSub ? "grp-end" : (lastSub ? "" : "c-sub");
+            if(pi>0) html += `<tr${lastRow && lastSub ? ' class="cat-end"' : ""}>`;
+            const firstOfProv = pi===0 || sorted[pi-1].proveedor_id!==p.proveedor_id;
+            if(firstOfProv){
+              const n = sorted.filter(x=>x.proveedor_id===p.proveedor_id).length, pv = cfgProv(p.proveedor_id);
+              const touchesEnd = lastRow && (pi+n===sorted.length);
+              html += `<td class="${touchesEnd?"grp-end":(pi+n===sorted.length?"":"c-sub")}" rowspan="${n}"><div class="cfg-cell"><div class="txt"><div class="nm" style="font-weight:600">${hiQ(pv?pv.nombre:"(proveedor eliminado)","prov")}</div></div></div></td>`;
+            }
+            html += `<td class="grp-start ${subEnd}"><div class="cfg-cell"><span class="cfg-costeo-cell">${hiQ(cfgFmtNum(p.cantidad),"cantidad")}</span></div></td>`;
+            html += `<td class="${subEnd}"><div class="cfg-cell"><span class="cfg-pill">${hiQ(cfgUnLabel(p.unidad),"unidad")}</span></div></td>`;
+            if(pi===0) html += mermaCell;
+            html += `</tr>`;
+          });
+          return;
         }
         html += `</tr>`;
       });
@@ -5532,7 +5586,7 @@ function cfgRubrosListHtml(dom, rows){
           : `<div class="cfg-empty-cell">Sin proveedores asignados · <a onclick="cfgOpenProvForm(null,'${r.id}')">Agregar proveedor</a></div>`;
       } else {
         const is = leafIds.map(id=>cfgIns(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
-        inner = is.map(i=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(i.nombre,q)}</span><span class="cfg-sub-meta" style="flex-direction:column;align-items:flex-start">${cfgPresPillsHtml(i.id,q)}</span>${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${i.id}')`)])}</div>`).join("");
+        inner = is.map(i=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(i.nombre,q)}</span><span class="cfg-sub-meta" style="flex-direction:column;align-items:flex-start">${cfgPresPillsHtml(i.id,q)}</span><span class="cfg-sub-meta" title="Factor de merma">${cfgMermaChip(i)}</span>${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${i.id}')`)])}</div>`).join("");
       }
       html += `<tr class="cfg-lsub"><td colspan="4"><div class="cfg-sub">${inner}</div></td></tr>`;
     }
@@ -5559,12 +5613,13 @@ function cfgHojasListHtml(dom, rows){
         <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
         <td><div class="cfg-cell">${cfgEntregasCell(p)}</div></td><td><div class="cfg-cell">${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip">${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim">—</span>'}</div></td></tr>`; });
   } else {
-    html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:16%"><col style="width:46%"></colgroup>
-      <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Insumo</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Proveedores · cantidad y unidad de pedido</div></th></tr></thead><tbody>`;
+    html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:15%"><col style="width:15%"><col style="width:35%"><col style="width:13%"></colgroup>
+      <thead><tr class="cfg-thgrp"><th colspan="3" class="cfg-thgrp-cat">Categorización</th><th colspan="2" class="cfg-thgrp-costeo grp-start">Costeo del insumo</th></tr>
+      <tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Insumo</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th class="grp-start"><div class="cfg-th">Proveedor · cantidad y unidad</div></th><th><div class="cfg-th">Factor de merma</div></th></tr></thead><tbody>`;
     leaves.forEach(i=>{ const x = cr(i);
       html += `<tr class="cfg-lrow flat"><td><div class="cfg-cell"><div class="txt"><div class="nm">${cfgHi(i.nombre,q)}</div></div>${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${i.id}')`), cfgBtn("del","Eliminar insumo",`cfgDeleteInsumo('${i.id}')`)])}</div></td>
         <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
-        <td><div class="cfg-provlist">${cfgPresPillsHtml(i.id,q)}</div></td></tr>`; });
+        <td class="grp-start"><div class="cfg-provlist">${cfgPresPillsHtml(i.id,q)}</div></td><td><div class="cfg-cell">${cfgMermaChip(i)}</div></td></tr>`; });
   }
   return html + "</tbody></table>";
 }
@@ -5583,13 +5638,13 @@ function cfgExportExcel(dom){
       ps.forEach(p=>{ const es = cfgEntregas(p); out.push([cat, r.nombre, p.nombre, es.map(e=>CFG_DIAS[e.entrega]).join(", "), es.map(e=>CFG_DIAS[e.pedido]).join(", "), p.plazo_pago_dias==null?"":p.plazo_pago_dias]); });
     });
   } else {
-    cols = ["Categoría","Rubro","Insumo","Proveedor","Cantidad","Unidad","Notas"];
+    cols = ["Categoría","Rubro","Insumo","Proveedor","Cantidad","Unidad","Factor de merma","Notas"];
     rubs.forEach(r=>{
       const cat = (cfgCat(dom,r.catId)||{}).nombre||"";
       cfgData.items.filter(i=>i.rubro_id===r.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre)).forEach(i=>{
         const pres = cfgPresDeIns(i.id).slice().sort((a,b)=>cfgCmp((cfgProv(a.proveedor_id)||{}).nombre,(cfgProv(b.proveedor_id)||{}).nombre) || a.orden-b.orden);
-        if(!pres.length) out.push([cat, r.nombre, i.nombre, "Sin proveedor definido", "", "", i.notas||""]);
-        pres.forEach(p=>out.push([cat, r.nombre, i.nombre, (cfgProv(p.proveedor_id)||{}).nombre||"", Number(p.cantidad), cfgUnLabel(p.unidad), i.notas||""]));
+        if(!pres.length) out.push([cat, r.nombre, i.nombre, "Sin proveedor definido", "", "", cfgMermaTxt(i), i.notas||""]);
+        pres.forEach(p=>out.push([cat, r.nombre, i.nombre, (cfgProv(p.proveedor_id)||{}).nombre||"", Number(p.cantidad), cfgUnLabel(p.unidad), cfgMermaTxt(i), i.notas||""]));
       });
     });
   }
@@ -6067,7 +6122,13 @@ function cfgOpenInsumoForm(id, presetRubroId){
       </div>
       <div class="cfg-sec-title"><span class="n">3</span>Categoría y rubro</div>
       <div class="field-row" id="cfgClasif"></div>
-      <div class="cfg-sec-title"><span class="n">4</span>Notas <span class="opt">· opcional</span></div>
+      <div class="cfg-sec-title"><span class="n">4</span>Factor de merma <span class="opt">· opcional</span></div>
+      <div class="cfg-note">${CFG_IC.info}<div>Se suma linealmente al costo por unidad de medida. Ej.: si el kg sale $1.000 y el insumo tiene <b>45%</b> de merma, el costo que ve Recetas es <b>$1.450/kg</b>. Si no tiene merma, dejalo en 0%.</div></div>
+      <div class="cfg-plazo" style="margin-bottom:18px">
+        <div class="stepper-input" style="width:150px"><button type="button" class="stepper-btn" onclick="cfgInsMermaStep(-1)">−</button><input type="text" id="cfgFInsMerma" inputmode="decimal" maxlength="6" style="flex:1;min-width:0;width:100%" oninput="this.classList.remove('bad')" value="${String(cfgMermaOf(ins)).replace(".",",")}"><button type="button" class="stepper-btn" onclick="cfgInsMermaStep(1)">+</button></div>
+        <span class="cfg-plazo-suf">%</span>
+      </div>
+      <div class="cfg-sec-title"><span class="n">5</span>Notas <span class="opt">· opcional</span></div>
       <div class="field"><textarea id="cfgFNotas" maxlength="600" placeholder="Marca preferida, calidad, observaciones…">${cfgEsc(ins&&ins.notas||"")}</textarea></div>
       <div class="cfg-err-box" id="cfgErrBox"></div>`,
     saveLabel: ins ? "Guardar cambios" : "Crear insumo",
@@ -6269,10 +6330,19 @@ async function cfgInsSubmit(ins){
       pres.push({ id:p.id, proveedor_id:g.provId, bulto:"", cantidad:n, unidad:p.unidad, orden:orden++ });
     });
   });
+  const mermaRaw = (document.getElementById("cfgFInsMerma").value||"").trim();
+  const merma = mermaRaw==="" ? 0 : cfgParseNum(mermaRaw);
+  if(!(merma>=0)){ document.getElementById("cfgFInsMerma").classList.add("bad"); errs.push("El factor de merma tiene que ser un porcentaje de 0 o más."); }
   if(errs.length){ cfgShowErr(errs.map(cfgEsc).join("<br>")); return false; }
   const notas = document.getElementById("cfgFNotas").value;
   const res = await sb.rpc("cm_guardar_insumo", { p_id: ins ? ins.id : null, p_nombre: nombre, p_rubro_id: rubroId, p_notas: notas, p_presentaciones: pres });
   if(res.error){ cfgShowErr(cfgErrText(res.error, "un insumo")); return false; }
+  // el factor de merma se guarda aparte (la función cm_guardar_insumo no lo maneja)
+  const insId = ins ? ins.id : res.data;
+  if(insId && (!ins || cfgMermaOf(ins)!==merma)){
+    const rm = await sb.from("cm_insumos").update({ factor_merma: merma }).eq("id", insId);
+    if(rm.error){ showToast("El insumo se guardó, pero no se pudo guardar el factor de merma. Probá de nuevo.", "warn"); }
+  }
   const resumen = list => { const m = new Map(); list.forEach(p=>{ const k=(cfgProv(p.proveedor_id)||{}).nombre||"?"; if(!m.has(k)) m.set(k,[]); m.get(k).push(cfgPresLabel(p)); }); return [...m.entries()].map(([k,v])=>`${k} (${v.join(", ")})`).join("; "); };
   const rubN = (cfgRub("insumos", rubroId)||{}).nombre, catN = (cfgCat("insumos", catId)||{}).nombre;
   if(ins){
@@ -6281,13 +6351,20 @@ async function cfgInsSubmit(ins){
     if(ins.rubro_id!==rubroId) ch.push(`rubro: “${(cfgRub("insumos",ins.rubro_id)||{}).nombre}” → “${rubN}”`);
     const a = resumen(antes), d = resumen(pres);
     if(a!==d) ch.push(`proveedores: ${a||"sin proveedor definido"} → ${d||"sin proveedor definido"}`);
+    if(cfgMermaOf(ins)!==merma) ch.push(`factor de merma: ${cfgMermaTxt(ins)} → ${cfgFmtNum(merma)}%`);
     if((ins.notas||"")!==notas.trim()) ch.push("actualizó notas");
     if(ch.length) logHistorialConfig("Editó un insumo", `“${nombre}” · ${ch.join(" · ")}`);
-  } else logHistorialConfig("Creó un insumo", `“${nombre}” en ${catN} › ${rubN} · proveedores: ${resumen(pres) || "sin proveedor definido"}`);
+  } else logHistorialConfig("Creó un insumo", `“${nombre}” en ${catN} › ${rubN} · proveedores: ${resumen(pres) || "sin proveedor definido"}${merma?` · merma: ${cfgFmtNum(merma)}%`:""}`);
   cfgState.insumos.collapsed.delete(catId);
   await cfgReload();
   showToast(ins ? "Insumo actualizado" : "Insumo creado");
   return true;
+}
+
+function cfgInsMermaStep(d){
+  const i = document.getElementById("cfgFInsMerma");
+  const n = Math.max(0, (cfgParseNum(i.value)||0) + d);
+  i.value = String(n).replace(".",","); i.classList.remove("bad");
 }
 
 /* ---------- modal de confirmación / aviso ---------- */
@@ -8060,7 +8137,10 @@ function insumoCosts(){
   return _insCost=m;
 }
 function insUnidad(insId){ const p=cfgPresDeIns(insId)[0]; return p?p.unidad:"un"; }
-function insCost(insId){ const c=insumoCosts()[insId]; return c?c.unit:null; }
+/* Factor de merma (Configuración > Compras > Insumos): % que se suma linealmente al costo por unidad
+   de medida (ej. $1.000/kg con 45% de merma → $1.450/kg). Igual que en La Fortaleza. */
+function insMerma(insId){ const i=cfgIns(insId); return i?(Number(i.factor_merma)||0):0; }
+function insCost(insId){ const c=insumoCosts()[insId]; if(!c) return null; const m=insMerma(insId); return c.unit*(1+m/100); }
 function lineRef(l){ return l.insumo_id?{t:"i",id:l.insumo_id}:l.sub_articulo_id?{t:"a",id:l.sub_articulo_id}:{t:"s",id:l.sub_semi_id}; }
 function refInfo(r){ if(r.t==="i"){ const i=cfgIns(r.id); return i?{nombre:i.nombre,unidad:insUnidad(i.id),tipo:"i"}:null; }
   if(r.t==="a"){ const a=D.arts.find(x=>x.id===r.id); return a?{nombre:a.nombre.toLowerCase(),unidad:"porción",tipo:"a"}:null; }
@@ -8388,7 +8468,7 @@ function recRowHtml(it,mode){ const open=ST.recOpen===it.id; const nl=itemLineas
   return `<div class="cx-rrow ${open?'open':''}" data-id="${it.id}" tabindex="0" role="button" aria-expanded="${open}"><span class="nm">${esc(it.nombre)}</span><span class="r">${fmtQ(it.rinde)} ${it.rinde_unidad==="kg"?"kg":"porc."}</span><span class="fx none">${nl}</span><span class="r"><b>${money0(c)}</b><small style="color:var(--text-3)">/${it.rinde_unidad==="kg"?"kg":"porc"}</small></span>${ICO.chev}</div>${open?recDetailHtml(it,"semi"):""}`; }
 function recDetailHtml(it,mode){ const ls=itemLineas(it,mode).sort((a,b)=>a.orden-b.orden);
   const lines=ls.map(l=>{ const r=lineRef(l); const inf=refInfo(r); const u=refCost(r); const sub=u==null?null:u*l.cantidad;
-    return `<tr><td title="${inf?refTipoTxt(inf.tipo):''}">${refNameHtml(inf)}</td><td><input class="q" data-lq="${l.id}" value="${fmtQ(l.cantidad)}" inputmode="decimal" aria-label="Cantidad"></td><td style="color:var(--text-3)">${inf?esc(cfgUnLabel(inf.unidad)):""}</td><td title="${u==null&&inf?(inf.tipo==="i"?'Todavía no hay una compra completa de este insumo':'Su receta todavía no tiene costo completo'):''}">${u==null?'<span style="color:var(--cx-bad)">sin costo</span>':money(u)}</td><td><b>${money0(sub)}</b></td><td><button type="button" class="cx-ibtn del" data-ldel="${l.id}" title="Quitar">${ICO.del}</button></td></tr>`; }).join("");
+    return `<tr><td title="${inf?refTipoTxt(inf.tipo):''}">${refNameHtml(inf)}</td><td><input class="q" data-lq="${l.id}" value="${fmtQ(l.cantidad)}" inputmode="decimal" aria-label="Cantidad"></td><td style="color:var(--text-3)">${inf?esc(cfgUnLabel(inf.unidad)):""}</td><td title="${u==null&&inf?(inf.tipo==="i"?'Todavía no hay una compra completa de este insumo':'Su receta todavía no tiene costo completo'):(inf&&inf.tipo==="i"&&insMerma(r.id)?'Incluye '+fmtQ(insMerma(r.id))+'% de merma':'')}">${u==null?'<span style="color:var(--cx-bad)">sin costo</span>':money(u)}${u!=null&&inf&&inf.tipo==="i"&&insMerma(r.id)?`<div style="font-size:10px;color:var(--cx-ok);font-weight:700">+${fmtQ(insMerma(r.id))}% merma</div>`:""}</td><td><b>${money0(sub)}</b></td><td><button type="button" class="cx-ibtn del" data-ldel="${l.id}" title="Quitar">${ICO.del}</button></td></tr>`; }).join("");
   const tot=ls.reduce((s,l)=>{ const u=refCost(lineRef(l)); return s+(u==null?0:u*l.cantidad); },0);
   let head=mode==="art"?`<div class="cx-rmeta">Porciones que rinde la receta <input data-porc value="${fmtQ(it.porciones)}" inputmode="decimal"> <span style="color:var(--text-3)">· el costo se muestra por porción</span></div>`
     :`<div class="cx-rmeta">Rinde <input data-rinde value="${fmtQ(it.rinde)}" inputmode="decimal"> <select data-ru><option value="kg" ${it.rinde_unidad==="kg"?"selected":""}>kg</option><option value="porc" ${it.rinde_unidad==="porc"?"selected":""}>porciones</option></select> · categoría <select data-scat>${D.semiCats.map(c=>`<option value="${c.id}" ${c.id===it.categoria_id?"selected":""}>${esc(c.nombre)}</option>`).join("")}</select></div>`;
