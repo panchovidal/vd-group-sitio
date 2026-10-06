@@ -11021,20 +11021,29 @@ function liqAusenteEnDia(dias, j){
   var d = dias[j];
   return !d || d.estado==="ausente";
 }
+// Corregido 06/10/2026, 2da vuelta (pedido de Pancho — ver diagnóstico Leonardo Rial/Karen
+// Ortega/Martina Oddo/Liz Paredes de 09/2026): las semanas se computan de LUNES A DOMINGO, no de
+// domingo a sábado. El franco por defecto sigue siendo el domingo de esa semana (lunes a domingo);
+// si ese domingo fue trabajado, el franco se corre a otro día SIN fichada dentro de la MISMA semana
+// (lunes a sábado). Ej.: Leonardo trabaja el domingo 20/09 → su franco de esa semana (lunes 14 a
+// domingo 20) se corre al sábado 19. Con el anclaje domingo-sábado anterior, el sábado 19 caía en la
+// semana previa y se contaba como ausencia real por error.
 function liqDiasFrancoDelMes(dias, mesISO){
   var diasMes = liqDiasDelMes(mesISO);
   if(!diasMes.length) return {};
   var primerDia = diasMes[0], ultimoDia = diasMes[diasMes.length-1];
-  var dowPrimerDia = new Date(primerDia+"T00:00:00Z").getUTCDay();
-  var cursor = liqSumarDiasISO(primerDia, -dowPrimerDia); // domingo que empieza la primera semana
+  var dowPrimerDia = new Date(primerDia+"T00:00:00Z").getUTCDay(); // 0=domingo,1=lunes...
+  var diffALunes = dowPrimerDia===0 ? -6 : (1 - dowPrimerDia);
+  var cursor = liqSumarDiasISO(primerDia, diffALunes); // lunes que empieza la primera semana
   var limite = liqSumarDiasISO(ultimoDia, 1);
   var francos = {};
   while(cursor < limite){
-    var domingo = cursor;
-    var franco = !liqAusenteEnDia(dias, domingo) ? null : domingo; // domingo libre → es el franco
-    if(franco===null){ // domingo trabajado: el franco se corre a otro día de esa semana
-      for(var k=1; k<7; k++){
-        var dia = liqSumarDiasISO(domingo, k);
+    var lunes = cursor;
+    var domingo = liqSumarDiasISO(lunes, 6);
+    var franco = liqAusenteEnDia(dias, domingo) ? domingo : null; // domingo libre → es el franco
+    if(franco===null){ // domingo trabajado: el franco se corre a otro día de esa misma semana (lun-sáb)
+      for(var k=0; k<6; k++){
+        var dia = liqSumarDiasISO(lunes, k);
         if(liqAusenteEnDia(dias, dia)){ franco = dia; break; }
       }
     }
