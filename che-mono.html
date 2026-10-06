@@ -1263,6 +1263,20 @@
   .cfg-plazo .stepper-input input{font-weight:800;font-size:14px;}
   .cfg-plazo-suf{font-size:12.5px;font-weight:600;color:var(--text-2);}
   .cfg-plazo-hint{font-size:11.8px;color:var(--text-2);margin-top:8px;}
+  /* tipo de gasto del proveedor */
+  .cfg-tg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .cfg-tg-opt{display:flex;align-items:flex-start;gap:10px;text-align:left;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s,box-shadow .15s;}
+  .cfg-tg-opt:hover{border-color:#C9D6EE;}
+  .cfg-tg-opt .rd{width:16px;height:16px;border-radius:50%;border:2px solid #C3CCDA;flex-shrink:0;margin-top:1px;position:relative;transition:border-color .15s;}
+  .cfg-tg-opt.on{border-color:var(--sky);background:#F3F8FF;box-shadow:0 0 0 3px color-mix(in srgb, var(--sky) 16%, transparent);}
+  .cfg-tg-opt.on .rd{border-color:var(--sky);}
+  .cfg-tg-opt.on .rd::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:var(--sky);}
+  .cfg-tg-opt .tx{display:flex;flex-direction:column;gap:2px;}
+  .cfg-tg-opt .tx b{font-size:13px;color:var(--navy);font-weight:800;}
+  .cfg-tg-opt .tx i{font-style:normal;font-size:11.5px;color:var(--text-3);font-weight:600;line-height:1.3;}
+  .cfg-tg-chip{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;letter-spacing:.02em;border-radius:20px;padding:2px 9px;white-space:nowrap;text-transform:uppercase;}
+  .cfg-tg-chip.puntual{color:#5B6478;background:#EEF1F6;}
+  .cfg-tg-chip.mensual{color:#6A3FC1;background:#F1EBFC;}
   .cfg-plazo-hint b{color:var(--navy);}
   .cfg-kpi.btn{cursor:pointer;font-family:inherit;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;}
   .cfg-kpi.btn:hover{border-color:var(--sky);background:#F7F9FF;}
@@ -1750,6 +1764,244 @@
   .cx-loading{padding:60px 20px;text-align:center;color:var(--text-3);font-size:13px}
   @media (max-width:1100px){ .cx-grid{--cols:1!important} .cx-colsel{display:none!important} }
   @media (max-width:860px){ .cx-phead,.cx-scroll{padding-left:16px;padding-right:16px} .cx-footbar{padding:12px 16px} .cx-fxbox,.cx-opts,.cx-dinfo{grid-template-columns:1fr} .cx-res{grid-template-columns:70px minmax(0,1fr) 90px} .cx-res .hs{display:none} }
+
+  /* =====================================================================
+     VENTAS › ANÁLISIS DE RESULTADOS (05/10/2026)
+     ===================================================================== */
+  .ar-wrap{max-width:1180px;}
+  .ar-bar{display:flex;align-items:stretch;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--border);border-radius:14px;padding:8px;box-shadow:var(--shadow-sm);margin:14px 0 12px 0;}
+  .ar-bar .ar-presets{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:2px 4px;}
+  .ar-bar .preset-pill{padding:7px 11px;font-size:11.5px;background:transparent;}
+  .ar-bar .preset-pill:hover{background:#F1F2FA;}
+  .ar-bar .preset-pill.active{background:color-mix(in srgb, var(--sky) 16%, transparent);}
+  .ar-per{display:flex;flex-direction:column;justify-content:center;border-left:1px solid var(--border);margin-left:8px;padding:0 18px;}
+  .ar-per .lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
+  .ar-per .val{font-size:14px;font-weight:800;color:var(--navy);white-space:nowrap;}
+  .ar-bar .ar-spacer{flex:1;}
+  .ar-btn-pdf{display:inline-flex;align-items:center;gap:8px;align-self:center;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:9px 15px;font-size:12.5px;font-weight:800;cursor:pointer;transition:transform .12s, box-shadow .12s;}
+  .ar-btn-pdf:hover{box-shadow:0 6px 16px rgba(2,11,45,.18);transform:translateY(-1px);}
+  .ar-btn-pdf svg{width:16px;height:16px;}
+  .ar-btn-ref{align-self:center;background:none;border:1px solid var(--border);border-radius:10px;width:36px;height:36px;margin-right:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-2);}
+  .ar-btn-ref:hover{background:#F5F6FB;color:var(--navy);}
+  .ar-btn-ref svg{width:16px;height:16px;}
+  .ar-custom{display:flex;align-items:flex-end;gap:10px;margin:0 0 12px 0;}
+  .ar-custom .f{display:flex;flex-direction:column;gap:4px;}
+  .ar-custom label{font-size:11px;font-weight:700;color:var(--text-2);}
+  .ar-custom input{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;}
+  .ar-sub-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+  .ar-sub-row .k{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
+  .ar-toggles{display:flex;flex-wrap:wrap;gap:6px;}
+  .ar-tg{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:#fff;border-radius:20px;padding:5px 12px 5px 6px;font-size:12px;font-weight:700;color:var(--text-3);cursor:pointer;transition:all .15s;}
+  .ar-tg .ck{width:18px;height:18px;border-radius:50%;border:1.5px solid #C9CEDF;display:inline-flex;align-items:center;justify-content:center;color:transparent;transition:all .15s;}
+  .ar-tg .ck svg{width:11px;height:11px;}
+  .ar-tg.on{color:var(--navy);border-color:color-mix(in srgb, var(--sky) 45%, var(--border));background:color-mix(in srgb, var(--sky) 7%, #fff);}
+  .ar-tg.on .ck{background:var(--sky);border-color:var(--sky);color:#fff;}
+  .ar-status{font-size:11.5px;color:var(--text-3);font-weight:600;display:flex;align-items:center;gap:7px;margin-left:auto;}
+  .ar-dot{width:7px;height:7px;border-radius:50%;background:var(--gray);display:inline-block;flex-shrink:0;}
+  .ar-dot.ok{background:#2E9E7E;} .ar-dot.warn{background:#E0A93B;} .ar-dot.load{background:var(--sky);animation:arPulse 1s ease-in-out infinite;}
+  @keyframes arPulse{50%{opacity:.3}}
+
+  .ar-kpis{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:12px;margin-bottom:16px;}
+  .ar-kpi{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 18px;}
+  .ar-kpi .lbl{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
+  .ar-kpi .lbl i{width:8px;height:8px;border-radius:2px;display:inline-block;}
+  .ar-kpi .val{font-size:22px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;margin-top:4px;letter-spacing:-.01em;}
+  .ar-kpi .note{font-size:11.5px;color:var(--text-3);font-weight:600;margin-top:1px;}
+  .ar-kpi.hero{background:linear-gradient(135deg,var(--navy),color-mix(in srgb, var(--navy) 78%, var(--sky)));border-color:transparent;}
+  .ar-kpi.hero .lbl,.ar-kpi.hero .note{color:rgba(255,255,255,.65);}
+  .ar-kpi.hero .val{color:#fff;font-size:26px;}
+  .ar-kpi.hero.neg .val{color:#FFB4A8;}
+
+  .ar-row{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start;margin-bottom:16px;}
+  .ar-row.single{grid-template-columns:minmax(0,1fr);}
+  .ar-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;min-width:0;margin-bottom:16px;}
+  .ar-row .ar-card{margin-bottom:0;}
+  .ar-card > h3{font-size:14px;font-weight:800;margin:0 0 14px 0;color:var(--text-1);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .ar-card > h3 .sub{font-size:12px;font-weight:700;color:var(--text-3);}
+  .ar-none{background:#fff;border:1px dashed var(--border);border-radius:var(--radius-lg);padding:36px;text-align:center;color:var(--text-3);font-size:13px;font-weight:600;}
+
+  /* Estado de resultados */
+  .ar-er-head,.ar-er-row,.ar-er-total,.ar-er-util,.ar-er-sub{display:grid;grid-template-columns:18px minmax(0,1fr) 78px 138px;gap:10px;align-items:center;}
+  .ar-er-head{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);padding:0 6px 8px;border-bottom:1px solid var(--border);}
+  .ar-er-head .pc,.ar-er-head .mt{text-align:right;}
+  .ar-er-sec{padding:4px 0 8px;border-bottom:1px solid var(--border);}
+  .ar-er-total{padding:12px 6px 8px;}
+  .ar-er-total .bar,.ar-er-util .bar{width:4px;height:18px;border-radius:2px;justify-self:center;}
+  .ar-er-total .nm{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);}
+  .ar-er-total .mt{font-size:16px;font-weight:800;color:var(--navy);text-align:right;font-variant-numeric:tabular-nums;}
+  .ar-er-total .pc{font-size:12px;font-weight:800;color:var(--text-2);text-align:right;font-variant-numeric:tabular-nums;}
+  .ar-er-item .ar-er-row{padding:7px 6px;border-radius:8px;}
+  .ar-er-item.exp .ar-er-row{cursor:pointer;}
+  .ar-er-item.exp .ar-er-row:hover{background:#F6F7FC;}
+  .ar-er-row .chev{width:14px;height:14px;color:var(--text-3);justify-self:center;display:flex;transition:transform .2s;}
+  .ar-er-row .chev svg{width:14px;height:14px;}
+  .ar-er-item.open .ar-er-row .chev{transform:rotate(90deg);color:var(--blue);}
+  .ar-er-row .nm{font-size:13.5px;font-weight:700;color:var(--text-1);padding-left:12px;min-width:0;}
+  .ar-er-row .nm small{display:block;font-size:10.5px;font-weight:600;color:var(--text-3);}
+  .ar-er-row .pc,.ar-er-sub .pc{font-size:12px;font-weight:700;color:var(--text-3);text-align:right;font-variant-numeric:tabular-nums;}
+  .ar-er-row .mt{font-size:13.5px;font-weight:700;color:var(--text-1);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .ar-er-subs{display:none;margin:2px 0 6px 34px;border-left:2px solid #EEF0F7;}
+  .ar-er-item.open .ar-er-subs{display:block;}
+  .ar-er-sub{grid-template-columns:minmax(0,1fr) 78px 138px;padding:5px 6px 5px 14px;font-size:12.5px;color:var(--text-2);}
+  .ar-er-sub .mt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;}
+  .ar-er-util{margin-top:10px;padding:14px 6px;border-radius:12px;background:linear-gradient(90deg,color-mix(in srgb, #2E9E7E 10%, #fff),#fff);border:1px solid color-mix(in srgb, #2E9E7E 25%, var(--border));}
+  .ar-er-util .nm{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);}
+  .ar-er-util .mt{font-size:19px;font-weight:800;color:#1E7A5F;text-align:right;font-variant-numeric:tabular-nums;}
+  .ar-er-util .pc{font-size:12px;font-weight:800;color:#1E7A5F;text-align:right;}
+  .ar-er-util.neg{background:linear-gradient(90deg,#FDEEEC,#fff);border-color:#F2C9C2;}
+  .ar-er-util.neg .mt,.ar-er-util.neg .pc{color:#B5432F;}
+  .ar-er-empty,.ar-empty{font-size:12.5px;color:var(--text-3);font-weight:600;padding:12px 6px 12px 34px;}
+  .ar-empty{padding:18px 4px;}
+  .ar-note{font-size:11.5px;color:var(--text-3);margin-top:12px;line-height:1.5;}
+  .ar-warn{font-size:12px;color:#8A5A00;background:#FFF6E0;border:1px solid #F4DFA6;border-radius:10px;padding:9px 12px;margin:10px 0;font-weight:600;}
+
+  /* Evolución */
+  .ar-evo-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .ar-evo-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+  .ar-evo h4{margin:0;font-size:13px;font-weight:800;color:var(--text-1);}
+  .ar-evo .sub{font-size:11px;color:var(--text-3);font-weight:600;margin-top:2px;}
+  .ar-ch{position:relative;}
+  .ar-ch svg{display:block;overflow:visible;}
+  .ar-ch-grid{stroke:#EEF0F7;stroke-width:1;}
+  .ar-ch-zero{stroke:#B9BED3;stroke-width:1.2;}
+  .ar-ch-ytick{font-size:10px;fill:var(--text-3);font-weight:600;font-variant-numeric:tabular-nums;}
+  .ar-ch-xtick{font-size:10.5px;fill:var(--text-2);font-weight:700;}
+  .ar-ch-xsub{font-size:9px;fill:var(--text-3);font-weight:600;}
+  .ar-ch-dl{font-size:10.5px;fill:var(--text-2);font-weight:700;}
+  .ar-ch-hit{fill:transparent;cursor:crosshair;}
+  .ar-ch-guide{stroke:#9AA3C4;stroke-width:1;stroke-dasharray:3 3;pointer-events:none;}
+  .ar-ch-tip{display:none;position:absolute;top:14px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);padding:9px 11px;min-width:190px;pointer-events:none;z-index:3;}
+  .ar-ch-tip .t{font-size:12px;font-weight:800;color:var(--text-1);margin-bottom:5px;}
+  .ar-ch-tip .t span{color:var(--text-3);font-weight:600;font-size:11px;}
+  .ar-ch-tip .r{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2);padding:2px 0;}
+  .ar-ch-tip .r b{margin-left:auto;color:var(--text-1);font-variant-numeric:tabular-nums;}
+  .ar-ch-tip .r b.neg{color:#B5432F;}
+  .ar-legend{display:flex;gap:18px;justify-content:center;margin-top:12px;font-size:12px;font-weight:700;color:var(--text-2);}
+  .ar-legend span{display:inline-flex;align-items:center;gap:7px;}
+  i.m-circle,i.m-square,i.m-diamond{display:inline-block;width:9px;height:9px;flex-shrink:0;}
+  i.m-circle{border-radius:50%;} i.m-square{border-radius:2px;} i.m-diamond{transform:rotate(45deg) scale(.85);border-radius:1px;}
+  .ar-vals{margin-top:6px;}
+  .ar-vals summary{font-size:11.5px;font-weight:700;color:var(--sky);cursor:pointer;list-style:none;display:inline-block;}
+  .ar-vals summary::-webkit-details-marker{display:none;}
+  .ar-vals summary::before{content:"▸ ";}
+  .ar-vals[open] summary::before{content:"▾ ";}
+  .ar-tbl{width:100%;border-collapse:collapse;margin-top:8px;}
+  .ar-tbl th{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);text-align:right;padding:0 8px 7px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  .ar-tbl td{padding:7px 8px;border-bottom:1px solid #EEF0F7;font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text-1);white-space:nowrap;}
+  .ar-tbl th.l,.ar-tbl td.l{text-align:left;}
+  .ar-tbl td.mut,.ar-tbl .mut{color:var(--text-3);}
+  .ar-tbl td.neg,.ar-tbl .neg{color:#B5432F;}
+  .ar-tbl td.nm{font-weight:700;}
+  .ar-tbl tr.tot td{font-weight:800;border-top:2px solid var(--border);border-bottom:none;background:#FAFBFE;}
+
+  /* Dividendos */
+  .ar-div-sum{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#F7F8FC;border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:14px;}
+  .ar-div-sum .lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+  .ar-div-sum .val{font-size:18px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;margin-top:2px;}
+  .ar-div-sum .val.neg{color:#B5432F;}
+  .ar-div-sum .op{font-size:20px;font-weight:600;color:var(--text-3);}
+  .ar-div-sum .hl{background:#fff;border:1px solid color-mix(in srgb, #2E9E7E 30%, var(--border));border-radius:10px;padding:8px 14px;margin-left:auto;}
+  .ar-div-sum .hl .val{color:#1E7A5F;font-size:21px;}
+  .ar-div-tbl td{font-size:13.5px;padding:10px 8px;}
+  .ar-share{display:flex;align-items:center;gap:10px;justify-content:flex-end;}
+  .ar-share .tr{width:120px;height:7px;border-radius:4px;background:#EEF0F9;overflow:hidden;display:inline-block;}
+  .ar-share .fl{display:block;height:100%;background:var(--sky);border-radius:4px;}
+  .ar-share b{width:44px;text-align:right;}
+
+  /* Modal PDF */
+  .ar-modal-ov{position:fixed;inset:0;background:rgba(2,11,45,.45);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;animation:arFade .15s ease;}
+  @keyframes arFade{from{opacity:0}}
+  .ar-modal{background:#fff;border-radius:18px;box-shadow:var(--shadow-lg);width:min(560px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden;}
+  .ar-modal-h{display:flex;align-items:flex-start;gap:12px;padding:20px 22px 12px;}
+  .ar-modal-h h3{margin:0;font-size:17px;font-weight:800;color:var(--navy);}
+  .ar-modal-h p{margin:4px 0 0;font-size:12.5px;color:var(--text-2);}
+  .ar-x{margin-left:auto;background:none;border:none;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-3);}
+  .ar-x:hover{background:#F2F3F9;color:var(--navy);}
+  .ar-x svg{width:16px;height:16px;}
+  .ar-modal-b{padding:6px 22px 16px;overflow:auto;}
+  .ar-mlbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin:12px 0 8px;}
+  .ar-mpills{display:flex;flex-wrap:wrap;gap:6px;}
+  .ar-mdates{display:flex;align-items:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .ar-mdates .f{display:flex;flex-direction:column;gap:4px;}
+  .ar-mdates label{font-size:11px;font-weight:700;color:var(--text-2);}
+  .ar-mdates input{border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-size:13px;}
+  .ar-mper{font-size:12.5px;font-weight:800;color:var(--navy);padding-bottom:9px;}
+  .ar-mchecks{display:flex;flex-direction:column;gap:4px;}
+  .ar-mck{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:700;color:var(--text-1);}
+  .ar-mck:hover{background:#F6F7FC;}
+  .ar-mck.sub{margin-left:28px;font-size:12.5px;font-weight:600;color:var(--text-2);}
+  .ar-mck input{position:absolute;opacity:0;pointer-events:none;}
+  .ar-mck .bx{width:18px;height:18px;border-radius:5px;border:1.6px solid #C3CADD;flex-shrink:0;position:relative;transition:all .12s;}
+  .ar-mck input:checked + .bx{background:var(--sky);border-color:var(--sky);}
+  .ar-mck input:checked + .bx::after{content:"";position:absolute;left:5px;top:1.5px;width:5px;height:9px;border:solid #fff;border-width:0 2.2px 2.2px 0;transform:rotate(45deg);}
+  .ar-mck input:focus-visible + .bx{box-shadow:0 0 0 3px color-mix(in srgb, var(--sky) 30%, transparent);}
+  .ar-modal-f{display:flex;align-items:center;gap:10px;padding:14px 22px;border-top:1px solid var(--border);background:#FAFBFE;}
+  .ar-modal-f .hint{flex:1;font-size:12px;color:#B5432F;font-weight:600;}
+  .ar-modal-f .btn-primary:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* Configuración › Socios */
+  .ar-soc-card{max-width:720px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;}
+  .ar-in{width:100%;border:1px solid transparent;border-radius:8px;padding:7px 9px;font-size:13.5px;background:#F7F8FC;color:var(--text-1);font-weight:600;}
+  .ar-in:hover{border-color:var(--border);}
+  .ar-in:focus{outline:none;border-color:var(--sky);background:#fff;box-shadow:0 0 0 3px color-mix(in srgb, var(--sky) 16%, transparent);}
+  .ar-in.r{text-align:right;font-variant-numeric:tabular-nums;}
+  .ar-in-pct{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+  .ar-in-pct .ar-in{width:90px;}
+  .ar-in-pct span{font-size:13px;font-weight:700;color:var(--text-3);}
+  .ar-ibtn{background:none;border:none;width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--text-3);display:inline-flex;align-items:center;justify-content:center;}
+  .ar-ibtn:hover{background:#FDEEEC;color:#B5432F;}
+  .ar-ibtn svg{width:15px;height:15px;}
+  .ar-add{margin-top:10px;background:none;border:1px dashed #C9CEDF;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:800;color:var(--sky);cursor:pointer;width:100%;}
+  .ar-add:hover{background:#F6F8FE;border-color:var(--sky);}
+  .ar-soc-foot{display:flex;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+  .ar-soc-sum{font-size:13px;font-weight:700;color:var(--text-2);}
+  .ar-soc-sum.ok b{color:#1E7A5F;} .ar-soc-sum.bad{color:#B5432F;}
+  .ar-soc-foot button:disabled{opacity:.45;cursor:not-allowed;}
+
+  @media(max-width:980px){ .ar-row,.ar-evo-grid{grid-template-columns:minmax(0,1fr);} .ar-kpis{grid-template-columns:1fr;} }
+
+  /* ---------- PDF (impresión) ---------- */
+  #arPrint{display:none;}
+  @media print{
+    @page{size:A4;margin:12mm 12mm 14mm;}
+    body.ar-printing{background:#fff !important;height:auto !important;}
+    body.ar-printing > *:not(#arPrint){display:none !important;}
+    body.ar-printing #arPrint{display:block;font-family:'Inter',sans-serif;color:#12142B;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    #arPrint .arp-band{display:flex;align-items:center;gap:18px;background:var(--navy);color:#fff;border-radius:10px;padding:16px 22px;}
+    #arPrint .arp-band img{height:38px;width:auto;}
+    #arPrint .arp-band img.sm{height:34px;}
+    #arPrint .arp-band strong{font-size:18px;letter-spacing:.04em;}
+    #arPrint .arp-band-t{margin-left:auto;text-align:right;}
+    #arPrint .arp-band-t .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;opacity:.7;font-weight:700;}
+    #arPrint .arp-band-t .p{font-size:17px;font-weight:800;margin-top:2px;}
+    #arPrint .arp-meta{display:flex;justify-content:space-between;font-size:9.5px;color:#5B5F82;padding:8px 4px 0;}
+    #arPrint .arp-kpis{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin:14px 0 6px;}
+    #arPrint .arp-kpis > div{border:1px solid #E4E6F1;border-radius:10px;padding:10px 14px;}
+    #arPrint .arp-kpis .lbl{font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:#9498B8;font-weight:800;}
+    #arPrint .arp-kpis .val{font-size:17px;font-weight:800;color:var(--navy);margin-top:3px;font-variant-numeric:tabular-nums;}
+    #arPrint .arp-kpis .note{font-size:9px;color:#5B5F82;font-weight:600;}
+    #arPrint .arp-kpis .hero{background:var(--navy);border-color:var(--navy);}
+    #arPrint .arp-kpis .hero .lbl,#arPrint .arp-kpis .hero .note{color:rgba(255,255,255,.7);}
+    #arPrint .arp-kpis .hero .val{color:#fff;}
+    #arPrint .arp-sec{margin-top:16px;break-inside:auto;}
+    #arPrint .arp-sec-h{display:flex;align-items:baseline;gap:10px;border-bottom:2px solid var(--navy);padding-bottom:5px;margin-bottom:8px;break-after:avoid;}
+    #arPrint .arp-sec-h h2{font-size:13px;margin:0;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);}
+    #arPrint .arp-sec-h span{font-size:9.5px;color:#9498B8;font-weight:600;}
+    #arPrint .arp-div,#arPrint .arp-comp,#arPrint .ar-evo{break-inside:avoid;}
+    #arPrint .ar-legend{break-before:avoid;}
+    #arPrint .ar-er-head,#arPrint .ar-er-row,#arPrint .ar-er-total,#arPrint .ar-er-util,#arPrint .ar-er-sub{grid-template-columns:14px minmax(0,1fr) 70px 120px;}
+    #arPrint .ar-er-sub{grid-template-columns:minmax(0,1fr) 70px 120px;}
+    #arPrint .ar-er-item,#arPrint .ar-er-total,#arPrint .ar-er-util{break-inside:avoid;}
+    #arPrint .ar-er-row .nm{font-size:11px;} #arPrint .ar-er-row .mt{font-size:11px;}
+    #arPrint .ar-er-sub{font-size:10px;padding:3px 6px 3px 12px;}
+    #arPrint .ar-er-row{padding:4px 6px;}
+    #arPrint .ar-er-total .mt{font-size:13px;} #arPrint .ar-er-util .mt{font-size:15px;}
+    #arPrint .ar-evo-grid{grid-template-columns:1fr;gap:12px;}
+    #arPrint .ar-tbl td{font-size:9.5px;padding:4px 6px;} #arPrint .ar-tbl th{font-size:8px;padding:0 6px 5px;}
+    #arPrint .ar-div-tbl td{font-size:11px;padding:6px;}
+    #arPrint .ar-ch-xsub{font-size:8px;}
+    #arPrint .arp-foot{margin-top:18px;padding-top:8px;border-top:1px solid #E4E6F1;font-size:8.5px;color:#9498B8;line-height:1.5;}
+  }
 </style>
 </head>
 <body>
@@ -1838,13 +2090,69 @@
 
     <!-- ===================== MÓDULO: VENTAS ===================== -->
     <section class="module-screen active" id="moduleVentas">
-      <div class="topbar">
-        <div><h1>Reporte de Ventas/Utilidades</h1><div class="sub">Resumen de ventas del día, la semana y el mes.</div></div>
-      </div>
-      <div class="placeholder-card">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></div>
-        <h2>Módulo en construcción</h2>
-        <p>La estructura de &quot;Ventas&quot; ya está lista. El contenido y la lógica de este módulo se van a construir en un próximo chat, igual que en La Fortaleza pero con la información propia de Che Mono.</p>
+      <div class="pagos-shell" id="ventasSubnav">
+        <div class="pagos-topbar">
+          <div class="pagos-tab active" data-vpane="resumen" onclick="goVentasPane('resumen')">Facturación</div>
+          <div class="pagos-tab" data-vpane="analisis" onclick="goVentasPane('analisis')">Análisis de resultados</div>
+        </div>
+        <div class="pagos-body">
+          <section class="pagos-pane active" id="vpaneResumen">
+            <div class="screen-header">
+              <div style="flex:1;">
+                <h1 style="font-size:20px;margin:0;font-weight:800;">Facturación</h1>
+                <div class="sub" style="font-size:12.5px;color:var(--text-2);">Ventas del club en el rango de fechas elegido</div>
+              </div>
+            </div>
+            <div class="screen-scroll">
+              <div class="placeholder-card">
+                <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></div>
+                <h2>Facturación en diseño</h2>
+                <p>Esta pestaña se va a construir más adelante con la información propia de Che Mono. Mientras tanto, “Análisis de resultados” ya muestra los gastos del club.</p>
+              </div>
+            </div>
+          </section>
+          <!-- VENTAS › ANÁLISIS DE RESULTADOS (05/10/2026) -->
+          <section class="pagos-pane" id="vpaneAnalisis">
+            <div class="screen-header">
+              <div style="flex:1;">
+                <h1 style="font-size:20px;margin:0;font-weight:800;">Análisis de resultados</h1>
+                <div class="sub" style="font-size:12.5px;color:var(--text-2);">Estado de resultados, composición de ventas, evolución y dividendos del período elegido</div>
+              </div>
+            </div>
+            <div class="screen-scroll">
+              <div class="ar-wrap">
+                <div class="ar-bar">
+                  <div class="ar-presets" id="arPresets"></div>
+                  <div class="ar-per"><div class="lbl">Período</div><div class="val" id="arPeriodoLbl">—</div></div>
+                  <div class="ar-spacer"></div>
+                  <button type="button" class="ar-btn-ref" title="Volver a leer los datos" onclick="arRefresh(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+                  <button type="button" class="ar-btn-pdf" onclick="arOpenPdf()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Descargar PDF</button>
+                </div>
+                <div class="ar-custom hidden" id="arCustom">
+                  <div class="f"><label>Desde</label><input type="date" id="arDesde"></div>
+                  <div class="f"><label>Hasta</label><input type="date" id="arHasta"></div>
+                  <button class="btn-primary" style="padding:9px 20px;" onclick="arApplyCustom()">Aplicar</button>
+                </div>
+                <div class="ar-sub-row">
+                  <span class="k">Mostrar</span>
+                  <div class="ar-toggles" id="arToggles"></div>
+                  <div class="ar-status" id="arStatus"></div>
+                </div>
+
+                <div id="arBody" class="hidden">
+                  <div class="ar-kpis" id="arKpis"></div>
+                  <div class="ar-row" id="arRow1">
+                    <div class="ar-card" id="arCard_er"><h3>Estado de resultados <span class="sub">% sobre ventas totales</span></h3><div id="arER"></div></div>
+                    <div class="ar-card" id="arCard_comp"><h3>Composición de ventas <span class="sub">Venta A vs B</span></h3><div id="arComp"></div></div>
+                  </div>
+                  <div class="ar-card" id="arCard_evo"><h3>Evolución de rendimientos <span class="sub">ventas, gastos y utilidad</span></h3><div id="arEvo"></div></div>
+                  <div class="ar-card" id="arCard_div"><h3>Dividendos entre socios <span class="sub">distribución de la utilidad del período</span></h3><div id="arDiv"></div></div>
+                  <div class="ar-none hidden" id="arNoneMsg">Elegí al menos un reporte en “Mostrar”.</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </section>
 
@@ -2325,6 +2633,7 @@
                     <option>Mañana</option>
                     <option>Tarde</option>
                     <option>Intermedio</option>
+                    <option>Sin horario</option>
                   </select>
                 </div>
               </div>
@@ -2374,7 +2683,7 @@
               <div class="form-footer">
                 <button class="btn-primary" style="flex:1" onclick="guardarNuevoEmpleado()">Guardar empleado</button>
                 <button class="btn-primary secondary" onclick="cancelarNuevoEmpleado()">Cancelar</button>
-                <button class="btn-primary secondary" id="btnEliminarEmpleado" onclick="eliminarEmpleadoActual()" style="display:none;color:#B22A32;">Eliminar empleado</button>
+                <button class="btn-primary secondary" id="btnEliminarEmpleado" onclick="empAbrirBaja(eEditId)" style="display:none;color:#B22A32;">Dar de baja</button>
               </div>
             </div>
           </section>
@@ -2389,6 +2698,7 @@
       <div class="pagos-shell" id="configSubnav">
         <div class="pagos-topbar">
           <div class="pagos-tab active" data-ctab="compras" onclick="goConfigTab('compras')">Compras</div>
+          <div class="pagos-tab" data-ctab="socios" onclick="goConfigTab('socios')">Socios</div>
           <div class="pagos-tab" data-ctab="actividad" onclick="goConfigTab('actividad')">Actividad</div>
         </div>
 
@@ -2471,6 +2781,16 @@
               <div class="cfg-scroll" id="cfgScrollInsumos">
                 <div id="cfgTableInsumos"></div>
               </div>
+            </div>
+          </section>
+
+          <!-- CONFIG > SOCIOS (05/10/2026): socios y % para "Dividendos entre socios" -->
+          <section class="pagos-pane" id="ctabSocios">
+            <div class="screen-header">
+              <div><h1 style="font-size:20px;margin:0;font-weight:800;">Socios</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">Integrantes de la sociedad y su participación — se usan para repartir los dividendos en Ventas › Análisis de resultados</div></div>
+            </div>
+            <div class="screen-scroll">
+              <div class="ar-soc-card" id="arSociosBox"></div>
             </div>
           </section>
 
@@ -2606,7 +2926,7 @@
     </div>
     <div class="field-row">
       <div class="field"><label>Fecha de creación</label><input type="date" id="fFechaOrden"></div>
-      <div class="field"><label>Fecha de la factura</label><input type="date" id="fFechaComprobante" onchange="pgPanelRefreshPlazo()"></div>
+      <div class="field"><label>Fecha de la factura</label><input type="date" id="fFechaComprobante" onchange="pgPanelRefreshPlazo()" onfocus="this.max=todayISO()"></div>
     </div>
     <div class="field"><label>Observaciones</label><textarea id="fNotas"></textarea></div>
     <div class="field">
@@ -2915,7 +3235,8 @@ document.addEventListener("click",(e)=>{
    cm_sueldos_actualizaciones/cm_historial). Arranca sin empleados:
    se van a cargar uno por uno desde acá.
    ========================================================= */
-var empleadosCache = [];
+var empleadosCache = [];   // solo ACTIVOS (planilla, actualización de sueldos, masa salarial)
+var empleadosTodos = [];   // activos + dados de baja (historial y liquidaciones de meses pasados)
 var modoActualizacionSueldos = false;
 var sueldosPendientes = {};
 var SUELDOS_PANE_ID = { esquema: "stabEsquema", liquidacion: "stabLiquidacion", nuevoEmpleado: "stabNuevoEmpleado" };
@@ -2952,7 +3273,7 @@ function resetNuevoEmpleadoForm(){
   eEditId = null;
   document.getElementById("empFormTitle").textContent = "Cargar nuevo empleado";
   document.getElementById("btnEliminarEmpleado").style.display = "none";
-  document.getElementById("eNumeracion").value = "N° " + (empleadosCache.length+1);
+  document.getElementById("eNumeracion").value = "N° " + ((empleadosTodos.length||empleadosCache.length)+1);
   document.getElementById("eCondicion").value = "";
   document.getElementById("eNombreCompleto").value = "";
   document.getElementById("eTurno").value = "";
@@ -3070,7 +3391,7 @@ async function guardarNuevoEmpleado(){
   /* Alta nueva: numeracion la asigna el código (ya no es un identity de
      Postgres) — se agrega al final del orden manual actual. */
   var maxNumeracion = 0;
-  empleadosCache.forEach(function(e){ if(Number(e.numeracion||0) > maxNumeracion) maxNumeracion = Number(e.numeracion); });
+  (empleadosTodos.length?empleadosTodos:empleadosCache).forEach(function(e){ if(Number(e.numeracion||0) > maxNumeracion) maxNumeracion = Number(e.numeracion); });
 
   var payload = {
     condicion: condicion,
@@ -3093,6 +3414,7 @@ async function guardarNuevoEmpleado(){
   }
 
   empleadosCache.push(res.data);
+  empleadosTodos.push(res.data);
   logHistorialSueldos("Alta de empleado", "Se cargó a " + nombre + " (" + puesto + ").");
   showToast("Empleado cargado correctamente");
   goSueldosTab("esquema");
@@ -3112,7 +3434,8 @@ async function loadEmpleados(){
   try{
     var res = await sb.from("cm_empleados").select("*").order("numeracion", { ascending:true });
     if(res.error){ console.warn("No se pudieron cargar los empleados", res.error); return; }
-    empleadosCache = res.data || [];
+    empleadosTodos = res.data || [];
+    empleadosCache = empleadosTodos.filter(function(e){ return e.activo!==false; });
     sueldosPendientes = {};
     renderEmpleadosTable();
     if(typeof cargarUltimaActualizacionSueldos === "function") cargarUltimaActualizacionSueldos();
@@ -4034,7 +4357,7 @@ var liqGuardarDraftTimer = null;
 function liqEmpleadoPorNombreCorto(nombreCorto){
   var key = String(nombreCorto||"").trim().toLowerCase();
   if(!key) return null;
-  var candidatos = (empleadosCache||[]).filter(function(e){
+  var candidatos = liqEmpleadosDelMes().filter(function(e){
     var nombre = String(e.nombre_completo||"").trim().toLowerCase();
     if(!nombre) return false;
     if(nombre.indexOf(key)===0) return true;               // empieza igual: "juan perez" vs "juan"
@@ -4477,6 +4800,71 @@ function liqDiasDelMes(mesISO){
 }
 /* Adaptado: en vez de recorrer LIQ_NOMBRE_COMPLETO, matchea cada nombreCorto que quedó
    registrado en liqState.presentismo contra empleadosCache en el momento. */
+
+/* ---- Bajas de empleados (pedido de Pancho, 06/10/2026) ----
+   La baja NO borra: el empleado queda inactivo con su fecha de baja, sale de la planilla y su
+   proveedor sale de los rubros Sueldos/Adelantos (no se le pueden cargar adelantos nuevos). Su
+   proveedor y sus órdenes se conservan para el historial y los reportes. Sigue apareciendo en la
+   liquidación de los meses hasta su fecha de baja inclusive (devengamiento). */
+function liqEmpleadosDelMes(){
+  var lista = (typeof empleadosTodos!=="undefined" && empleadosTodos.length) ? empleadosTodos : (empleadosCache||[]);
+  var mesIni = (typeof liqState!=="undefined" && liqState.mes) ? String(liqState.mes).slice(0,7)+"-01" : null;
+  return lista.filter(function(e){ return e.activo!==false || (mesIni && e.fecha_baja && e.fecha_baja >= mesIni); });
+}
+function empAbrirBaja(preId){
+  var activos = (empleadosCache||[]).slice().sort(function(a,b){ return String(a.nombre_completo).localeCompare(String(b.nombre_completo),"es"); });
+  if(!activos.length){ showToast("No hay empleados activos", "warn"); return; }
+  var hoy = todayISO();
+  var ov = document.createElement("div");
+  ov.className = "ar-modal-ov"; ov.id = "empBajaModal";
+  ov.innerHTML = '<div class="ar-modal" role="dialog" aria-modal="true" style="width:min(480px,100%)">'
+    + '<div class="ar-modal-h"><div><h3>Dar de baja a un empleado</h3><p>Sale de la planilla y de los rubros Sueldos y Adelantos. Su historial de pagos se conserva para los reportes.</p></div>'
+    + '<button type="button" class="ar-x" onclick="empCerrarBaja()" title="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+    + '<div class="ar-modal-b">'
+    + '<div class="ar-mlbl">Empleado</div><select id="empBajaSel" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-size:13.5px;font-family:inherit">'
+    + activos.map(function(e){ return '<option value="'+e.id+'"'+(e.id===preId?' selected':'')+'>'+liqEscapeHtml(e.nombre_completo)+' · '+liqEscapeHtml(e.puesto||"")+'</option>'; }).join("")
+    + '</select>'
+    + '<div class="ar-mlbl">Fecha de baja</div><input type="date" id="empBajaFecha" value="'+hoy+'" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13.5px;font-family:inherit">'
+    + '<div class="ar-note" style="margin-top:12px">Va a seguir apareciendo en la liquidación de los meses hasta su fecha de baja inclusive (por ejemplo, si se va el 10/10, entra en la liquidación de octubre).</div>'
+    + '</div>'
+    + '<div class="ar-modal-f"><span class="hint"></span><button type="button" class="btn-ghost" onclick="empCerrarBaja()">Cancelar</button><button type="button" class="btn-primary" id="empBajaGo" style="background:#B22A32" onclick="empEjecutarBaja()">Dar de baja</button></div>'
+    + '</div>';
+  ov.addEventListener("mousedown", function(e){ if(e.target===ov) empCerrarBaja(); });
+  document.body.appendChild(ov);
+}
+function empCerrarBaja(){ var m = document.getElementById("empBajaModal"); if(m) m.remove(); }
+async function empEjecutarBaja(){
+  var id = document.getElementById("empBajaSel").value;
+  var fecha = document.getElementById("empBajaFecha").value;
+  var emp = (empleadosCache||[]).find(function(e){ return e.id===id; });
+  if(!emp || !fecha){ showToast("Elegí el empleado y la fecha de baja", "warn"); return; }
+  if(!confirm("¿Dar de baja a " + emp.nombre_completo + " con fecha " + isoToDMY(fecha) + "?\n\nSale de la planilla y de los rubros Sueldos y Adelantos. Su historial se conserva.")) return;
+  var btn = document.getElementById("empBajaGo"); if(btn){ btn.disabled = true; btn.textContent = "Dando de baja…"; }
+  var res = await sb.from("cm_empleados").update({
+    activo:false, fecha_baja:fecha,
+    modificado_por:(typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null,
+    modificado_fecha:new Date().toISOString()
+  }).eq("id", id);
+  if(res.error){ showToast("No se pudo dar de baja: " + res.error.message, "warn"); if(btn){ btn.disabled=false; btn.textContent="Dar de baja"; } return; }
+  var avisoRubros = "";
+  if(emp.proveedor_id){
+    try{
+      var rr = await sb.from("cm_rubros").select("id").not("clave","is",null);
+      var ids = (rr.data||[]).map(function(r){ return r.id; });
+      if(ids.length){
+        var del = await sb.from("cm_proveedor_rubros").delete().eq("proveedor_id", emp.proveedor_id).in("rubro_id", ids);
+        if(del.error) avisoRubros = " No se pudo quitar su proveedor de Sueldos/Adelantos (" + del.error.message + "): hacelo desde Configuración.";
+      }
+    }catch(e){ avisoRubros = " No se pudo quitar su proveedor de Sueldos/Adelantos: hacelo desde Configuración."; }
+  }
+  await logHistorialSueldos("Baja de empleado", emp.nombre_completo + " (" + (emp.puesto||"") + ") · fecha de baja " + isoToDMY(fecha) + " · sale de la planilla y de Sueldos/Adelantos; su historial se conserva.");
+  empCerrarBaja();
+  if(typeof eEditId!=="undefined") eEditId = null;
+  await loadEmpleados();
+  if(typeof cfgLoaded!=="undefined") cfgLoaded = false; // Configuración relee los rubros la próxima vez
+  goSueldosTab("esquema");
+  showToast(emp.nombre_completo + " quedó dado de baja." + avisoRubros, avisoRubros ? "warn" : undefined);
+}
 function liqEmpleadosPorKey(){
   var out = {};
   Object.keys(liqState.presentismo||{}).forEach(function(key){
@@ -4492,22 +4880,106 @@ function liqEmpleadosPorKey(){
    el array global `ordenes` puede no existir todavía: mientras tanto esto simplemente no
    encuentra adelantos (mapa vacío) sin romper nada, y va a engancharse solo en cuanto Pagos se
    arme con el mismo nombre de variable. */
+/* ---- Regla de devengamiento (pedido de Pancho, 06/10/2026) ----
+   · Un adelanto pertenece al mes de su FECHA REAL (fecha de factura de la orden = día en que se entregó
+     la plata), no al día en que se cerró la Caja Mayor ni al día en que se cargó.
+   · Excepción (única): si el mes del adelanto YA estaba liquidado cuando el adelanto se registró
+     (ej. se liquidó septiembre el 03/10 y recién el 05/10 se cierra la Caja Mayor que trae un adelanto
+     del 29/09), ese adelanto se descuenta en la liquidación del mes SIGUIENTE, marcado como
+     "del mes anterior".
+   · Categoría/rubro se resuelven por la "clave" del rubro (sueldos / adelantos) en la base, no por
+     nombre fijo: si se renombran en Configuración, esto sigue funcionando. */
+var liqCat = { concepto:"Personal / Empleados", sueldos:"Sueldos", adelantos:"Adelantos de sueldo", cargado:false };
+var liqMesesLiq = [];
+var liqCoherencia = [];      // [{tipo:"proveedor_sin_empleado"|"empleado_sin_rubros", nombre}]
+function liqRenderCoherencia(){
+  var cont = document.getElementById("liqContent"); if(!cont) return;
+  var el = document.getElementById("liqCoherencia");
+  if(!el){ el = document.createElement("div"); el.id = "liqCoherencia"; cont.parentNode.insertBefore(el, cont); }
+  var provs = liqCoherencia.filter(function(x){ return x.tipo==="proveedor_sin_empleado"; }).map(function(x){ return x.nombre; });
+  var emps = liqCoherencia.filter(function(x){ return x.tipo==="empleado_sin_rubros"; }).map(function(x){ return x.nombre; });
+  if(!provs.length && !emps.length){ el.innerHTML = ""; return; }
+  el.innerHTML = '<div style="font-size:12.5px;color:#8A5A00;background:#FFF6E0;border:1px solid #F4DFA6;border-radius:10px;padding:10px 14px;margin:0 0 14px 0;font-weight:600;line-height:1.5">'
+    + (provs.length ? 'Proveedores en ' + liqEscapeHtml(liqCat.concepto) + ' › ' + liqEscapeHtml(liqCat.sueldos) + '/' + liqEscapeHtml(liqCat.adelantos) + ' que <b>no son empleados</b> (no entran en la liquidación y sus adelantos no se descuentan): <b>' + provs.map(liqEscapeHtml).join(", ") + '</b>.' : '')
+    + (provs.length && emps.length ? '<br>' : '')
+    + (emps.length ? 'Empleados sin proveedor vinculado en Sueldos y Adelantos: <b>' + emps.map(liqEscapeHtml).join(", ") + '</b>.' : '')
+    + '</div>';
+}        // [{mes:"yyyy-mm-01", liquidado, liquidado_en}]
+var liqAdelantosDetalle = {}; // nombre -> [{monto, fecha, arrastrado, mesOrigen}]
+async function liqCargarCatalogoSueldos(){
+  try{
+    var r = await sb.from("cm_rubros").select("nombre,clave,concepto_id").not("clave","is",null);
+    if(!r.error && r.data && r.data.length){
+      var cIds = r.data.map(function(x){ return x.concepto_id; });
+      var c = await sb.from("cm_conceptos").select("id,nombre").in("id", cIds);
+      r.data.forEach(function(x){
+        if(x.clave==="sueldos") liqCat.sueldos = x.nombre;
+        if(x.clave==="adelantos") liqCat.adelantos = x.nombre;
+        var cc = (c.data||[]).find(function(k){ return k.id===x.concepto_id; });
+        if(cc) liqCat.concepto = cc.nombre;
+      });
+      liqCat.cargado = true;
+    }
+  }catch(e){ console.warn("Catálogo de sueldos:", e); }
+  try{
+    var co = await sb.rpc("zz_sueldos_coherencia", { p_pre: "cm" });
+    liqCoherencia = (!co.error && co.data) ? co.data : [];
+  }catch(e){ liqCoherencia = []; }
+  try{
+    var m = await sb.rpc("cm_meses_liquidados");
+    if(!m.error) liqMesesLiq = (m.data||[]).map(function(x){ return { mes:String(x.mes).slice(0,7), liquidado:!!x.liquidado, liquidado_en:x.liquidado_en }; });
+  }catch(e){ console.warn("Meses liquidados:", e); }
+}
+function liqMesSiguiente(ym){ var p = ym.split("-").map(Number); var y=p[0], m=p[1]+1; if(m>12){ m=1; y++; } return y+"-"+String(m).padStart(2,"0"); }
+// Mes en que se descuenta un adelanto: su propio mes, salvo que ese mes ya estuviera liquidado cuando se registró.
+function liqMesDescuento(o){
+  var f = String(o.fechaComprobante || o.fechaOrden || "").slice(0,7);
+  if(!f) return null;
+  var creado = o.createdAt ? new Date(o.createdAt).getTime() : null;
+  var mes = f, guard = 0;
+  while(guard++ < 24){
+    var L = liqMesesLiq.find(function(x){ return x.mes===mes; });
+    if(L && L.liquidado && L.liquidado_en && creado!=null && new Date(L.liquidado_en).getTime() < creado){ mes = liqMesSiguiente(mes); continue; }
+    break;
+  }
+  return mes;
+}
 function liqAdelantosPorNombre(){
-  var mapa = {};
+  var mapa = {}; liqAdelantosDetalle = {};
   if(!liqState.mes) return mapa;
-  var mesPrefix = String(liqState.mes).slice(0,7);
+  var mesPrefix = String(liqState.mes).slice(0,7); // "yyyy-mm"
   var src = (typeof ordenes !== "undefined" && ordenes) ? ordenes : [];
   src.forEach(function(o){
-    if(o.concepto!=="Sueldos y CS" || o.rubro!=="Adelanto de sueldo") return;
+    if(o.concepto!==liqCat.concepto || o.rubro!==liqCat.adelantos) return;
     if(o.estado!=="Pagado") return;
-    if(!o.fechaOrden || String(o.fechaOrden).slice(0,7)!==mesPrefix) return;
+    var mesDesc = liqMesDescuento(o);
+    if(mesDesc!==mesPrefix) return;
     var nombre = o.proveedor||"";
+    var mesOrigen = String(o.fechaComprobante || o.fechaOrden).slice(0,7);
     mapa[nombre] = (mapa[nombre]||0) + Number(o.monto||0);
+    (liqAdelantosDetalle[nombre] = liqAdelantosDetalle[nombre] || []).push({ monto:Number(o.monto||0), fecha:o.fechaComprobante || o.fechaOrden, arrastrado: mesOrigen!==mesPrefix, mesOrigen:mesOrigen, id:o.id });
   });
   return mapa;
 }
+function liqAdelantoTitle(nombre){
+  var d = liqAdelantosDetalle[nombre] || [];
+  if(!d.length) return "Sin adelantos imputados a este mes ("+liqCat.concepto+" › "+liqCat.adelantos+").";
+  return "Adelantos ("+liqCat.concepto+" › "+liqCat.adelantos+"):\n" + d.map(function(x){
+    return "• "+isoToDMY(x.fecha)+" · "+fmtMoney(x.monto)+(x.arrastrado ? " — del mes anterior (se registró después de liquidarlo)" : "");
+  }).join("\n");
+}
+function liqAdelantoArrastrado(nombre){ return (liqAdelantosDetalle[nombre]||[]).some(function(x){ return x.arrastrado; }); }
+// Fecha de imputación de las órdenes de la liquidación: último día del mes liquidado (nunca futura).
+function liqFechaImputacion(){
+  var p = String(liqState.mes).slice(0,7).split("-").map(Number);
+  var last = new Date(p[0], p[1], 0);
+  var iso = last.getFullYear()+"-"+String(last.getMonth()+1).padStart(2,"0")+"-"+String(last.getDate()).padStart(2,"0");
+  var hoyISO = todayISO();
+  return iso > hoyISO ? hoyISO : iso;
+}
 function liqRenderTodo(){
   if(!liqState.mes) return;
+  liqRenderCoherencia();
   document.getElementById("liqUploadCard").style.display = "";
   document.getElementById("liqContent").style.display = "";
   document.getElementById("liqSubtitle").textContent = "Mes en estudio: " + liqMesNombre(liqState.mes) + (liqState.liquidado ? " · liquidado" : "");
@@ -4622,7 +5094,7 @@ function liqRenderTablaLiquidacion(){
   var porKey = liqEmpleadosPorKey();
   var keysConPresentismo = Object.keys(liqState.presentismo||{});
   var nombresConPresentismo = keysConPresentismo.map(function(k){ var e=porKey[k]; return e?e.nombre_completo:null; }).filter(Boolean);
-  var otros = (empleadosCache||[]).filter(function(e){ return nombresConPresentismo.indexOf(e.nombre_completo)===-1; });
+  var otros = liqEmpleadosDelMes().filter(function(e){ return nombresConPresentismo.indexOf(e.nombre_completo)===-1; });
 
   var filas = keysConPresentismo.map(function(key){
     var emp = porKey[key];
@@ -4631,6 +5103,9 @@ function liqRenderTablaLiquidacion(){
     return {key:"emp_"+e.id, emp:e, nombre:e.nombre_completo, tienePresentismo:false};
   }));
 
+  if(liqState.liquidado && liqState.pagoBManual && Object.keys(liqState.pagoBManual).length){
+    filas = filas.filter(function(f){ return Object.prototype.hasOwnProperty.call(liqState.pagoBManual, f.key); });
+  }
   var adelantosPorNombre = liqAdelantosPorNombre();
 
   var thead = "<thead>" +
@@ -4659,7 +5134,7 @@ function liqRenderTablaLiquidacion(){
     }
     var sueldo = Number(f.emp.sueldo||0);
     var esCondA = f.emp.condicion==="A";
-    var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : 0) : 0;
+    var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : (liqState.liquidado ? 0 : Number(f.emp.monto_a_default||0))) : 0;
     var b = sueldo - a;
     var adelanto = Number(adelantosPorNombre[f.nombre]||0);
     var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
@@ -4669,8 +5144,10 @@ function liqRenderTablaLiquidacion(){
     var feriadosManual = Number(liqState.feriadosManual[f.key]||0);
     var ausenciasManual = Number(liqState.ausenciasManual[f.key]||0);
     var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora));
+    var aNeto = a;
+    if(esCondA && sugerido < 0 && a > 0){ aNeto = Math.max(0, a + sugerido); sugerido = sugerido + (a - aNeto); } // excedente de adelantos → se descuenta de A
     var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
-    totalA += a; totalB += pagoB;
+    totalA += aNeto; totalB += pagoB;
 
     var horasExtraTxt = liqFmtHM(agr.horasExtraMin);
     var horasExtraCls = agr.horasExtraMin>0 ? "liq-dia-verde" : agr.horasExtraMin<0 ? "liq-dia-rojo" : "";
@@ -4684,10 +5161,10 @@ function liqRenderTablaLiquidacion(){
       "<td><span class=\"liq-badge-cond cond-"+f.emp.condicion.toLowerCase()+"\">"+f.emp.condicion+"</span></td>" +
       "<td class=\"liq-num-cell\">"+fmtMoney(sueldo)+"</td>" +
       "<td>"+(esCondA
-        ? "<input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"a\" value=\""+fmtMoney(a)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+">"
+        ? "<input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"a\" value=\""+fmtMoney(a)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+">"+(aNeto!==a?"<div style=\"font-size:10.5px;font-weight:700;color:#B22A32;margin-top:3px;white-space:nowrap\" title=\"Los adelantos superan el pago B: el excedente se descuenta de A\">neto adelantos: "+fmtMoney(aNeto)+"</div>":"")
         : "<span class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(0)+"</span>") + "</td>" +
       "<td class=\"liq-num-cell\">"+fmtMoney(b)+"</td>" +
-      "<td class=\"liq-num-cell\" style=\""+(adelanto>0?"color:#B22A32;font-weight:700;":"color:var(--text-3);")+"\" title=\"Suma de Pagos con Concepto=Sueldos y CS, Rubro=Adelanto de sueldo, Proveedor="+liqEscapeHtml(f.nombre)+", pagados este mes\">"+(adelanto>0?"−"+fmtMoney(adelanto):"—")+"</td>" +
+      "<td class=\"liq-num-cell\" style=\""+(adelanto>0?"color:#B22A32;font-weight:700;":"color:var(--text-3);")+"\" title=\""+liqEscapeHtml(liqAdelantoTitle(f.nombre))+"\">"+(adelanto>0?"−"+fmtMoney(adelanto)+(liqAdelantoArrastrado(f.nombre)?"<sup style=\"color:#8A5A00;font-weight:800;margin-left:2px\" title=\"Incluye un adelanto del mes anterior\">*</sup>":""):"—")+"</td>" +
       "<td class=\"liq-num-cell "+horasExtraCls+"\">"+(f.tienePresentismo?horasExtraTxt:"—")+"</td>" +
       "<td>"+manualInput("horasExtraManual", horasExtraManual)+"</td>" +
       "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.feriadosTrabajados:"—")+"</td>" +
@@ -4754,18 +5231,21 @@ function liqComputeTotales(){
   var porKey = liqEmpleadosPorKey();
   var keysConPresentismo = Object.keys(liqState.presentismo||{});
   var nombresConPresentismo = keysConPresentismo.map(function(k){ var e=porKey[k]; return e?e.nombre_completo:null; }).filter(Boolean);
-  var otros = (empleadosCache||[]).filter(function(e){ return nombresConPresentismo.indexOf(e.nombre_completo)===-1; });
+  var otros = liqEmpleadosDelMes().filter(function(e){ return nombresConPresentismo.indexOf(e.nombre_completo)===-1; });
   var filas = keysConPresentismo.map(function(key){
     return {key:key, emp:porKey[key], tienePresentismo:true};
   }).concat(otros.map(function(e){ return {key:"emp_"+e.id, emp:e, tienePresentismo:false}; }));
 
+  if(liqState.liquidado && liqState.pagoBManual && Object.keys(liqState.pagoBManual).length){
+    filas = filas.filter(function(f){ return Object.prototype.hasOwnProperty.call(liqState.pagoBManual, f.key); });
+  }
   var adelantosPorNombre = liqAdelantosPorNombre();
   var totalA=0, totalB=0, totalAdelantos=0, montosA={}, pagosB={}, recibos=[];
   filas.forEach(function(f){
     if(!f.emp) return;
     var sueldo = Number(f.emp.sueldo||0);
     var esCondA = f.emp.condicion==="A";
-    var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : 0) : 0;
+    var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : (liqState.liquidado ? 0 : Number(f.emp.monto_a_default||0))) : 0;
     var adelanto = Number(adelantosPorNombre[f.emp.nombre_completo]||0);
     var jornal = sueldo/30;
     var valorHora = jornal/8;
@@ -4773,10 +5253,12 @@ function liqComputeTotales(){
     var feriadosManual = Number(liqState.feriadosManual[f.key]||0);
     var ausenciasManual = Number(liqState.ausenciasManual[f.key]||0);
     var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora));
+    var aNeto = a;
+    if(esCondA && sugerido < 0 && a > 0){ aNeto = Math.max(0, a + sugerido); sugerido = sugerido + (a - aNeto); } // excedente de adelantos → se descuenta de A
     var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
-    totalA += a; totalB += pagoB; totalAdelantos += adelanto;
-    montosA[f.key] = a; pagosB[f.key] = pagoB;
-    recibos.push({key:f.key, emp:f.emp, monto:pagoB});
+    totalA += aNeto; totalB += pagoB; totalAdelantos += adelanto;
+    montosA[f.key] = aNeto; pagosB[f.key] = pagoB;
+    if(pagoB > 0) recibos.push({key:f.key, emp:f.emp, monto:pagoB}); // sin recibo B si no hay pago B (ej. sueldo 100% A)
   });
   return {totalA:totalA, totalB:totalB, totalAdelantos:totalAdelantos, montosA:montosA, pagosB:pagosB, recibos:recibos};
 }
@@ -4822,6 +5304,7 @@ async function liqOnTabOpen(){
   liqRenderZone();
   liqWireZoneEvents();
   if(!empleadosCache.length){ try{ await loadEmpleados(); }catch(e){} }
+  await liqCargarCatalogoSueldos();
   try{
     var res = await sb.from("cm_liquidaciones").select("*").order("mes", {ascending:false}).limit(1);
     if(!res.error && res.data && res.data.length){
@@ -4964,6 +5447,8 @@ function liqConfirmarLiquidar(){
 async function liqEjecutarLiquidar(tot){
   var mesNombre = liqMesNombre(liqState.mes);
   var hoy = todayISO();
+  var fechaImput = liqFechaImputacion();
+  await liqCargarCatalogoSueldos();
   var creadoPorId = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null;
   var creadoPorNombre = (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.nombre : "—";
   var ordenAId = null, ordenBId = null;
@@ -4971,8 +5456,8 @@ async function liqEjecutarLiquidar(tot){
   try{
     if(tot.totalA>0){
       var payloadA = {
-        fecha_orden: hoy, comprobante_tipo: null, fecha_comprobante: hoy, comprobante: "",
-        proveedor: "No especifica proveedor", concepto: "Sueldos y CS", rubro: "Sueldos",
+        fecha_orden: hoy, comprobante_tipo: null, fecha_comprobante: fechaImput, comprobante: "",
+        proveedor: "No especifica proveedor", concepto: liqCat.concepto, rubro: liqCat.sueldos,
         monto_factura: tot.totalA, monto_retencion: 0, monto: tot.totalA,
         estado: "Pendiente", metodo: "Bco. Galicia", fecha_venc: null, fecha_pago: null,
         notas: "Liquidación de sueldos — parte A — " + mesNombre + ".",
@@ -4987,8 +5472,8 @@ async function liqEjecutarLiquidar(tot){
     }
     if(tot.totalB>0){
       var payloadB = {
-        fecha_orden: hoy, comprobante_tipo: "Compra B", fecha_comprobante: hoy, comprobante: "",
-        proveedor: "No especifica proveedor", concepto: "Sueldos y CS", rubro: "Sueldos",
+        fecha_orden: hoy, comprobante_tipo: "Compra B", fecha_comprobante: fechaImput, comprobante: "",
+        proveedor: "No especifica proveedor", concepto: liqCat.concepto, rubro: liqCat.sueldos,
         monto_factura: tot.totalB, monto_retencion: 0, monto: tot.totalB,
         estado: "Pendiente", metodo: "Efectivo - Caja Mayor", fecha_venc: null, fecha_pago: null,
         notas: "Liquidación de sueldos — parte B — " + mesNombre + ".",
@@ -5005,6 +5490,7 @@ async function liqEjecutarLiquidar(tot){
     if(typeof updateCounts==="function") updateCounts();
 
     liqState.liquidado = true;
+    liqCargarCatalogoSueldos();
     liqState.ordenAId = ordenAId;
     liqState.ordenBId = ordenBId;
     liqState.montoA = tot.montosA;
@@ -5190,7 +5676,7 @@ async function cfgLoadAll(){
   const res = await Promise.all([
     sb.from("cm_conceptos").select("id,nombre"),
     sb.from("cm_rubros").select("id,nombre,concepto_id"),
-    sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias,entregas"),
+    sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto"),
     sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
     sb.from("cm_insumos").select("id,nombre,rubro_id,notas,factor_merma"),
     sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden")
@@ -5531,10 +6017,27 @@ function cfgTableHtml(dom, rows){
   return html + "</tbody></table>";
 }
 
+/* ---- Tipo de gasto del proveedor (pedido de Pancho, 05/10/2026) ----
+   Define cómo impactan sus órdenes de pago en Ventas › Análisis de resultados:
+   · puntual  → el gasto se imputa entero el día de la factura (fecha del comprobante).
+   · mensual  → el gasto se distribuye día a día en todo el mes calendario de la factura.
+   La base ya acepta "semestral" y "anual" para una etapa siguiente; por ahora el formulario
+   solo ofrece puntual / mensual. */
+const CFG_TIPO_GASTO = {
+  puntual: { lbl:"Puntual", desc:"Impacta entero el día de la factura" },
+  mensual: { lbl:"Mensual", desc:"Se distribuye en todo el mes de la factura" }
+};
+function cfgTipoGasto(p){ const t = p && p.tipo_gasto; return CFG_TIPO_GASTO[t] ? t : "puntual"; }
+function cfgTipoGastoLbl(p){ return CFG_TIPO_GASTO[cfgTipoGasto(p)].lbl; }
+function cfgTipoGastoChip(p){ const t = cfgTipoGasto(p); return `<span class="cfg-tg-chip ${t}" title="Tipo de gasto: ${CFG_TIPO_GASTO[t].desc.toLowerCase()}">${CFG_TIPO_GASTO[t].lbl}</span>`; }
+function cfgTipoGastoPick(t){
+  const inp = document.getElementById("cfgFTipoGasto"); if(!inp) return;
+  inp.value = t;
+  document.querySelectorAll("#cfgTipoGasto .cfg-tg-opt").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
+}
 function cfgProvMetaHtml(p){
   const es = cfgEntregas(p), pl = cfgPlazoTxt(p);
-  if(!es.length && !pl) return "";
-  return `<div class="cfg-pmeta">${es.length?`<span title="${cfgEsc(cfgEntregasTxt(p,true))}">${CFG_IC.truck} ${es.map(e=>CFG_DIAS_C[e.entrega]).join(", ")}</span>`:""}${pl?`<span title="Plazo de pago">${CFG_IC.card} ${cfgEsc(pl)}</span>`:""}</div>`;
+  return `<div class="cfg-pmeta">${cfgTipoGastoChip(p)}${es.length?`<span title="${cfgEsc(cfgEntregasTxt(p,true))}">${CFG_IC.truck} ${es.map(e=>CFG_DIAS_C[e.entrega]).join(", ")}</span>`:""}${pl?`<span title="Plazo de pago">${CFG_IC.card} ${cfgEsc(pl)}</span>`:""}</div>`;
 }
 function cfgEntregasCell(p){
   const es = cfgEntregas(p);
@@ -5571,7 +6074,7 @@ function cfgRubrosListHtml(dom, rows){
       let inner = "";
       if(isProv){
         const ps = leafIds.map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
-        inner = ps.length ? ps.map(p=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(p.nombre,q)}</span><span class="cfg-sub-meta">${cfgEntregasCell(p)}${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip" title="Plazo de pago">${CFG_IC.card.replace('<svg','<svg style="width:11px;height:11px;margin-right:4px"')}${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim" title="Sin plazo de pago">Sin plazo</span>'}</span>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`)])}</div>`).join("")
+        inner = ps.length ? ps.map(p=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(p.nombre,q)}</span><span class="cfg-sub-meta">${cfgEntregasCell(p)}${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip" title="Plazo de pago">${CFG_IC.card.replace('<svg','<svg style="width:11px;height:11px;margin-right:4px"')}${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim" title="Sin plazo de pago">Sin plazo</span>'}${cfgTipoGastoChip(p)}</span>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`)])}</div>`).join("")
           : `<div class="cfg-empty-cell">Sin proveedores asignados · <a onclick="cfgOpenProvForm(null,'${r.id}')">Agregar proveedor</a></div>`;
       } else {
         const is = leafIds.map(id=>cfgIns(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
@@ -5595,12 +6098,12 @@ function cfgHojasListHtml(dom, rows){
   };
   let html;
   if(isProv){
-    html = `<table class="cfg-table cfg-list"><colgroup><col style="width:24%"><col style="width:17%"><col style="width:19%"><col style="width:28%"><col style="width:12%"></colgroup>
-      <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Días de entrega · pedido</div></th><th><div class="cfg-th">Plazo de pago</div></th></tr></thead><tbody>`;
+    html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:17%"><col style="width:25%"><col style="width:10%"><col style="width:10%"></colgroup>
+      <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Días de entrega · pedido</div></th><th><div class="cfg-th">Plazo de pago</div></th><th><div class="cfg-th">Tipo de gasto</div></th></tr></thead><tbody>`;
     leaves.forEach(p=>{ const x = cr(p);
       html += `<tr class="cfg-lrow flat"><td><div class="cfg-cell"><div class="txt"><div class="nm">${cfgHi(p.nombre,q)}</div></div>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar proveedor",`cfgDeleteProv('${p.id}',null)`)])}</div></td>
         <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
-        <td><div class="cfg-cell">${cfgEntregasCell(p)}</div></td><td><div class="cfg-cell">${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip">${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim">—</span>'}</div></td></tr>`; });
+        <td><div class="cfg-cell">${cfgEntregasCell(p)}</div></td><td><div class="cfg-cell">${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip">${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim">—</span>'}</div></td><td><div class="cfg-cell">${cfgTipoGastoChip(p)}</div></td></tr>`; });
   } else {
     html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:20%"><col style="width:14%"><col style="width:14%"><col style="width:15%"><col style="width:15%"></colgroup>
       <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Insumo</div></th><th><div class="cfg-th"><span class="lvl-dot l4">4</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Cantidad / Unidad</div></th><th><div class="cfg-th">Factor de merma</div></th></tr></thead><tbody>`;
@@ -5624,11 +6127,11 @@ function cfgExportExcel(dom){
   const rubs = D.rubros.slice().sort((a,b)=>cfgCmp((cfgCat(dom,a.catId)||{}).nombre,(cfgCat(dom,b.catId)||{}).nombre) || cfgCmp(a.nombre,b.nombre));
   let cols;
   if(dom==="proveedores"){
-    cols = ["Categoría","Rubro","Proveedor","Días de entrega","Días de pedido","Plazo de pago (días)"];
+    cols = ["Categoría","Rubro","Proveedor","Días de entrega","Días de pedido","Plazo de pago (días)","Tipo de gasto"];
     rubs.forEach(r=>{
       const cat = (cfgCat(dom,r.catId)||{}).nombre||"", ps = cfgProvsDeRubro(r.id);
-      if(!ps.length) out.push([cat, r.nombre, "", "", "", ""]);
-      ps.forEach(p=>{ const es = cfgEntregas(p); out.push([cat, r.nombre, p.nombre, es.map(e=>CFG_DIAS[e.entrega]).join(", "), es.map(e=>CFG_DIAS[e.pedido]).join(", "), p.plazo_pago_dias==null?"":p.plazo_pago_dias]); });
+      if(!ps.length) out.push([cat, r.nombre, "", "", "", "", ""]);
+      ps.forEach(p=>{ const es = cfgEntregas(p); out.push([cat, r.nombre, p.nombre, es.map(e=>CFG_DIAS[e.entrega]).join(", "), es.map(e=>CFG_DIAS[e.pedido]).join(", "), p.plazo_pago_dias==null?"":p.plazo_pago_dias, cfgTipoGastoLbl(p)]); });
     });
   } else {
     cols = ["Categoría","Rubro","Insumo","Proveedor","Cantidad","Unidad","Factor de merma","Notas"];
@@ -5834,10 +6337,21 @@ function cfgCrumb(parts){
 function cfgErrText(error, que){
   const code = error && error.code;
   if(code==="23505") return `Ya existe ${que} con ese nombre (puede haberlo creado otro usuario recién).`;
-  if(code==="23503") return "No se puede: está siendo usado por otros registros.";
+  if(code==="23503") return (error.message && /^No se puede eliminar/.test(error.message)) ? error.message : "No se puede: está siendo usado por otros registros.";
   if(code==="42501") return "No tenés permisos para modificar Configuración.";
   if(code==="22023" && error.message) return error.message;
   return "No se pudo guardar. Revisá la conexión e intentá de nuevo.";
+}
+/* Antes de renombrar algo que ya tiene órdenes de pago, avisa cuántas se van a actualizar
+   (la base las actualiza sola al guardar — triggers zz_cascade_*, 06/10/2026). */
+async function cfgConfirmRenombre(tipo, viejo, nuevo, filtro){
+  try{
+    var q = sb.from("cm_ordenes").select("id", { count:"exact", head:true });
+    var r = await filtro(q);
+    var n = r && !r.error ? (r.count||0) : 0;
+    if(!n) return true;
+    return confirm("Vas a cambiar " + tipo + " “" + viejo + "” → “" + nuevo + "”.\n\nHay " + n + " órdenes de pago cargadas con el nombre anterior: se van a actualizar automáticamente para que Pagos, Sueldos y los reportes sigan coherentes.\n\n¿Continuar?");
+  }catch(e){ return true; }
 }
 function cfgShowErr(msg){ const b = document.getElementById("cfgErrBox"); if(b){ b.innerHTML = msg; b.classList.add("show"); b.scrollIntoView({block:"nearest", behavior:"smooth"}); } else showToast(msg, "warn"); }
 function cfgHideErr(){ const b = document.getElementById("cfgErrBox"); if(b) b.classList.remove("show"); }
@@ -5892,6 +6406,7 @@ function cfgOpenCatForm(dom, id){
     submit: async ()=>{
       const nombre = cfgReadName(); if(!nombre) return false;
       const T = CFG_DOM[dom].catTable;
+      if(c && c.nombre!==nombre && !(await cfgConfirmRenombre("la categoría", c.nombre, nombre, q=>q.eq("concepto", c.nombre)))) return false;
       const r = c ? await sb.from(T).update({ nombre }).eq("id", c.id) : await sb.from(T).insert({ nombre });
       if(r.error){ cfgShowErr(cfgErrText(r.error, "una categoría")); return false; }
       if(c){ if(c.nombre!==nombre) logHistorialConfig(`Editó una categoría`, `“${c.nombre}” → “${nombre}”`); }
@@ -5935,6 +6450,11 @@ function cfgOpenRubroForm(dom, id, presetCatId){
       const nombre = cfgReadName(); if(!nombre) return false;
       const payload = { nombre }; payload[CFG_DOM[dom].rubFk] = catId;
       const T = CFG_DOM[dom].rubTable;
+      if(r && (r.nombre!==nombre || r.catId!==catId)){
+        const catViejo = (cfgCat(dom, r.catId)||{}).nombre || "";
+        const destino = r.catId!==catId ? nombre + " (" + ((cfgCat(dom,catId)||{}).nombre||"") + ")" : nombre;
+        if(!(await cfgConfirmRenombre("el rubro", r.nombre, destino, q=>q.eq("concepto", catViejo).eq("rubro", r.nombre)))) return false;
+      }
       const res = r ? await sb.from(T).update(payload).eq("id", r.id) : await sb.from(T).insert(payload);
       if(res.error){ cfgShowErr(cfgErrText(res.error, "un rubro")); return false; }
       const catN = (cfgCat(dom,catId)||{}).nombre;
@@ -5986,6 +6506,10 @@ function cfgOpenProvForm(id, presetRubroId){
         <span class="cfg-plazo-suf">días desde la fecha de la factura</span>
       </div>
       <div class="cfg-plazo-hint" id="cfgPlazoHint"></div>
+      <div class="cfg-sec-title"><span class="n">5</span>Tipo de gasto</div>
+      <div class="cfg-note">${CFG_IC.info}<div>Define cómo impactan las órdenes de pago de este proveedor en <b>Análisis de resultados</b>: entero el día de la factura, o repartido en el mes de la factura.</div></div>
+      <input type="hidden" id="cfgFTipoGasto" value="${cfgTipoGasto(p)}">
+      <div class="cfg-tg" id="cfgTipoGasto">${Object.entries(CFG_TIPO_GASTO).map(([k,v])=>`<button type="button" class="cfg-tg-opt${cfgTipoGasto(p)===k?" on":""}" data-t="${k}" onclick="cfgTipoGastoPick('${k}')"><span class="rd"></span><span class="tx"><b>${v.lbl}</b><i>${v.desc}</i></span></button>`).join("")}</div>
       <div class="cfg-err-box" id="cfgErrBox"></div>`,
     saveLabel: p ? "Guardar cambios" : "Crear proveedor",
     nameList: ()=>cfgData.provs,
@@ -6004,8 +6528,15 @@ function cfgOpenProvForm(id, presetRubroId){
       const entregas = cfgPS.entregas.slice().sort((a,b)=>a.entrega-b.entrega);
       if(entregas.some(e=>!e.pedido)){ cfgShowErr("Indicá el día de pedido para cada día de entrega."); return false; }
       const args = { p_id: p ? p.id : null, p_nombre: nombre, p_rubro_ids: rubIds, p_plazo_pago: plazo, p_entregas: entregas };
+      if(p && p.nombre!==nombre && !(await cfgConfirmRenombre("el proveedor", p.nombre, nombre, q=>q.eq("proveedor", p.nombre)))) return false;
       const res = await sb.rpc("cm_guardar_proveedor", args);
       if(res.error){ cfgShowErr(cfgErrText(res.error, "un proveedor")); return false; }
+      const tipoGasto = (document.getElementById("cfgFTipoGasto")||{}).value || "puntual";
+      const provIdGuardado = res.data || (p && p.id);
+      if(provIdGuardado && tipoGasto !== (p ? cfgTipoGasto(p) : "puntual")){
+        const rt = await sb.from("cm_proveedores").update({ tipo_gasto: tipoGasto }).eq("id", provIdGuardado);
+        if(rt.error){ cfgShowErr("El proveedor se guardó, pero no se pudo guardar el tipo de gasto: " + rt.error.message); await cfgReload(); return false; }
+      }
       const rubN = ids => ids.map(i=>(cfgRub("proveedores",i)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
       if(p){
         const antes = cfgRubrosDeProv(p.id).map(r=>r.id);
@@ -6015,8 +6546,9 @@ function cfgOpenProvForm(id, presetRubroId){
         const eA = cfgEntregasTxt(p, true), eD = cfgEntregasTxt({entregas}, true);
         if(eA!==eD) ch.push(`entregas: ${eA||"—"} → ${eD||"—"}`);
         if((p.plazo_pago_dias??null)!==plazo) ch.push(`plazo de pago: ${cfgPlazoTxt(p)||"—"} → ${cfgPlazoTxt({plazo_pago_dias:plazo})||"—"}`);
+        if(cfgTipoGasto(p)!==tipoGasto) ch.push(`tipo de gasto: ${cfgTipoGastoLbl(p)} → ${CFG_TIPO_GASTO[tipoGasto].lbl}`);
         if(ch.length) logHistorialConfig("Editó un proveedor", `“${nombre}” · ${ch.join(" · ")}`);
-      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""}`);
+      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""} · tipo de gasto: ${CFG_TIPO_GASTO[tipoGasto].lbl}`);
       await cfgReload();
       rubIds.forEach(id=>{ const r = cfgRub("proveedores", id); if(r) cfgState.proveedores.collapsed.delete(r.catId); });
       cfgRenderDom("proveedores");
@@ -6547,6 +7079,7 @@ function goConfigTab(ctab){
   cfgCloseFloating();
   if(ctab==="compras") cfgEnsureLoaded();
   if(ctab==="actividad") renderActividad();
+  if(ctab==="socios") arSociosOnOpen();
 }
 async function cfgEnsureLoaded(){
   cfgStartRealtime();
@@ -6557,7 +7090,9 @@ async function cfgEnsureLoaded(){
 }
 function cfgOnEnterModule(){
   const act = document.querySelector("#configSubnav .pagos-tab.active");
-  if(act && act.dataset.ctab==="actividad") renderActividad(); else cfgEnsureLoaded();
+  if(act && act.dataset.ctab==="actividad") renderActividad();
+  else if(act && act.dataset.ctab==="socios") arSociosOnOpen();
+  else cfgEnsureLoaded();
 }
 
 /* ---------- tiempo real: cambios de otros usuarios ---------- */
@@ -6732,6 +7267,7 @@ function mapOrdenRow(row){
     montoFactura: Number(row.monto_factura||0), montoRetencion: Number(row.monto_retencion||0), monto: Number(row.monto||0),
     estado: row.estado, metodo: row.metodo || "", fechaVenc: row.fecha_venc, fechaPago: row.fecha_pago, notas: row.notas || "",
     adjuntos: adj, adjuntosPago: adjP,
+    createdAt: row.created_at || null,
     unread: row.unread, creadoPor: row.creado_por_nombre, modificadoPor: row.modificado_por_nombre, modificadoFecha: row.modificado_fecha,
   };
 }
@@ -7497,6 +8033,7 @@ async function saveOrder(){
   const comprobante = document.getElementById("fComprobante").value.trim();
   const fechaOrden = document.getElementById("fFechaOrden").value;
   const fechaComprobante = document.getElementById("fFechaComprobante").value;
+  if(fechaComprobante && fechaComprobante > todayISO()){ showToast("La fecha de factura no puede ser posterior a hoy", "warn"); return; }
   const fechaPago = document.getElementById("fFechaPago").value;
   const notas = document.getElementById("fNotas").value;
   const estado = document.getElementById("panel").dataset.status || o.estado;
@@ -7713,7 +8250,8 @@ async function saveNuevaOrden(){
   const bad = (id, cond)=>{ markFieldError(id, cond); if(cond) ok=false; };
   bad("fld-nFechaOrden", !fechaOrdenISO);
   bad("fld-nComprobanteTipo", !comprobanteTipo);
-  bad("fld-nFechaComprobante", !fechaComprobanteISO);
+  bad("fld-nFechaComprobante", !fechaComprobanteISO || fechaComprobanteISO > todayISO());
+  if(fechaComprobanteISO && fechaComprobanteISO > todayISO()){ showToast("La fecha de factura no puede ser posterior a hoy", "warn"); return; }
   bad("fld-nComprobanteNro", !esB && !comprobanteNro);
   if(!sinProveedor) bad("fld-nProveedor", !pgProvByName[proveedor]);
   bad("fld-nRubroWrap", !rsel.rubro);
@@ -7797,7 +8335,8 @@ function toggleReportPopover(ev){
   pop.innerHTML = `<h4>Descargar reporte por fecha</h4>
     <label style="font-size:11px;color:var(--text-3);font-weight:700;">Desde</label><input type="date" id="repDesde">
     <label style="font-size:11px;color:var(--text-3);font-weight:700;">Hasta</label><input type="date" id="repHasta">
-    <div style="font-size:11px;color:var(--text-3);margin:-2px 0 8px 0;">Se filtra por Fecha de orden.</div>
+    <label style="font-size:11px;color:var(--text-3);font-weight:700;">Filtrar por</label>
+    <select id="repCampo" style="margin-bottom:10px;"><option value="orden">Fecha de orden</option><option value="factura">Fecha de factura</option></select>
     <div class="filter-actions"><button class="fa-clear" onclick="closeReportPopover()">Cancelar</button><button class="fa-apply" onclick="exportOrdenesPorRango()">Descargar</button></div>`;
   cfgPlace(pop, ev.currentTarget, "right");
 }
@@ -7806,7 +8345,9 @@ function exportOrdenesPorRango(){
   const desde = document.getElementById("repDesde").value, hasta = document.getElementById("repHasta").value;
   if(!desde && !hasta){ showToast("Elegí al menos una fecha (Desde y/o Hasta)", "warn"); return; }
   if(desde && hasta && desde>hasta){ showToast("La fecha 'Desde' no puede ser posterior a 'Hasta'", "warn"); return; }
-  const list = ordenes.filter(o=>(!desde || o.fechaOrden>=desde) && (!hasta || o.fechaOrden<=hasta)).sort((a,b)=>cfgCmp(a.fechaOrden,b.fechaOrden));
+  const porFactura = (document.getElementById("repCampo")||{}).value === "factura";
+  const fk = o => (porFactura ? o.fechaComprobante : o.fechaOrden) || "";
+  const list = ordenes.filter(o=>fk(o) && (!desde || fk(o)>=desde) && (!hasta || fk(o)<=hasta)).sort((a,b)=>cfgCmp(fk(a),fk(b)));
   const suf = (desde?isoToDMY(desde).replace(/\//g,"-"):"inicio")+"_a_"+(hasta?isoToDMY(hasta).replace(/\//g,"-"):todayISO());
   downloadOrdenesReportExcel(list, suf);
   closeReportPopover();
@@ -8013,11 +8554,652 @@ function goModule(mod){
   const el = document.getElementById("module"+mod.charAt(0).toUpperCase()+mod.slice(1));
   if(el) el.classList.add("active");
   if(mod==="config") cfgOnEnterModule();
+  if(mod==="ventas"){ const vp = document.querySelector("#ventasSubnav .pagos-tab.active"); if(vp && vp.dataset.vpane==="analisis") arOnOpen(); }
   if(mod==="pagos") pgOnEnterModule();
   if(mod==="costeo") cxOnEnterModule();
   if(mod==="sueldos" && !pgLoaded) pgReload(); // Liquidación lee los adelantos pagados desde Pagos
 }
 
+
+/* ---- Análisis de resultados: configuración propia de Che Mono ----
+   Che Mono todavía no tiene integradas sus ventas (Facturación se diseña más adelante):
+   el análisis muestra los gastos reales (cm_ordenes) con ventas en $0 hasta que exista
+   un proveedor de ventas para este club. */
+const AR_SITE = {
+  pre:"cm", club:"Che Mono", sede:"", bandName:true,
+  tieneSeccion: m => tieneSeccionChemono(m),
+  logoSel: ".module-sidebar .brand-mark img",
+  ventas: null, renderAB: null,
+  ventasPendienteTxt: "Las ventas de Che Mono todavía no están integradas (Facturación en diseño): por ahora se muestran solo los gastos."
+};
+
+/* =====================================================================
+   VENTAS › ANÁLISIS DE RESULTADOS  (pedido de Pancho, 05/10/2026)
+   Módulo compartido La Fortaleza / Che Mono — mismo código en ambos sitios;
+   lo propio de cada club vive en AR_SITE (definido antes de este bloque).
+
+   Reportes (cada uno se puede mostrar/ocultar y elegir para el PDF):
+   1. Estado de resultados  — Ventas totales (Movimientos de caja) con sus
+      Cat. 1 del índice (Compras-Ventas) + línea de "Diferencia de conciliación"
+      para que cuadre; Gastos totales por categoría (Concepto de la orden de pago)
+      con sus rubros; Utilidad. Cada línea se abre en sus sub-rubros.
+   2. Composición de ventas — el mismo anillo Venta A vs B de Facturación.
+   3. Evolución de rendimientos — por semana calendario del período y mes a mes
+      (todo el historial). Cada punto = total de ESA semana / mes (no acumulado).
+   4. Dividendos entre socios — se reparte la utilidad redondeada hacia abajo al
+      millón, dejando siempre al menos $1.000.000 de saldo en la empresa.
+
+   Gastos (órdenes de pago, estado ≠ Anulado):
+   · Importe: monto a pagar (neto de retenciones; las retenciones se imputan cuando se pagan).
+   · Fecha: fecha del comprobante (criterio de lo devengado: pendientes incluidas).
+   · Proveedor "puntual": entero ese día. Proveedor "mensual": repartido día a
+     día en el mes calendario de esa fecha (un reporte semanal toma 7/30 del gasto).
+   · Órdenes cuyo proveedor no está en el maestro (ej. "No especifica proveedor")
+     se toman como puntuales.
+   ===================================================================== */
+const AR_COLORS = { ventas:"#5977D2", gastos:"#D9822B", util:"#2E9E7E" }; // validado (dataviz): sin FAIL, contraste con relieve (etiquetas + tabla)
+const AR_MARK = { ventas:"circle", gastos:"square", util:"diamond" };
+const AR_REPORTES = [
+  { id:"er",   lbl:"Estado de resultados" },
+  { id:"comp", lbl:"Composición de ventas" },
+  { id:"evo",  lbl:"Evolución de rendimientos" },
+  { id:"div",  lbl:"Dividendos entre socios" }
+];
+const AR_PRESETS = [
+  { id:"semana",  lbl:"Última semana" },
+  { id:"mes",     lbl:"Este mes" },
+  { id:"mesAnt",  lbl:"Último mes" },
+  { id:"trim",    lbl:"Último trimestre" },
+  { id:"anio",    lbl:"Este año" },
+  { id:"custom",  lbl:"Personalizado" }
+];
+const AR_MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const AR_MESES_L = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const AR_DIV_PISO = 1000000;
+
+const arState = {
+  preset:"mesAnt", desde:null, hasta:null,
+  show:{ er:true, comp:true, evo:true, div:true },
+  open:new Set(), loaded:false, loading:null,
+  ordenes:[], provTipo:new Map(), mesesLiq:null, socios:[], ventas:null, ventasErr:null, gastosErr:null,
+  calc:null
+};
+
+/* ---------- utilidades de fecha (ISO "YYYY-MM-DD", sin husos horarios) ---------- */
+function arISO(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function arDate(iso){ const p = iso.split("-").map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function arAddDays(iso, n){ const d = arDate(iso); d.setDate(d.getDate()+n); return arISO(d); }
+function arDays(aISO, bISO){ return Math.round((Date.UTC(...bISO.split("-").map((x,i)=>i===1?x-1:+x)) - Date.UTC(...aISO.split("-").map((x,i)=>i===1?x-1:+x)))/86400000); }
+function arMonthStart(iso){ return iso.slice(0,7)+"-01"; }
+function arMonthEnd(iso){ const d = arDate(arMonthStart(iso)); d.setMonth(d.getMonth()+1); d.setDate(0); return arISO(d); }
+function arDMY(iso){ if(!iso) return ""; const [y,m,d] = iso.split("-"); return `${d}/${m}/${y}`; }
+function arDM(iso){ const [,m,d] = iso.split("-"); return `${d}/${m}`; }
+function arToday(){ return arISO(new Date()); }
+function arPresetRange(id){
+  const t = arToday(), td = arDate(t);
+  if(id==="semana"){ const dow = td.getDay(), lunes = arAddDays(t, -(dow===0?6:dow-1)); return [arAddDays(lunes,-7), arAddDays(lunes,-1)]; }
+  if(id==="mes") return [arMonthStart(t), t];
+  if(id==="mesAnt"){ const fin = arAddDays(arMonthStart(t), -1); return [arMonthStart(fin), fin]; }
+  if(id==="trim"){ const fin = arAddDays(arMonthStart(t), -1); const d = arDate(arMonthStart(fin)); d.setMonth(d.getMonth()-2); return [arISO(d), fin]; }
+  if(id==="anio") return [t.slice(0,4)+"-01-01", t];
+  return [arState.desde || arMonthStart(t), arState.hasta || t];
+}
+function arPeriodoTxt(desde, hasta){
+  if(desde===arMonthStart(desde) && hasta===arMonthEnd(desde)){ const d = arDate(desde); return `${AR_MESES_L[d.getMonth()].replace(/^./,c=>c.toUpperCase())} ${d.getFullYear()}`; }
+  return `${arDMY(desde)} al ${arDMY(hasta)}`;
+}
+
+/* ---------- formato ---------- */
+function arMoney(n, dec){ const v = Number(n)||0, d = dec||0; return (v<0?"−":"")+"$"+Math.abs(v).toLocaleString("es-AR",{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function arParen(n){ const v = Math.abs(Number(n)||0); return "($"+v.toLocaleString("es-AR",{maximumFractionDigits:0})+")"; }
+function arPct(v, t){ return t ? (v/t*100).toLocaleString("es-AR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%" : "—"; }
+function arShort(n){
+  const v = Number(n)||0, a = Math.abs(v), s = v<0?"−":"";
+  if(a>=1e6) return s+"$"+(a/1e6).toLocaleString("es-AR",{maximumFractionDigits:a>=1e7?1:2})+"M";
+  if(a>=1e3) return s+"$"+(a/1e3).toLocaleString("es-AR",{maximumFractionDigits:0})+"k";
+  return s+"$"+a.toLocaleString("es-AR",{maximumFractionDigits:0});
+}
+function arEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function arNorm(s){ return String(s||"").trim().toLowerCase(); }
+
+/* ---------- carga de datos ---------- */
+async function arSelectAll(table, cols, apply){
+  const out = []; const page = 1000;
+  for(let from=0; ; from+=page){
+    let q = sb.from(table).select(cols).range(from, from+page-1);
+    if(apply) q = apply(q);
+    const { data, error } = await q;
+    if(error) throw new Error(error.message);
+    out.push(...(data||[]));
+    if(!data || data.length < page) break;
+  }
+  return out;
+}
+async function arLoadAll(force){
+  if(arState.loading) return arState.loading;
+  if(arState.loaded && !force) return;
+  arState.loading = (async ()=>{
+    const P = AR_SITE.pre;
+    arState.gastosErr = null; arState.ventasErr = null;
+    const puedeGastos = AR_SITE.tieneSeccion("pagos") || AR_SITE.tieneSeccion("costeo");
+    const tareas = [
+      puedeGastos ? arSelectAll(P+"_ordenes", "id,proveedor,concepto,rubro,monto,monto_factura,estado,fecha_comprobante", q=>q.neq("estado","Anulado")) : Promise.resolve(null),
+      puedeGastos ? arSelectAll(P+"_proveedores", "nombre,tipo_gasto") : Promise.resolve(null),
+      sb.from(P+"_socios").select("id,nombre,porcentaje,orden").order("orden").order("nombre"),
+      AR_SITE.ventas ? AR_SITE.ventas(force).catch(e=>{ arState.ventasErr = e.message || String(e); return null; }) : Promise.resolve(null),
+      sb.rpc(P+"_meses_liquidados")
+    ];
+    const [ord, provs, soc, ventas, liqs] = await Promise.all(tareas.map(p=>Promise.resolve(p).then(x=>x, e=>({__err:e}))));
+    if(!puedeGastos) arState.gastosErr = "Tu usuario no tiene acceso a Pagos: los gastos no se pueden leer.";
+    else if(ord && ord.__err) arState.gastosErr = "No se pudieron leer las órdenes de pago ("+(ord.__err.message||ord.__err)+").";
+    arState.ordenes = Array.isArray(ord) ? ord.filter(o=>o.fecha_comprobante) : [];
+    arState.provTipo = new Map((Array.isArray(provs)?provs:[]).map(p=>[arNorm(p.nombre), p.tipo_gasto||"puntual"]));
+    arState.socios = (soc && !soc.__err && !soc.error) ? (soc.data||[]) : [];
+    arState.ventas = ventas && !ventas.__err ? ventas : null;
+    arState.mesesLiq = (liqs && !liqs.__err && !liqs.error) ? (liqs.data||[]).filter(x=>x.liquidado).map(x=>String(x.mes).slice(0,7)) : null;
+    arState.loaded = true;
+  })();
+  try{ await arState.loading; } finally { arState.loading = null; }
+}
+
+/* ---------- cálculo ---------- */
+function arTipoGasto(o){ return arState.provTipo.get(arNorm(o.proveedor)) || "puntual"; }
+// Monto a pagar (neto de retenciones) — decisión de Pancho 06/10/2026: las retenciones se pagan
+// aparte y son gasto del mes en que se ejecute ese pago (con su propia orden).
+function arImporteOrden(o){ return Number(o.monto)||0; }
+// Parte del gasto de una orden que cae en [desde, hasta] (ambos inclusive).
+function arGastoEnRango(o, desde, hasta){
+  const f = o.fecha_comprobante, imp = arImporteOrden(o);
+  if(arTipoGasto(o)==="mensual"){
+    const ms = arMonthStart(f), me = arMonthEnd(f);
+    const a = desde > ms ? desde : ms, b = hasta < me ? hasta : me;
+    if(a > b) return 0;
+    return imp * (arDays(a,b)+1) / (arDays(ms,me)+1);
+  }
+  return (f >= desde && f <= hasta) ? imp : 0;
+}
+function arVentasRango(desde, hasta){
+  const V = arState.ventas;
+  const r = { total:0, metodos:{}, grupos:new Map(), cv:0, dias:0 };
+  if(!V) return r;
+  V.dias.forEach((d, iso)=>{
+    if(iso < desde || iso > hasta) return;
+    r.total += d.caja; if(d.activo) r.dias++;
+    Object.entries(d.metodos).forEach(([m,v])=>{ r.metodos[m] = (r.metodos[m]||0)+v; });
+    d.grupos.forEach((g, key)=>{
+      if(!r.grupos.has(g.grupo)) r.grupos.set(g.grupo, { name:g.grupo, total:0, subs:new Map() });
+      const G = r.grupos.get(g.grupo); G.total += g.total; r.cv += g.total;
+      G.subs.set(g.sub, (G.subs.get(g.sub)||0) + g.total);
+    });
+  });
+  return r;
+}
+function arGastosRango(desde, hasta){
+  const cats = new Map(); let total = 0;
+  arState.ordenes.forEach(o=>{
+    const v = arGastoEnRango(o, desde, hasta); if(!v) return;
+    const c = (o.concepto||"").trim() || "Sin categoría", rb = (o.rubro||"").trim() || "Sin rubro";
+    if(!cats.has(c)) cats.set(c, { name:c, total:0, subs:new Map(), n:0 });
+    const C = cats.get(c); C.total += v; C.n++; C.subs.set(rb, (C.subs.get(rb)||0)+v);
+    total += v;
+  });
+  return { total, cats };
+}
+const AR_GRUPOS_FIN = ["Movimientos de caja","Sin clasificar"];
+function arOrdenarGrupos(arr){
+  return arr.sort((a,b)=>{ const fa = AR_GRUPOS_FIN.indexOf(a.name), fb = AR_GRUPOS_FIN.indexOf(b.name); return fa!==fb ? fa-fb : b.total-a.total; });
+}
+function arDividendos(util){
+  const distrib = util >= 2*AR_DIV_PISO ? Math.floor((util - AR_DIV_PISO)/AR_DIV_PISO)*AR_DIV_PISO : 0;
+  return { distrib, saldo: util - distrib };
+}
+function arCalcular(desde, hasta){
+  const v = arVentasRango(desde, hasta), g = arGastosRango(desde, hasta);
+  const util = v.total - g.total;
+  // semanas calendario (lunes a domingo) que componen el período, recortadas a sus bordes
+  const semanas = [];
+  let ini = desde;
+  while(ini <= hasta){
+    const dow = arDate(ini).getDay(), dom = arAddDays(ini, dow===0 ? 0 : 7-dow);
+    const fin = dom < hasta ? dom : hasta;
+    const vv = arVentasRango(ini, fin).total, gg = arGastosRango(ini, fin).total;
+    semanas.push({ desde:ini, hasta:fin, lbl:`Sem ${semanas.length+1}`, sub:`${arDM(ini)}–${arDM(fin)}`, ventas:vv, gastos:gg, util:vv-gg });
+    ini = arAddDays(fin, 1);
+  }
+  // mes a mes: todo el historial disponible (independiente del período elegido)
+  const hoy = arToday();
+  const fechas = [];
+  if(arState.ventas && arState.ventas.minISO) fechas.push(arState.ventas.minISO);
+  arState.ordenes.forEach(o=>fechas.push(o.fecha_comprobante));
+  let primer = fechas.length ? fechas.reduce((a,b)=>a<b?a:b) : arMonthStart(hoy);
+  if(primer > hoy) primer = hoy;
+  const meses = [];
+  for(let m = arMonthStart(primer); m <= arMonthStart(hoy); m = arAddDays(arMonthEnd(m),1)){
+    const fin = arMonthEnd(m), enCurso = m===arMonthStart(hoy);
+    const vv = arVentasRango(m, fin).total, gg = arGastosRango(m, fin).total;
+    const d = arDate(m);
+    meses.push({ desde:m, hasta:fin, lbl:`${AR_MESES[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`, sub: enCurso ? "en curso" : "", enCurso, ventas:vv, gastos:gg, util:vv-gg });
+  }
+  return { desde, hasta, v, g, util, div:arDividendos(util), semanas, meses };
+}
+
+/* ---------- render: pantalla ---------- */
+function arInitDom(){
+  const pills = document.getElementById("arPresets");
+  if(pills && !pills.dataset.ready){
+    pills.innerHTML = AR_PRESETS.map(p=>`<span class="preset-pill" data-arpreset="${p.id}" onclick="arSetPreset('${p.id}')">${p.lbl}</span>`).join("");
+    pills.dataset.ready = "1";
+  }
+  const tg = document.getElementById("arToggles");
+  if(tg && !tg.dataset.ready){
+    tg.innerHTML = AR_REPORTES.map(r=>`<button type="button" class="ar-tg${arState.show[r.id]?" on":""}" data-rep="${r.id}" onclick="arToggleRep('${r.id}')"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>${r.lbl}</button>`).join("");
+    tg.dataset.ready = "1";
+  }
+}
+async function arOnOpen(){
+  arInitDom();
+  if(!arState.desde){ const [d,h] = arPresetRange(arState.preset); arState.desde = d; arState.hasta = h; }
+  arSyncControls();
+  await arRefresh(false);
+}
+function arSyncControls(){
+  document.querySelectorAll("[data-arpreset]").forEach(p=>p.classList.toggle("active", p.dataset.arpreset===arState.preset));
+  const cr = document.getElementById("arCustom"); if(cr) cr.classList.toggle("hidden", arState.preset!=="custom");
+  const d = document.getElementById("arDesde"), h = document.getElementById("arHasta");
+  if(d) d.value = arState.desde || ""; if(h) h.value = arState.hasta || "";
+  const lbl = document.getElementById("arPeriodoLbl"); if(lbl) lbl.textContent = arState.desde ? arPeriodoTxt(arState.desde, arState.hasta) : "";
+}
+async function arSetPreset(id){
+  arState.preset = id;
+  if(id!=="custom"){ const [d,h] = arPresetRange(id); arState.desde = d; arState.hasta = h; arSyncControls(); await arRefresh(false); }
+  else arSyncControls();
+}
+async function arApplyCustom(){
+  const d = document.getElementById("arDesde").value, h = document.getElementById("arHasta").value;
+  if(!d || !h){ showToast("Elegí las dos fechas del período", "warn"); return; }
+  if(d > h){ showToast("La fecha “desde” no puede ser posterior a “hasta”", "warn"); return; }
+  arState.desde = d; arState.hasta = h; arSyncControls(); await arRefresh(false);
+}
+function arToggleRep(id){
+  arState.show[id] = !arState.show[id];
+  document.querySelectorAll(`#arToggles [data-rep="${id}"]`).forEach(b=>b.classList.toggle("on", arState.show[id]));
+  arApplyVisibility();
+}
+function arApplyVisibility(){
+  AR_REPORTES.forEach(r=>{ const el = document.getElementById("arCard_"+r.id); if(el) el.classList.toggle("hidden", !arState.show[r.id]); });
+  const row = document.getElementById("arRow1");
+  if(row) row.classList.toggle("single", !(arState.show.er && arState.show.comp));
+  const none = !AR_REPORTES.some(r=>arState.show[r.id]);
+  const e = document.getElementById("arNoneMsg"); if(e) e.classList.toggle("hidden", !none);
+}
+async function arRefresh(force){
+  const body = document.getElementById("arBody"), st = document.getElementById("arStatus");
+  if(!arState.loaded || force){
+    if(st) st.innerHTML = `<span class="ar-dot load"></span>Leyendo ventas, órdenes de pago y socios…`;
+    try{ await arLoadAll(force); }
+    catch(err){ if(st) st.innerHTML = `<span class="ar-dot warn"></span>No se pudieron cargar los datos: ${arEsc(err.message)}`; return; }
+  }
+  arState.calc = arCalcular(arState.desde, arState.hasta);
+  arRenderStatus();
+  arRenderKpis();
+  arRenderER(document.getElementById("arER"), arState.calc, false);
+  arRenderComp(document.getElementById("arComp"), arState.calc);
+  arRenderEvo(document.getElementById("arEvo"), arState.calc, false);
+  arRenderDiv(document.getElementById("arDiv"), arState.calc);
+  if(body) body.classList.remove("hidden");
+  arApplyVisibility();
+}
+function arRenderStatus(){
+  const st = document.getElementById("arStatus"); if(!st) return;
+  const avisos = [];
+  if(arState.gastosErr) avisos.push(arState.gastosErr);
+  if(AR_SITE.ventas && arState.ventasErr) avisos.push("Ventas: "+arState.ventasErr);
+  if(!AR_SITE.ventas) avisos.push(AR_SITE.ventasPendienteTxt || "Las ventas de este club todavía no están integradas: se muestran en $0.");
+  const V = arState.ventas;
+  const ok = V ? `Ventas ATC hasta el ${arDMY(V.maxISO)}` : "";
+  const nOrd = arState.ordenes.length;
+  st.innerHTML = avisos.length
+    ? `<span class="ar-dot warn"></span>${arEsc(avisos.join(" · "))}${ok?` · ${ok}`:""}`
+    : `<span class="ar-dot ok"></span>${ok} · ${nOrd} órdenes de pago · actualizado ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}`;
+}
+function arRenderKpis(){
+  const c = arState.calc, el = document.getElementById("arKpis"); if(!el) return;
+  const margen = c.v.total ? c.util/c.v.total : null;
+  el.innerHTML = `
+    <div class="ar-kpi"><div class="lbl"><i style="background:${AR_COLORS.ventas}"></i>Ventas totales</div><div class="val">${arMoney(c.v.total)}</div><div class="note">${c.v.dias} día(s) con actividad</div></div>
+    <div class="ar-kpi"><div class="lbl"><i style="background:${AR_COLORS.gastos}"></i>Gastos totales</div><div class="val">${arMoney(c.g.total)}</div><div class="note">${arPct(c.g.total, c.v.total)} de las ventas</div></div>
+    <div class="ar-kpi hero ${c.util<0?"neg":""}"><div class="lbl"><i style="background:${AR_COLORS.util}"></i>Utilidad del período</div><div class="val">${arMoney(c.util)}</div><div class="note">${margen==null?"Sin ventas en el período":"Margen "+arPct(c.util,c.v.total)}</div></div>`;
+}
+
+function arMesesSinLiquidar(desde, hasta){
+  const L = arState.mesesLiq; if(!L || !L.length) return [];
+  const primero = L.slice().sort()[0], actual = arToday().slice(0,7), out = [];
+  for(let m = desde.slice(0,7); m <= hasta.slice(0,7); m = arAddDays(arMonthEnd(m+"-01"),1).slice(0,7)){
+    if(m >= primero && m < actual && !L.includes(m)) out.push(m);
+  }
+  return out;
+}
+function arMesNombre(ym){ const [y,m] = ym.split("-").map(Number); return AR_MESES_L[m-1] + " " + y; }
+/* Estado de resultados (pantalla y PDF). expandAll=true abre todos los sub-rubros (PDF). */
+function arRenderER(el, c, expandAll){
+  if(!el) return;
+  const V = c.v, G = c.g, base = V.total;
+  const vGrupos = arOrdenarGrupos([...V.grupos.values()]);
+  const gCats = [...G.cats.values()].sort((a,b)=>b.total-a.total);
+  const dif = V.total - V.cv;
+  const row = (key, name, monto, opts)=>{
+    const o = opts||{}, subs = o.subs || [], open = expandAll || arState.open.has(key);
+    const exp = subs.length > 0;
+    const val = o.gasto ? arParen(monto) : arMoney(monto);
+    const subHtml = exp ? `<div class="ar-er-subs">${subs.map(s=>`<div class="ar-er-sub"><span class="nm">${arEsc(s[0])}</span><span class="pc">${arPct(s[1], base)}</span><span class="mt">${o.gasto?arParen(s[1]):arMoney(s[1])}</span></div>`).join("")}</div>` : "";
+    return `<div class="ar-er-item${open?" open":""}${exp?" exp":""}" data-key="${arEsc(key)}">
+      <div class="ar-er-row"${exp && !expandAll?` onclick="arToggleER(this)"`:""}>
+        <span class="chev">${exp?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`:""}</span>
+        <span class="nm">${arEsc(name)}${o.hint?`<small>${arEsc(o.hint)}</small>`:""}</span><span class="pc">${arPct(monto, base)}</span><span class="mt">${val}</span>
+      </div>${subHtml}</div>`;
+  };
+  const ventasRows = vGrupos.map(g=>row("v:"+g.name, g.name, g.total, { subs:[...g.subs.entries()].sort((a,b)=>b[1]-a[1]) })).join("")
+    + (AR_SITE.ventas ? row("v:__dif", "Diferencia de conciliación", dif, { hint:"Movimientos de caja vs. detalle de Compras-Ventas" }) : "");
+  const gastosRows = gCats.map(g=>row("g:"+g.name, g.name, g.total, { gasto:true, subs:[...g.subs.entries()].sort((a,b)=>b[1]-a[1]) })).join("")
+    || `<div class="ar-er-empty">${arState.gastosErr ? arEsc(arState.gastosErr) : "Sin órdenes de pago imputadas al período."}</div>`;
+  const sinLiq = arMesesSinLiquidar(c.desde, c.hasta);
+  const avisoLiq = sinLiq.length ? `<div class="ar-warn">Sueldos sin liquidar: <b>${sinLiq.map(arMesNombre).join(", ")}</b>. Para ${sinLiq.length>1?"esos meses":"ese mes"} los gastos de personal solo incluyen adelantos y pagos sueltos; el sueldo se suma cuando se liquide (se imputa al mes liquidado).</div>` : "";
+  el.innerHTML = avisoLiq + `
+    <div class="ar-er-head"><span></span><span>Concepto</span><span class="pc">% s/ ventas</span><span class="mt">Importe</span></div>
+    <div class="ar-er-sec ventas">
+      <div class="ar-er-total"><span class="bar" style="background:${AR_COLORS.ventas}"></span><span class="nm">Ventas totales</span><span class="pc">${base?"100,0%":"—"}</span><span class="mt">${arMoney(V.total)}</span></div>
+      ${vGrupos.length || AR_SITE.ventas ? ventasRows : `<div class="ar-er-empty">${arEsc(AR_SITE.ventasPendienteTxt || "Sin ventas en el período.")}</div>`}
+    </div>
+    <div class="ar-er-sec gastos">
+      <div class="ar-er-total"><span class="bar" style="background:${AR_COLORS.gastos}"></span><span class="nm">Gastos totales</span><span class="pc">${arPct(G.total, base)}</span><span class="mt">${arParen(G.total)}</span></div>
+      ${gastosRows}
+    </div>
+    <div class="ar-er-util ${c.util<0?"neg":""}"><span class="bar" style="background:${AR_COLORS.util}"></span><span class="nm">Utilidad del período</span><span class="pc">${base?arPct(c.util, base):"—"}</span><span class="mt">${arMoney(c.util)}</span></div>
+    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros. Ventas por categoría del índice de artículos (Compras-Ventas); el total es el de Movimientos de caja, y la diferencia entre ambos reportes se muestra como “Diferencia de conciliación”. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes de su factura.</div>`}`;
+}
+function arToggleER(row){
+  const it = row.parentElement, k = it.dataset.key;
+  it.classList.toggle("open");
+  if(it.classList.contains("open")) arState.open.add(k); else arState.open.delete(k);
+}
+function arRenderComp(el, c){
+  if(!el) return;
+  if(!AR_SITE.renderAB){ el.innerHTML = `<div class="ar-empty">${arEsc(AR_SITE.ventasPendienteTxt || "Sin ventas integradas para este club.")}</div>`; return; }
+  const m = c.v.metodos; let efectivo = 0, facturado = 0;
+  Object.entries(m).forEach(([k,v])=>{ if(k==="Efectivo") efectivo += v; else facturado += v; });
+  el.innerHTML = `<div id="${el.id}_ab"></div>`;
+  AR_SITE.renderAB(facturado, efectivo, m, el.id+"_ab");
+}
+
+/* Gráfico XY de 3 series (ventas / gastos / utilidad) con puntos discretos por período. */
+function arLineChart(points, opts){
+  const o = Object.assign({ w:560, h:250, interactive:true, id:"c"+Math.random().toString(36).slice(2,8) }, opts||{});
+  const n = points.length;
+  if(!n) return `<div class="ar-empty">Sin datos para graficar.</div>`;
+  const padL = 58, padR = 62, padT = 16, padB = 40;
+  const W = o.w - padL - padR, H = o.h - padT - padB;
+  const vals = points.flatMap(p=>[p.ventas, p.gastos, p.util]);
+  let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+  if(hi===lo) hi = lo + 1;
+  const rawStep = (hi-lo)/4, mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const step = [1,2,2.5,5,10].map(k=>k*mag).find(s=>s>=rawStep) || 10*mag;
+  lo = Math.floor(lo/step)*step; hi = Math.ceil(hi/step)*step;
+  const y = v => padT + H - (v-lo)/(hi-lo)*H;
+  const x = i => padL + (n===1 ? W/2 : i*W/(n-1));
+  let g = "";
+  for(let t=lo; t<=hi+1e-6; t+=step){
+    const yy = y(t).toFixed(1);
+    g += `<line x1="${padL}" x2="${padL+W}" y1="${yy}" y2="${yy}" class="${Math.abs(t)<1e-6?"ar-ch-zero":"ar-ch-grid"}"/>`
+      + `<text x="${padL-8}" y="${yy}" class="ar-ch-ytick" text-anchor="end" dominant-baseline="middle">${arShort(t)}</text>`;
+  }
+  const every = Math.ceil(n/12);
+  points.forEach((p,i)=>{
+    if(i%every && i!==n-1) return;
+    g += `<text x="${x(i).toFixed(1)}" y="${padT+H+16}" class="ar-ch-xtick" text-anchor="middle">${arEsc(p.lbl)}</text>`;
+    if(p.sub) g += `<text x="${x(i).toFixed(1)}" y="${padT+H+29}" class="ar-ch-xsub" text-anchor="middle">${arEsc(p.sub)}</text>`;
+  });
+  const marker = (kind, cx, cy, color)=>{
+    const r = 4.5;
+    if(kind==="square") return `<rect x="${(cx-r+.5).toFixed(1)}" y="${(cy-r+.5).toFixed(1)}" width="${2*r-1}" height="${2*r-1}" rx="1.5" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+    if(kind==="diamond") return `<path d="M${cx} ${(cy-r-1).toFixed(1)} L${(cx+r+1).toFixed(1)} ${cy} L${cx} ${(cy+r+1).toFixed(1)} L${(cx-r-1).toFixed(1)} ${cy} Z" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+  };
+  ["gastos","ventas","util"].forEach(k=>{
+    const pts = points.map((p,i)=>[x(i), y(p[k])]);
+    if(n>1) g += `<polyline points="${pts.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join(" ")}" fill="none" stroke="${AR_COLORS[k]}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    pts.forEach(q=>{ g += marker(AR_MARK[k], +q[0].toFixed(1), +q[1].toFixed(1), AR_COLORS[k]); });
+  });
+  // etiqueta directa al final de cada serie (selectiva: solo el último punto), sin superponerse
+  {
+    const last = points[n-1], lx = x(n-1) + 10;
+    const lab = ["ventas","gastos","util"].map(k=>({k, yy:y(last[k])})).sort((a,b)=>a.yy-b.yy);
+    for(let i=1;i<lab.length;i++) if(lab[i].yy - lab[i-1].yy < 13) lab[i].yy = lab[i-1].yy + 13;
+    const tope = padT + H - 6, exceso = lab[lab.length-1].yy - tope;
+    if(exceso > 0) lab.forEach(l=>{ l.yy -= exceso; });
+    lab.forEach(l=>{ g += `<text x="${lx.toFixed(1)}" y="${l.yy.toFixed(1)}" class="ar-ch-dl" dominant-baseline="middle">${{ventas:"Ventas",gastos:"Gastos",util:"Utilidad"}[l.k]}</text>`; });
+  }
+  let hit = "";
+  if(o.interactive){
+    const bw = n===1 ? W : W/(n-1);
+    points.forEach((p,i)=>{ hit += `<rect class="ar-ch-hit" x="${(x(i)-bw/2).toFixed(1)}" y="${padT}" width="${bw.toFixed(1)}" height="${H}" data-i="${i}" onmouseenter="arChartHover('${o.id}',${i})" onmouseleave="arChartHover('${o.id}',-1)"/>`; });
+    g += `<line id="${o.id}_guide" class="ar-ch-guide" x1="0" x2="0" y1="${padT}" y2="${padT+H}" style="display:none"/>`;
+  }
+  const svg = `<svg viewBox="0 0 ${o.w} ${o.h}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${arEsc(o.aria||"Evolución de ventas, gastos y utilidad")}">${g}${hit}</svg>`;
+  if(o.interactive){ (window.__arCharts = window.__arCharts || {})[o.id] = { points, x:points.map((p,i)=>x(i)), w:o.w }; }
+  return `<div class="ar-ch" id="${o.id}">${svg}${o.interactive?`<div class="ar-ch-tip" id="${o.id}_tip"></div>`:""}</div>`;
+}
+function arChartHover(id, i){
+  const C = (window.__arCharts||{})[id], tip = document.getElementById(id+"_tip"), gl = document.getElementById(id+"_guide");
+  if(!C || !tip) return;
+  if(i<0){ tip.style.display = "none"; if(gl) gl.style.display = "none"; return; }
+  const p = C.points[i], xx = C.x[i];
+  if(gl){ gl.setAttribute("x1", xx); gl.setAttribute("x2", xx); gl.style.display = ""; }
+  tip.innerHTML = `<div class="t">${arEsc(p.lbl)}${p.sub?` <span>${arEsc(p.sub)}</span>`:""}</div>
+    <div class="r"><i class="m-circle" style="background:${AR_COLORS.ventas}"></i>Ventas<b>${arMoney(p.ventas)}</b></div>
+    <div class="r"><i class="m-square" style="background:${AR_COLORS.gastos}"></i>Gastos<b>${arMoney(p.gastos)}</b></div>
+    <div class="r"><i class="m-diamond" style="background:${AR_COLORS.util}"></i>Utilidad<b class="${p.util<0?"neg":""}">${arMoney(p.util)}</b></div>`;
+  tip.style.display = "block";
+  const pct = xx / C.w * 100;
+  tip.style.left = pct + "%";
+  tip.style.transform = pct > 60 ? "translate(calc(-100% - 12px), 0)" : "translate(12px, 0)";
+}
+function arLegend(){
+  return `<div class="ar-legend">${["ventas","gastos","util"].map(k=>`<span><i class="m-${AR_MARK[k]}" style="background:${AR_COLORS[k]}"></i>${{ventas:"Ventas",gastos:"Gastos",util:"Utilidad"}[k]}</span>`).join("")}</div>`;
+}
+function arEvoTable(points){
+  return `<table class="ar-tbl"><thead><tr><th class="l">Período</th><th>Ventas</th><th>Gastos</th><th>Utilidad</th><th>Margen</th></tr></thead><tbody>${points.map(p=>`<tr><td class="l"><b>${arEsc(p.lbl)}</b>${p.sub?` <span class="mut">${arEsc(p.sub)}</span>`:""}</td><td>${arMoney(p.ventas)}</td><td>${arMoney(p.gastos)}</td><td class="${p.util<0?"neg":""}"><b>${arMoney(p.util)}</b></td><td class="mut">${arPct(p.util,p.ventas)}</td></tr>`).join("")}</tbody></table>`;
+}
+function arRenderEvo(el, c, print){
+  if(!el) return;
+  const w = print ? 680 : 560, h = print ? 230 : 250;
+  el.innerHTML = `
+    <div class="ar-evo-grid">
+      <div class="ar-evo">
+        <div class="ar-evo-h"><div><h4>Semana a semana</h4><div class="sub">Semanas calendario (lunes a domingo) del período · total de cada semana</div></div></div>
+        ${arLineChart(c.semanas, { w, h, interactive:!print, aria:"Ventas, gastos y utilidad por semana" })}
+        ${print ? arEvoTable(c.semanas) : `<details class="ar-vals"><summary>Ver valores</summary>${arEvoTable(c.semanas)}</details>`}
+      </div>
+      <div class="ar-evo">
+        <div class="ar-evo-h"><div><h4>Mes a mes</h4><div class="sub">Todo el historial disponible · no depende del período elegido</div></div></div>
+        ${arLineChart(c.meses, { w, h, interactive:!print, aria:"Ventas, gastos y utilidad por mes" })}
+        ${print ? arEvoTable(c.meses) : `<details class="ar-vals"><summary>Ver valores</summary>${arEvoTable(c.meses)}</details>`}
+      </div>
+    </div>
+    ${arLegend()}`;
+}
+function arRenderDiv(el, c){
+  if(!el) return;
+  const soc = arState.socios, sum = soc.reduce((s,x)=>s+Number(x.porcentaje||0),0);
+  const { distrib, saldo } = c.div;
+  const warn = !soc.length
+    ? `<div class="ar-warn">No hay socios cargados para este club. Cargalos en Configuración › Socios.</div>`
+    : Math.abs(sum-100) > 0.001 ? `<div class="ar-warn">Los porcentajes de los socios suman ${sum.toLocaleString("es-AR")}% (deberían sumar 100%). Revisalos en Configuración › Socios.</div>` : "";
+  const rows = soc.map(s=>{ const p = Number(s.porcentaje)||0, m = distrib*p/100;
+    return `<tr><td class="l nm">${arEsc(s.nombre)}</td><td><div class="ar-share"><span class="tr"><span class="fl" style="width:${Math.min(p,100)}%"></span></span><b>${p.toLocaleString("es-AR",{maximumFractionDigits:2})}%</b></div></td><td><b>${arMoney(m,2)}</b></td></tr>`; }).join("");
+  el.innerHTML = `
+    <div class="ar-div-sum">
+      <div><div class="lbl">Utilidad del período</div><div class="val ${c.util<0?"neg":""}">${arMoney(c.util,2)}</div></div>
+      <div class="op">−</div>
+      <div><div class="lbl">Saldo que queda en la empresa</div><div class="val">${arMoney(saldo,2)}</div></div>
+      <div class="op">=</div>
+      <div class="hl"><div class="lbl">A distribuir entre socios</div><div class="val">${arMoney(distrib,2)}</div></div>
+    </div>
+    ${warn}
+    ${soc.length ? `<table class="ar-tbl ar-div-tbl"><thead><tr><th class="l">Socio</th><th>Participación</th><th>Dividendo</th></tr></thead><tbody>${rows}
+      <tr class="tot"><td class="l">Total</td><td>${sum.toLocaleString("es-AR",{maximumFractionDigits:2})}%</td><td>${arMoney(distrib*sum/100,2)}</td></tr></tbody></table>` : ""}
+    <div class="ar-note">${distrib ? `Se reparte el múltiplo de $1.000.000 inmediatamente inferior a la utilidad, dejando siempre al menos $1.000.000 de saldo.` : `La utilidad del período no alcanza $2.000.000: no se distribuyen dividendos (el saldo mínimo a conservar es $1.000.000).`}</div>`;
+}
+
+/* ---------- PDF ---------- */
+let arPdfSel = null;
+function arOpenPdf(){
+  if(!arState.calc){ showToast("Esperá a que termine de cargar el análisis", "warn"); return; }
+  arPdfSel = { preset:arState.preset, desde:arState.desde, hasta:arState.hasta, show:Object.assign({}, arState.show), desglose:true };
+  const ov = document.createElement("div");
+  ov.className = "ar-modal-ov"; ov.id = "arPdfModal";
+  ov.innerHTML = `<div class="ar-modal" role="dialog" aria-modal="true" aria-labelledby="arPdfTitle">
+    <div class="ar-modal-h"><div><h3 id="arPdfTitle">Descargar análisis en PDF</h3><p>Elegí el período y qué reportes incluir en el documento.</p></div>
+      <button type="button" class="ar-x" onclick="arClosePdf()" title="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="ar-modal-b">
+      <div class="ar-mlbl">Período</div>
+      <div class="ar-mpills">${AR_PRESETS.map(p=>`<span class="preset-pill" data-pdfpreset="${p.id}" onclick="arPdfPreset('${p.id}')">${p.lbl}</span>`).join("")}</div>
+      <div class="ar-mdates"><div class="f"><label>Desde</label><input type="date" id="arPdfDesde" onchange="arPdfDates()"></div><div class="f"><label>Hasta</label><input type="date" id="arPdfHasta" onchange="arPdfDates()"></div><div class="ar-mper" id="arPdfPer"></div></div>
+      <div class="ar-mlbl">Reportes a incluir</div>
+      <div class="ar-mchecks">${AR_REPORTES.map(r=>`<label class="ar-mck"><input type="checkbox" data-pdfrep="${r.id}" ${arPdfSel.show[r.id]?"checked":""} onchange="arPdfSel.show['${r.id}']=this.checked;arPdfValidate()"><span class="bx"></span><span>${r.lbl}</span></label>${r.id==="er"?`<label class="ar-mck sub"><input type="checkbox" checked onchange="arPdfSel.desglose=this.checked"><span class="bx"></span><span>Con los sub-rubros desplegados</span></label>`:""}`).join("")}</div>
+    </div>
+    <div class="ar-modal-f"><span class="hint" id="arPdfHint"></span><button type="button" class="btn-ghost" onclick="arClosePdf()">Cancelar</button><button type="button" class="btn-primary" id="arPdfGo" onclick="arGenerarPdf()">Generar PDF</button></div>
+  </div>`;
+  ov.addEventListener("mousedown", e=>{ if(e.target===ov) arClosePdf(); });
+  document.body.appendChild(ov);
+  arPdfSyncDom();
+}
+function arClosePdf(){ const m = document.getElementById("arPdfModal"); if(m) m.remove(); }
+function arPdfSyncDom(){
+  document.querySelectorAll("[data-pdfpreset]").forEach(p=>p.classList.toggle("active", p.dataset.pdfpreset===arPdfSel.preset));
+  document.getElementById("arPdfDesde").value = arPdfSel.desde; document.getElementById("arPdfHasta").value = arPdfSel.hasta;
+  document.getElementById("arPdfPer").textContent = arPdfSel.desde && arPdfSel.hasta ? arPeriodoTxt(arPdfSel.desde, arPdfSel.hasta) : "";
+  arPdfValidate();
+}
+function arPdfPreset(id){ arPdfSel.preset = id; if(id!=="custom"){ const [d,h] = arPresetRange(id); arPdfSel.desde = d; arPdfSel.hasta = h; } arPdfSyncDom(); }
+function arPdfDates(){ arPdfSel.preset = "custom"; arPdfSel.desde = document.getElementById("arPdfDesde").value; arPdfSel.hasta = document.getElementById("arPdfHasta").value; arPdfSyncDom(); }
+function arPdfValidate(){
+  const go = document.getElementById("arPdfGo"), hint = document.getElementById("arPdfHint");
+  let msg = "";
+  if(!arPdfSel.desde || !arPdfSel.hasta) msg = "Elegí las dos fechas.";
+  else if(arPdfSel.desde > arPdfSel.hasta) msg = "“Desde” es posterior a “hasta”.";
+  else if(!AR_REPORTES.some(r=>arPdfSel.show[r.id])) msg = "Elegí al menos un reporte.";
+  go.disabled = !!msg; hint.textContent = msg;
+}
+function arGenerarPdf(){
+  const sel = arPdfSel, c = arCalcular(sel.desde, sel.hasta);
+  arClosePdf();
+  const per = arPeriodoTxt(sel.desde, sel.hasta);
+  const logo = (document.querySelector(AR_SITE.logoSel)||{}).src || "";
+  const emit = new Date().toLocaleString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  const user = (typeof currentPerfil!=="undefined" && currentPerfil && currentPerfil.nombre) ? currentPerfil.nombre : "";
+  const margen = c.v.total ? arPct(c.util, c.v.total) : "—";
+  const sec = (id, title, sub, html)=> sel.show[id] ? `<section class="arp-sec arp-${id}"><div class="arp-sec-h"><h2>${title}</h2>${sub?`<span>${sub}</span>`:""}</div>${html}</section>` : "";
+  const tmp = document.createElement("div");
+  const render = fn => { tmp.innerHTML = ""; const d = document.createElement("div"); d.id = "arpTmp"+Math.random().toString(36).slice(2,7); tmp.appendChild(d); document.body.appendChild(tmp); fn(d); const h = d.innerHTML; tmp.remove(); return h; };
+  const erHtml = render(d=>arRenderER(d, c, sel.desglose));
+  const compHtml = render(d=>{ d.id = "arpComp"; arRenderComp(d, c); });
+  const evoHtml = render(d=>arRenderEvo(d, c, true));
+  const divHtml = render(d=>arRenderDiv(d, c));
+  let pr = document.getElementById("arPrint");
+  if(!pr){ pr = document.createElement("div"); pr.id = "arPrint"; document.body.appendChild(pr); }
+  pr.innerHTML = `
+    <header class="arp-band">
+      ${logo?`<img src="${logo}" alt="" class="${AR_SITE.bandName?"sm":""}">`:""}${!logo || AR_SITE.bandName ? `<strong>${arEsc(AR_SITE.club)}</strong>` : ""}
+      <div class="arp-band-t"><div class="k">Análisis de resultados</div><div class="p">${arEsc(per)}</div></div>
+    </header>
+    <div class="arp-meta"><span>${arEsc(AR_SITE.club)}${AR_SITE.sede?" · "+arEsc(AR_SITE.sede):""}</span><span>Período: ${arDMY(sel.desde)} al ${arDMY(sel.hasta)}</span><span>Emitido: ${emit}${user?" · "+arEsc(user):""}</span></div>
+    <div class="arp-kpis">
+      <div><div class="lbl">Ventas totales</div><div class="val">${arMoney(c.v.total)}</div></div>
+      <div><div class="lbl">Gastos totales</div><div class="val">${arMoney(c.g.total)}</div></div>
+      <div class="hero ${c.util<0?"neg":""}"><div class="lbl">Utilidad del período</div><div class="val">${arMoney(c.util)}</div><div class="note">Margen ${margen}</div></div>
+    </div>
+    ${sec("er","Estado de resultados","Importes en pesos · % sobre ventas totales", erHtml)}
+    ${sec("comp","Composición de ventas","Venta A (facturado) vs. Venta B (efectivo)", compHtml)}
+    ${sec("evo","Evolución de rendimientos","", evoHtml)}
+    ${sec("div","Dividendos entre socios","", divHtml)}
+    <footer class="arp-foot">Ventas: Movimientos de caja y Compras-Ventas de ATC (corte de jornada 05:00). Gastos: órdenes de pago no anuladas, por monto a pagar, imputadas por fecha de factura; proveedores mensuales repartidos en el mes de su factura. Documento generado desde el panel de administración de ${arEsc(AR_SITE.club)}.</footer>`;
+  const prevTitle = document.title;
+  document.title = `Analisis de resultados - ${AR_SITE.club} - ${per}`;
+  document.body.classList.add("ar-printing");
+  const done = ()=>{ document.body.classList.remove("ar-printing"); document.title = prevTitle; window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  setTimeout(()=>window.print(), 60);
+}
+
+/* =====================================================================
+   CONFIGURACIÓN › SOCIOS  (editable por club, tabla {pre}_socios)
+   ===================================================================== */
+let arSocDraft = null, arSocOrig = [];
+async function arSociosOnOpen(){
+  const el = document.getElementById("arSociosBox"); if(!el) return;
+  el.innerHTML = `<div class="ar-empty">Cargando socios…</div>`;
+  const { data, error } = await sb.from(AR_SITE.pre+"_socios").select("id,nombre,porcentaje,orden").order("orden").order("nombre");
+  if(error){ el.innerHTML = `<div class="ar-warn">No se pudieron leer los socios: ${arEsc(error.message)}</div>`; return; }
+  arSocOrig = (data||[]).map(s=>({ id:s.id, nombre:s.nombre, porcentaje:Number(s.porcentaje) }));
+  arSocDraft = arSocOrig.map(s=>Object.assign({}, s));
+  arSociosRender();
+}
+function arSociosRender(){
+  const el = document.getElementById("arSociosBox"); if(!el || !arSocDraft) return;
+  const sum = arSocDraft.reduce((s,x)=>s+(Number(x.porcentaje)||0),0);
+  const ok = Math.abs(sum-100) < 0.001 || !arSocDraft.length;
+  const dirty = JSON.stringify(arSocDraft.map(s=>[s.id||null,s.nombre.trim(),Number(s.porcentaje)||0])) !== JSON.stringify(arSocOrig.map(s=>[s.id,s.nombre,s.porcentaje]));
+  el.innerHTML = `
+    <table class="ar-tbl ar-soc-tbl"><thead><tr><th class="l" style="width:44px">#</th><th class="l">Socio</th><th style="width:170px">Participación</th><th style="width:52px"></th></tr></thead><tbody>
+      ${arSocDraft.map((s,i)=>`<tr><td class="l mut">${i+1}</td>
+        <td class="l"><input type="text" class="ar-in" value="${arEsc(s.nombre)}" placeholder="Apellido, Nombre" oninput="arSocDraft[${i}].nombre=this.value;arSociosFoot()"></td>
+        <td><div class="ar-in-pct"><input type="text" inputmode="decimal" class="ar-in r" value="${String(s.porcentaje).replace(".",",")}" oninput="arSocDraft[${i}].porcentaje=parseFloat(this.value.replace(',','.'))||0;arSociosFoot()"><span>%</span></div></td>
+        <td><button type="button" class="ar-ibtn" title="Quitar socio" onclick="arSocDraft.splice(${i},1);arSociosRender()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></td></tr>`).join("")
+        || `<tr><td colspan="4" class="l mut" style="padding:18px 10px">Todavía no hay socios cargados.</td></tr>`}
+    </tbody></table>
+    <button type="button" class="ar-add" onclick="arSocDraft.push({id:null,nombre:'',porcentaje:0});arSociosRender();setTimeout(()=>{const ins=document.querySelectorAll('#arSociosBox .ar-in:not(.r)');if(ins.length)ins[ins.length-1].focus();},0)">+ Agregar socio</button>
+    <div class="ar-soc-foot" id="arSocFoot"></div>`;
+  arSociosFoot(dirty, sum, ok);
+}
+function arSociosFoot(){
+  const f = document.getElementById("arSocFoot"); if(!f) return;
+  const sum = arSocDraft.reduce((s,x)=>s+(Number(x.porcentaje)||0),0);
+  const ok = Math.abs(sum-100) < 0.001 || !arSocDraft.length;
+  const dirty = JSON.stringify(arSocDraft.map(s=>[s.id||null,s.nombre.trim(),Number(s.porcentaje)||0])) !== JSON.stringify(arSocOrig.map(s=>[s.id,s.nombre,s.porcentaje]));
+  f.innerHTML = `<div class="ar-soc-sum ${ok?"ok":"bad"}">Total: <b>${sum.toLocaleString("es-AR",{maximumFractionDigits:2})}%</b>${ok?"":" · tiene que sumar 100%"}</div>
+    <div style="flex:1"></div>
+    <button type="button" class="btn-ghost" ${dirty?"":"disabled"} onclick="arSociosOnOpen()">Descartar</button>
+    <button type="button" class="btn-primary" ${dirty && ok?"":"disabled"} onclick="arSociosGuardar()">Guardar cambios</button>`;
+}
+async function arSociosGuardar(){
+  const T = AR_SITE.pre+"_socios";
+  if(arSocDraft.some(s=>!s.nombre.trim())){ showToast("Completá el nombre de todos los socios", "warn"); return; }
+  if(arSocDraft.some(s=>!(s.porcentaje>=0 && s.porcentaje<=100))){ showToast("Cada porcentaje tiene que estar entre 0 y 100", "warn"); return; }
+  const ids = new Set(arSocDraft.filter(s=>s.id).map(s=>s.id));
+  const borrar = arSocOrig.filter(s=>!ids.has(s.id));
+  try{
+    for(const s of borrar){ const r = await sb.from(T).delete().eq("id", s.id); if(r.error) throw r.error; }
+    for(let i=0;i<arSocDraft.length;i++){
+      const s = arSocDraft[i], row = { nombre:s.nombre.trim(), porcentaje:Number(s.porcentaje)||0, orden:i+1 };
+      const r = s.id ? await sb.from(T).update(row).eq("id", s.id) : await sb.from(T).insert(row);
+      if(r.error) throw r.error;
+    }
+  }catch(err){ showToast("No se pudieron guardar los socios: "+(err.message||err), "warn"); return; }
+  const antes = arSocOrig.map(s=>`${s.nombre} ${s.porcentaje}%`).join(", ") || "—";
+  const despues = arSocDraft.map(s=>`${s.nombre.trim()} ${Number(s.porcentaje)||0}%`).join(", ") || "—";
+  if(typeof logHistorialConfig==="function") logHistorialConfig("Editó los socios", `${antes} → ${despues}`);
+  showToast("Socios actualizados");
+  arState.loaded = false; // el próximo análisis relee los socios
+  await arSociosOnOpen();
+}
+
+function goVentasPane(pane){
+  const scope = document.getElementById("ventasSubnav");
+  scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.vpane===pane));
+  scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
+  document.getElementById("vpane"+pane.charAt(0).toUpperCase()+pane.slice(1)).classList.add("active");
+  if(pane==="analisis") arOnOpen();
+}
 /* =====================================================================
    COSTEO (Che Mono) — Precios / Recetas / Carga de compras
    Diseño acordado con Pancho (29/09/2026), tomando como modelo el Costeo
