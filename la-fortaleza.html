@@ -11001,24 +11001,71 @@ function liqRenderTablaPresentismo(){
 }
 
 /* ---------- tabla de liquidación ---------- */
+function liqSumarDiasISO(j, n){
+  var p = j.split("-").map(Number);
+  var d = new Date(Date.UTC(p[0], p[1]-1, p[2]));
+  d.setUTCDate(d.getUTCDate()+n);
+  return d.toISOString().slice(0,10);
+}
+// Franco semanal (pedido de Pancho, 06/10/2026 — corrige el fix anterior, que contaba CUALQUIER
+// día sin fichada como ausencia): por defecto el franco es el domingo de cada semana. Si ese
+// domingo el empleado SÍ trabajó (hay torneo y rotan turnos), el franco de esa semana se corre al
+// primer día sin fichada que encuentre en el resto de la semana (lunes a sábado) — "si curró el
+// domingo, le corresponde otro día". Siempre debe haber como máximo 1 franco por semana: cualquier
+// otro día sin fichada en esa misma semana, además del ya asignado, es una ausencia real (caso Liz
+// Paredes 23/09 — esa semana ya había usado su franco el domingo 20/09, así que el miércoles cuenta
+// aparte). Si ningún día de la semana trabajó, el franco no es necesario, no hay nada que "perdonar".
+// Usa `dias` completo (puede traer algún día de desborde de mes anterior/siguiente si el reporte lo
+// incluyó) para no perder de vista el domingo de una semana que empieza en el mes previo.
+function liqAusenteEnDia(dias, j){
+  var d = dias[j];
+  return !d || d.estado==="ausente";
+}
+function liqDiasFrancoDelMes(dias, mesISO){
+  var diasMes = liqDiasDelMes(mesISO);
+  if(!diasMes.length) return {};
+  var primerDia = diasMes[0], ultimoDia = diasMes[diasMes.length-1];
+  var dowPrimerDia = new Date(primerDia+"T00:00:00Z").getUTCDay();
+  var cursor = liqSumarDiasISO(primerDia, -dowPrimerDia); // domingo que empieza la primera semana
+  var limite = liqSumarDiasISO(ultimoDia, 1);
+  var francos = {};
+  while(cursor < limite){
+    var domingo = cursor;
+    var franco = !liqAusenteEnDia(dias, domingo) ? null : domingo; // domingo libre → es el franco
+    if(franco===null){ // domingo trabajado: el franco se corre a otro día de esa semana
+      for(var k=1; k<7; k++){
+        var dia = liqSumarDiasISO(domingo, k);
+        if(liqAusenteEnDia(dias, dia)){ franco = dia; break; }
+      }
+    }
+    if(franco) francos[franco] = true;
+    cursor = liqSumarDiasISO(cursor, 7);
+  }
+  return francos;
+}
 // Corregido 06/10/2026 (pedido de Pancho — ver diagnóstico Liz Paredes 23/09): un día sin NINGUNA
 // fichada (ausencia de día completo) nunca llega a existir como clave en `dias` — antes este
 // conteo recorría solo Object.keys(dias) y esos días quedaban afuera, mientras que la grilla
 // visual de Presentismo (liqRenderTablaPresentismo) sí los pinta como "aus.". Ahora se recorren
-// TODOS los días del mes (liqDiasDelMes) y un día sin registro cuenta como ausente, igual que en
-// la grilla. Se acota por inicio_actividades/fecha_baja del empleado para no contar como ausente
-// un día anterior a su alta o posterior a su baja.
+// TODOS los días del mes (liqDiasDelMes) y un día sin registro cuenta como ausente, salvo que sea
+// el franco semanal que le corresponde (ver liqDiasFrancoDelMes arriba). Se acota por
+// inicio_actividades/fecha_baja del empleado para no contar como ausente un día anterior a su alta
+// o posterior a su baja.
 function liqCalcularAgregados(key, emp){
   var dias = (liqState.presentismo && liqState.presentismo[key]) || {};
   var ingreso = emp && emp.inicio_actividades ? emp.inicio_actividades : null;
   var baja = emp && emp.fecha_baja ? emp.fecha_baja : null;
+  var francos = liqDiasFrancoDelMes(dias, liqState.mes);
   var ausencias=0, feriadosTrabajados=0, horasExtraMin=0;
   liqDiasDelMes(liqState.mes).forEach(function(j){
     if(ingreso && j<ingreso) return;
     if(baja && j>baja) return;
     var d = dias[j];
     var esFeriado = liqState.feriados.indexOf(j)!==-1;
-    if(!d || d.estado==="ausente"){ ausencias++; return; }
+    if(!d || d.estado==="ausente"){
+      if(!francos[j]) ausencias++;
+      return;
+    }
     if(esFeriado) feriadosTrabajados++;
     if(d.estado==="rojo" || d.estado==="verde") horasExtraMin += d.diffMin;
   });
