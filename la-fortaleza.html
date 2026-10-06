@@ -10267,9 +10267,24 @@ async function anularUltimaActualizacionSueldos(){
 // jornada_partida), editables desde "Cargar nuevo empleado". Así, un empleado nuevo con fichadas
 // se toma automáticamente para presentismo, sin tocar código (antes había que agregarlo a mano a
 // LIQ_EXPECTED_HOURS/LIQ_NOMBRE_COMPLETO, que ya no existen).
+// Alias de nombres cortos del reloj de fichaje que NO matchean por prefijo/palabra contra
+// nombre_completo (diagnosticado 06/10/2026: el reporte trae "Lizak" para Liza Ojeda y "Martu"
+// para Martina Oddo — ninguno de los dos es el inicio de su nombre_completo, así que sin este
+// alias el motor descarta esas fichadas en silencio y el empleado queda "sin presentismo").
+// Si el reloj registra un nombre nuevo que tampoco matchee solo, agregarlo aquí.
+var LIQ_ALIAS_NOMBRE = {
+  "lizak": "liza ojeda",
+  "martu": "martina oddo"
+};
 function liqEmpleadoPorNombreCorto(nombreCorto){
   var key = String(nombreCorto||"").trim().toLowerCase();
   if(!key) return null;
+  if(LIQ_ALIAS_NOMBRE[key]){
+    var porAlias = liqEmpleadosDelMes().filter(function(e){
+      return String(e.nombre_completo||"").trim().toLowerCase()===LIQ_ALIAS_NOMBRE[key];
+    })[0];
+    if(porAlias) return porAlias;
+  }
   var candidatos = liqEmpleadosDelMes().filter(function(e){
     var nombre = String(e.nombre_completo||"").trim().toLowerCase();
     if(!nombre) return false;
@@ -10986,19 +11001,26 @@ function liqRenderTablaPresentismo(){
 }
 
 /* ---------- tabla de liquidación ---------- */
-function liqCalcularAgregados(key){
+// Corregido 06/10/2026 (pedido de Pancho — ver diagnóstico Liz Paredes 23/09): un día sin NINGUNA
+// fichada (ausencia de día completo) nunca llega a existir como clave en `dias` — antes este
+// conteo recorría solo Object.keys(dias) y esos días quedaban afuera, mientras que la grilla
+// visual de Presentismo (liqRenderTablaPresentismo) sí los pinta como "aus.". Ahora se recorren
+// TODOS los días del mes (liqDiasDelMes) y un día sin registro cuenta como ausente, igual que en
+// la grilla. Se acota por inicio_actividades/fecha_baja del empleado para no contar como ausente
+// un día anterior a su alta o posterior a su baja.
+function liqCalcularAgregados(key, emp){
   var dias = (liqState.presentismo && liqState.presentismo[key]) || {};
-  var mesPrefix = liqState.mes.slice(0,7);
+  var ingreso = emp && emp.inicio_actividades ? emp.inicio_actividades : null;
+  var baja = emp && emp.fecha_baja ? emp.fecha_baja : null;
   var ausencias=0, feriadosTrabajados=0, horasExtraMin=0;
-  Object.keys(dias).forEach(function(j){
-    if(j.slice(0,7)!==mesPrefix) return;
+  liqDiasDelMes(liqState.mes).forEach(function(j){
+    if(ingreso && j<ingreso) return;
+    if(baja && j>baja) return;
     var d = dias[j];
     var esFeriado = liqState.feriados.indexOf(j)!==-1;
-    if(d.estado==="ausente"){ ausencias++; }
-    else {
-      if(esFeriado) feriadosTrabajados++;
-      if(d.estado==="rojo" || d.estado==="verde") horasExtraMin += d.diffMin;
-    }
+    if(!d || d.estado==="ausente"){ ausencias++; return; }
+    if(esFeriado) feriadosTrabajados++;
+    if(d.estado==="rojo" || d.estado==="verde") horasExtraMin += d.diffMin;
   });
   return {ausencias:ausencias, feriadosTrabajados:feriadosTrabajados, horasExtraMin:horasExtraMin};
 }
@@ -11054,7 +11076,7 @@ function liqRenderTablaLiquidacion(){
     var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : (liqState.liquidado ? 0 : Number(f.emp.monto_a_default||0))) : 0;
     var b = sueldo - a;
     var adelanto = Number(adelantosPorNombre[f.nombre]||0);
-    var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
+    var agr = f.tienePresentismo ? liqCalcularAgregados(f.key, f.emp) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
     var jornal = sueldo/30;
     var valorHora = jornal/8;
     // Overrides manuales — el Sugerido pago B usa SOLO estos valores (arrancan en 0), la columna
