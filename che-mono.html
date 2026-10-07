@@ -1518,6 +1518,15 @@
   .cx-tab-sep{width:1px;align-self:stretch;background:var(--border);margin:12px 8px}
   .cx-cnt{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px;background:var(--cx-warn-bg);color:var(--cx-warn)}
   #moduleCosteo .pagos-pane.cx-alt{background:var(--cx-bgalt)}
+  /* Detalle de factura (mismo modelo que La Fortaleza) */
+  #cxPaneCompras.ord-open > .cx-phead, #cxPaneCompras.ord-open > .cx-scroll{display:none}
+  #cxOrdView{display:flex;flex-direction:column;flex:1;min-height:0;background:var(--bg,#F5F6FB)}
+  #cxOrdView[hidden]{display:none}
+  #cxOrdView .screen-header .factura-link{cursor:pointer}
+  #cxCiWrap{display:flex;flex-direction:column;flex:1;min-height:0;}
+  #cxCiWrap .config-hint{flex:0 0 auto;}
+  #cxCiWrap .ci-table-scroll{flex:1 1 auto;min-height:220px;}
+  #cxCiWrap .ci-summary{flex:0 0 auto;}
   .cx-phead{padding:20px 32px 0;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;flex-shrink:0}
   .cx-phead h1{font-size:21px;font-weight:800;margin:0;letter-spacing:-.2px}
   .cx-phead .cx-sub{font-size:12.5px;color:var(--text-2);margin-top:3px;max-width:64ch;line-height:1.45}
@@ -2451,7 +2460,7 @@
           <!-- CARGA DE COMPRAS -->
           <section class="pagos-pane cx-alt" id="cxPaneCompras">
             <div class="cx-phead">
-              <div class="cx-grow"><h1>Carga de compras</h1><div class="cx-sub">Órdenes de Pagos agrupadas por categoría de proveedor. Cargá el detalle de cada factura: al completarla, el costo de cada insumo se actualiza en Recetas y Precios.</div></div>
+              <div class="cx-grow"><h1>Carga de compras</h1><div class="cx-sub">Órdenes de Pagos agrupadas por categoría de proveedor. Cargá el detalle de cada factura (precio de lista, impuestos y descuentos): el costo de cada insumo se actualiza en Recetas y Precios, y la orden queda completa cuando coincide con el total de la factura.</div></div>
               <div class="cx-actions"><div class="cx-seg" id="cxCoEstado"><button type="button" data-e="todas" class="on">Todas</button><button type="button" data-e="pend">Por cargar</button><button type="button" data-e="ok">Completas</button></div></div>
             </div>
             <div class="cx-scroll">
@@ -2465,6 +2474,7 @@
               <div class="cx-chips" id="cxCoChips"></div>
               <div class="cx-grid" id="cxCoGrid"></div>
             </div>
+            <div id="cxOrdView" hidden></div>
           </section>
 
         </div>
@@ -9220,7 +9230,7 @@ function goVentasPane(pane){
      el $/unidad pasa a ser el costo del insumo.
    Tablas: cm_costeo_indice, cm_costeo_articulos, cm_semi_categorias,
    cm_semielaborados, cm_receta_lineas, cm_precios_ajustes,
-   cm_compra_items, cm_compra_estado.
+   cm_compra_items, cm_compra_ajustes.
    ===================================================================== */
 (function(){
 const $ = (s,r=document)=>r.querySelector(s);
@@ -9270,45 +9280,52 @@ const ICO = {
 };
 
 /* ---------------- datos ---------------- */
-const D = { arts:[], semis:[], semiCats:[], lineas:[], ajustes:[], items:[], estado:{}, ordenes:[], indice:null };
+const D = { arts:[], semis:[], semiCats:[], lineas:[], ajustes:[], items:[], estado:{}, aj:{}, ordenes:[], indice:null };
 let loaded=false, loading=null;
 async function loadAll(){
   if(!cfgLoaded){ const ok = await cfgLoadAll(); if(!ok) return false; }
   try{
-    const [arts, semiCats, semis, lineas, ajustes, ordenes, items, estado, idx] = await Promise.all([
+    const [arts, semiCats, semis, lineas, ajustes, ordenes, items, ajFact, idx] = await Promise.all([
       fetchAll("cm_costeo_articulos","*","nombre"),
       fetchAll("cm_semi_categorias","id,nombre","nombre"),
       fetchAll("cm_semielaborados","*","nombre"),
       fetchAll("cm_receta_lineas","*","orden"),
       fetchAll("cm_precios_ajustes","id,fecha,tipo,adherido_a,usuario_nombre,detalle"),
-      fetchAll("cm_ordenes","id,fecha_orden,fecha_comprobante,comprobante_tipo,comprobante,proveedor,concepto,rubro,monto_factura,monto,estado","id"),
+      fetchAll("cm_ordenes","id,fecha_orden,fecha_comprobante,comprobante_tipo,comprobante,proveedor,concepto,rubro,monto_factura,monto,estado,adjuntos,adjunto_nombre,adjunto_path","id"),
       fetchAll("cm_compra_items","*","orden_index"),
-      fetchAll("cm_compra_estado","orden_id,completa"),
+      fetchAll("cm_compra_ajustes","*"),
       sb.from("cm_costeo_indice").select("id,fecha,archivo,usuario_nombre").maybeSingle()
     ]);
     D.arts=arts.map(a=>({...a,porciones:Number(a.porciones)||1,factor_pct:a.factor_pct==null?null:Number(a.factor_pct),costo_ant:numOrNull(a.costo_ant),precio_ant:numOrNull(a.precio_ant),precio_actual:numOrNull(a.precio_actual)}));
     D.semiCats=semiCats; D.semis=semis.map(s=>({...s,rinde:Number(s.rinde)}));
     D.lineas=lineas.map(l=>({...l,cantidad:Number(l.cantidad)}));
     D.ajustes=ajustes.sort((a,b)=>b.fecha.localeCompare(a.fecha));
-    D.ordenes=ordenes; D.items=items.map(i=>({...i,bultos:Number(i.bultos),cantidad:Number(i.cantidad),total:Number(i.total)}));
-    D.estado={}; estado.forEach(e=>D.estado[e.orden_id]=!!e.completa);
+    D.ordenes=ordenes; D.items=items.map(mapItem);
+    D.aj={}; ajFact.forEach(r=>{ D.aj[r.orden_id]={ impuestos_generales:r.impuestos_generales||[], descuento_modo:r.descuento_modo||null, descuento_valor:r.descuento_valor!=null?Number(r.descuento_valor):null, justificativo_tipo:r.justificativo_tipo||null, justificativo_nota:r.justificativo_nota||null }; });
+    computeEstados();
     D.indice=idx.data||null;
     invalidateCosts(); loaded=true; return true;
   }catch(e){ console.warn("Costeo:",e); toast("No se pudieron cargar los datos de Costeo","warn"); return false; }
 }
 const numOrNull=v=>v==null?null:Number(v);
+const mapItem=i=>({...i,bultos:Number(i.bultos),cantidad:Number(i.cantidad),total:Number(i.total),precio_lista:i.precio_lista==null?Number(i.total):Number(i.precio_lista),impuestos:Array.isArray(i.impuestos)?i.impuestos:[],descuentos:Array.isArray(i.descuentos)?i.descuentos:[]});
 async function reload(){ if(loading) return loading; loading=loadAll().finally(()=>loading=null); const ok=await loading; if(ok) render(); return ok; }
 
 /* ---------------- costos ---------------- */
 let _insCost=null;
 function invalidateCosts(){ _insCost=null; }
 function ordFecha(o){ return o.fecha_comprobante||o.fecha_orden||""; }
+/* Costo vigente de cada insumo, igual que La Fortaleza: dentro del mes calendario en curso se toma el
+   $/unidad MÁS ALTO de las compras del mes (para no subestimar por una promo puntual); si todavía no hay
+   compras este mes, el de la compra más reciente. Cuentan todas las facturas con detalle cargado. */
 function insumoCosts(){
-  if(_insCost) return _insCost; const m={};
+  if(_insCost) return _insCost; const by={};
   const ordById={}; D.ordenes.forEach(o=>ordById[o.id]=o);
-  D.items.forEach(it=>{ if(!it.insumo_id||!D.estado[it.orden_id]||!it.cantidad) return; const o=ordById[it.orden_id]; if(!o) return;
-    const key=ordFecha(o)+"|"+(it.created_at||""); const prev=m[it.insumo_id];
-    if(!prev||key>prev.key) m[it.insumo_id]={key,unit:it.total/it.cantidad,fecha:ordFecha(o),prov:o.proveedor}; });
+  D.items.forEach(it=>{ if(!it.insumo_id||!it.cantidad) return; const o=ordById[it.orden_id]; if(!o) return;
+    (by[it.insumo_id]=by[it.insumo_id]||[]).push({ fecha:ordFecha(o), key:ordFecha(o)+"|"+(it.created_at||""), unit:it.total/it.cantidad, prov:o.proveedor }); });
+  const now=new Date(), mes=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0"); const m={};
+  Object.keys(by).forEach(id=>{ const L=by[id]; const delMes=L.filter(c=>c.fecha.slice(0,7)===mes);
+    m[id] = delMes.length ? delMes.reduce((a,b)=>b.unit>a.unit?b:a) : L.reduce((a,b)=>b.key>a.key?b:a); });
   return _insCost=m;
 }
 function insUnidad(insId){ const p=cfgPresDeIns(insId)[0]; return p?p.unidad:"un"; }
@@ -9347,7 +9364,7 @@ const cats = ()=>[...new Set(artsActivos().map(a=>a.categoria))].sort((a,b)=>a.l
 function orderFor(key,ids){ const saved=ST.order[key]||[]; const out=saved.filter(x=>ids.includes(x)); ids.forEach(x=>{ if(!out.includes(x)) out.push(x); }); return out; }
 function saveOrder(key,list){ ST.order[key]=list; LS.set("order",ST.order); }
 
-function goTab(t){ ST.tab=t; LS.set("tab",t); $$("#costeoSubnav .pagos-tab").forEach(b=>b.classList.toggle("active",b.dataset.cxtab===t));
+function goTab(t){ if(CI.ordenId){ CI.ordenId=null; const v=$("#cxOrdView"); if(v){ v.hidden=true; v.innerHTML=""; } $("#cxPaneCompras").classList.remove("ord-open"); } ST.tab=t; LS.set("tab",t); $$("#costeoSubnav .pagos-tab").forEach(b=>b.classList.toggle("active",b.dataset.cxtab===t));
   $$("#costeoSubnav .pagos-pane").forEach(p=>p.classList.remove("active")); $("#cxPane"+t[0].toUpperCase()+t.slice(1)).classList.add("active"); closePop(); render(); }
 function render(){ if(!loaded) return; if(ST.tab==="precios") renderPrecios(); else if(ST.tab==="recetas") renderRecetas(); else renderCompras(); updateComprasCnt(); }
 
@@ -9734,7 +9751,7 @@ function comprasConceptos(){ const s=new Set(); cfgData.items.forEach(i=>{ const
 function ordenesCompra(){ const cs=comprasConceptos(); return D.ordenes.filter(o=>cs.has(o.concepto)&&o.comprobante_tipo!=="NC"); }
 const ordTotal=o=>Number(o.monto_factura??o.monto??0);
 const ordItems=o=>D.items.filter(i=>i.orden_id===o.id).sort((a,b)=>a.orden_index-b.orden_index);
-const ordCargado=o=>ordItems(o).reduce((s,x)=>s+x.total,0);
+const ordCargado=o=>{ const its=ordItems(o); return its.length?totalCalc(its,ajDe(o.id)):0; };
 const ordEstado=o=>D.estado[o.id]?"ok":(ordItems(o).length?"part":"pend");
 function ordPass(o){ return ST.coEstado==="todas"||(ST.coEstado==="ok"?!!D.estado[o.id]:!D.estado[o.id]); }
 function updateComprasCnt(){ const n=ordenesCompra().filter(o=>!D.estado[o.id]).length; const el=$("#cxComprasCnt"); if(el){ el.textContent=n; el.hidden=!n; } }
@@ -9776,35 +9793,282 @@ function renderComprasResults(){ const q=ST.coSearch.trim(); const el=$("#cxCoRe
   el.innerHTML=`<div class="cx-results"><h4>${res.length} resultado${res.length!==1?'s':''} para “${esc(q)}” <span>· en órdenes con detalle cargado</span>${same?`<span style="margin-left:auto">Último $/${esc(res[0].it.unidad)}: <b style="color:var(--text-1)">${money(u0)}</b> <span class="${u0>u1?'cx-up':'cx-down'}">${pctTxt(dif(u1,u0))}</span></span>`:""}</h4>
     ${res.slice(0,50).map(r=>`<div class="cx-res" data-o="${esc(r.o.id)}"><span class="num" style="color:var(--text-2)">${fmtDL(ordFecha(r.o))}</span><span style="font-weight:600">${hl(r.nm,q)}</span><span class="hs" style="color:var(--text-2)">${hl(r.o.proveedor,q)}</span><span class="r hs">${fmtQ(r.it.cantidad)} ${esc(cfgUnLabel(r.it.unidad))}</span><span class="r"><b>${money(r.it.total/r.it.cantidad)}</b>/${esc(r.it.unidad)}</span></div>`).join("")||`<div class="cx-empty">Sin coincidencias en compras cargadas.</div>`}</div>`;
   $$(".cx-res",el).forEach(r=>r.onclick=()=>openOrden(r.dataset.o)); }
-function openOrden(id){ const o=D.ordenes.find(x=>x.id===id); if(!o) return; const prov=provByName(o.proveedor);
-  const pool=prov?cfgInsumosDeProv(prov.id):[]; const opts=pool.length?pool:cfgData.items.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
-  const presFor=insId=>{ const ps=cfgPresDeIns(insId); return (prov&&ps.find(p=>p.proveedor_id===prov.id))||ps[0]||null; };
-  const draw=()=>{ const t=ordTotal(o), car=ordCargado(o), diffv=t-car; const ok=Math.abs(diffv)<1; const comp=!!D.estado[o.id]; const its=ordItems(o);
-    const d=drawer(`<div class="cx-dh"><div style="flex:1;min-width:0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>${esc(o.proveedor||"—")}</h3><span class="cx-pill ${ordEstado(o)}">${comp?"Completa":its.length?"Parcial":"Por cargar"}</span></div><div class="cx-sub">${esc(o.id)} · ${esc(o.concepto||"")}${o.rubro?" › "+esc(o.rubro):""}</div></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
-      <div class="cx-db"><div class="cx-dinfo"><div><small>Fecha</small><b>${fmtDL(ordFecha(o))}</b></div><div><small>Comprobante</small><b>${esc(o.comprobante_tipo||"")} ${esc(o.comprobante||"")}</b></div><div><small>Total factura</small><b>${money0(t)}</b></div></div>
-      ${!pool.length?`<p style="font-size:12px;color:var(--cx-warn);margin:0 0 10px">${prov?"Este proveedor no tiene insumos asignados en Configuración: se muestran todos los insumos.":"No encontré este proveedor en Configuración: se muestran todos los insumos."}</p>`:""}
-      <table class="cx-rl"><thead><tr><th>Insumo</th><th>Bultos</th><th>Cantidad</th><th>Total</th><th>$ / un.</th><th></th></tr></thead><tbody>
-      ${its.map(it=>{ const nm=(cfgIns(it.insumo_id)||{}).nombre||it.insumo_nombre||"(eliminado)"; return `<tr><td>${esc(nm)}</td><td>${fmtQ(it.bultos)}</td><td>${fmtQ(it.cantidad)} ${esc(cfgUnLabel(it.unidad))}</td><td>${money0(it.total)}</td><td><b>${money(it.total/it.cantidad)}</b></td><td>${comp?"":`<button type="button" class="cx-ibtn del" data-idel="${it.id}" title="Quitar">${ICO.del}</button>`}</td></tr>`; }).join("")||`<tr><td colspan="6" style="text-align:left;color:var(--text-3)">Todavía no se cargó el detalle de esta factura.</td></tr>`}
-      ${comp?"":`<tr class="add"><td><input id="cxOiN" list="cxDlProvIns" placeholder="Insumo…" autocomplete="off"><div class="cx-warnmsg" id="cxOiPres"></div></td><td><input class="q" id="cxOiB" placeholder="0" inputmode="decimal" title="Cantidad de bultos o presentaciones"></td><td id="cxOiQ" style="color:var(--text-3)">—</td><td><input class="q" id="cxOiT" placeholder="$ total" inputmode="decimal" style="width:90px"></td><td id="cxOiP">—</td><td><button type="button" class="cx-ibtn" id="cxOiGo" title="Agregar">${ICO.plus}</button></td></tr>`}
-      </tbody></table>
-      <div class="cx-recon"><div class="l"><span>Total factura</span><b>${money0(t)}</b></div><div class="l"><span>Detalle cargado</span><b>${money0(car)}</b></div><div class="cx-bar ${ok?'ok':''}"><i style="width:${t?Math.min(100,car/t*100):0}%"></i></div><div class="l"><span>Diferencia</span><b class="${ok?'cx-down':'cx-up'}">${ok?"Sin diferencia":money0(diffv)}</b></div></div></div>
-      <div class="cx-df">${comp?`<span style="flex:1;font-size:12.5px;color:var(--text-2)">Los costos de estos insumos ya impactan en Recetas y Precios.</span><button type="button" class="cx-btn" id="cxOEdit">${ICO.pen}Editar detalle</button>`:`<span style="flex:1;font-size:12.5px;color:var(--text-2)">${ok&&its.length?"El detalle coincide con la factura.":"Completá el detalle hasta que coincida con el total de la factura."}</span><button type="button" class="cx-btn pri" id="cxODone" ${ok&&its.length?"":"disabled"}>${ICO.ok}Marcar como completa</button>`}</div>`);
-    $("#cxDlProvIns").innerHTML=opts.map(i=>{ const p=presFor(i.id); return `<option value="${esc(i.nombre)}">${p?"bulto: "+esc(cfgPresLabel(p)):""}</option>`; }).join("");
-    const iN=$("#cxOiN",d), iB=$("#cxOiB",d), iT=$("#cxOiT",d);
-    if(iN){ const cur=()=>{ const ins=cfgData.items.find(x=>norm(x.nombre)===norm(iN.value)); const p=ins?presFor(ins.id):null; return {ins,p}; };
-      const pr=()=>{ const {ins,p}=cur(); const b=parseNum(iB.value), tt=parseNum(iT.value); $("#cxOiPres",d).textContent=ins&&!p?"Este insumo no tiene presentación: se toma 1 bulto = 1 un.":""; $("#cxOiPres",d).style.color=ins&&!p?"":"";
-        const q=ins&&b?b*(p?p.cantidad:1):null; $("#cxOiQ",d).textContent=q?`${fmtQ(q)} ${cfgUnLabel(p?p.unidad:"un")}`:(ins&&p?`1 bulto = ${cfgPresLabel(p)}`:"—"); $("#cxOiP",d).textContent=q&&tt?money(tt/q):"—"; };
-      iN.oninput=pr; iB.oninput=pr; iT.oninput=pr;
-      const add=async()=>{ const {ins,p}=cur(); const b=parseNum(iB.value), tt=parseNum(iT.value); if(!ins){ toast("Elegí un insumo de la lista","warn"); return; } if(!b||b<=0||!tt||tt<=0){ toast("Completá bultos y total","warn"); return; }
-        const row={orden_id:o.id,insumo_id:ins.id,insumo_nombre:ins.nombre,presentacion_id:p?p.id:null,bultos:b,cantidad:b*(p?p.cantidad:1),unidad:p?p.unidad:"un",total:tt,orden_index:ordItems(o).length,creado_por:uid()};
-        const {data,error}=await sb.from("cm_compra_items").insert(row).select().single(); if(error){ toast("No se pudo agregar","warn"); console.warn(error); return; }
-        D.items.push({...data,bultos:Number(data.bultos),cantidad:Number(data.cantidad),total:Number(data.total)}); draw(); renderCompras(); setTimeout(()=>{ const x=$("#cxOiN"); if(x) x.focus(); },0); };
-      $("#cxOiGo",d).onclick=add; iT.onkeydown=e=>{ if(e.key==="Enter") add(); }; if(!its.length) iN.focus(); }
-    $$("[data-idel]",d).forEach(b=>b.onclick=async()=>{ const {error}=await sb.from("cm_compra_items").delete().eq("id",b.dataset.idel); if(error){ toast("No se pudo quitar","warn"); return; } D.items=D.items.filter(x=>x.id!==b.dataset.idel); draw(); renderCompras(); });
-    const setEstado=async v=>{ const {error}=await sb.from("cm_compra_estado").upsert({orden_id:o.id,completa:v,modificado_por:uid(),modificado_fecha:new Date().toISOString()}); if(error){ toast("No se pudo guardar el estado","warn"); return false; } D.estado[o.id]=v; invalidateCosts(); return true; };
-    const dn=$("#cxODone",d); if(dn) dn.onclick=async()=>{ if(await setEstado(true)){ logCx("Completó la carga de una compra",`${o.id} · ${o.proveedor}`); draw(); renderCompras(); toast("Compra completa: costos actualizados"); } };
-    const ed=$("#cxOEdit",d); if(ed) ed.onclick=async()=>{ if(await setEstado(false)){ draw(); renderCompras(); } };
-  }; draw(); }
+/* ======================= DETALLE DE FACTURA =======================
+   Mismo modelo que la Carga de compras de La Fortaleza (pedido de Pancho, 07/10/2026):
+   cada ítem se carga con su $ de lista, bultos, impuestos de línea (IVA / IIBB / Internos, en % o $)
+   y descuentos de línea; a nivel factura hay impuestos generales (ej. percepción de IIBB), un
+   descuento general (sobre precio de lista, prorrateado entre los ítems y aplicado ANTES de los
+   impuestos de línea) y un justificativo de diferencia. La orden queda "Completa" sola cuando el
+   total calculado coincide con el de la factura (o la diferencia está justificada).
+   El insumo tiene que estar asignado a ese proveedor en Configuración › Insumos: de ahí salen la
+   cantidad por bulto y la unidad de medida. "total" de cada ítem = su costo propio (lista neta de
+   descuentos + impuestos de línea), que es lo que usan Recetas y Precios.
+   Tablas: cm_compra_items, cm_compra_ajustes. */
+const CI = { ordenId:null, provId:null, editing:null, newTax:[], newDesc:[], editTax:{}, editDesc:{} };
+const fmtMC = n=>"$"+Number(n||0).toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtNC = n=>Number(n||0).toLocaleString("es-AR",{maximumFractionDigits:3});
+const pd = s=>{ const n=parseNum(s); return n==null?0:n; };
+const ajDefault = ()=>({impuestos_generales:[], descuento_modo:null, descuento_valor:null, justificativo_tipo:null, justificativo_nota:null});
+function ajDe(ordenId){ return D.aj[ordenId] || ajDefault(); }
+function ajEnsure(ordenId){ if(!D.aj[ordenId]) D.aj[ordenId]=ajDefault(); return D.aj[ordenId]; }
+/* ---- fórmulas (idénticas a La Fortaleza) ---- */
+function ajMonto(e, base){ if(!e) return 0; return e.modo==="monto" ? (Number(e.valor)||0) : (Number(base||0)*((Number(e.valor)||0)/100)); }
+function sumAj(list, base){ return (list||[]).reduce((s,e)=>s+ajMonto(e,base),0); }
+function sumLista(items){ return (items||[]).reduce((s,it)=>s+Number(it.precio_lista||0),0); }
+function descGlobal(aj, base){ if(!aj||aj.descuento_valor==null||aj.descuento_valor==="") return 0; return ajMonto({modo:aj.descuento_modo, valor:aj.descuento_valor}, base); }
+function baseFact(it, items, aj){ const sl=sumLista(items), dg=descGlobal(aj, sl), li=Number(it.precio_lista||0); return li - ((dg&&sl>0)?dg*(li/sl):0); }
+function baseItem(it, items, aj){ const b=baseFact(it, items, aj); return b - sumAj(it.descuentos, b); }
+function lineTotal(it, items, aj){ const L=(items&&items.length)?items:[it]; const b=baseItem(it, L, aj); return b + sumAj(it.impuestos, b); }
+function subtotalItems(items, aj){ return (items||[]).reduce((s,it)=>s+lineTotal(it, items, aj),0); }
+function impGenMonto(aj, sub){ return sumAj(aj&&aj.impuestos_generales, sub); }
+function totalCalc(items, aj){ const s=subtotalItems(items, aj); return s + impGenMonto(aj, s); }
+const cantBulto = it=> it.cant_bulto!=null ? Number(it.cant_bulto) : (Number(it.bultos)>0 ? Number(it.cantidad)/Number(it.bultos) : 0);
+function computeRow(it, items, aj){ const bultos=Number(it.bultos)||0, cb=cantBulto(it); const precioBulto=bultos>0?Number(it.precio_lista||0)/bultos:0;
+  const tp=lineTotal(it, (items&&items.length)?items:[it], aj); const u=bultos*cb; return { precioBulto, totalPropio:tp, punit:u>0?tp/u:0 }; }
+function computeEstados(){ D.estado={}; D.ordenes.forEach(o=>{ const its=ordItems(o); if(!its.length){ D.estado[o.id]=false; return; } const aj=ajDe(o.id);
+  D.estado[o.id] = Math.abs(totalCalc(its, aj) - ordTotal(o)) < 1 || !!aj.justificativo_tipo; }); }
+
+/* ---- insumos del proveedor (presentaciones de Configuración › Insumos) ---- */
+function ciOpts(){ if(!CI.provId) return []; const by={}; cfgData.pres.filter(p=>p.proveedor_id===CI.provId).forEach(p=>(by[p.insumo_id]=by[p.insumo_id]||[]).push(p));
+  const out=[]; Object.keys(by).forEach(iid=>{ const ins=cfgIns(iid); if(!ins) return; by[iid].forEach(p=>out.push({label: by[iid].length>1?`${ins.nombre} · ${cfgPresLabel(p)}`:ins.nombre, ins, p})); });
+  return out.sort((a,b)=>cfgCmp(a.label,b.label)); }
+function ciMatch(name){ const n=norm(name); if(!n) return null; return ciOpts().find(o=>norm(o.label)===n)||null; }
+function ciLabelDe(it){ const o=ciOpts().find(x=>x.p.id===it.presentacion_id) || ciOpts().find(x=>x.ins.id===it.insumo_id); return o?o.label:((cfgIns(it.insumo_id)||{}).nombre||it.insumo_nombre||"(eliminado)"); }
+const ciItems = ()=>{ const o=D.ordenes.find(x=>x.id===CI.ordenId); return o?ordItems(o):[]; };
+const ciOrden = ()=>D.ordenes.find(x=>x.id===CI.ordenId);
+const $i = id=>document.getElementById(id);
+
+/* ---- impuestos y descuentos por ítem (ctx = "new" o id del ítem en edición) ---- */
+function taxArr(ctx){ return ctx==="new" ? CI.newTax : (CI.editTax[ctx] || (CI.editTax[ctx]=[])); }
+function descArr(ctx){ return ctx==="new" ? CI.newDesc : (CI.editDesc[ctx] || (CI.editDesc[ctx]=[])); }
+function plByCtx(ctx){ const el=$i(ctx==="new"?"ciNewPrecio":`ei_pl_${ctx}`); return el?pd(el.value):0; }
+function baseNetaCtx(ctx){ const draft={precio_lista:plByCtx(ctx)}; const items = ctx==="new" ? [...ciItems(), draft] : ciItems().map(it=>it.id===ctx?draft:it); return baseFact(draft, items, ajDe(CI.ordenId)); }
+function baseNetaTrasDescCtx(ctx){ const b=baseNetaCtx(ctx); return b - sumAj(descArr(ctx), b); }
+function taxChips(list, ctx, editable, base){
+  if(!(list||[]).length) return editable ? "" : `<span class="ci-um-lbl">—</span>`;
+  return list.map((t,i)=>{ const monto=t.modo==="monto"; const label=monto?fmtMC(t.valor):(fmtNC(t.valor)+"%"); const sub=monto?"":` <span class="ci-tax-monto">(${fmtMC(ajMonto(t,base))})</span>`;
+    if(!editable) return `<span class="ci-tax-chip ci-tax-chip-view">${esc(t.tipo)} ${label}${sub}</span>`;
+    return `<span class="ci-tax-chip">${esc(t.tipo)} ${label}${sub} <button type="button" onclick="cxCI.removeTax('${ctx}',${i})" title="Quitar">×</button></span>`; }).join(""); }
+function descChips(list, ctx, editable, base){
+  if(!(list||[]).length) return editable ? "" : `<span class="ci-um-lbl">—</span>`;
+  return list.map((d,i)=>{ const monto=d.modo==="monto"; const label=monto?fmtMC(d.valor):(fmtNC(d.valor)+"%"); const sub=monto?"":` <span class="ci-tax-monto">(${fmtMC(ajMonto(d,base))})</span>`; const nm=esc(d.concepto||"Descuento");
+    if(!editable) return `<span class="ci-tax-chip ci-tax-chip-view ci-desc-chip">${nm} ${label}${sub}</span>`;
+    return `<span class="ci-tax-chip ci-desc-chip">${nm} ${label}${sub} <button type="button" onclick="cxCI.removeDesc('${ctx}',${i})" title="Quitar">×</button></span>`; }).join(""); }
+function taxCellHTML(ctx){ return `<div class="ci-tax-chips" id="ciTaxChips_${ctx}">${taxChips(taxArr(ctx),ctx,true,baseNetaTrasDescCtx(ctx))}</div>
+  <div class="ci-tax-adder"><select id="ciTaxTipo_${ctx}" onchange="cxCI.onTaxTipo('${ctx}')"><option value="IVA">IVA</option><option value="IIBB">IIBB</option><option value="Internos">Internos</option></select>
+  <select id="ciTaxIVAVal_${ctx}"><option value="21">21%</option><option value="10.5">10,5%</option></select>
+  <select id="ciTaxModo_${ctx}" style="display:none;" onchange="cxCI.onTaxModo('${ctx}')"><option value="pct">%</option><option value="monto">$</option></select>
+  <input type="text" id="ciTaxManualVal_${ctx}" placeholder="%" inputmode="decimal" style="display:none;">
+  <button type="button" class="ci-tax-add-btn" onclick="cxCI.addTax('${ctx}')" title="Agregar impuesto">+</button></div>`; }
+function descCellHTML(ctx){ return `<div class="ci-tax-chips" id="ciDescChips_${ctx}">${descChips(descArr(ctx),ctx,true,baseNetaCtx(ctx))}</div>
+  <div class="ci-tax-adder"><input type="text" id="ciDescConcepto_${ctx}" placeholder="Concepto" style="width:80px;">
+  <select id="ciDescModo_${ctx}" onchange="cxCI.onDescModo('${ctx}')"><option value="pct">%</option><option value="monto">$</option></select>
+  <input type="text" id="ciDescVal_${ctx}" placeholder="%" inputmode="decimal">
+  <button type="button" class="ci-tax-add-btn" onclick="cxCI.addDesc('${ctx}')" title="Agregar descuento">+</button></div>`; }
+function refreshTax(ctx){ const el=$i(`ciTaxChips_${ctx}`); if(el) el.innerHTML=taxChips(taxArr(ctx),ctx,true,baseNetaTrasDescCtx(ctx)); }
+function refreshDesc(ctx){ const el=$i(`ciDescChips_${ctx}`); if(el) el.innerHTML=descChips(descArr(ctx),ctx,true,baseNetaCtx(ctx)); }
+const recalcCtx = ctx=>ctx==="new"?recalcNew():recalcEdit(ctx);
+
+/* ---- vista ---- */
+function openOrden(id){ const o=D.ordenes.find(x=>x.id===id); if(!o) return; closeModal(); closePop();
+  const prov=provByName(o.proveedor); CI.ordenId=id; CI.provId=prov?prov.id:null; CI.editing=null; CI.newTax=[]; CI.newDesc=[]; CI.editTax={}; CI.editDesc={};
+  const adj=(Array.isArray(o.adjuntos)?o.adjuntos.filter(f=>f&&f.path):[]); if(!adj.length&&o.adjunto_path) adj.push({nombre:o.adjunto_nombre||"Factura",path:o.adjunto_path});
+  CI.adj=adj;
+  const v=$("#cxOrdView");
+  v.innerHTML=`<div class="screen-header">
+      <div class="back-btn" onclick="cxCI.volver()" title="Volver a Carga de compras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div style="flex:1;min-width:0;"><h1 style="font-size:20px;margin:0;font-weight:800;">${esc(o.id)} · ${esc(o.proveedor||"—")}</h1><div class="sub" style="font-size:12.5px;color:var(--text-2);">${esc(o.concepto||"")}${o.rubro?" — "+esc(o.rubro):""} · ${esc(o.comprobante_tipo||"")}${o.comprobante?" N° "+esc(o.comprobante):""} · ${fmtDL(ordFecha(o))}</div></div>
+      ${adj.map((f,i)=>`<a class="factura-link" onclick="cxCI.verAdjunto(${i})" title="${esc(f.nombre||"")}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>${adj.length>1?"Ver "+esc(f.nombre||("adjunto "+(i+1))):"Ver factura / presupuesto"}</a>`).join("")}
+    </div>
+    <div class="screen-scroll" style="display:flex;flex-direction:column;min-height:0;">
+      <div id="cxCiWrap">
+        <p class="config-hint">El insumo cargado tiene que coincidir con uno asignado a este proveedor en Configuración › Insumos — de ahí se toman automáticamente su Cantidad y Unidad de medida.${prov?"":` <b style="color:#B22A32">No encontré a “${esc(o.proveedor)}” en Configuración › Proveedores.</b>`}</p>
+        <div class="ci-ajustes">
+          <div class="ci-ajustes-col"><div class="ci-ajustes-title">Impuestos generales de la factura</div>
+            <div class="ci-ajustes-hint">Se calculan sobre el subtotal de ítems cargados e impactan el total de la factura (no el costo unitario de cada ítem). Ej.: percepción de IIBB.</div>
+            <div class="ci-tax-chips" id="ciImpGenChips"></div>
+            <div class="ci-tax-adder"><input type="text" id="ciImpGenNombre" placeholder="Nombre (ej. Percepción IIBB)" style="width:150px;">
+              <select id="ciImpGenModo" onchange="cxCI.onImpGenModo()"><option value="pct">%</option><option value="monto">$</option></select>
+              <input type="text" id="ciImpGenVal" placeholder="%" inputmode="decimal">
+              <button type="button" class="ci-tax-add-btn" onclick="cxCI.addImpGen()" title="Agregar impuesto general">+</button></div></div>
+          <div class="ci-ajustes-col"><div class="ci-ajustes-title">Descuento de la factura</div>
+            <div class="ci-ajustes-hint">Se calcula sobre el precio de lista (sin impuestos) y se prorratea proporcionalmente entre todos los ítems. Se aplica antes que el IVA/IIBB/Internos de cada ítem — reduce el precio de lista y después se calculan los impuestos sobre ese valor ya descontado.</div>
+            <div id="ciDescFacturaChip"></div>
+            <div class="ci-tax-adder" id="ciDescFacturaAdder"><select id="ciDescFacturaModo" onchange="cxCI.onDescFactModo()"><option value="pct">%</option><option value="monto">$</option></select>
+              <input type="text" id="ciDescFacturaVal" placeholder="%" inputmode="decimal">
+              <button type="button" class="ci-tax-add-btn" onclick="cxCI.setDescFact()" title="Aplicar descuento">✓</button></div></div>
+          <div class="ci-ajustes-col"><div class="ci-ajustes-title">Justificativo de diferencia</div>
+            <div class="ci-ajustes-hint">Si cargaste algún valor distinto al real de la factura (ej. porque el proveedor bonificó productos y necesitás que el costo unitario de la receta quede actualizado igual), dejá aclarado el motivo acá. Sirve para distinguir, en el listado de facturas, cuáles diferencias son reales y cuáles son por este tipo de ajuste intencional.</div>
+            <div id="ciJustifChip"></div>
+            <div class="ci-tax-adder" id="ciJustifAdder" style="flex-wrap:wrap;"><select id="ciJustifTipo" onchange="cxCI.onJustifTipo()"><option value="">Motivo…</option><option value="bonificados">Artículos bonificados</option><option value="otro">Otro</option></select>
+              <input type="text" id="ciJustifNota" placeholder="Detalle (opcional)" style="flex:1;min-width:140px;">
+              <button type="button" class="ci-tax-add-btn" onclick="cxCI.setJustif()" title="Guardar justificativo">✓</button></div></div>
+        </div>
+        <div class="ci-table-scroll"><div class="ci-table">
+          <div class="ci-head-row"><div>Item</div><div>$ Lista</div><div>Bultos</div><div>$/Bulto</div><div>Impuestos</div><div>Descuentos</div><div>#/Bulto</div><div>[un]</div><div>$/[un]</div><div>[un]</div><div></div></div>
+          <div id="costeoItemsList"></div>
+          <div class="ci-row ci-add-row" id="ciAddRow">
+            <div class="ci-cell-item"><button type="button" class="ci-add-btn-mini" onclick="cxCI.addItem()" title="Agregar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+              <div class="ci-cell-item-inputs"><input type="text" id="ciNewNomenclatura" placeholder="Insumo…" list="cxDlProvIns" autocomplete="off" oninput="cxCI.onNewName()" onchange="cxCI.onNewName()">
+              <div class="ci-warn" id="ciNewNomenclaturaWarn" style="display:none;">No coincide con ningún insumo asignado a este proveedor</div></div></div>
+            <input type="text" id="ciNewPrecio" placeholder="$" inputmode="decimal" oninput="cxCI.recalcNew()">
+            <input type="text" id="ciNewBultos" placeholder="1" inputmode="decimal" oninput="cxCI.recalcNew()">
+            <div class="ci-auto" id="ciNewPrecioBulto">$0</div>
+            <div class="ci-tax-cell" id="ciTaxCellWrap_new"></div>
+            <div class="ci-tax-cell" id="ciDescCellWrap_new"></div>
+            <div class="ci-auto" id="ciNewCantidadAuto">—</div>
+            <div class="ci-auto ci-um-lbl" id="ciNewUMAuto">—</div>
+            <div class="ci-auto ci-punit" id="ciNewPunit">$0</div>
+            <div class="ci-auto ci-um-lbl" id="ciNewUMAuto2">—</div>
+            <button type="button" class="ci-add-btn" onclick="cxCI.addItem()" title="Agregar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          </div>
+        </div></div>
+        <div class="ci-summary">
+          <div class="cis-item" title="Calculado sobre el precio de lista de los ítems, sin impuestos">Descuento de factura aplicado<strong id="ciDescGlobalMonto">$0</strong></div>
+          <div class="cis-item" title="Precio de lista ya neto del descuento de factura, más los impuestos/descuentos propios de cada ítem (IVA, IIBB, Internos)">Suma de ítems (neta, con impuestos)<strong id="ciSumaItems">$0</strong></div>
+          <div class="cis-item">+ Impuestos generales<strong id="ciImpGenMonto">$0</strong></div>
+          <div class="cis-item">Total calculado<strong id="ciTotalCalculado">$0</strong></div>
+          <div class="cis-item">Total de la factura<strong id="ciTotalFactura">$0</strong></div>
+          <div class="cis-item">Diferencia<strong id="ciDiferencia">$0</strong></div>
+          <div id="ciReconBadge"></div>
+        </div>
+      </div>
+    </div>`;
+  $("#cxDlProvIns").innerHTML=ciOpts().map(x=>`<option value="${esc(x.label)}">${esc(cfgPresLabel(x.p))}</option>`).join("");
+  $("#cxPaneCompras").classList.add("ord-open"); v.hidden=false;
+  initAddRow(); renderAjustes(); renderItems();
+  if(!ciItems().length) setTimeout(()=>{ const x=$i("ciNewNomenclatura"); if(x) x.focus(); },0); }
+function volverDeOrden(){ CI.ordenId=null; CI.editing=null; const v=$("#cxOrdView"); if(v){ v.hidden=true; v.innerHTML=""; } $("#cxPaneCompras").classList.remove("ord-open"); if(loaded&&ST.tab==="compras") renderCompras(); }
+async function verAdjunto(i){ const f=(CI.adj||[])[i]; if(!f||!f.path) return; const {data,error}=await sb.storage.from(ADJUNTOS_BUCKET).createSignedUrl(f.path,3600);
+  if(error||!data){ toast("No se pudo abrir el archivo","warn"); return; } window.open(data.signedUrl,"_blank","noopener"); }
+
+/* ---- ajustes de la factura ---- */
+function renderAjustes(){ const aj=ajDe(CI.ordenId), items=ciItems(); const sub=subtotalItems(items,aj), sl=sumLista(items);
+  const ch=$i("ciImpGenChips"); if(ch) ch.innerHTML=(aj.impuestos_generales||[]).map((t,i)=>{ const monto=t.modo==="monto"; const label=monto?fmtMC(t.valor):(fmtNC(t.valor)+"%"); const s=monto?"":` <span class="ci-tax-monto">(${fmtMC(ajMonto(t,sub))})</span>`;
+    return `<span class="ci-tax-chip">${esc(t.nombre)} ${label}${s} <button type="button" onclick="cxCI.removeImpGen(${i})" title="Quitar">×</button></span>`; }).join("");
+  const dc=$i("ciDescFacturaChip"), da=$i("ciDescFacturaAdder");
+  if(dc&&da){ if(aj.descuento_valor!=null&&aj.descuento_valor!==""){ const monto=aj.descuento_modo==="monto"; const label=monto?fmtMC(aj.descuento_valor):(fmtNC(aj.descuento_valor)+"%"); const s=monto?"":` (${fmtMC(ajMonto({modo:"pct",valor:aj.descuento_valor},sl))})`;
+      dc.innerHTML=`<span class="ci-tax-chip ci-desc-chip">Descuento ${label}${s} <button type="button" onclick="cxCI.quitarDescFact()" title="Quitar">×</button></span>`; da.style.display="none"; }
+    else { dc.innerHTML=""; da.style.display=""; } }
+  const jc=$i("ciJustifChip"), ja=$i("ciJustifAdder");
+  if(jc&&ja){ if(aj.justificativo_tipo){ jc.innerHTML=`<span class="ci-tax-chip ci-desc-chip">${esc(justifLabel(aj.justificativo_tipo))}${aj.justificativo_nota?" — "+esc(aj.justificativo_nota):""} <button type="button" onclick="cxCI.quitarJustif()" title="Quitar">×</button></span>`; ja.style.display="none"; }
+    else { jc.innerHTML=""; ja.style.display=""; } } }
+const justifLabel = t=>t==="bonificados"?"Artículos bonificados":(t==="otro"?"Otro motivo":"");
+async function saveAjustes(){ const a=ajDe(CI.ordenId);
+  const {error}=await sb.from("cm_compra_ajustes").upsert({ orden_id:CI.ordenId, impuestos_generales:a.impuestos_generales||[], descuento_modo:a.descuento_modo||null,
+    descuento_valor:(a.descuento_valor!=null&&a.descuento_valor!=="")?a.descuento_valor:null, justificativo_tipo:a.justificativo_tipo||null,
+    justificativo_nota:(a.justificativo_nota&&a.justificativo_nota.trim())?a.justificativo_nota.trim():null, modificado_por:uid(), modificado_fecha:new Date().toISOString() });
+  if(error){ toast("No se pudieron guardar los ajustes de la factura","warn"); console.warn(error); return false; } return true; }
+/* El descuento de factura (y el alta/baja de ítems cuando hay descuento) cambia el costo propio de
+   cada ítem: se recalcula y se guarda "total" de los que cambiaron. */
+async function syncTotales(){ const o=ciOrden(); if(!o) return; const its=ordItems(o), aj=ajDe(o.id); const ups=[];
+  its.forEach(it=>{ const t=lineTotal(it,its,aj); if(Math.abs(t-Number(it.total||0))>0.005){ it.total=t; ups.push(sb.from("cm_compra_items").update({total:t}).eq("id",it.id)); } });
+  if(ups.length){ const rs=await Promise.all(ups); if(rs.some(r=>r.error)) toast("No se pudieron actualizar algunos costos","warn"); } }
+async function afterChange(){ await syncTotales(); computeEstados(); invalidateCosts(); updateComprasCnt(); }
+
+/* ---- fila de alta ---- */
+function initAddRow(){ const w=$i("ciTaxCellWrap_new"); if(w) w.innerHTML=taxCellHTML("new"); const d=$i("ciDescCellWrap_new"); if(d) d.innerHTML=descCellHTML("new"); onNewName(); }
+function onNewName(){ const nm=$i("ciNewNomenclatura").value.trim(), m=ciMatch(nm); const un=m?cfgUnLabel(m.p.unidad):"—";
+  $i("ciNewCantidadAuto").textContent=m?fmtNC(m.p.cantidad):"—"; $i("ciNewUMAuto").textContent=un; $i("ciNewUMAuto2").textContent=un;
+  $i("ciNewNomenclaturaWarn").style.display=(nm&&!m)?"":"none"; recalcNew(); }
+function recalcNew(){ const m=ciMatch($i("ciNewNomenclatura").value); const h={precio_lista:pd($i("ciNewPrecio").value), bultos:pd($i("ciNewBultos").value), cant_bulto:m?Number(m.p.cantidad)||0:0, impuestos:CI.newTax, descuentos:CI.newDesc};
+  const r=computeRow(h,[...ciItems(),h],ajDe(CI.ordenId)); $i("ciNewPrecioBulto").textContent=fmtMC(r.precioBulto); $i("ciNewPunit").textContent=fmtMC(r.punit); refreshTax("new"); refreshDesc("new"); }
+async function addItem(){ if(!CI.ordenId) return; const nm=$i("ciNewNomenclatura").value.trim(), precio=pd($i("ciNewPrecio").value), bultos=pd($i("ciNewBultos").value)||1;
+  if(!nm){ toast("Escribí el nombre del insumo","warn"); return; } if(!precio){ toast("Cargá el precio de lista","warn"); return; }
+  const m=ciMatch(nm); if(!m){ toast("Ese insumo no está asignado a este proveedor. Asignalo primero en Configuración › Insumos.","warn"); return; }
+  const o=ciOrden(); const draft={precio_lista:precio,bultos,cant_bulto:Number(m.p.cantidad)||0,impuestos:CI.newTax,descuentos:CI.newDesc};
+  const row={ orden_id:o.id, insumo_id:m.ins.id, insumo_nombre:m.ins.nombre, presentacion_id:m.p.id, bultos, cantidad:bultos*(Number(m.p.cantidad)||0), unidad:m.p.unidad,
+    precio_lista:precio, impuestos:CI.newTax, descuentos:CI.newDesc, total:lineTotal(draft,[...ordItems(o),draft],ajDe(o.id)),
+    orden_index:ordItems(o).reduce((mx,x)=>Math.max(mx,Number(x.orden_index)||0),-1)+1, creado_por:uid() };
+  const {data,error}=await sb.from("cm_compra_items").insert(row).select().single(); if(error){ toast("No se pudo agregar el ítem","warn"); console.warn(error); return; }
+  D.items.push(mapItem(data)); CI.newTax=[]; CI.newDesc=[]; $i("ciNewNomenclatura").value=""; $i("ciNewPrecio").value=""; $i("ciNewBultos").value="";
+  await afterChange(); initAddRow(); renderAjustes(); renderItems(); logCx("Cargó un ítem de compra",`${m.ins.nombre} — orden ${o.id}`); toast("Ítem agregado correctamente");
+  setTimeout(()=>{ const x=$i("ciNewNomenclatura"); if(x) x.focus(); },0); }
+
+/* ---- ítems cargados ---- */
+function renderItems(){ const list=ciItems(), aj=ajDe(CI.ordenId), el=$i("costeoItemsList"); if(!el) return;
+  if(!list.length){ el.innerHTML=`<div class="empty-mini" style="padding:16px;">Todavía no cargaste ítems para esta orden.</div>`; updateSummary(); return; }
+  el.innerHTML=list.map(it=>{ const un=esc(cfgUnLabel(it.unidad)||"—");
+    if(CI.editing===it.id) return `<div class="ci-row ci-row-editing">
+      <div class="ci-cell-item"><button type="button" class="ci-add-btn-mini" onclick="cxCI.saveItem('${it.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <div class="ci-cell-item-inputs"><input id="ei_nom_${it.id}" value="${esc(ciLabelDe(it))}" list="cxDlProvIns" autocomplete="off" oninput="cxCI.recalcEdit('${it.id}')" onchange="cxCI.recalcEdit('${it.id}')">
+        <div class="ci-warn" id="ei_warn_${it.id}" style="display:none;">No coincide con ningún insumo de este proveedor</div></div></div>
+      <input id="ei_pl_${it.id}" value="${Number(it.precio_lista||0)}" inputmode="decimal" oninput="cxCI.recalcEdit('${it.id}')">
+      <input id="ei_bu_${it.id}" value="${Number(it.bultos||0)}" inputmode="decimal" oninput="cxCI.recalcEdit('${it.id}')">
+      <div class="ci-auto" id="ei_precioBulto_${it.id}">$0</div>
+      <div class="ci-tax-cell" id="ciTaxCellWrap_${it.id}"></div>
+      <div class="ci-tax-cell" id="ciDescCellWrap_${it.id}"></div>
+      <div class="ci-auto" id="ei_cantidad_${it.id}">—</div>
+      <div class="ci-auto ci-um-lbl" id="ei_um_${it.id}">—</div>
+      <div class="ci-auto ci-punit" id="ei_punit_${it.id}">$0</div>
+      <div class="ci-auto ci-um-lbl" id="ei_um2_${it.id}">—</div>
+      <div class="ci-actions"><button class="icon-btn" onclick="cxCI.saveItem('${it.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="icon-btn" onclick="cxCI.cancelEdit()" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>`;
+    const r=computeRow(it,list,aj), bf=baseFact(it,list,aj), bi=baseItem(it,list,aj);
+    return `<div class="ci-row">
+      <div>${esc(ciLabelDe(it))}</div><div>${fmtMC(it.precio_lista)}</div><div>${fmtNC(it.bultos)}</div><div class="ci-auto">${fmtMC(r.precioBulto)}</div>
+      <div class="ci-tax-cell">${taxChips(it.impuestos||[],it.id,false,bi)}</div><div class="ci-tax-cell">${descChips(it.descuentos||[],it.id,false,bf)}</div>
+      <div class="ci-auto">${fmtNC(cantBulto(it))}</div><div class="ci-auto ci-um-lbl">${un}</div><div class="ci-auto ci-punit">${fmtMC(r.punit)}</div><div class="ci-auto ci-um-lbl">${un}</div>
+      <div class="ci-actions"><button class="icon-btn" onclick="cxCI.startEdit('${it.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
+        <button class="icon-btn del-btn" onclick="cxCI.delItem('${it.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div></div>`; }).join("");
+  if(CI.editing){ const it=list.find(x=>x.id===CI.editing); if(it){ CI.editTax[it.id]=JSON.parse(JSON.stringify(it.impuestos||[])); CI.editDesc[it.id]=JSON.parse(JSON.stringify(it.descuentos||[]));
+    $i(`ciTaxCellWrap_${it.id}`).innerHTML=taxCellHTML(it.id); $i(`ciDescCellWrap_${it.id}`).innerHTML=descCellHTML(it.id); recalcEdit(it.id); } }
+  updateSummary(); }
+function recalcEdit(id){ const nm=$i(`ei_nom_${id}`).value.trim(), m=ciMatch(nm);
+  const draft={id, precio_lista:pd($i(`ei_pl_${id}`).value), bultos:pd($i(`ei_bu_${id}`).value), cant_bulto:m?Number(m.p.cantidad)||0:0, impuestos:CI.editTax[id]||[], descuentos:CI.editDesc[id]||[]};
+  const r=computeRow(draft, ciItems().map(it=>it.id===id?draft:it), ajDe(CI.ordenId)); const un=m?cfgUnLabel(m.p.unidad):"—";
+  $i(`ei_precioBulto_${id}`).textContent=fmtMC(r.precioBulto); $i(`ei_cantidad_${id}`).textContent=m?fmtNC(m.p.cantidad):"—"; $i(`ei_um_${id}`).textContent=un; $i(`ei_um2_${id}`).textContent=un;
+  $i(`ei_punit_${id}`).textContent=fmtMC(r.punit); $i(`ei_warn_${id}`).style.display=(nm&&!m)?"":"none"; refreshTax(id); refreshDesc(id); }
+function updateSummary(){ const o=ciOrden(); if(!o) return; const list=ciItems(), aj=ajDe(o.id); const dg=descGlobal(aj,sumLista(list)), sub=subtotalItems(list,aj), ig=impGenMonto(aj,sub), tc=sub+ig, tf=ordTotal(o), d=tc-tf;
+  $i("ciSumaItems").textContent=fmtMC(sub); $i("ciImpGenMonto").textContent=fmtMC(ig); $i("ciDescGlobalMonto").textContent=fmtMC(dg); $i("ciTotalCalculado").textContent=fmtMC(tc); $i("ciTotalFactura").textContent=fmtMC(tf); $i("ciDiferencia").textContent=fmtMC(d);
+  const b=$i("ciReconBadge"); if(!list.length) b.innerHTML=`<span class="recon-badge recon-pending">Sin cargar</span>`;
+  else if(Math.abs(d)<1) b.innerHTML=`<span class="recon-badge recon-ok">✓ Coincide con la factura</span>`;
+  else if(aj.justificativo_tipo){ const mo=justifLabel(aj.justificativo_tipo); b.innerHTML=`<span class="recon-badge recon-info" title="${esc(mo)}${aj.justificativo_nota?" — "+esc(aj.justificativo_nota):""}">Diferencia justificada: ${esc(mo)}</span>`; }
+  else b.innerHTML=`<span class="recon-badge recon-bad">No coincide con la factura</span>`; }
+async function saveItem(id){ const nm=$i("ei_nom_"+id).value.trim(), precio=pd($i("ei_pl_"+id).value), bultos=pd($i("ei_bu_"+id).value)||1;
+  if(!nm||!precio){ toast("Completá el insumo y el precio de lista","warn"); return; }
+  const m=ciMatch(nm); if(!m){ toast("Ese insumo no está asignado a este proveedor. Asignalo primero en Configuración › Insumos.","warn"); return; }
+  const o=ciOrden(); const impuestos=CI.editTax[id]||[], descuentos=CI.editDesc[id]||[];
+  const draft={id,precio_lista:precio,bultos,cant_bulto:Number(m.p.cantidad)||0,impuestos,descuentos};
+  const upd={ insumo_id:m.ins.id, insumo_nombre:m.ins.nombre, presentacion_id:m.p.id, precio_lista:precio, bultos, cantidad:bultos*(Number(m.p.cantidad)||0), unidad:m.p.unidad, impuestos, descuentos,
+    total:lineTotal(draft, ordItems(o).map(it=>it.id===id?draft:it), ajDe(o.id)), modificado_por:uid(), modificado_fecha:new Date().toISOString() };
+  const {error}=await sb.from("cm_compra_items").update(upd).eq("id",id); if(error){ toast("No se pudo actualizar el ítem","warn"); console.warn(error); return; }
+  const it=D.items.find(x=>x.id===id); if(it) Object.assign(it, upd);
+  CI.editing=null; delete CI.editTax[id]; delete CI.editDesc[id]; await afterChange(); renderAjustes(); renderItems(); toast("Ítem actualizado correctamente"); }
+function delItem(id){ const it=D.items.find(x=>x.id===id); if(!it) return;
+  const s=modal(`<div class="cx-mh"><h3>¿Eliminar este ítem?</h3></div><div class="cx-mb"><p style="margin:0;font-size:13px;color:var(--text-2)">Vas a eliminar “${esc(ciLabelDe(it))}” de esta orden. Esta acción no se puede deshacer.</p></div>
+    <div class="cx-mf"><button type="button" class="cx-btn" data-close>Cancelar</button><button type="button" class="cx-btn pri" id="cxCiDelOk" style="background:#C23434;border-color:#C23434">Eliminar</button></div>`);
+  $("#cxCiDelOk",s).onclick=async()=>{ const {error}=await sb.from("cm_compra_items").delete().eq("id",id); if(error){ toast("No se pudo eliminar el ítem","warn"); return; }
+    closeModal(); D.items=D.items.filter(x=>x.id!==id); if(CI.editing===id) CI.editing=null; await afterChange(); renderAjustes(); renderItems(); logCx("Eliminó un ítem de compra",`${it.insumo_nombre||""} — orden ${it.orden_id}`); toast("Ítem eliminado"); }; }
+
+window.cxCI = {
+  volver: volverDeOrden, verAdjunto, recalcNew, onNewName, addItem, recalcEdit, saveItem, delItem,
+  startEdit(id){ CI.editing=id; renderItems(); },
+  cancelEdit(){ if(CI.editing){ delete CI.editTax[CI.editing]; delete CI.editDesc[CI.editing]; } CI.editing=null; renderItems(); },
+  onTaxTipo(ctx){ const iva=$i(`ciTaxTipo_${ctx}`).value==="IVA"; $i(`ciTaxIVAVal_${ctx}`).style.display=iva?"":"none"; $i(`ciTaxModo_${ctx}`).style.display=iva?"none":""; $i(`ciTaxManualVal_${ctx}`).style.display=iva?"none":""; if(!iva) cxCI.onTaxModo(ctx); },
+  onTaxModo(ctx){ $i(`ciTaxManualVal_${ctx}`).placeholder=$i(`ciTaxModo_${ctx}`).value==="monto"?"$":"%"; },
+  onDescModo(ctx){ $i(`ciDescVal_${ctx}`).placeholder=$i(`ciDescModo_${ctx}`).value==="monto"?"$":"%"; },
+  addTax(ctx){ const tipo=$i(`ciTaxTipo_${ctx}`).value; let modo="pct", valor; if(tipo==="IVA") valor=Number($i(`ciTaxIVAVal_${ctx}`).value); else { modo=$i(`ciTaxModo_${ctx}`).value; valor=pd($i(`ciTaxManualVal_${ctx}`).value); }
+    if(!valor){ toast("Cargá el valor del impuesto","warn"); return; } taxArr(ctx).push({tipo,valor,modo}); const mv=$i(`ciTaxManualVal_${ctx}`); if(mv) mv.value=""; refreshTax(ctx); recalcCtx(ctx); },
+  removeTax(ctx,i){ taxArr(ctx).splice(i,1); refreshTax(ctx); recalcCtx(ctx); },
+  addDesc(ctx){ const concepto=$i(`ciDescConcepto_${ctx}`).value.trim(), modo=$i(`ciDescModo_${ctx}`).value, valor=pd($i(`ciDescVal_${ctx}`).value);
+    if(!valor){ toast("Cargá el valor del descuento","warn"); return; } descArr(ctx).push({concepto:concepto||"Descuento",valor,modo}); $i(`ciDescConcepto_${ctx}`).value=""; $i(`ciDescVal_${ctx}`).value=""; refreshDesc(ctx); refreshTax(ctx); recalcCtx(ctx); },
+  removeDesc(ctx,i){ descArr(ctx).splice(i,1); refreshDesc(ctx); refreshTax(ctx); recalcCtx(ctx); },
+  onImpGenModo(){ $i("ciImpGenVal").placeholder=$i("ciImpGenModo").value==="monto"?"$":"%"; },
+  onDescFactModo(){ $i("ciDescFacturaVal").placeholder=$i("ciDescFacturaModo").value==="monto"?"$":"%"; },
+  onJustifTipo(){ $i("ciJustifNota").placeholder=$i("ciJustifTipo").value==="otro"?"Detalle del motivo":"Detalle (opcional)"; },
+  async addImpGen(){ const nombre=$i("ciImpGenNombre").value.trim(), modo=$i("ciImpGenModo").value, valor=pd($i("ciImpGenVal").value);
+    if(!nombre){ toast("Escribí el nombre del impuesto","warn"); return; } if(!valor){ toast("Cargá el valor del impuesto","warn"); return; }
+    const a=ajEnsure(CI.ordenId); a.impuestos_generales=[...(a.impuestos_generales||[]),{nombre,modo,valor}]; if(!await saveAjustes()){ a.impuestos_generales.pop(); return; }
+    $i("ciImpGenNombre").value=""; $i("ciImpGenVal").value=""; await afterChange(); renderAjustes(); updateSummary(); },
+  async removeImpGen(i){ const a=ajEnsure(CI.ordenId); const prev=a.impuestos_generales.slice(); a.impuestos_generales.splice(i,1); if(!await saveAjustes()){ a.impuestos_generales=prev; return; } await afterChange(); renderAjustes(); updateSummary(); },
+  async setDescFact(){ const modo=$i("ciDescFacturaModo").value, valor=pd($i("ciDescFacturaVal").value); if(!valor){ toast("Cargá el valor del descuento","warn"); return; }
+    const a=ajEnsure(CI.ordenId); a.descuento_modo=modo; a.descuento_valor=valor; if(!await saveAjustes()) return; $i("ciDescFacturaVal").value=""; await afterChange(); renderAjustes(); renderItems(); },
+  async quitarDescFact(){ const a=ajEnsure(CI.ordenId); a.descuento_modo=null; a.descuento_valor=null; if(!await saveAjustes()) return; await afterChange(); renderAjustes(); renderItems(); },
+  async setJustif(){ const tipo=$i("ciJustifTipo").value, nota=$i("ciJustifNota").value.trim(); if(!tipo){ toast("Elegí un motivo","warn"); return; }
+    const a=ajEnsure(CI.ordenId); a.justificativo_tipo=tipo; a.justificativo_nota=nota||null; if(!await saveAjustes()) return; $i("ciJustifNota").value=""; $i("ciJustifTipo").value=""; await afterChange(); renderAjustes(); updateSummary(); },
+  async quitarJustif(){ const a=ajEnsure(CI.ordenId); a.justificativo_tipo=null; a.justificativo_nota=null; if(!await saveAjustes()) return; await afterChange(); renderAjustes(); updateSummary(); }
+};
 
 /* ---------------- enlaces ---------------- */
 let bound=false;
