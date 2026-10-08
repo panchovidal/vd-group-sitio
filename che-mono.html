@@ -2011,6 +2011,87 @@
     #arPrint .ar-ch-xsub{font-size:8px;}
     #arPrint .arp-foot{margin-top:18px;padding-top:8px;border-top:1px solid #E4E6F1;font-size:8.5px;color:#9498B8;line-height:1.5;}
   }
+  /* ---- Pagos: buscador de proveedores (08/10/2026) ---- */
+  .pgc-list{position:fixed;z-index:9999;display:none;background:#fff;border:1px solid var(--border,#E3E6EF);border-radius:12px;box-shadow:0 14px 34px rgba(2,11,45,.18);overflow:auto;padding:5px;}
+  .pgc-list.show{display:block;}
+  .pgc-it{padding:7px 10px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .pgc-it b{font-size:13px;color:var(--navy,#0A1A4A);font-weight:700;}
+  .pgc-it span{font-size:11px;color:var(--text-3,#8A90A6);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pgc-it.on,.pgc-it:hover{background:#EEF3FD;}
+  .pgc-it mark{background:#FFE9A8;color:inherit;border-radius:2px;padding:0 1px;}
+  .pgc-empty{padding:10px 12px;font-size:12px;color:var(--text-3,#8A90A6);font-weight:600;}
+  #fld-nProveedor:focus-within .rl-warn, #fld-fProveedor:focus-within .rl-warn{display:none !important;}
+  /* ---- Costeo: lista de impuestos generales (08/10/2026) ---- */
+  .igc-sel{max-width:190px;}
+  .ci-tax-adder select.igc-sel{width:168px !important;}
+  .ci-tax-adder #ciImpGenModo{width:52px;}
+  .igc-gear{width:24px;height:24px;border-radius:6px;border:1px solid var(--border,#E3E6EF);background:#fff;color:var(--text-2,#5B6478);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0;}
+  .igc-gear:hover{background:#F1F2FA;color:var(--navy,#0A1A4A);}
+  .igc-gear svg{width:13px;height:13px;}
+  .igc-ov{position:fixed;inset:0;z-index:9000;background:rgba(10,18,48,.38);display:none;align-items:center;justify-content:center;padding:20px;}
+  .igc-ov.show{display:flex;}
+  .igc-box{background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(2,11,45,.28);width:min(560px,100%);max-height:min(640px,calc(100vh - 40px));display:flex;flex-direction:column;overflow:hidden;}
+  .igc-h{display:flex;gap:12px;align-items:flex-start;padding:18px 20px 12px;border-bottom:1px solid var(--border,#E3E6EF);}
+  .igc-h h3{margin:0;font-size:16px;font-weight:800;color:var(--navy,#0A1A4A);}
+  .igc-h p{margin:4px 0 0;font-size:12px;line-height:1.4;color:var(--text-3,#8A90A6);font-weight:600;}
+  .igc-x{margin-left:auto;background:none;border:none;width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--text-3,#8A90A6);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .igc-x:hover{background:#F1F2FA;color:var(--navy,#0A1A4A);}
+  .igc-x svg{width:16px;height:16px;}
+  .igc-thead,.igc-row{display:grid;grid-template-columns:minmax(0,1fr) 150px 64px;gap:10px;align-items:center;padding:0 20px;}
+  .igc-thead{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3,#8A90A6);padding-top:10px;padding-bottom:6px;}
+  .igc-list{overflow:auto;flex:1;min-height:60px;}
+  .igc-row{min-height:44px;border-bottom:1px solid #F0F1F6;}
+  .igc-row.ed{background:#F7F9FF;}
+  .igc-nom{font-size:13px;font-weight:700;color:var(--text-1,#1B2033);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .igc-val{display:flex;gap:4px;align-items:center;}
+  .igc-row input,.igc-row select{padding:6px 8px;border-radius:7px;border:1px solid var(--border,#E3E6EF);font-size:12.5px;font-family:inherit;background:#fff;min-width:0;}
+  .igc-row input:focus,.igc-row select:focus{outline:none;border-color:var(--sky,#4A8BEF);}
+  .igc-val select{width:52px;flex-shrink:0;} .igc-val input{width:100%;}
+  .igc-chip{font-size:11px;font-weight:800;background:#EEF1F6;color:#5B6478;border-radius:20px;padding:2px 9px;}
+  .igc-none{color:var(--text-3,#8A90A6);font-size:12px;}
+  .igc-act{display:flex;gap:4px;justify-content:flex-end;}
+  .igc-ib{width:28px;height:28px;border-radius:7px;border:none;background:none;color:var(--text-3,#8A90A6);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+  .igc-ib:hover{background:#F1F2FA;color:var(--navy,#0A1A4A);} .igc-ib.del:hover{background:#FFF1F1;color:#C23434;} .igc-ib.ok{color:#137B44;}
+  .igc-ib svg{width:14px;height:14px;}
+  .igc-add{border-top:1px solid var(--border,#E3E6EF);border-bottom:none;padding-top:10px;padding-bottom:10px;background:#FAFBFF;grid-template-columns:minmax(0,1fr) 150px auto;}
+  .igc-addbtn{background:var(--navy,#0A1A4A);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;}
+  .igc-addbtn:hover{filter:brightness(1.15);}
+  .igc-empty{padding:18px 20px;font-size:12.5px;color:var(--text-3,#8A90A6);font-weight:600;}
+  .igc-f{padding:8px 20px 14px;font-size:11px;color:var(--text-3,#8A90A6);font-weight:600;background:#FAFBFF;}
+  /* Liquidación: totales A / B (08/10/2026) */
+  .liq-table tfoot td{position:sticky;bottom:0;background:#F3F5FB;border-top:2px solid var(--border);font-weight:800;color:var(--navy);z-index:1;}
+  .liq-table tfoot td.liq-col-nombre{background:#F3F5FB;z-index:3;}
+  .liq-tot-lbl{display:block;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+  .liq-total-bar .lt-parts{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;}
+  .liq-total-bar .lt-value.lt-sm{font-size:17px;opacity:.92;}
+  .liq-total-bar .lt-op{font-size:18px;font-weight:800;color:var(--gray);padding-bottom:2px;}
+  /* Presentismo semanal (Che Mono, 08/10/2026) */
+  .liq-table .liq-wk-start{border-left:2px solid #CBD3E6;}
+  .liq-dia-ok{color:var(--text-1);font-weight:700;font-variant-numeric:tabular-nums;}
+  .liq-table .liq-noline{text-decoration:none;}
+  .liq-table td .liq-tooltip, .liq-table td.liq-tiene-obs:hover .liq-tooltip{display:none !important;}
+  .liq-floattip{position:fixed;z-index:9500;display:none;background:var(--navy);color:#fff;font-size:11.5px;font-weight:600;line-height:1.45;padding:9px 11px;border-radius:9px;max-width:280px;box-shadow:0 10px 26px rgba(2,11,45,.28);pointer-events:none;text-align:left;}
+  .liq-dia-franco{background:#EAF1FE;color:#2B5FC7;font-weight:700;font-size:11px;}
+  .liq-dia-aus{background:#FCE6E7;color:#B22A32;font-weight:700;}
+  .liq-dia-incompleto{background:#FFF1D6;color:#A56500;font-weight:800;cursor:pointer;}
+  .liq-dia-manual{background:#FFF8E8;color:#7A5200;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;}
+  .liq-table thead th.liq-th-sem{background:#EEF1F8;}
+  .liq-table .liq-sem-first{border-left:3px solid var(--navy);}
+  .liq-sem-cell{font-variant-numeric:tabular-nums;min-width:74px;}
+  .liq-sem-tot{border-left:2px solid #CBD3E6;font-weight:800;}
+  .liq-pend-sup{color:#A56500;font-weight:800;margin-left:2px;}
+  .liq-pend{margin-top:14px;border:1px solid #F1D9A6;background:#FFFBF1;border-radius:var(--radius-md);overflow:hidden;}
+  .liq-pend-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:11px 14px;border-bottom:1px solid #F1D9A6;}
+  .liq-pend-h b{font-size:13px;color:#7A5200;}
+  .liq-pend-h span{font-size:11.5px;color:#8A6A2E;font-weight:600;line-height:1.4;flex:1;min-width:260px;}
+  .liq-pend-list{max-height:260px;overflow:auto;}
+  .liq-pend-row{display:grid;grid-template-columns:minmax(150px,1.2fr) 90px minmax(160px,2fr) 120px;gap:10px;align-items:center;padding:7px 14px;border-bottom:1px solid #F6E8C8;font-size:12.3px;transition:background .3s;}
+  .liq-pend-row:last-child{border-bottom:none;}
+  .liq-pend-row .n{font-weight:700;color:var(--text-1);} .liq-pend-row .f{font-weight:800;color:var(--navy);}
+  .liq-pend-row .fx{color:var(--text-2);} .liq-pend-row .fx i{font-style:normal;font-weight:800;color:var(--text-1);}
+  .liq-pend-row .in{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-3);font-weight:700;}
+  .liq-pend-row.falta .in input{border-color:#E8B860;background:#fff;}
+  .liq-pend-row.flash{background:#FFE7B3;}
 </style>
 </head>
 <body>
@@ -2461,7 +2542,7 @@
           <section class="pagos-pane cx-alt" id="cxPaneCompras">
             <div class="cx-phead">
               <div class="cx-grow"><h1>Carga de compras</h1><div class="cx-sub">Órdenes de Pagos agrupadas por categoría de proveedor. Cargá el detalle de cada factura (precio de lista, impuestos y descuentos): el costo de cada insumo se actualiza en Recetas y Precios, y la orden queda completa cuando coincide con el total de la factura.</div></div>
-              <div class="cx-actions"><div class="cx-seg" id="cxCoEstado"><button type="button" data-e="todas" class="on">Todas</button><button type="button" data-e="pend">Por cargar</button><button type="button" data-e="ok">Completas</button></div></div>
+              <div class="cx-actions"><button type="button" class="cx-btn" onclick="IGCat.open()" title="Agregar, editar o eliminar los impuestos generales que se eligen al cargar una factura"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Impuestos generales</button><div class="cx-seg" id="cxCoEstado"><button type="button" data-e="todas" class="on">Todas</button><button type="button" data-e="pend">Por cargar</button><button type="button" data-e="ok">Completas</button></div></div>
             </div>
             <div class="cx-scroll">
               <div class="cx-kpis" id="cxCoKpis"></div>
@@ -2596,21 +2677,29 @@
               <div class="form-card liq-card">
                 <div class="form-section-title">Presentismo — <span id="liqMesLabel2"></span></div>
                 <div class="liq-legend">
-                  <span><span class="lg-dot" style="background:#E4F8ED;border:1px solid #137B44;"></span>Excedente &gt; 30 min</span>
-                  <span><span class="lg-dot" style="background:#FCE6E7;border:1px solid #B22A32;"></span>Faltante &gt; 30 min</span>
-                  <span><span class="lg-dot" style="background:#F1F2FA;border:1px solid var(--gray);"></span>Ausente</span>
+                  <span><span class="lg-dot" style="background:#fff;border:1px solid var(--border);"></span>Horas trabajadas en la jornada (06:00 a 05:00 del día siguiente)</span>
+                  <span><span class="lg-dot" style="background:#EAF1FE;border:1px solid #2B5FC7;"></span>Franco</span>
+                  <span><span class="lg-dot" style="background:#FCE6E7;border:1px solid #B22A32;"></span>Ausencia</span>
+                  <span><span class="lg-dot" style="background:#FFF1D6;border:1px solid #C27C0E;"></span>Fichada incompleta (a definir)</span>
                   <span><span class="lg-dot" style="background:#FFF6DF;border:1px solid #E3A008;"></span>Feriado</span>
+                  <span><span class="lg-dot" style="background:#E4F8ED;border:1px solid #137B44;"></span>Semana: excedente &gt; 30 min</span>
+                  <span><span class="lg-dot" style="background:#FCE6E7;border:1px solid #B22A32;"></span>Semana: faltante &gt; 30 min</span>
                 </div>
+                <div class="actualizacion-hint" style="margin:-8px 0 12px;">Las horas se evalúan por semana (de martes a lunes) contra las horas semanales de cada empleado. Fichadas a 15' o menos una de otra cuentan como una sola. Pasá el mouse sobre un día o una semana para ver el detalle.</div>
                 <div class="liq-scroll"><table class="liq-table" id="liqTablaPresentismo"></table></div>
+                <div id="liqPendientes"></div>
               </div>
 
               <div class="form-card liq-card">
                 <div class="form-section-title">Liquidación — <span id="liqMesLabel3"></span></div>
                 <div class="liq-scroll"><table class="liq-table" id="liqTablaLiquidacion"></table></div>
                 <div class="liq-total-bar">
-                  <div>
-                    <div class="lt-label">Total a liquidar (Pago A + Pago B)</div>
-                    <div class="lt-value" id="liqTotalGeneral">$0</div>
+                  <div class="lt-parts">
+                    <div><div class="lt-label">Total A</div><div class="lt-value lt-sm" id="liqTotalA">$0</div></div>
+                    <div class="lt-op">+</div>
+                    <div><div class="lt-label">Total B</div><div class="lt-value lt-sm" id="liqTotalB">$0</div></div>
+                    <div class="lt-op">=</div>
+                    <div><div class="lt-label">Total liquidado (A + B)</div><div class="lt-value" id="liqTotalGeneral">$0</div></div>
                   </div>
                   <button class="btn-primary" id="liqBtnLiquidar" style="max-width:180px;" onclick="liqConfirmarLiquidar()" disabled title="Cargá un reporte de marcaciones para habilitar la liquidación">Liquidar</button>
                 </div>
@@ -2643,6 +2732,7 @@
                     <option>Mañana</option>
                     <option>Tarde</option>
                     <option>Intermedio</option>
+                    <option>Cortado</option>
                     <option>Sin horario</option>
                   </select>
                 </div>
@@ -2675,21 +2765,24 @@
               </div>
               <div class="form-section-title">Presentismo (para Liquidación)</div>
               <div class="field-row">
-                <div class="field" id="fld-eHorasEsperadas" style="max-width:200px;"><label>Horas promedio esperadas por jornada</label>
+                <div class="field" id="fld-eHorasSemanales" style="max-width:220px;"><label>Horas semanales a cumplir</label>
                   <div class="stepper-input">
-                    <button type="button" class="stepper-btn" onclick="stepHorasEsperadas(-1)">−</button>
-                    <input type="text" id="eHorasEsperadas" value="8" inputmode="numeric" oninput="onHorasEsperadasInput(this)">
-                    <button type="button" class="stepper-btn" onclick="stepHorasEsperadas(1)">+</button>
+                    <button type="button" class="stepper-btn" onclick="stepHorasSemanales(-1)">−</button>
+                    <input type="text" id="eHorasSemanales" value="48" inputmode="decimal" oninput="onHorasEsperadasInput(this); empPresHint()">
+                    <button type="button" class="stepper-btn" onclick="stepHorasSemanales(1)">+</button>
                   </div>
                 </div>
-                <div class="field" id="fld-eJornadaPartida">
-                  <label>Jornada</label>
-                  <div class="field-checkbox">
-                    <input type="checkbox" id="eJornadaPartida">
-                    <label for="eJornadaPartida">Tiene corte (turno partido, con pausa)</label>
-                  </div>
+                <div class="field" id="fld-eFrancos" style="max-width:200px;"><label>Francos semanales</label>
+                  <select id="eFrancos" onchange="empPresHint()">
+                    <option value="0">Sin francos</option>
+                    <option value="1" selected>1 franco</option>
+                    <option value="2">2 francos</option>
+                    <option value="3">3 francos</option>
+                  </select>
                 </div>
+                <div class="field" style="display:none;"><input type="text" id="eHorasEsperadas" value="8"><input type="checkbox" id="eJornadaPartida"></div>
               </div>
+              <div class="actualizacion-hint" id="ePresHint" style="margin-top:-4px;"></div>
               <div class="form-footer">
                 <button class="btn-primary" style="flex:1" onclick="guardarNuevoEmpleado()">Guardar empleado</button>
                 <button class="btn-primary secondary" onclick="cancelarNuevoEmpleado()">Cancelar</button>
@@ -3292,6 +3385,9 @@ function resetNuevoEmpleadoForm(){
   document.getElementById("eSueldo").value = "";
   document.getElementById("eHorasEsperadas").value = "8";
   document.getElementById("eJornadaPartida").checked = false;
+  document.getElementById("eHorasSemanales").value = "48";
+  document.getElementById("eFrancos").value = "1";
+  empPresHint();
 }
 
 function editarEmpleado(id){
@@ -3310,6 +3406,10 @@ function editarEmpleado(id){
   document.getElementById("eSueldo").value = emp.sueldo ? formatearPesosVivo(emp.sueldo) : "";
   document.getElementById("eHorasEsperadas").value = String(emp.horas_esperadas!=null ? emp.horas_esperadas : 8);
   document.getElementById("eJornadaPartida").checked = !!emp.jornada_partida;
+  var cfgP = liqCfgParaEmpleado(emp);
+  document.getElementById("eHorasSemanales").value = String(Math.round(cfgP.horasSemanales*100)/100).replace(".", ",");
+  document.getElementById("eFrancos").value = String(cfgP.francos);
+  empPresHint();
 }
 
 async function eliminarEmpleadoActual(){
@@ -3349,6 +3449,19 @@ function onHorasEsperadasInput(el){
   var v = el.value.replace(/[^\d.,]/g,"").replace(",", ".");
   el.value = v;
 }
+function stepHorasSemanales(delta){
+  var el = document.getElementById("eHorasSemanales");
+  var n = parseFloat(String(el.value).replace(",", ".")) || 0;
+  n = Math.max(0, Math.min(84, n + delta));
+  el.value = String(n).replace(".", ","); empPresHint();
+}
+function empPresHint(){
+  var el = document.getElementById("ePresHint"); if(!el) return;
+  var hs = parseFloat(String(document.getElementById("eHorasSemanales").value).replace(",", ".")) || 0;
+  var fr = Number(document.getElementById("eFrancos").value)||0;
+  var dias = 7-fr;
+  el.textContent = "Semana de martes a lunes: " + dias + " día" + (dias===1?"":"s") + " de trabajo" + (dias>0 ? " · " + (Math.round(hs/dias*100)/100).toString().replace(".", ",") + " h por día en promedio" : "") + ". Las horas extra y faltantes se calculan por semana contra este total.";
+}
 function stepHorasEsperadas(delta){
   var el = document.getElementById("eHorasEsperadas");
   var n = parseFloat(String(el.value).replace(",", ".")) || 0;
@@ -3363,7 +3476,9 @@ async function guardarNuevoEmpleado(){
   var puesto = document.getElementById("ePuesto").value;
   var inicioDMY = document.getElementById("eInicioActividades").value.trim();
   var sueldo = parseSueldoInput(document.getElementById("eSueldo").value);
-  var horasEsperadas = parseFloat(String(document.getElementById("eHorasEsperadas").value).replace(",", ".")) || 0;
+  var horasSemanales = parseFloat(String(document.getElementById("eHorasSemanales").value).replace(",", ".")) || 0;
+  var francosSemanales = Number(document.getElementById("eFrancos").value)||0;
+  var horasEsperadas = (7-francosSemanales)>0 ? Math.round(horasSemanales/(7-francosSemanales)*100)/100 : 0;
   var jornadaPartida = document.getElementById("eJornadaPartida").checked;
 
   if(!condicion || !nombre || !turno || !puesto){
@@ -3380,6 +3495,8 @@ async function guardarNuevoEmpleado(){
       puesto: puesto,
       inicio_actividades: inicioDMY ? dmyToISO(inicioDMY) : null,
       horas_esperadas: horasEsperadas,
+      horas_semanales: horasSemanales,
+      francos_semanales: francosSemanales,
       jornada_partida: jornadaPartida
     };
     /* El SUELDO se edita desde "Actualización de sueldos" (deja registro en el historial
@@ -3413,6 +3530,8 @@ async function guardarNuevoEmpleado(){
     sueldo: sueldo,
     sueldo_anterior: sueldo,
     horas_esperadas: horasEsperadas,
+    horas_semanales: horasSemanales,
+    francos_semanales: francosSemanales,
     jornada_partida: jornadaPartida,
     creado_por: (typeof currentPerfil !== "undefined" && currentPerfil) ? currentPerfil.id : null
   };
@@ -3535,8 +3654,8 @@ var SUELDOS_GRID_COLUMNS = [
       return "<div class=\"cell\">" + pctMasa.toFixed(1) + "%</div>"; } },
   { id:"ultimaActualizacion", label:"Última actualización", sortField:"modificado_fecha", defaultWidth:170, minWidth:130, maxWidth:230,
     cell:function(e){ return "<div class=\"cell c-fecha-emp\">" + (e.modificado_fecha ? fmtFechaHora(e.modificado_fecha) : "—") + "</div>"; } },
-  { id:"horasEsperadas", label:"Hs. esperadas", sortField:"horas_esperadas", defaultWidth:120, minWidth:90, maxWidth:160,
-    cell:function(e){ return "<div class=\"cell\">" + (e.horas_esperadas!=null ? e.horas_esperadas+"h"+(e.jornada_partida?" · con corte":"") : "—") + "</div>"; } }
+  { id:"horasEsperadas", label:"Hs. semanales", sortField:"horas_semanales", defaultWidth:150, minWidth:100, maxWidth:200,
+    cell:function(e){ var c = liqCfgParaEmpleado(e); return "<div class=\"cell\">" + liqFmtDecimal(c.horasSemanales)+" h · "+c.francos+" franco"+(c.francos===1?"":"s") + "</div>"; } }
 ];
 var SUELDOS_GRID_STATE_KEY = "cm_sueldos_grid_state_v1";
 
@@ -4347,6 +4466,7 @@ var liqState = {
   horasExtraManual: {},      // {key: numero de horas, ej. 1.5}
   feriadosManual: {},        // {key: cantidad de jornales}
   ausenciasManual: {},       // {key: cantidad de jornales}
+  horasDiaManual: {},        // {key: {jornadaISO: minutos}} — días con fichadas incompletas, definidos a mano
   liquidado: false,
   liquidacionId: null,
   ordenAId: null,
@@ -4384,13 +4504,6 @@ function liqEmpleadoPorNombreCorto(nombreCorto){
   }
   return null;
 }
-function liqCfgParaEmpleado(emp){
-  return {
-    horasEsperadas: Number(emp && emp.horas_esperadas!=null ? emp.horas_esperadas : 8),
-    horario: (emp && emp.jornada_partida) ? "cortado" : "continuo"
-  };
-}
-
 /* ---------- utilidades de fecha/hora ----------
    vParseFlexDate/vToISODate/vParseHoraHour/vJornadaFecha portadas de Ventas
    (todavía sin módulo propio en Che Mono) para el corte de jornada 05:00:
@@ -4564,66 +4677,6 @@ function liqPromedioIntervaloPosicion(diasResueltos, posicion, jornadaExcluida){
   });
   return count ? total/count : null;
 }
-/* Adaptado: recibe el registro de empleado (de empleadosCache) en vez de
-   buscar por nombre corto en LIQ_EXPECTED_HOURS. */
-function liqProcesarEmpleado(emp, jornadasRaw){
-  if(!emp) return null;
-  var cfg = liqCfgParaEmpleado(emp);
-  var esperadoMin = cfg.horasEsperadas*60;
-  var longitudCanonica = cfg.horario==="cortado" ? 4 : 2;
-  var medianas = liqConstruirEstadisticasHorarios(jornadasRaw, longitudCanonica);
-  var dias = {};
-  Object.keys(jornadasRaw).forEach(function(j){
-    var limpio = liqDedupFichadas(jornadasRaw[j]);
-    var reparado = liqRepararAlternancia(limpio, medianas);
-    var armado = liqArmarIntervalos(reparado.rows);
-    dias[j] = {intervalos:armado.intervalos, cambios:reparado.cambios};
-  });
-  var resultado = {};
-  Object.keys(dias).forEach(function(j){
-    var info = dias[j];
-    var intervalos = info.intervalos;
-    var completados = intervalos.filter(function(iv){ return iv.minutos!=null; });
-    var incompletosIdx = intervalos.map(function(iv,idx){ return iv.minutos==null?idx:-1; }).filter(function(i){ return i!==-1; });
-    var totalReal = completados.reduce(function(s,iv){ return s+iv.minutos; }, 0);
-    var obs = [];
-    var estimado = false;
-    info.cambios.forEach(function(c){
-      obs.push("fichada corregida (decía "+c.de+", se interpretó como "+c.a+" por horario habitual)");
-    });
-    if(intervalos.length===0){
-      resultado[j] = {totalReal:null, diffMin:null, obs:["ausente"], estado:"ausente"};
-      return;
-    }
-    var huboContenidoReal = completados.length>0;
-    function lado(iv){ return iv.entrada==null ? "entrada" : "salida"; }
-    incompletosIdx.forEach(function(idx){
-      var hora = intervalos[idx].entrada ? intervalos[idx].entrada.hora : intervalos[idx].salida.hora;
-      obs.push("no ficho "+lado(intervalos[idx])+" ("+hora+")");
-    });
-    if(incompletosIdx.length>0){
-      if(cfg.horario==="cortado" && huboContenidoReal){
-        incompletosIdx.forEach(function(idx){
-          var prom = liqPromedioIntervaloPosicion(dias, idx, j);
-          if(prom!=null){ totalReal+=prom; estimado=true; }
-          else { totalReal = esperadoMin; }
-        });
-      } else {
-        totalReal = esperadoMin;
-      }
-    }
-    var diff, estado;
-    if(incompletosIdx.length>0 && !estimado){
-      diff = 0; estado = "neutro";
-    } else {
-      diff = totalReal - esperadoMin;
-      estado = diff>30 ? "verde" : diff<-30 ? "rojo" : "neutro";
-    }
-    resultado[j] = {totalReal:totalReal, diffMin:diff, obs:obs, estado:estado, intervalos:intervalos};
-  });
-  return resultado;
-}
-
 /* ---------- lectura del reporte de marcaciones (xlsx) ---------- */
 function liqLeerReporteMarcaciones(file){
   return new Promise(function(resolve, reject){
@@ -4785,6 +4838,7 @@ async function liqProcesarArchivo(parsed, fileName){
   liqState.horasExtraManual = filaExistente ? (filaExistente.horas_extra_manual || {}) : {};
   liqState.feriadosManual = filaExistente ? (filaExistente.feriados_manual || {}) : {};
   liqState.ausenciasManual = filaExistente ? (filaExistente.ausencias_manual || {}) : {};
+  liqState.horasDiaManual = filaExistente ? (filaExistente.horas_dia_manual || {}) : {};
   liqState.liquidado = false;
   liqState.liquidacionId = filaExistente ? filaExistente.id : null;
   liqState.ordenAId = filaExistente ? filaExistente.orden_a_id : null;
@@ -5036,67 +5090,231 @@ function liqAplicarFeriados(){
   liqGuardarDraft();
 }
 
-/* ---------- tabla de presentismo ---------- */
+/* =========================================================
+   PRESENTISMO SEMANAL (Che Mono — pedido de Pancho, 08/10/2026)
+   · Cada empleado tiene horas semanales a cumplir y una cantidad de francos semanales
+     (cm_empleados.horas_semanales / francos_semanales). La semana va de MARTES a LUNES.
+   · Jornada de trabajo: de 06:00 a 05:00 del día siguiente. Lo fichado entre las 00:00 y las
+     04:59 pertenece a la jornada del día anterior (ej. entra mar 5 17:15, sale mié 6 02:15 →
+     9 h de la jornada del martes 5).
+   · Fichadas repetidas: las que caen a 15' o menos una de otra cuentan como una sola. Si esa
+     fichada es una entrada se toma la más temprana; si es una salida, la última.
+   · Las fichadas que quedan se toman en orden como entrada / salida / entrada / salida… (así,
+     un turno cortado suma sus dos intervalos). El tipo marcado en el reloj solo se usa para
+     avisar si no coincide (el personal a veces marca entrada en vez de salida).
+   · Si falta una de las dos partes (cantidad impar de fichadas), el día queda "a definir": se
+     muestran la fecha y las fichadas que existen, y las horas de ese día las define el
+     empleador a mano (liqState.horasDiaManual).
+   · Evaluación semanal: horas trabajadas contra horas a cumplir. Las ausencias de la semana
+     hasta la cantidad de francos son francos; las que exceden, ausencias. Un feriado no
+     trabajado no es ausencia. Las ausencias y los feriados no trabajados descuentan de las
+     horas a cumplir las horas de un día (horas semanales ÷ días de trabajo de la semana), para
+     no penalizar dos veces. En las semanas que empiezan o terminan en otro mes, los francos se
+     toman como disponibles dentro de los días del mes y se exigen las horas de los días del mes
+     que no fueron franco.
+   ========================================================= */
+var LIQ_AGRUPAR_MIN = 15;
+function liqCfgParaEmpleado(emp){
+  var francos = (emp && emp.francos_semanales!=null) ? Math.max(0, Math.min(6, Number(emp.francos_semanales)||0)) : 1;
+  var hsDia = Number(emp && emp.horas_esperadas!=null ? emp.horas_esperadas : 8);
+  var hsSem = (emp && emp.horas_semanales!=null && emp.horas_semanales!=="") ? Number(emp.horas_semanales) : hsDia*(7-francos);
+  return { horasSemanales: hsSem, francos: francos, horasDia: (7-francos)>0 ? hsSem/(7-francos) : hsSem/7,
+           horasEsperadas: hsDia, horario: (emp && emp.jornada_partida) ? "cortado" : "continuo" };
+}
+function liqHM(min){ if(min==null) return "—"; var a=Math.round(Math.abs(min)); return (min<0?"-":"")+Math.floor(a/60)+":"+String(a%60).padStart(2,"0"); }
+function liqHoraCorta(h){ return String(h||"").slice(0,5); }
+/* Devuelve {jornadaISO: {estado:"trabajado"|"incompleto", minutos, intervalos, fichadas, obs}} — los días sin fichadas no aparecen (ausente). */
+function liqProcesarEmpleado(emp, jornadasRaw){
+  if(!emp) return null;
+  var out = {};
+  Object.keys(jornadasRaw).forEach(function(j){
+    var rows = jornadasRaw[j].slice().sort(function(a,b){ return liqAbsMinutes(a)-liqAbsMinutes(b); });
+    var grupos = [];
+    rows.forEach(function(r){
+      var g = grupos[grupos.length-1];
+      if(g && liqAbsMinutes(r) - liqAbsMinutes(g[g.length-1]) <= LIQ_AGRUPAR_MIN) g.push(r); else grupos.push([r]);
+    });
+    var obs = [];
+    var eventos = grupos.map(function(g, i){
+      var rol = i%2===0 ? "Entrada" : "Salida";
+      var r = rol==="Entrada" ? g[0] : g[g.length-1];
+      if(g.length>1) obs.push(g.length+" fichadas entre "+liqHoraCorta(g[0].hora)+" y "+liqHoraCorta(g[g.length-1].hora)+" se tomaron como una sola "+rol.toLowerCase()+" ("+liqHoraCorta(r.hora)+")");
+      var declarados = g.map(function(x){ return x.tipo; });
+      if(declarados.indexOf(rol)===-1) obs.push(liqHoraCorta(r.hora)+": marcada como "+String(declarados[0]||"").toLowerCase()+", se tomó como "+rol.toLowerCase());
+      return { rol: rol, row: r, declarado: declarados[0] };
+    });
+    var fichadas = eventos.map(function(e){ return { hora: liqHoraCorta(e.row.hora), fecha: e.row.fecha, tipo: e.declarado }; });
+    var impar = eventos.length%2===1;
+    var dosFaltantes = !impar && eventos.length>=2 && eventos[0].declarado==="Salida" && eventos[eventos.length-1].declarado==="Entrada";
+    if(impar || dosFaltantes){
+      out[j] = { estado:"incompleto", minutos:null, intervalos:[], fichadas:fichadas,
+                 obs:[impar ? "Falta una fichada: no se pueden calcular las horas del día" : "Faltan la primera entrada y la última salida: no se pueden calcular las horas del día"] };
+      return;
+    }
+    var intervalos = [], total = 0;
+    for(var i=0;i<eventos.length;i+=2){
+      var m = liqAbsMinutes(eventos[i+1].row) - liqAbsMinutes(eventos[i].row);
+      if(m<0) m += 24*60;
+      intervalos.push({ e: liqHoraCorta(eventos[i].row.hora), s: liqHoraCorta(eventos[i+1].row.hora), min: m });
+      total += m;
+    }
+    out[j] = { estado:"trabajado", minutos:total, intervalos:intervalos, fichadas:fichadas, obs:obs };
+  });
+  return out;
+}
+function liqDowISO(j){ var p=j.split("-").map(Number); return new Date(Date.UTC(p[0],p[1]-1,p[2])).getUTCDay(); }
+function liqAddDaysISO(j,n){ var p=j.split("-").map(Number); var d=new Date(Date.UTC(p[0],p[1]-1,p[2]+n)); return d.toISOString().slice(0,10); }
+function liqDMcorto(j){ return j.slice(8,10)+"/"+j.slice(5,7); }
+function liqHorasManualDe(key, j){ var m=liqState.horasDiaManual&&liqState.horasDiaManual[key]; return (m && m[j]!=null) ? Number(m[j]) : null; }
+/* Semanas (martes a lunes) del mes en estudio para un empleado, con su evaluación. */
+function liqSemanas(key){
+  var emp = liqEmpleadosPorKey()[key];
+  var cfg = liqCfgParaEmpleado(emp);
+  var datos = (liqState.presentismo && liqState.presentismo[key]) || {};
+  var dias = liqDiasDelMes(liqState.mes);
+  var semanas = [], porIni = {};
+  dias.forEach(function(j){
+    var ini = liqAddDaysISO(j, -((liqDowISO(j)-2+7)%7));
+    if(!porIni[ini]){ porIni[ini] = { ini:ini, fin:liqAddDaysISO(ini,6), dias:[] }; semanas.push(porIni[ini]); }
+    porIni[ini].dias.push(j);
+  });
+  var diaMin = cfg.horasDia*60;
+  semanas.forEach(function(s){
+    var k = s.dias.length;
+    /* Semana completa: horas semanales y sus francos. Semana partida con otro mes: los francos se
+       consideran disponibles dentro de los días del mes (no se sabe si se tomaron en los días del
+       otro mes), y se exigen las horas de los días del mes que no fueron franco. */
+    s.francosPermitidos = Math.min(cfg.francos, k);
+    s.trabajado = 0; s.pendientes = []; s.ausentes = []; s.feriadosNoTrab = 0; s.feriadosTrab = 0; s.estadoDia = {};
+    s.dias.forEach(function(j){
+      var d = datos[j], fer = liqState.feriados.indexOf(j)!==-1;
+      if(!d){ if(fer){ s.feriadosNoTrab++; s.estadoDia[j]="feriado"; } else s.ausentes.push(j); return; }
+      if(fer) s.feriadosTrab++;
+      if(d.estado==="incompleto"){ var man = liqHorasManualDe(key,j); if(man==null){ s.pendientes.push(j); s.estadoDia[j]="pendiente"; } else { s.trabajado += man; s.estadoDia[j]="manual"; } return; }
+      s.trabajado += d.minutos; s.estadoDia[j]="trabajado";
+    });
+    s.francosTomados = Math.min(s.francosPermitidos, s.ausentes.length);
+    s.ausentes.forEach(function(j,i){ s.estadoDia[j] = i < s.francosTomados ? "franco" : "ausente"; });
+    s.ausencias = s.ausentes.length - s.francosTomados;
+    s.esperadoBase = k===7 ? cfg.horasSemanales*60 : diaMin * Math.max(0, k - s.francosTomados);
+    s.esperado = Math.max(0, s.esperadoBase - (s.ausencias + s.feriadosNoTrab)*diaMin);
+    s.diff = s.trabajado - s.esperado;
+  });
+  return semanas;
+}
+function liqCalcularAgregados(key){
+  var sem = liqSemanas(key);
+  var r = { ausencias:0, feriadosTrabajados:0, horasExtraMin:0, pendientes:0 };
+  sem.forEach(function(s){ r.ausencias += s.ausencias; r.feriadosTrabajados += s.feriadosTrab; r.horasExtraMin += s.diff; r.pendientes += s.pendientes.length; });
+  return r;
+}
+
+/* ---------- tabla de presentismo (misma estructura: un día por columna) + evaluación semanal ---------- */
 function liqRenderTablaPresentismo(){
   var dias = liqDiasDelMes(liqState.mes);
+  var porKey = liqEmpleadosPorKey();
+  var keys = Object.keys(liqState.presentismo||{});
+  var semRef = keys.length ? liqSemanas(keys[0]) : [];
   var thead = "<thead><tr><th class=\"liq-col-nombre\">Nombre completo</th>";
   dias.forEach(function(j){
-    var dd = j.slice(8,10);
-    var esFeriado = liqState.feriados.indexOf(j)!==-1;
-    thead += "<th class=\""+(esFeriado?"liq-th-feriado":"")+"\"><span class=\"liq-th-dow\">"+liqDiaSemana(j)+"</span><span class=\"liq-th-dd\">"+dd+"</span>"+(esFeriado?"<span class=\"liq-flag\">FERIADO</span>":"")+"</th>";
+    var esFeriado = liqState.feriados.indexOf(j)!==-1, wk = liqDowISO(j)===2;
+    thead += "<th class=\""+(esFeriado?"liq-th-feriado ":"")+(wk?"liq-wk-start":"")+"\"><span class=\"liq-th-dow\">"+liqDiaSemana(j)+"</span><span class=\"liq-th-dd\">"+j.slice(8,10)+"</span>"+(esFeriado?"<span class=\"liq-flag\">FERIADO</span>":"")+"</th>";
   });
-  thead += "</tr></thead>";
+  semRef.forEach(function(s,i){ thead += "<th class=\"liq-th-sem"+(i===0?" liq-sem-first":"")+"\"><span class=\"liq-th-dow\">Semana "+(i+1)+"</span><span class=\"liq-th-dd\" style=\"font-size:11px\">"+liqDMcorto(s.ini)+" – "+liqDMcorto(s.fin)+"</span>"+(s.dias.length<7?"<span class=\"liq-flag\" style=\"color:var(--text-3)\">"+s.dias.length+" días del mes</span>":"")+"</th>"; });
+  thead += "<th class=\"liq-th-sem\"><span class=\"liq-th-dow\">Mes</span><span class=\"liq-th-dd\">Total</span></th></tr></thead>";
 
-  var porKey = liqEmpleadosPorKey();
   var tbody = "<tbody>";
-  Object.keys(liqState.presentismo||{}).forEach(function(key){
-    var emp = porKey[key];
-    var cfg = liqCfgParaEmpleado(emp);
+  keys.forEach(function(key){
+    var emp = porKey[key], cfg = liqCfgParaEmpleado(emp);
     var nombre = emp ? emp.nombre_completo : key;
-    var row = "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(nombre)+"<span class=\"liq-col-esperado\">"+cfg.horasEsperadas+"h · "+cfg.horario+"</span></td>";
-    var datosEmp = (liqState.presentismo && liqState.presentismo[key]) || {};
+    var datos = liqState.presentismo[key] || {};
+    var sem = liqSemanas(key), estadoDia = {};
+    sem.forEach(function(s){ Object.assign(estadoDia, s.estadoDia); });
+    var row = "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(nombre)+"<span class=\"liq-col-esperado\">"+liqFmtDecimal(cfg.horasSemanales)+" h/sem · "+cfg.francos+" franco"+(cfg.francos===1?"":"s")+"</span></td>";
     dias.forEach(function(j){
-      var d = datosEmp[j];
-      var esFeriado = liqState.feriados.indexOf(j)!==-1;
-      var feriadoCls = esFeriado ? " liq-dia-feriado-col" : "";
-      if(!d){
-        row += "<td class=\"liq-dia-ausente"+feriadoCls+"\">aus.</td>";
-      } else if(d.estado==="ausente"){
-        row += "<td class=\"liq-dia-ausente"+feriadoCls+"\">aus.</td>";
-      } else {
-        var cls = "liq-dia-"+d.estado+feriadoCls;
-        var obsHtml = "";
-        if(d.obs && d.obs.length){
-          cls += " liq-tiene-obs";
-          obsHtml = "<div class=\"liq-tooltip\">"+d.obs.map(liqEscapeHtml).join("<br>")+"</div>";
-        }
-        row += "<td class=\""+cls+"\" style=\"position:relative;\">"+liqFmtHM(d.diffMin)+obsHtml+"</td>";
+      var d = datos[j], st = estadoDia[j], cls = (liqState.feriados.indexOf(j)!==-1?" liq-dia-feriado-col":"")+(liqDowISO(j)===2?" liq-wk-start":"");
+      var tip = [];
+      if(d){
+        if(d.intervalos && d.intervalos.length) tip.push(d.intervalos.map(function(iv){ return iv.e+" → "+iv.s+" ("+liqHM(iv.min)+")"; }).join("<br>"));
+        else tip.push("Fichadas: "+d.fichadas.map(function(f){ return f.hora+" ("+String(f.tipo||"").toLowerCase()+")"; }).join(", "));
+        (d.obs||[]).forEach(function(o){ tip.push(liqEscapeHtml(o)); });
       }
+      var tipHtml = tip.length ? "<div class=\"liq-tooltip\">"+tip.join("<br>")+"</div>" : "";
+      if(st==="franco") row += "<td class=\"liq-dia-franco"+cls+"\">franco</td>";
+      else if(st==="ausente") row += "<td class=\"liq-dia-aus"+cls+"\">aus.</td>";
+      else if(st==="feriado") row += "<td class=\"liq-dia-ausente"+cls+"\">fer.</td>";
+      else if(st==="pendiente") row += "<td class=\"liq-dia-incompleto liq-tiene-obs"+cls+"\" style=\"position:relative;\" onclick=\"liqIrADefinir('"+liqEscapeHtml(key)+"','"+j+"')\">?"+tipHtml+"</td>";
+      else if(st==="manual") row += "<td class=\"liq-dia-manual liq-tiene-obs"+cls+"\" style=\"position:relative;\" onclick=\"liqIrADefinir('"+liqEscapeHtml(key)+"','"+j+"')\">"+liqHM(liqHorasManualDe(key,j))+"*"+"<div class=\"liq-tooltip\">Horas definidas a mano<br>"+tip.join("<br>")+"</div></td>";
+      else row += "<td class=\"liq-dia-ok"+(tipHtml?" liq-tiene-obs":"")+((d&&d.obs&&d.obs.length)?"":" liq-noline")+cls+"\" style=\"position:relative;\">"+liqHM(d?d.minutos:0)+tipHtml+"</td>";
     });
-    row += "</tr>";
-    tbody += row;
+    var totDiff = 0, totPend = 0;
+    sem.forEach(function(s,i){
+      totDiff += s.diff; totPend += s.pendientes.length;
+      var c = s.diff>30 ? "liq-dia-verde" : s.diff<-30 ? "liq-dia-rojo" : "liq-dia-neutro";
+      var tt = "Horas a cumplir: "+liqHM(s.esperado)+(s.esperado!==s.esperadoBase?" (de "+liqHM(s.esperadoBase)+")":"")+"<br>Horas trabajadas: "+liqHM(s.trabajado)+"<br>Francos: "+s.francosTomados+" de "+s.francosPermitidos+"<br>Ausencias: "+s.ausencias+(s.feriadosNoTrab?"<br>Feriados no trabajados: "+s.feriadosNoTrab:"")+(s.dias.length<7?"<br><i>Semana compartida con otro mes ("+s.dias.length+" días en este mes)</i>":"")+(s.pendientes.length?"<br><b>"+s.pendientes.length+" día"+(s.pendientes.length>1?"s":"")+" a definir</b>":"");
+      row += "<td class=\"liq-sem-cell "+c+" liq-tiene-obs"+(i===0?" liq-sem-first":"")+"\" style=\"position:relative;\">"+liqFmtHM(s.diff)+(s.pendientes.length?"<sup class=\"liq-pend-sup\">?</sup>":"")+"<div class=\"liq-tooltip\">"+tt+"</div></td>";
+    });
+    var ct = totDiff>30 ? "liq-dia-verde" : totDiff<-30 ? "liq-dia-rojo" : "liq-dia-neutro";
+    row += "<td class=\"liq-sem-cell liq-sem-tot "+ct+"\">"+liqFmtHM(totDiff)+(totPend?"<sup class=\"liq-pend-sup\">?</sup>":"")+"</td>";
+    tbody += row + "</tr>";
   });
   tbody += "</tbody>";
   document.getElementById("liqTablaPresentismo").innerHTML = thead+tbody;
+  liqRenderPendientes();
+}
+/* ---------- días con fichadas incompletas: los define el empleador ---------- */
+function liqRenderPendientes(){
+  var el = document.getElementById("liqPendientes"); if(!el) return;
+  var porKey = liqEmpleadosPorKey(), items = [];
+  var mes = liqState.mes.slice(0,7);
+  Object.keys(liqState.presentismo||{}).forEach(function(key){
+    var datos = liqState.presentismo[key]||{}, emp = porKey[key];
+    Object.keys(datos).sort().forEach(function(j){ if(j.slice(0,7)===mes && datos[j].estado==="incompleto") items.push({key:key, j:j, d:datos[j], nombre: emp?emp.nombre_completo:key}); });
+  });
+  if(!items.length){ el.innerHTML = ""; return; }
+  var faltan = items.filter(function(x){ return liqHorasManualDe(x.key,x.j)==null; }).length;
+  var dis = liqState.liquidado ? "disabled" : "";
+  el.innerHTML = "<div class=\"liq-pend\"><div class=\"liq-pend-h\"><b>Fichadas incompletas</b><span>"+(faltan?faltan+" de "+items.length+" día"+(items.length>1?"s":"")+" sin definir":"Todos los días definidos")+" · Falta la entrada o la salida, así que las horas de ese día no se pueden calcular: definilas a mano (ej. 8, 8,5 u 8:30). Hasta que se definan, el día cuenta 0 horas.</span></div>"
+    + "<div class=\"liq-pend-list\">" + items.map(function(x){
+      var man = liqHorasManualDe(x.key,x.j);
+      return "<div class=\"liq-pend-row"+(man==null?" falta":"")+"\" id=\"liqPend_"+String(x.key).replace(/\W/g,"_")+"_"+x.j+"\"><span class=\"n\">"+liqEscapeHtml(x.nombre)+"</span><span class=\"f\">"+liqDiaSemana(x.j)+" "+liqDMcorto(x.j)+"</span><span class=\"fx\">"
+        + x.d.fichadas.map(function(f){ return "<i>"+f.hora+"</i> "+String(f.tipo||"").toLowerCase(); }).join(" · ")+"</span>"
+        + "<span class=\"in\"><input type=\"text\" class=\"liq-input-num\" placeholder=\"h:mm\" value=\""+(man==null?"":liqHM(man))+"\" data-key=\""+liqEscapeHtml(x.key)+"\" data-j=\""+x.j+"\" onchange=\"liqSetHorasDia(this)\" onkeydown=\"if(event.key==='Enter') this.blur()\" "+dis+"> hs</span></div>";
+    }).join("") + "</div></div>";
+}
+(function(){
+  var tip = null;
+  function hide(){ if(tip) tip.style.display = "none"; }
+  document.addEventListener("mouseover", function(e){
+    var td = e.target.closest && e.target.closest(".liq-table td.liq-tiene-obs");
+    if(!td){ hide(); return; }
+    var src = td.querySelector(".liq-tooltip"); if(!src){ hide(); return; }
+    if(!tip){ tip = document.createElement("div"); tip.className = "liq-floattip"; document.body.appendChild(tip); }
+    tip.innerHTML = src.innerHTML; tip.style.display = "block";
+    var r = td.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = Math.min(window.innerWidth - w - 8, Math.max(8, r.left + r.width/2 - w/2));
+    var top = r.bottom + 6; if(top + h > window.innerHeight - 8) top = r.top - h - 6;
+    tip.style.left = left + "px"; tip.style.top = Math.max(8, top) + "px";
+  });
+  document.addEventListener("scroll", hide, true);
+})();
+function liqParseHoras(s){ s = String(s||"").trim(); if(!s) return null; var m = s.match(/^(\d{1,2}):(\d{1,2})$/); if(m) return Number(m[1])*60+Number(m[2]);
+  var n = parseFloat(s.replace(",", ".")); return isNaN(n) ? null : Math.round(n*60); }
+function liqSetHorasDia(el){
+  if(liqState.liquidado) return;
+  var key = el.dataset.key, j = el.dataset.j, v = liqParseHoras(el.value);
+  if(el.value.trim() && v==null){ showToast("Escribí las horas como 8, 8,5 u 8:30", "warn"); return; }
+  liqState.horasDiaManual = liqState.horasDiaManual || {};
+  var m = liqState.horasDiaManual[key] = liqState.horasDiaManual[key] || {};
+  if(v==null) delete m[j]; else m[j] = v;
+  liqRenderTablaPresentismo(); liqRenderTablaLiquidacion(); liqGuardarDraft();
+}
+function liqIrADefinir(key, j){
+  var row = document.getElementById("liqPend_"+String(key).replace(/\W/g,"_")+"_"+j); if(!row) return;
+  row.scrollIntoView({behavior:"smooth", block:"center"}); row.classList.add("flash"); setTimeout(function(){ row.classList.remove("flash"); }, 1400);
+  var inp = row.querySelector("input"); if(inp) setTimeout(function(){ inp.focus(); }, 300);
 }
 
-/* ---------- tabla de liquidación ---------- */
-function liqCalcularAgregados(key){
-  var dias = (liqState.presentismo && liqState.presentismo[key]) || {};
-  var mesPrefix = liqState.mes.slice(0,7);
-  var ausencias=0, feriadosTrabajados=0, horasExtraMin=0;
-  Object.keys(dias).forEach(function(j){
-    if(j.slice(0,7)!==mesPrefix) return;
-    var d = dias[j];
-    var esFeriado = liqState.feriados.indexOf(j)!==-1;
-    if(d.estado==="ausente"){ ausencias++; }
-    else {
-      if(esFeriado) feriadosTrabajados++;
-      if(d.estado==="rojo" || d.estado==="verde") horasExtraMin += d.diffMin;
-    }
-  });
-  return {ausencias:ausencias, feriadosTrabajados:feriadosTrabajados, horasExtraMin:horasExtraMin};
-}
 /* Adaptado: las filas "con presentismo" son las claves de liqState.presentismo (nombres cortos
    del reporte ya matcheados), y el resto de empleadosCache que no matchearon ningún nombre del
    reporte se listan igual, sin presentismo (igual que Vanina en La Fortaleza). */
@@ -5147,7 +5365,7 @@ function liqRenderTablaLiquidacion(){
     var a = esCondA ? (liqState.montoA[f.key]!=null ? liqState.montoA[f.key] : (liqState.liquidado ? 0 : Number(f.emp.monto_a_default||0))) : 0;
     var b = sueldo - a;
     var adelanto = Number(adelantosPorNombre[f.nombre]||0);
-    var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0};
+    var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0, pendientes:0};
     var jornal = sueldo/30;
     var valorHora = jornal/8;
     var horasExtraManual = Number(liqState.horasExtraManual[f.key]||0);
@@ -5175,7 +5393,7 @@ function liqRenderTablaLiquidacion(){
         : "<span class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(0)+"</span>") + "</td>" +
       "<td class=\"liq-num-cell\">"+fmtMoney(b)+"</td>" +
       "<td class=\"liq-num-cell\" style=\""+(adelanto>0?"color:#B22A32;font-weight:700;":"color:var(--text-3);")+"\" title=\""+liqEscapeHtml(liqAdelantoTitle(f.nombre))+"\">"+(adelanto>0?"−"+fmtMoney(adelanto)+(liqAdelantoArrastrado(f.nombre)?"<sup style=\"color:#8A5A00;font-weight:800;margin-left:2px\" title=\"Incluye un adelanto del mes anterior\">*</sup>":""):"—")+"</td>" +
-      "<td class=\"liq-num-cell "+horasExtraCls+"\">"+(f.tienePresentismo?horasExtraTxt:"—")+"</td>" +
+      "<td class=\"liq-num-cell "+horasExtraCls+"\""+(agr.pendientes?" title=\""+agr.pendientes+" día(s) con fichadas incompletas sin definir: cuentan 0 horas\"":"")+">"+(f.tienePresentismo?horasExtraTxt+(agr.pendientes?"<sup class=\"liq-pend-sup\">?</sup>":""):"—")+"</td>" +
       "<td>"+manualInput("horasExtraManual", horasExtraManual)+"</td>" +
       "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.feriadosTrabajados:"—")+"</td>" +
       "<td>"+manualInput("feriadosManual", feriadosManual)+"</td>" +
@@ -5186,8 +5404,15 @@ function liqRenderTablaLiquidacion(){
       "</tr>";
   });
 
-  document.getElementById("liqTablaLiquidacion").innerHTML = thead+"<tbody>"+rows+"</tbody>";
+  /* Totales de A y de Pago B al pie de cada columna: A + B = total liquidado (pedido de Pancho, 08/10/2026). */
+  var tfoot = filas.length ? "<tfoot><tr class=\"liq-tot-row\"><td class=\"liq-col-nombre\">Totales<span class=\"liq-col-esperado\">A + B = "+fmtMoney(totalA+totalB)+"</span></td><td></td><td></td>" +
+    "<td class=\"liq-num-cell\"><span class=\"liq-tot-lbl\">Total A</span>"+fmtMoney(totalA)+"</td>" +
+    "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>" +
+    "<td class=\"liq-num-cell\"><span class=\"liq-tot-lbl\">Total B</span>"+fmtMoney(totalB)+"</td></tr></tfoot>" : "";
+  document.getElementById("liqTablaLiquidacion").innerHTML = thead+"<tbody>"+rows+"</tbody>"+tfoot;
   document.getElementById("liqTotalGeneral").textContent = fmtMoney(totalA+totalB);
+  var ltA = document.getElementById("liqTotalA"), ltB = document.getElementById("liqTotalB");
+  if(ltA) ltA.textContent = fmtMoney(totalA); if(ltB) ltB.textContent = fmtMoney(totalB);
   var btn = document.getElementById("liqBtnLiquidar");
   btn.disabled = liqState.liquidado;
   btn.title = liqState.liquidado ? "Este mes ya fue liquidado" : "Crea las órdenes de pago y genera los recibos";
@@ -5292,6 +5517,7 @@ async function liqGuardarDraftAhora(){
     horas_extra_manual: liqState.horasExtraManual,
     feriados_manual: liqState.feriadosManual,
     ausencias_manual: liqState.ausenciasManual,
+    horas_dia_manual: liqState.horasDiaManual || {},
     total_a: tot.totalA,
     total_b: tot.totalB,
     modificado_por: (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null
@@ -5329,6 +5555,7 @@ async function liqOnTabOpen(){
       liqState.horasExtraManual = row.horas_extra_manual || {};
       liqState.feriadosManual = row.feriados_manual || {};
       liqState.ausenciasManual = row.ausencias_manual || {};
+      liqState.horasDiaManual = row.horas_dia_manual || {};
       liqState.liquidado = !!row.liquidado;
       liqState.liquidacionId = row.id;
       liqState.ordenAId = row.orden_a_id;
@@ -9887,7 +10114,7 @@ function openOrden(id){ const o=D.ordenes.find(x=>x.id===id); if(!o) return; clo
           <div class="ci-ajustes-col"><div class="ci-ajustes-title">Impuestos generales de la factura</div>
             <div class="ci-ajustes-hint">Se calculan sobre el subtotal de ítems cargados e impactan el total de la factura (no el costo unitario de cada ítem). Ej.: percepción de IIBB.</div>
             <div class="ci-tax-chips" id="ciImpGenChips"></div>
-            <div class="ci-tax-adder"><input type="text" id="ciImpGenNombre" placeholder="Nombre (ej. Percepción IIBB)" style="width:150px;">
+            <div class="ci-tax-adder">${IGCat.selectHTML("ciImpGenNombre")}
               <select id="ciImpGenModo" onchange="cxCI.onImpGenModo()"><option value="pct">%</option><option value="monto">$</option></select>
               <input type="text" id="ciImpGenVal" placeholder="%" inputmode="decimal">
               <button type="button" class="ci-tax-add-btn" onclick="cxCI.addImpGen()" title="Agregar impuesto general">+</button></div></div>
@@ -10085,7 +10312,7 @@ function bindOnce(){ if(bound) return; bound=true;
   $("#cxCoSearch").oninput=e=>{ ST.coSearch=e.target.value; renderComprasResults(); };
   let rz; addEventListener("resize",()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(loaded&&ST.tab==="precios"&&document.getElementById("moduleCosteo").classList.contains("active")) renderPrecios(); },200); });
 }
-window.cxOnEnterModule = async function(){ bindOnce(); goTab(ST.tab); await reload(); };
+window.cxOnEnterModule = async function(){ if(window.IGCat) IGCat.load(); bindOnce(); goTab(ST.tab); await reload(); };
 })();
 
 /* SESI\u00d3N REAL (Supabase Auth) \u2014 el login siempre ocurre en home.html;
@@ -10103,6 +10330,124 @@ window.cxOnEnterModule = async function(){ bindOnce(); goTab(ST.tab); await relo
     window.location.href = "home.html";
   }
 })();
+</script>
+<script>
+/* ---------- Buscador de proveedores (Pagos) — reemplaza la lista nativa del navegador ----------
+   Pedido de Pancho, 08/10/2026: con el <datalist> nativo, al escribir el proveedor a mano la lista
+   no se filtraba y el campo marcaba "no coincide" hasta salir del cuadro. Este buscador filtra
+   mientras se escribe (sin distinguir mayúsculas ni tildes, por nombre o rubro), se maneja con
+   flechas/Enter/Esc y, al elegir o al salir del campo con un nombre que coincide, completa el nombre
+   exacto y dispara los mismos eventos que antes (input/change), así el resto del formulario
+   (rubro, categoría, plazo) se actualiza igual que siempre. Las opciones salen del mismo
+   #dlProveedoresPago que ya se mantenía actualizado. */
+(function(){
+  const DL_ID = "dlProveedoresPago";
+  const nrm = s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+  const esc = s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  let box=null, cur=null, idx=-1, shown=[];
+  function opts(){ const dl=document.getElementById(DL_ID); return dl ? [...dl.options].map(o=>({v:o.value, l:o.label && o.label!==o.value ? o.label : (o.textContent||"")})) : []; }
+  function ensureBox(){ if(box) return box; box=document.createElement("div"); box.className="pgc-list"; box.setAttribute("role","listbox"); document.body.appendChild(box);
+    box.addEventListener("mousedown",e=>{ const it=e.target.closest(".pgc-it"); if(!it) return; e.preventDefault(); pick(shown[Number(it.dataset.i)]); }); return box; }
+  function place(){ if(!cur||!box) return; const r=cur.getBoundingClientRect(); const below=window.innerHeight-r.bottom;
+    box.style.left=r.left+"px"; box.style.width=Math.max(r.width,280)+"px";
+    if(below<220 && r.top>below){ box.style.top=""; box.style.bottom=(window.innerHeight-r.top+4)+"px"; box.style.maxHeight=Math.min(300,r.top-12)+"px"; }
+    else { box.style.bottom=""; box.style.top=(r.bottom+4)+"px"; box.style.maxHeight=Math.min(300,below-12)+"px"; } }
+  function hi(t,q){ const s=String(t||""); if(!q) return esc(s); const i=nrm(s).indexOf(q); if(i<0) return esc(s); return esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+q.length))+"</mark>"+esc(s.slice(i+q.length)); }
+  function render(){ if(!cur) return; const q=nrm(cur.value); const all=opts();
+    const starts=[], has=[], lab=[]; all.forEach(o=>{ const n=nrm(o.v); if(!q||n.startsWith(q)) starts.push(o); else if(n.includes(q)) has.push(o); else if(nrm(o.l).includes(q)) lab.push(o); });
+    shown=[...starts,...has,...lab].slice(0,60); idx=shown.length && q ? 0 : -1; const b=ensureBox();
+    if(!shown.length){ b.innerHTML=`<div class="pgc-empty">${q?"Ningún proveedor coincide con “"+esc(cur.value.trim())+"”":"No hay proveedores cargados"}</div>`; }
+    else b.innerHTML=shown.map((o,i)=>`<div class="pgc-it${i===idx?" on":""}" data-i="${i}" role="option"><b>${hi(o.v,q)}</b>${o.l?`<span>${hi(o.l,q)}</span>`:""}</div>`).join("");
+    b.classList.add("show"); place(); }
+  function move(d){ if(!shown.length) return; idx=(idx+d+shown.length)%shown.length; [...box.querySelectorAll(".pgc-it")].forEach((el,i)=>el.classList.toggle("on",i===idx)); const el=box.querySelector(".pgc-it.on"); if(el) el.scrollIntoView({block:"nearest"}); }
+  function hide(){ if(box) box.classList.remove("show"); idx=-1; }
+  function fire(inp){ inp.dispatchEvent(new Event("input",{bubbles:true})); inp.dispatchEvent(new Event("change",{bubbles:true})); }
+  function pick(o){ if(!cur||!o) return; const inp=cur; inp.value=o.v; hide(); fire(inp); }
+  /* Si lo escrito coincide (sin mayúsculas/tildes/espacios de más) con un único proveedor, se completa su nombre exacto. */
+  function canon(inp){ const q=nrm(inp.value); if(!q) return; const m=opts().filter(o=>nrm(o.v)===q); if(m.length===1 && m[0].v!==inp.value){ inp.value=m[0].v; fire(inp); } }
+  function attach(inp){ if(!inp || inp.dataset.pgc) return; inp.dataset.pgc="1"; inp.removeAttribute("list"); inp.setAttribute("autocomplete","off");
+    inp.addEventListener("focus",()=>{ cur=inp; render(); });
+    inp.addEventListener("input",e=>{ if(!e.isTrusted) return; cur=inp; render(); });
+    inp.addEventListener("keydown",e=>{ if(cur!==inp) return; const open=box&&box.classList.contains("show");
+      if(e.key==="ArrowDown"){ e.preventDefault(); if(!open) render(); else move(1); }
+      else if(e.key==="ArrowUp"){ e.preventDefault(); if(open) move(-1); }
+      else if(e.key==="Enter"){ if(open && idx>=0){ e.preventDefault(); pick(shown[idx]); } }
+      else if(e.key==="Escape"){ if(open){ e.preventDefault(); e.stopPropagation(); hide(); } }
+      else if(e.key==="Tab"){ if(open && idx>=0 && nrm(inp.value)) pick(shown[idx]); } });
+    inp.addEventListener("blur",()=>{ setTimeout(()=>{ if(document.activeElement!==inp){ hide(); canon(inp); fire(inp); if(cur===inp) cur=null; } },0); });
+  }
+  function init(){ document.querySelectorAll(`input[list="${DL_ID}"]`).forEach(attach); }
+  window.addEventListener("scroll",()=>{ if(box&&box.classList.contains("show")) place(); },true);
+  window.addEventListener("resize",()=>{ if(box&&box.classList.contains("show")) place(); });
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+  window.pgComboInit = init;
+})();
+
+
+/* ---------- Costeo › Carga de compras: lista de impuestos generales ----------
+   Pedido de Pancho, 08/10/2026: los nombres de los impuestos generales de las facturas (percepción de
+   IIBB, percepción de IVA, etc.) quedan guardados en una lista que se administra desde Carga de
+   compras (agregar, editar, eliminar) y se eligen de un desplegable al cargar cada factura. Cada uno
+   puede tener, opcionalmente, un valor habitual (% o $) que se completa solo al elegirlo.
+   Eliminar o renombrar un impuesto de la lista no cambia las facturas ya cargadas. */
+(function(){
+  const TABLE = "cm_compra_impuestos_cat";
+  const esc = s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const nrm = s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+  const num = s=>{ if(s==null) return null; s=String(s).trim().replace(/[$%\s]/g,""); if(!s) return null; if(s.includes(",")) s=s.replace(/\./g,"").replace(",","."); const n=Number(s); return isFinite(n)?n:null; };
+  const fmt = n=>Number(n).toLocaleString("es-AR",{maximumFractionDigits:3});
+  const toast=(m,t)=>{ try{ showToast(m,t); }catch(e){ console.log(m); } };
+  const uid=()=>{ try{ return currentPerfil?currentPerfil.id:null; }catch(e){ return null; } };
+  const G = { items:[], loaded:false, editing:null };
+  async function load(){ const {data,error}=await sb.from(TABLE).select("*").order("orden").order("nombre"); if(error){ console.warn(error); return false; }
+    G.items=(data||[]).map(r=>({...r, valor:r.valor==null?null:Number(r.valor)})); G.loaded=true; refreshSelects(); return true; }
+  const byName = n=>G.items.find(x=>nrm(x.nombre)===nrm(n));
+  const valTxt = it=>it.valor==null?"":(it.modo==="monto"?"$"+fmt(it.valor):fmt(it.valor)+"%");
+  function optionsHTML(){ return `<option value="">Impuesto…</option>`+G.items.map(it=>`<option value="${esc(it.nombre)}">${esc(it.nombre)}${it.valor!=null?" · "+esc(valTxt(it)):""}</option>`).join("")+`<option value="__igadm">＋ Agregar / editar la lista…</option>`; }
+  function selectHTML(id){ return `<select id="${id}" class="igc-sel" onchange="IGCat.onPick(this)" title="Elegí un impuesto de la lista">${optionsHTML()}</select><button type="button" class="igc-gear" onclick="IGCat.open()" title="Administrar la lista de impuestos generales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>`; }
+  function refreshSelects(){ document.querySelectorAll("select.igc-sel").forEach(s=>{ const v=s.value; s.innerHTML=optionsHTML(); if(v&&v!=="__igadm"&&byName(v)) s.value=v; }); }
+  function onPick(sel){ if(sel.value==="__igadm"){ sel.value=""; open(); return; } const it=byName(sel.value); if(!it||it.valor==null) return;
+    const wrap=sel.closest(".ci-tax-adder")||document; const m=wrap.querySelector("#ciImpGenModo"), v=wrap.querySelector("#ciImpGenVal");
+    if(m){ m.value=it.modo==="monto"?"monto":"pct"; m.dispatchEvent(new Event("change",{bubbles:true})); } if(v) v.value=String(it.valor).replace(".",","); }
+
+  /* ---- ventana de administración ---- */
+  let ov=null;
+  function open(){ if(!ov){ ov=document.createElement("div"); ov.className="igc-ov"; document.body.appendChild(ov);
+      ov.addEventListener("mousedown",e=>{ if(e.target===ov) close(); });
+      document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&ov&&ov.classList.contains("show")){ if(G.editing){ G.editing=null; render(); } else close(); } }); }
+    G.editing=null; ov.classList.add("show"); render(); if(!G.loaded) load().then(render); }
+  function close(){ if(ov) ov.classList.remove("show"); G.editing=null; }
+  function modoSel(id,modo){ return `<select id="${id}"><option value="pct"${modo!=="monto"?" selected":""}>%</option><option value="monto"${modo==="monto"?" selected":""}>$</option></select>`; }
+  function render(){ if(!ov) return;
+    const rows=G.items.map(it=> G.editing===it.id
+      ? `<div class="igc-row ed"><input id="igcEdNom" value="${esc(it.nombre)}" placeholder="Nombre"><div class="igc-val">${modoSel("igcEdModo",it.modo)}<input id="igcEdVal" value="${it.valor==null?"":esc(String(it.valor).replace(".",","))}" placeholder="opcional" inputmode="decimal"></div>
+          <div class="igc-act"><button type="button" class="igc-ib ok" onclick="IGCat._save('${it.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg></button><button type="button" class="igc-ib" onclick="IGCat._edit(null)" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div></div>`
+      : `<div class="igc-row"><div class="igc-nom">${esc(it.nombre)}</div><div class="igc-val">${it.valor!=null?`<span class="igc-chip">${esc(valTxt(it))}</span>`:`<span class="igc-none">—</span>`}</div>
+          <div class="igc-act"><button type="button" class="igc-ib" onclick="IGCat._edit('${it.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.8 2.8 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button><button type="button" class="igc-ib del" onclick="IGCat._del('${it.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div></div>`).join("");
+    ov.innerHTML=`<div class="igc-box" role="dialog" aria-modal="true">
+      <div class="igc-h"><div><h3>Impuestos generales</h3><p>Los nombres que aparecen al cargar los impuestos generales de una factura. El valor habitual es opcional: si lo cargás, se completa solo al elegir el impuesto.</p></div><button type="button" class="igc-x" onclick="IGCat.close()" title="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+      <div class="igc-thead"><span>Nombre</span><span>Valor habitual</span><span></span></div>
+      <div class="igc-list">${!G.loaded?`<div class="igc-empty">Cargando…</div>`:(rows||`<div class="igc-empty">Todavía no hay impuestos en la lista. Agregá el primero abajo.</div>`)}</div>
+      <div class="igc-row igc-add"><input id="igcNewNom" placeholder="Nuevo impuesto (ej. Percepción IIBB)"><div class="igc-val">${modoSel("igcNewModo","pct")}<input id="igcNewVal" placeholder="opcional" inputmode="decimal"></div>
+        <div class="igc-act"><button type="button" class="igc-addbtn" onclick="IGCat._add()">Agregar</button></div></div>
+      <div class="igc-f">Renombrar o eliminar un impuesto no modifica las facturas ya cargadas.</div></div>`;
+    const ni=ov.querySelector("#igcNewNom"); if(ni){ ni.onkeydown=e=>{ if(e.key==="Enter") IGCat._add(); }; ov.querySelector("#igcNewVal").onkeydown=e=>{ if(e.key==="Enter") IGCat._add(); }; }
+    const ei=ov.querySelector("#igcEdNom"); if(ei){ ei.focus(); ei.select(); const go=e=>{ if(e.key==="Enter") IGCat._save(G.editing); }; ei.onkeydown=go; ov.querySelector("#igcEdVal").onkeydown=go; } else if(ni && G.loaded) ni.focus(); }
+  async function add(){ const nombre=(ov.querySelector("#igcNewNom").value||"").trim().replace(/\s+/g," "); const modo=ov.querySelector("#igcNewModo").value; const valor=num(ov.querySelector("#igcNewVal").value);
+    if(!nombre){ toast("Escribí el nombre del impuesto","warn"); return; } if(byName(nombre)){ toast("Ese impuesto ya está en la lista","warn"); return; }
+    const orden=G.items.reduce((m,x)=>Math.max(m,Number(x.orden)||0),-1)+1;
+    const {error}=await sb.from(TABLE).insert({nombre,modo,valor,orden,creado_por:uid()}); if(error){ toast(error.code==="23505"?"Ese impuesto ya está en la lista":"No se pudo agregar el impuesto","warn"); return; }
+    await load(); render(); toast("Impuesto agregado"); }
+  async function save(id){ const nombre=(ov.querySelector("#igcEdNom").value||"").trim().replace(/\s+/g," "); const modo=ov.querySelector("#igcEdModo").value; const valor=num(ov.querySelector("#igcEdVal").value);
+    if(!nombre){ toast("El nombre no puede quedar vacío","warn"); return; } const d=byName(nombre); if(d&&d.id!==id){ toast("Ya hay otro impuesto con ese nombre","warn"); return; }
+    const {error}=await sb.from(TABLE).update({nombre,modo,valor}).eq("id",id); if(error){ toast("No se pudo guardar el impuesto","warn"); return; }
+    G.editing=null; await load(); render(); toast("Impuesto actualizado"); }
+  async function del(id){ const it=G.items.find(x=>x.id===id); if(!it) return; if(!confirm(`¿Eliminar “${it.nombre}” de la lista? Las facturas ya cargadas no cambian.`)) return;
+    const {error}=await sb.from(TABLE).delete().eq("id",id); if(error){ toast("No se pudo eliminar el impuesto","warn"); return; } await load(); render(); toast("Impuesto eliminado"); }
+  window.IGCat = { load, open, close, onPick, selectHTML, refreshSelects, get items(){ return G.items; },
+    _add:add, _save:save, _del:del, _edit(id){ G.editing=id; render(); } };
+})();
+
 </script>
 </body>
 </html>

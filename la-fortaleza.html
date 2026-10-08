@@ -2082,6 +2082,60 @@
     #arPrint .ar-ch-xsub{font-size:8px;}
     #arPrint .arp-foot{margin-top:18px;padding-top:8px;border-top:1px solid #E4E6F1;font-size:8.5px;color:#9498B8;line-height:1.5;}
   }
+  /* ---- Pagos: buscador de proveedores (08/10/2026) ---- */
+  .pgc-list{position:fixed;z-index:9999;display:none;background:#fff;border:1px solid var(--border,#E3E6EF);border-radius:12px;box-shadow:0 14px 34px rgba(2,11,45,.18);overflow:auto;padding:5px;}
+  .pgc-list.show{display:block;}
+  .pgc-it{padding:7px 10px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .pgc-it b{font-size:13px;color:var(--navy,#0A1A4A);font-weight:700;}
+  .pgc-it span{font-size:11px;color:var(--text-3,#8A90A6);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pgc-it.on,.pgc-it:hover{background:#EEF3FD;}
+  .pgc-it mark{background:#FFE9A8;color:inherit;border-radius:2px;padding:0 1px;}
+  .pgc-empty{padding:10px 12px;font-size:12px;color:var(--text-3,#8A90A6);font-weight:600;}
+  #fld-nProveedor:focus-within .rl-warn, #fld-fProveedor:focus-within .rl-warn{display:none !important;}
+  /* ---- Costeo: lista de impuestos generales (08/10/2026) ---- */
+  .igc-sel{max-width:190px;}
+  .ci-tax-adder select.igc-sel{width:168px !important;}
+  .ci-tax-adder #ciImpGenModo{width:52px;}
+  .igc-gear{width:24px;height:24px;border-radius:6px;border:1px solid var(--border,#E3E6EF);background:#fff;color:var(--text-2,#5B6478);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0;}
+  .igc-gear:hover{background:#F1F2FA;color:var(--navy,#0A1A4A);}
+  .igc-gear svg{width:13px;height:13px;}
+  .igc-ov{position:fixed;inset:0;z-index:9000;background:rgba(10,18,48,.38);display:none;align-items:center;justify-content:center;padding:20px;}
+  .igc-ov.show{display:flex;}
+  .igc-box{background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(2,11,45,.28);width:min(560px,100%);max-height:min(640px,calc(100vh - 40px));display:flex;flex-direction:column;overflow:hidden;}
+  .igc-h{display:flex;gap:12px;align-items:flex-start;padding:18px 20px 12px;border-bottom:1px solid var(--border,#E3E6EF);}
+  .igc-h h3{margin:0;font-size:16px;font-weight:800;color:var(--navy,#0A1A4A);}
+  .igc-h p{margin:4px 0 0;font-size:12px;line-height:1.4;color:var(--text-3,#8A90A6);font-weight:600;}
+  .igc-x{margin-left:auto;background:none;border:none;width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--text-3,#8A90A6);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .igc-x:hover{background:#F1F2FA;color:var(--navy,#0A1A4A);}
+  .igc-x svg{width:16px;height:16px;}
+  .igc-thead,.igc-row{display:grid;grid-template-columns:minmax(0,1fr) 150px 64px;gap:10px;align-items:center;padding:0 20px;}
+  .igc-thead{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3,#8A90A6);padding-top:10px;padding-bottom:6px;}
+  .igc-list{overflow:auto;flex:1;min-height:60px;}
+  .igc-row{min-height:44px;border-bottom:1px solid #F0F1F6;}
+  .igc-row.ed{background:#F7F9FF;}
+  .igc-nom{font-size:13px;font-weight:700;color:var(--text-1,#1B2033);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .igc-val{display:flex;gap:4px;align-items:center;}
+  .igc-row input,.igc-row select{padding:6px 8px;border-radius:7px;border:1px solid var(--border,#E3E6EF);font-size:12.5px;font-family:inherit;background:#fff;min-width:0;}
+  .igc-row input:focus,.igc-row select:focus{outline:none;border-color:var(--sky,#4A8BEF);}
+  .igc-val select{width:52px;flex-shrink:0;} .igc-val input{width:100%;}
+  .igc-chip{font-size:11px;font-weight:800;background:#EEF1F6;color:#5B6478;border-radius:20px;padding:2px 9px;}
+  .igc-none{color:var(--text-3,#8A90A6);font-size:12px;}
+  .igc-act{display:flex;gap:4px;justify-content:flex-end;}
+  .igc-ib{width:28px;height:28px;border-radius:7px;border:none;background:none;color:var(--text-3,#8A90A6);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+  .igc-ib:hover{background:#F1F2FA;color:var(--navy,#0A1A4A);} .igc-ib.del:hover{background:#FFF1F1;color:#C23434;} .igc-ib.ok{color:#137B44;}
+  .igc-ib svg{width:14px;height:14px;}
+  .igc-add{border-top:1px solid var(--border,#E3E6EF);border-bottom:none;padding-top:10px;padding-bottom:10px;background:#FAFBFF;grid-template-columns:minmax(0,1fr) 150px auto;}
+  .igc-addbtn{background:var(--navy,#0A1A4A);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;}
+  .igc-addbtn:hover{filter:brightness(1.15);}
+  .igc-empty{padding:18px 20px;font-size:12.5px;color:var(--text-3,#8A90A6);font-weight:600;}
+  .igc-f{padding:8px 20px 14px;font-size:11px;color:var(--text-3,#8A90A6);font-weight:600;background:#FAFBFF;}
+  /* Liquidación: totales A / B (08/10/2026) */
+  .liq-table tfoot td{position:sticky;bottom:0;background:#F3F5FB;border-top:2px solid var(--border);font-weight:800;color:var(--navy);z-index:1;}
+  .liq-table tfoot td.liq-col-nombre{background:#F3F5FB;z-index:3;}
+  .liq-tot-lbl{display:block;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+  .liq-total-bar .lt-parts{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;}
+  .liq-total-bar .lt-value.lt-sm{font-size:17px;opacity:.92;}
+  .liq-total-bar .lt-op{font-size:18px;font-weight:800;color:var(--gray);padding-bottom:2px;}
 </style>
 </head>
 <body>
@@ -2873,9 +2927,12 @@
                 <div class="form-section-title">Liquidación — <span id="liqMesLabel3"></span></div>
                 <div class="liq-scroll"><table class="liq-table" id="liqTablaLiquidacion"></table></div>
                 <div class="liq-total-bar">
-                  <div>
-                    <div class="lt-label">Total a liquidar (Pago A + Pago B)</div>
-                    <div class="lt-value" id="liqTotalGeneral">$0</div>
+                  <div class="lt-parts">
+                    <div><div class="lt-label">Total A</div><div class="lt-value lt-sm" id="liqTotalA">$0</div></div>
+                    <div class="lt-op">+</div>
+                    <div><div class="lt-label">Total B</div><div class="lt-value lt-sm" id="liqTotalB">$0</div></div>
+                    <div class="lt-op">=</div>
+                    <div><div class="lt-label">Total liquidado (A + B)</div><div class="lt-value" id="liqTotalGeneral">$0</div></div>
                   </div>
                   <button class="btn-primary" id="liqBtnLiquidar" style="max-width:180px;" onclick="liqConfirmarLiquidar()" disabled title="Cargá un reporte de marcaciones para habilitar la liquidación">Liquidar</button>
                 </div>
@@ -3026,7 +3083,7 @@
           <section class="pagos-pane cx-alt" id="cxPaneCompras">
             <div class="cx-phead">
               <div class="cx-grow"><h1>Carga de compras</h1><div class="cx-sub">Órdenes de Pagos agrupadas por categoría de proveedor. Cargá el detalle de cada factura (con impuestos y descuentos): cuando coincide con el total, el costo de cada insumo se actualiza en Recetas y Precios.</div></div>
-              <div class="cx-actions"><div class="cx-seg" id="cxCoEstado"><button type="button" data-e="todas" class="on">Todas</button><button type="button" data-e="pend">Por cargar</button><button type="button" data-e="ok">Completas</button></div></div>
+              <div class="cx-actions"><button type="button" class="cx-btn" onclick="IGCat.open()" title="Agregar, editar o eliminar los impuestos generales que se eligen al cargar una factura"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Impuestos generales</button><div class="cx-seg" id="cxCoEstado"><button type="button" data-e="todas" class="on">Todas</button><button type="button" data-e="pend">Por cargar</button><button type="button" data-e="ok">Completas</button></div></div>
             </div>
             <div class="cx-scroll">
               <div class="cx-kpis" id="cxCoKpis"></div>
@@ -3124,7 +3181,7 @@
                     <div class="ci-ajustes-hint">Se calculan sobre el subtotal de ítems cargados e impactan el total de la factura (no el costo unitario de cada ítem). Ej.: percepción de IIBB.</div>
                     <div class="ci-tax-chips" id="ciImpGenChips"></div>
                     <div class="ci-tax-adder">
-                      <input type="text" id="ciImpGenNombre" placeholder="Nombre (ej. Percepción IIBB)" style="width:150px;">
+                      <select id="ciImpGenNombre" class="igc-sel" onchange="IGCat.onPick(this)" title="Elegí un impuesto de la lista"><option value="">Impuesto…</option></select><button type="button" class="igc-gear" onclick="IGCat.open()" title="Administrar la lista de impuestos generales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
                       <select id="ciImpGenModo" onchange="costeoOnImpGenModoChange()">
                         <option value="pct">%</option>
                         <option value="monto">$</option>
@@ -6295,7 +6352,7 @@ function bindOnce(){ if(bound) return; bound=true;
   $("#cxCoSearch").oninput=e=>{ ST.coSearch=e.target.value; renderComprasResults(); };
   let rz; addEventListener("resize",()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(loaded&&ST.tab==="precios"&&document.getElementById("moduleCosteo").classList.contains("active")) renderPrecios(); },200); });
 }
-window.cxOnEnterModule = async function(){ bindOnce(); const lg=$("#costeoLegacy"); if(lg){ lg.classList.add("hidden"); $("#costeoSubnav").classList.remove("hidden"); } goTab(ST.tab); await reload(); };
+window.cxOnEnterModule = async function(){ if(window.IGCat) IGCat.load(); bindOnce(); const lg=$("#costeoLegacy"); if(lg){ lg.classList.add("hidden"); $("#costeoSubnav").classList.remove("hidden"); } goTab(ST.tab); await reload(); };
 })();
 (async function initSession(){
   try{
@@ -11173,8 +11230,15 @@ function liqRenderTablaLiquidacion(){
       "</tr>";
   });
 
-  document.getElementById("liqTablaLiquidacion").innerHTML = thead+"<tbody>"+rows+"</tbody>";
+  /* Totales de A y de Pago B al pie de cada columna: A + B = total liquidado (pedido de Pancho, 08/10/2026). */
+  var tfoot = filas.length ? "<tfoot><tr class=\"liq-tot-row\"><td class=\"liq-col-nombre\">Totales<span class=\"liq-col-esperado\">A + B = "+fmtMoney(totalA+totalB)+"</span></td><td></td><td></td>" +
+    "<td class=\"liq-num-cell\"><span class=\"liq-tot-lbl\">Total A</span>"+fmtMoney(totalA)+"</td>" +
+    "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>" +
+    "<td class=\"liq-num-cell\"><span class=\"liq-tot-lbl\">Total B</span>"+fmtMoney(totalB)+"</td></tr></tfoot>" : "";
+  document.getElementById("liqTablaLiquidacion").innerHTML = thead+"<tbody>"+rows+"</tbody>"+tfoot;
   document.getElementById("liqTotalGeneral").textContent = fmtMoney(totalA+totalB);
+  var ltA = document.getElementById("liqTotalA"), ltB = document.getElementById("liqTotalB");
+  if(ltA) ltA.textContent = fmtMoney(totalA); if(ltB) ltB.textContent = fmtMoney(totalB);
   var btn = document.getElementById("liqBtnLiquidar");
   btn.disabled = liqState.liquidado;
   btn.title = liqState.liquidado ? "Este mes ya fue liquidado" : "Crea las órdenes de pago y genera los recibos";
@@ -13584,7 +13648,7 @@ async function costeoAddImpuestoGeneral(){
   const nombre = document.getElementById("ciImpGenNombre").value.trim();
   const modo = document.getElementById("ciImpGenModo").value;
   const valor = parseDecimalCosteo(document.getElementById("ciImpGenVal").value);
-  if(!nombre){ showToast("Escribí el nombre del impuesto", "warn"); return; }
+  if(!nombre){ showToast("Elegí el impuesto de la lista", "warn"); return; }
   if(!valor){ showToast("Cargá el valor del impuesto", "warn"); return; }
   const ajustes = costeoEnsureAjustesDeOrden(ordenId);
   ajustes.impuestos_generales.push({ nombre, modo, valor });
@@ -16381,6 +16445,124 @@ async function stkQuitarSemi(semiId){
   showToast("Semielaborado sacado de Stock");
   stkRenderEditorSemi();
 }
+</script>
+<script>
+/* ---------- Buscador de proveedores (Pagos) — reemplaza la lista nativa del navegador ----------
+   Pedido de Pancho, 08/10/2026: con el <datalist> nativo, al escribir el proveedor a mano la lista
+   no se filtraba y el campo marcaba "no coincide" hasta salir del cuadro. Este buscador filtra
+   mientras se escribe (sin distinguir mayúsculas ni tildes, por nombre o rubro), se maneja con
+   flechas/Enter/Esc y, al elegir o al salir del campo con un nombre que coincide, completa el nombre
+   exacto y dispara los mismos eventos que antes (input/change), así el resto del formulario
+   (rubro, categoría, plazo) se actualiza igual que siempre. Las opciones salen del mismo
+   #dlProveedoresPago que ya se mantenía actualizado. */
+(function(){
+  const DL_ID = "dlProveedoresPago";
+  const nrm = s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+  const esc = s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  let box=null, cur=null, idx=-1, shown=[];
+  function opts(){ const dl=document.getElementById(DL_ID); return dl ? [...dl.options].map(o=>({v:o.value, l:o.label && o.label!==o.value ? o.label : (o.textContent||"")})) : []; }
+  function ensureBox(){ if(box) return box; box=document.createElement("div"); box.className="pgc-list"; box.setAttribute("role","listbox"); document.body.appendChild(box);
+    box.addEventListener("mousedown",e=>{ const it=e.target.closest(".pgc-it"); if(!it) return; e.preventDefault(); pick(shown[Number(it.dataset.i)]); }); return box; }
+  function place(){ if(!cur||!box) return; const r=cur.getBoundingClientRect(); const below=window.innerHeight-r.bottom;
+    box.style.left=r.left+"px"; box.style.width=Math.max(r.width,280)+"px";
+    if(below<220 && r.top>below){ box.style.top=""; box.style.bottom=(window.innerHeight-r.top+4)+"px"; box.style.maxHeight=Math.min(300,r.top-12)+"px"; }
+    else { box.style.bottom=""; box.style.top=(r.bottom+4)+"px"; box.style.maxHeight=Math.min(300,below-12)+"px"; } }
+  function hi(t,q){ const s=String(t||""); if(!q) return esc(s); const i=nrm(s).indexOf(q); if(i<0) return esc(s); return esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+q.length))+"</mark>"+esc(s.slice(i+q.length)); }
+  function render(){ if(!cur) return; const q=nrm(cur.value); const all=opts();
+    const starts=[], has=[], lab=[]; all.forEach(o=>{ const n=nrm(o.v); if(!q||n.startsWith(q)) starts.push(o); else if(n.includes(q)) has.push(o); else if(nrm(o.l).includes(q)) lab.push(o); });
+    shown=[...starts,...has,...lab].slice(0,60); idx=shown.length && q ? 0 : -1; const b=ensureBox();
+    if(!shown.length){ b.innerHTML=`<div class="pgc-empty">${q?"Ningún proveedor coincide con “"+esc(cur.value.trim())+"”":"No hay proveedores cargados"}</div>`; }
+    else b.innerHTML=shown.map((o,i)=>`<div class="pgc-it${i===idx?" on":""}" data-i="${i}" role="option"><b>${hi(o.v,q)}</b>${o.l?`<span>${hi(o.l,q)}</span>`:""}</div>`).join("");
+    b.classList.add("show"); place(); }
+  function move(d){ if(!shown.length) return; idx=(idx+d+shown.length)%shown.length; [...box.querySelectorAll(".pgc-it")].forEach((el,i)=>el.classList.toggle("on",i===idx)); const el=box.querySelector(".pgc-it.on"); if(el) el.scrollIntoView({block:"nearest"}); }
+  function hide(){ if(box) box.classList.remove("show"); idx=-1; }
+  function fire(inp){ inp.dispatchEvent(new Event("input",{bubbles:true})); inp.dispatchEvent(new Event("change",{bubbles:true})); }
+  function pick(o){ if(!cur||!o) return; const inp=cur; inp.value=o.v; hide(); fire(inp); }
+  /* Si lo escrito coincide (sin mayúsculas/tildes/espacios de más) con un único proveedor, se completa su nombre exacto. */
+  function canon(inp){ const q=nrm(inp.value); if(!q) return; const m=opts().filter(o=>nrm(o.v)===q); if(m.length===1 && m[0].v!==inp.value){ inp.value=m[0].v; fire(inp); } }
+  function attach(inp){ if(!inp || inp.dataset.pgc) return; inp.dataset.pgc="1"; inp.removeAttribute("list"); inp.setAttribute("autocomplete","off");
+    inp.addEventListener("focus",()=>{ cur=inp; render(); });
+    inp.addEventListener("input",e=>{ if(!e.isTrusted) return; cur=inp; render(); });
+    inp.addEventListener("keydown",e=>{ if(cur!==inp) return; const open=box&&box.classList.contains("show");
+      if(e.key==="ArrowDown"){ e.preventDefault(); if(!open) render(); else move(1); }
+      else if(e.key==="ArrowUp"){ e.preventDefault(); if(open) move(-1); }
+      else if(e.key==="Enter"){ if(open && idx>=0){ e.preventDefault(); pick(shown[idx]); } }
+      else if(e.key==="Escape"){ if(open){ e.preventDefault(); e.stopPropagation(); hide(); } }
+      else if(e.key==="Tab"){ if(open && idx>=0 && nrm(inp.value)) pick(shown[idx]); } });
+    inp.addEventListener("blur",()=>{ setTimeout(()=>{ if(document.activeElement!==inp){ hide(); canon(inp); fire(inp); if(cur===inp) cur=null; } },0); });
+  }
+  function init(){ document.querySelectorAll(`input[list="${DL_ID}"]`).forEach(attach); }
+  window.addEventListener("scroll",()=>{ if(box&&box.classList.contains("show")) place(); },true);
+  window.addEventListener("resize",()=>{ if(box&&box.classList.contains("show")) place(); });
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+  window.pgComboInit = init;
+})();
+
+
+/* ---------- Costeo › Carga de compras: lista de impuestos generales ----------
+   Pedido de Pancho, 08/10/2026: los nombres de los impuestos generales de las facturas (percepción de
+   IIBB, percepción de IVA, etc.) quedan guardados en una lista que se administra desde Carga de
+   compras (agregar, editar, eliminar) y se eligen de un desplegable al cargar cada factura. Cada uno
+   puede tener, opcionalmente, un valor habitual (% o $) que se completa solo al elegirlo.
+   Eliminar o renombrar un impuesto de la lista no cambia las facturas ya cargadas. */
+(function(){
+  const TABLE = "lf_costeo_impuestos_cat";
+  const esc = s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const nrm = s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+  const num = s=>{ if(s==null) return null; s=String(s).trim().replace(/[$%\s]/g,""); if(!s) return null; if(s.includes(",")) s=s.replace(/\./g,"").replace(",","."); const n=Number(s); return isFinite(n)?n:null; };
+  const fmt = n=>Number(n).toLocaleString("es-AR",{maximumFractionDigits:3});
+  const toast=(m,t)=>{ try{ showToast(m,t); }catch(e){ console.log(m); } };
+  const uid=()=>{ try{ return currentPerfil?currentPerfil.id:null; }catch(e){ return null; } };
+  const G = { items:[], loaded:false, editing:null };
+  async function load(){ const {data,error}=await sb.from(TABLE).select("*").order("orden").order("nombre"); if(error){ console.warn(error); return false; }
+    G.items=(data||[]).map(r=>({...r, valor:r.valor==null?null:Number(r.valor)})); G.loaded=true; refreshSelects(); return true; }
+  const byName = n=>G.items.find(x=>nrm(x.nombre)===nrm(n));
+  const valTxt = it=>it.valor==null?"":(it.modo==="monto"?"$"+fmt(it.valor):fmt(it.valor)+"%");
+  function optionsHTML(){ return `<option value="">Impuesto…</option>`+G.items.map(it=>`<option value="${esc(it.nombre)}">${esc(it.nombre)}${it.valor!=null?" · "+esc(valTxt(it)):""}</option>`).join("")+`<option value="__igadm">＋ Agregar / editar la lista…</option>`; }
+  function selectHTML(id){ return `<select id="${id}" class="igc-sel" onchange="IGCat.onPick(this)" title="Elegí un impuesto de la lista">${optionsHTML()}</select><button type="button" class="igc-gear" onclick="IGCat.open()" title="Administrar la lista de impuestos generales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>`; }
+  function refreshSelects(){ document.querySelectorAll("select.igc-sel").forEach(s=>{ const v=s.value; s.innerHTML=optionsHTML(); if(v&&v!=="__igadm"&&byName(v)) s.value=v; }); }
+  function onPick(sel){ if(sel.value==="__igadm"){ sel.value=""; open(); return; } const it=byName(sel.value); if(!it||it.valor==null) return;
+    const wrap=sel.closest(".ci-tax-adder")||document; const m=wrap.querySelector("#ciImpGenModo"), v=wrap.querySelector("#ciImpGenVal");
+    if(m){ m.value=it.modo==="monto"?"monto":"pct"; m.dispatchEvent(new Event("change",{bubbles:true})); } if(v) v.value=String(it.valor).replace(".",","); }
+
+  /* ---- ventana de administración ---- */
+  let ov=null;
+  function open(){ if(!ov){ ov=document.createElement("div"); ov.className="igc-ov"; document.body.appendChild(ov);
+      ov.addEventListener("mousedown",e=>{ if(e.target===ov) close(); });
+      document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&ov&&ov.classList.contains("show")){ if(G.editing){ G.editing=null; render(); } else close(); } }); }
+    G.editing=null; ov.classList.add("show"); render(); if(!G.loaded) load().then(render); }
+  function close(){ if(ov) ov.classList.remove("show"); G.editing=null; }
+  function modoSel(id,modo){ return `<select id="${id}"><option value="pct"${modo!=="monto"?" selected":""}>%</option><option value="monto"${modo==="monto"?" selected":""}>$</option></select>`; }
+  function render(){ if(!ov) return;
+    const rows=G.items.map(it=> G.editing===it.id
+      ? `<div class="igc-row ed"><input id="igcEdNom" value="${esc(it.nombre)}" placeholder="Nombre"><div class="igc-val">${modoSel("igcEdModo",it.modo)}<input id="igcEdVal" value="${it.valor==null?"":esc(String(it.valor).replace(".",","))}" placeholder="opcional" inputmode="decimal"></div>
+          <div class="igc-act"><button type="button" class="igc-ib ok" onclick="IGCat._save('${it.id}')" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg></button><button type="button" class="igc-ib" onclick="IGCat._edit(null)" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div></div>`
+      : `<div class="igc-row"><div class="igc-nom">${esc(it.nombre)}</div><div class="igc-val">${it.valor!=null?`<span class="igc-chip">${esc(valTxt(it))}</span>`:`<span class="igc-none">—</span>`}</div>
+          <div class="igc-act"><button type="button" class="igc-ib" onclick="IGCat._edit('${it.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.8 2.8 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button><button type="button" class="igc-ib del" onclick="IGCat._del('${it.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div></div>`).join("");
+    ov.innerHTML=`<div class="igc-box" role="dialog" aria-modal="true">
+      <div class="igc-h"><div><h3>Impuestos generales</h3><p>Los nombres que aparecen al cargar los impuestos generales de una factura. El valor habitual es opcional: si lo cargás, se completa solo al elegir el impuesto.</p></div><button type="button" class="igc-x" onclick="IGCat.close()" title="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+      <div class="igc-thead"><span>Nombre</span><span>Valor habitual</span><span></span></div>
+      <div class="igc-list">${!G.loaded?`<div class="igc-empty">Cargando…</div>`:(rows||`<div class="igc-empty">Todavía no hay impuestos en la lista. Agregá el primero abajo.</div>`)}</div>
+      <div class="igc-row igc-add"><input id="igcNewNom" placeholder="Nuevo impuesto (ej. Percepción IIBB)"><div class="igc-val">${modoSel("igcNewModo","pct")}<input id="igcNewVal" placeholder="opcional" inputmode="decimal"></div>
+        <div class="igc-act"><button type="button" class="igc-addbtn" onclick="IGCat._add()">Agregar</button></div></div>
+      <div class="igc-f">Renombrar o eliminar un impuesto no modifica las facturas ya cargadas.</div></div>`;
+    const ni=ov.querySelector("#igcNewNom"); if(ni){ ni.onkeydown=e=>{ if(e.key==="Enter") IGCat._add(); }; ov.querySelector("#igcNewVal").onkeydown=e=>{ if(e.key==="Enter") IGCat._add(); }; }
+    const ei=ov.querySelector("#igcEdNom"); if(ei){ ei.focus(); ei.select(); const go=e=>{ if(e.key==="Enter") IGCat._save(G.editing); }; ei.onkeydown=go; ov.querySelector("#igcEdVal").onkeydown=go; } else if(ni && G.loaded) ni.focus(); }
+  async function add(){ const nombre=(ov.querySelector("#igcNewNom").value||"").trim().replace(/\s+/g," "); const modo=ov.querySelector("#igcNewModo").value; const valor=num(ov.querySelector("#igcNewVal").value);
+    if(!nombre){ toast("Escribí el nombre del impuesto","warn"); return; } if(byName(nombre)){ toast("Ese impuesto ya está en la lista","warn"); return; }
+    const orden=G.items.reduce((m,x)=>Math.max(m,Number(x.orden)||0),-1)+1;
+    const {error}=await sb.from(TABLE).insert({nombre,modo,valor,orden,creado_por:uid()}); if(error){ toast(error.code==="23505"?"Ese impuesto ya está en la lista":"No se pudo agregar el impuesto","warn"); return; }
+    await load(); render(); toast("Impuesto agregado"); }
+  async function save(id){ const nombre=(ov.querySelector("#igcEdNom").value||"").trim().replace(/\s+/g," "); const modo=ov.querySelector("#igcEdModo").value; const valor=num(ov.querySelector("#igcEdVal").value);
+    if(!nombre){ toast("El nombre no puede quedar vacío","warn"); return; } const d=byName(nombre); if(d&&d.id!==id){ toast("Ya hay otro impuesto con ese nombre","warn"); return; }
+    const {error}=await sb.from(TABLE).update({nombre,modo,valor}).eq("id",id); if(error){ toast("No se pudo guardar el impuesto","warn"); return; }
+    G.editing=null; await load(); render(); toast("Impuesto actualizado"); }
+  async function del(id){ const it=G.items.find(x=>x.id===id); if(!it) return; if(!confirm(`¿Eliminar “${it.nombre}” de la lista? Las facturas ya cargadas no cambian.`)) return;
+    const {error}=await sb.from(TABLE).delete().eq("id",id); if(error){ toast("No se pudo eliminar el impuesto","warn"); return; } await load(); render(); toast("Impuesto eliminado"); }
+  window.IGCat = { load, open, close, onPick, selectHTML, refreshSelects, get items(){ return G.items; },
+    _add:add, _save:save, _del:del, _edit(id){ G.editing=id; render(); } };
+})();
+
 </script>
 </body>
 </html>
