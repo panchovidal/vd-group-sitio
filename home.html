@@ -190,6 +190,12 @@
   .pf-sec-grid.hidden{display:none;}
   .pf-sec-chip{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-2);background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 9px;cursor:pointer;}
   .pf-sec-chip input{accent-color:var(--orange);}
+  .pf-sec-block{display:flex;flex-direction:column;gap:5px;}
+  .pf-sub-row{display:flex;flex-wrap:wrap;gap:4px;padding-left:16px;}
+  .pf-sub-row.off{opacity:.4;}
+  .pf-sub-chip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--text-3);border:1px dashed var(--border);border-radius:20px;padding:3px 9px 3px 6px;cursor:pointer;}
+  .pf-sub-chip input{accent-color:var(--orange);width:12px;height:12px;margin:0;}
+  .pf-sub-row.off .pf-sub-chip{cursor:not-allowed;}
   .pf-sec-empty-note{font-size:11px;color:var(--text-3);margin:6px 0 4px 20px;font-style:italic;}
   .pf-proj-list{display:flex;flex-direction:column;gap:0;margin-bottom:16px;}
   .pf-add-btn{background:var(--orange);color:#fff;border:none;padding:10px 20px;border-radius:9px;font-size:12.8px;font-weight:800;cursor:pointer;}
@@ -447,22 +453,22 @@ const PROYECTOS = [
 // vive en RLS en Supabase, esto solo arma el checklist).
 const SECTIONS_BY_PROYECTO = {
   fortaleza: [
-    {id:"ventas", nombre:"Reporte de Ventas/Utilidades"},
-    {id:"cajaMayor", nombre:"Caja Mayor"},
-    {id:"pagos", nombre:"Pagos / Compras"},
-    {id:"costeo", nombre:"Costeo de productos"},
+    {id:"ventas", nombre:"Reporte de Ventas/Utilidades", subs:[{id:"facturacion", nombre:"Facturación"},{id:"analisis", nombre:"Análisis de resultados"}]},
+    {id:"cajaMayor", nombre:"Caja Mayor", subs:[{id:"imputacion", nombre:"Imputación"},{id:"historial", nombre:"Cierres anteriores"}]},
+    {id:"pagos", nombre:"Pagos / Compras", subs:[{id:"lista", nombre:"Lista de órdenes"},{id:"nueva", nombre:"Nueva orden de pago"},{id:"cuentas", nombre:"Cuentas corrientes"}]},
+    {id:"costeo", nombre:"Costeo de productos", subs:[{id:"precios", nombre:"Precios"},{id:"recetas", nombre:"Recetas"},{id:"compras", nombre:"Carga de compras"}]},
     {id:"stock", nombre:"Stock"},
-    {id:"sueldos", nombre:"Sueldos"},
-    {id:"config", nombre:"Configuración"},
+    {id:"sueldos", nombre:"Sueldos", subs:[{id:"esquema", nombre:"Esquema del personal"},{id:"liquidacion", nombre:"Liquidación"}]},
+    {id:"config", nombre:"Configuración", subs:[{id:"compras", nombre:"Compras"},{id:"socios", nombre:"Socios"},{id:"actividad", nombre:"Actividad"}]},
   ],
   chemono: [
-    {id:"ventas", nombre:"Reporte de Ventas/Utilidades"},
-    {id:"cajaMayor", nombre:"Caja Mayor"},
-    {id:"pagos", nombre:"Pagos / Compras"},
-    {id:"costeo", nombre:"Costeo de productos"},
+    {id:"ventas", nombre:"Reporte de Ventas/Utilidades", subs:[{id:"facturacion", nombre:"Facturación"},{id:"analisis", nombre:"Análisis de resultados"}]},
+    {id:"cajaMayor", nombre:"Caja Mayor", subs:[{id:"imputacion", nombre:"Imputación"},{id:"historial", nombre:"Cierres anteriores"}]},
+    {id:"pagos", nombre:"Pagos / Compras", subs:[{id:"lista", nombre:"Lista de órdenes"},{id:"nueva", nombre:"Nueva orden de pago"},{id:"cuentas", nombre:"Cuentas corrientes"}]},
+    {id:"costeo", nombre:"Costeo de productos", subs:[{id:"precios", nombre:"Precios"},{id:"recetas", nombre:"Recetas"},{id:"compras", nombre:"Carga de compras"}]},
     {id:"stock", nombre:"Stock"},
-    {id:"sueldos", nombre:"Sueldos"},
-    {id:"config", nombre:"Configuración"},
+    {id:"sueldos", nombre:"Sueldos", subs:[{id:"esquema", nombre:"Esquema del personal"},{id:"liquidacion", nombre:"Liquidación"}]},
+    {id:"config", nombre:"Configuración", subs:[{id:"compras", nombre:"Compras"},{id:"socios", nombre:"Socios"},{id:"actividad", nombre:"Actividad"}]},
   ],
 };
 let currentPerfil = null;   // fila de public.perfiles del usuario logueado
@@ -662,13 +668,35 @@ function proyectosWithSeccionesHTML(prefix, selectedProyectos, selectedSecciones
     const secciones = SECTIONS_BY_PROYECTO[p.id] || [];
     const secHTML = secciones.length ? `
       <div class="pf-sec-grid ${checked?'':'hidden'}" id="${prefix}Sec_${p.id}">
-        ${secciones.map(s=>`<label class="pf-sec-chip"><input type="checkbox" value="${p.id}:${s.id}" ${selectedSecciones.includes(p.id+':'+s.id)?'checked':''}> ${s.nombre}</label>`).join("")}
+        ${secciones.map(s=>{
+          const on = selectedSecciones.includes(p.id+':'+s.id);
+          const subs = s.subs||[];
+          const explicitas = subs.filter(x=>selectedSecciones.includes(p.id+':'+s.id+'/'+x.id));
+          const subOn = x => !on || !explicitas.length || explicitas.includes(x); // sin sub-secciones marcadas = todas
+          return `<div class="pf-sec-block">
+            <label class="pf-sec-chip"><input type="checkbox" value="${p.id}:${s.id}" ${on?'checked':''} onchange="pfToggleSubs(this)"> ${s.nombre}</label>
+            ${subs.length ? `<div class="pf-sub-row ${on?'':'off'}">${subs.map(x=>`<label class="pf-sub-chip"><input type="checkbox" data-sub="${p.id}:${s.id}/${x.id}" ${subOn(x)?'checked':''} ${on?'':'disabled'} onchange="pfOnSubChange(this)"> ${x.nombre}</label>`).join("")}</div>` : ""}
+          </div>`;
+        }).join("")}
       </div>` : "";
     return `<div class="pf-proj-block">
       <label class="pf-proj-chip"><input type="checkbox" value="${p.id}" ${checked?'checked':''} onchange="toggleSeccionesFor('${prefix}','${p.id}',this.checked)"> ${p.nombre}</label>
       ${secHTML}
     </div>`;
   }).join("");
+}
+/* Sub-secciones: al tildar una sección se habilitan todas sus sub-secciones; destildando alguna
+   queda restringida a las marcadas. Si se destildan todas, se destilda la sección. */
+function pfToggleSubs(cb){
+  const row = cb.closest(".pf-sec-block").querySelector(".pf-sub-row");
+  if(!row) return;
+  row.classList.toggle("off", !cb.checked);
+  row.querySelectorAll("input").forEach(i=>{ i.disabled = !cb.checked; if(cb.checked) i.checked = true; });
+}
+function pfOnSubChange(sub){
+  const block = sub.closest(".pf-sec-block");
+  const any = Array.from(block.querySelectorAll(".pf-sub-row input")).some(i=>i.checked);
+  if(!any){ const sec = block.querySelector(".pf-sec-chip input"); sec.checked = false; pfToggleSubs(sec); }
 }
 function toggleSeccionesFor(prefix, proyectoId, checked){
   const el = document.getElementById(prefix+"Sec_"+proyectoId);
@@ -677,8 +705,16 @@ function toggleSeccionesFor(prefix, proyectoId, checked){
 function collectProyectosYSecciones(containerId){
   const container = document.getElementById(containerId);
   const proyectos = Array.from(container.querySelectorAll(".pf-proj-chip input:checked")).map(c=>c.value);
-  const secciones = Array.from(container.querySelectorAll(".pf-sec-chip input:checked")).map(c=>c.value)
-    .filter(s=>proyectos.includes(s.split(":")[0])); // ignora secciones de proyectos destildados
+  const secciones = [];
+  container.querySelectorAll(".pf-sec-block").forEach(block=>{
+    const sec = block.querySelector(".pf-sec-chip input");
+    if(!sec.checked || !proyectos.includes(sec.value.split(":")[0])) return; // ignora secciones de proyectos destildados
+    secciones.push(sec.value);
+    const subs = Array.from(block.querySelectorAll(".pf-sub-row input"));
+    const marcadas = subs.filter(i=>i.checked);
+    // Todas marcadas = acceso completo a la sección (no se guardan sub-secciones explícitas)
+    if(subs.length && marcadas.length && marcadas.length < subs.length) marcadas.forEach(i=>secciones.push(i.dataset.sub));
+  });
   return { proyectos, secciones };
 }
 function renderPerfilesForm(){
@@ -700,7 +736,10 @@ function seccionesChipsHTML(proyectos, secciones){
     const defs = SECTIONS_BY_PROYECTO[pid];
     const activas = defs.filter(s=>(secciones||[]).includes(pid+":"+s.id));
     if(!activas.length) return `<span class="pf-chip" style="opacity:.55;">${pid}: sin secciones</span>`;
-    return activas.map(s=>`<span class="pf-chip">${s.nombre}</span>`).join("");
+    return activas.map(s=>{
+      const subs = (s.subs||[]).filter(x=>(secciones||[]).includes(pid+":"+s.id+"/"+x.id));
+      return `<span class="pf-chip"${subs.length?` title="Solo: ${subs.map(x=>x.nombre).join(", ")}"`:""}>${s.nombre}${subs.length?` <i style="opacity:.7;font-style:normal">· ${subs.map(x=>x.nombre).join(", ")}</i>`:""}</span>`;
+    }).join("");
   }).join("");
 }
 function renderPerfilesList(){

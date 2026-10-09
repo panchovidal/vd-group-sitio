@@ -287,7 +287,24 @@
   .status-select-wrap{display:flex;gap:8px;flex-wrap:wrap;}
   .status-chip{padding:7px 13px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:#fff;cursor:pointer;color:var(--text-2);transition:all .15s ease;}
   .status-chip[data-s="Pendiente"].active{background:#FFF6DF;border-color:#E3A008;color:#93690A;}
-  .status-chip[data-s="Pagado"].active{background:#E4F8ED;border-color:#1F9D5A;color:#137B44;}
+  .pg-varios{display:inline-block;font-size:11px;font-weight:700;color:#5A4BB5;background:#EFEBFF;border-radius:6px;padding:1px 7px;}
+.pg-varios-n{font-size:10.5px;font-weight:700;color:var(--text-3,#8a8a8a);}
+.pg-rubro-items{font-size:11px;color:#5A4BB5;margin-top:5px;line-height:1.45;}
+.pg-items-card{display:flex;align-items:center;gap:12px;border:1px solid #DCD6FA;background:#F7F5FF;border-radius:12px;padding:10px 12px;margin:0 0 16px;}
+.pg-items-ic{width:34px;height:34px;border-radius:9px;background:#EAE5FF;color:#5A4BB5;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.pg-items-ic svg{width:18px;height:18px;}
+.pg-items-txt{flex:1;min-width:0;display:flex;flex-direction:column;font-size:11.5px;color:var(--text-2);line-height:1.35;}
+.pg-items-txt b{font-size:12.8px;color:var(--navy,#020B2D);}
+.pg-items-btn{border:none;background:#5A4BB5;color:#fff;font-weight:700;font-size:12px;border-radius:9px;padding:8px 12px;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.pg-items-btn:hover{background:#4A3CA0;}
+.pg-items-btn:disabled{opacity:.6;cursor:wait;}
+.pg-items-ov{position:fixed;inset:0;background:rgba(2,11,45,.45);backdrop-filter:blur(2px);z-index:60;align-items:stretch;justify-content:center;padding:22px;}
+.pg-items-modal{background:var(--bg,#F5F6FA);border-radius:18px;box-shadow:0 24px 60px rgba(2,11,45,.3);width:min(1400px,100%);display:flex;flex-direction:column;overflow:hidden;}
+.pg-items-modal #cxOrdView{padding:18px 22px 10px;}
+.pg-items-modal .screen-scroll{flex:1;min-height:0;overflow:auto;}
+.ci-crear-ins{color:#5A4BB5;font-weight:700;cursor:pointer;text-decoration:underline;}
+@media (max-width:700px){ .pg-items-ov{padding:0;} .pg-items-modal{border-radius:0;} }
+.status-chip[data-s="Pagado"].active{background:#E4F8ED;border-color:#1F9D5A;color:#137B44;}
   .status-chip[data-s="Vencido"].active{background:#FCE6E7;border-color:#D1414A;color:#B22A32;}
   .status-chip[data-s="Anulado"].active{background:#EEEFF5;border-color:#9498B8;color:#6D7191;}
   .status-chip.active{background:#EAF1FF;border-color:var(--blue);color:var(--blue);}
@@ -2818,6 +2835,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 Insumos <span class="cnt" id="cfgCntInsumos">·</span>
               </div>
+              <div class="cfg-subtab" data-cview="metodos" onclick="cfgGoView('metodos')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                Métodos de pago <span class="cnt" id="cfgCntMetodos">·</span>
+              </div>
               <div class="spacer"></div>
               <div class="cfg-live" id="cfgLive" title="Los cambios que hagan otros usuarios se reflejan acá automáticamente"><i></i><span>Conectando…</span></div>
             </div>
@@ -2883,6 +2904,19 @@
               <div class="cfg-chips" id="cfgChipsInsumos"></div>
               <div class="cfg-scroll" id="cfgScrollInsumos">
                 <div id="cfgTableInsumos"></div>
+              </div>
+            </div>
+
+            <!-- VISTA: MÉTODOS DE PAGO (09/10/2026, igual que La Fortaleza) -->
+            <div class="cfg-view" id="cfgViewMetodos">
+              <div class="cfg-head"><div><h1>Métodos de pago</h1></div></div>
+              <div class="screen-scroll">
+                <p class="config-hint">Métodos de pago disponibles al crear o editar una orden. Ordenado alfabéticamente. Si renombrás uno, las órdenes ya cargadas se actualizan solas; no se puede eliminar uno que tenga órdenes.</p>
+                <div class="config-card" id="cfgList-metodos"></div>
+                <div class="config-card" style="margin-top:14px;"><div class="config-add-bar">
+                  <input type="text" id="cfgNewMetodo" placeholder="Nuevo método de pago" onkeydown="if(event.key==='Enter')cmMpAgregar()">
+                  <button onclick="cmMpAgregar()">+ Agregar</button>
+                </div></div>
               </div>
             </div>
           </section>
@@ -2991,6 +3025,11 @@
       <div><div class="l">Monto a pagar</div><div class="v" id="pSumMonto">—</div></div>
       <div><div class="l">Plazo de pago</div><div class="v" id="pSumPlazo">—</div></div>
     </div>
+    <div class="pg-items-card" id="pgItemsCard" style="display:none;">
+      <div class="pg-items-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
+      <div class="pg-items-txt"><b>Ítems de la factura</b><span id="pgItemsResumen">—</span></div>
+      <button type="button" class="pg-items-btn" id="pgItemsBtn" onclick="pgAbrirItems(openOrderId)">Cargar ítems</button>
+    </div>
     <div class="field">
       <label>Estado</label>
       <div class="status-select-wrap" id="statusChips">
@@ -3014,7 +3053,7 @@
     </div>
     <div class="field-row">
       <div class="field"><label>Categoría</label><input type="text" id="fConcepto" readonly></div>
-      <div class="field"><label>Rubro</label><select id="fRubro" onchange="onPanelRubroChange()"></select></div>
+      <div class="field"><label>Rubro</label><select id="fRubro" onchange="onPanelRubroChange()"></select><div class="pg-rubro-items" id="fRubroItems" style="display:none"></div></div>
     </div>
     <div class="field-row">
       <div class="field"><label>Monto de factura</label><input type="text" id="fMontoFactura"></div>
@@ -3050,6 +3089,11 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
     </div>
   </div>
+</div>
+
+<!-- Carga de ítems desde Pagos (09/10/2026): se muestra el mismo editor de Costeo › Carga de compras -->
+<div class="pg-items-ov" id="pgItemsOv" style="display:none;">
+  <div class="pg-items-modal" id="pgItemsHost"></div>
 </div>
 
 <!-- filtro por columna (embudo) — mismo formato que Configuración > Proveedores -->
@@ -3133,8 +3177,63 @@ function tieneSeccionChemono(mod){
   if(currentPerfil.rol === "due\u00f1o") return true;
   return (currentPerfil.secciones||[]).includes("chemono:"+mod);
 }
+
+/* ---- Permisos por sub-sección (pedido de Pancho, 09/10/2026) ----
+   perfiles.secciones guarda "proyecto:modulo" y, opcionalmente, "proyecto:modulo/sub".
+   Si un perfil tiene el módulo y ninguna sub-sección marcada, accede a todas (compatibilidad).
+   La base aplica la misma regla en los datos sensibles (has_subseccion): Socios, Dividendos
+   (Análisis de resultados) y Liquidación. */
+const SUB_TABS = {
+  ventas:   { map:{ resumen:"facturacion", analisis:"analisis" }, sel:"#ventasSubnav [data-vpane]", attr:"vpane" },
+  pagos:    { map:{ lista:"lista", cuentas:"cuentas", nueva:"nueva" }, sel:"#pagosSubnav [data-pane]", attr:"pane", extra:{ nueva:["#ctaNuevaBtn"] } },
+  cajaMayor:{ map:{ imputacion:"imputacion", historial:"historial" }, sel:"#cmSubnav [data-cmpane]", attr:"cmpane" },
+  costeo:   { map:{ precios:"precios", recetas:"recetas", compras:"compras" }, sel:"#costeoSubnav [data-cxtab]", attr:"cxtab" },
+  sueldos:  { map:{ esquema:"esquema", liquidacion:"liquidacion", nuevoEmpleado:"esquema" }, sel:"#sueldosSubnav [data-stab]", attr:"stab",
+              extra:{ esquema:["#ctaNuevoEmpleadoBtn","#btnActualizarSueldos","#btnBajaEmpleado"] } },
+  config:   { map:{ compras:"compras", socios:"socios", actividad:"actividad" }, sel:"#configSubnav [data-ctab]", attr:"ctab" }
+};
+function tieneSubseccion(mod, sub){
+  if(!currentPerfil) return false;
+  if(currentPerfil.rol === "dueño") return true;
+  const secs = currentPerfil.secciones || [], base = "chemono:" + mod;
+  if(!secs.includes(base)) return false;
+  const explicitas = secs.filter(x=>x.indexOf(base + "/")===0);
+  return !explicitas.length || explicitas.includes(base + "/" + sub);
+}
+// Devuelve la pestaña pedida si está permitida; si no, la primera permitida del módulo.
+function subTabPermitida(mod, tab){
+  const d = SUB_TABS[mod]; if(!d || !currentPerfil) return tab;
+  const sub = d.map[tab]; if(!sub || tieneSubseccion(mod, sub)) return tab;
+  const alt = Object.keys(d.map).find(t=>t!=="nuevoEmpleado" && tieneSubseccion(mod, d.map[t]));
+  return alt || tab;
+}
+function aplicarGatingSubsecciones(){
+  Object.keys(SUB_TABS).forEach(mod=>{
+    const d = SUB_TABS[mod];
+    document.querySelectorAll(d.sel).forEach(el=>{
+      const sub = d.map[el.dataset[d.attr]];
+      if(sub) el.classList.toggle("hidden", !tieneSubseccion(mod, sub));
+    });
+    Object.entries(d.extra||{}).forEach(([sub, sels])=>sels.forEach(q=>{ const el = document.querySelector(q); if(el) el.classList.toggle("hidden", !tieneSubseccion(mod, sub)); }));
+  });
+}
+function asegurarSubActiva(mod){
+  const d = SUB_TABS[mod]; if(!d || !currentPerfil) return;
+  const act = document.querySelector(d.sel + ".active");
+  const tab = act ? act.dataset[d.attr] : null;
+  if(tab && subTabPermitida(mod, tab) === tab) return;
+  const destino = subTabPermitida(mod, tab || Object.keys(d.map)[0]);
+  if(!destino || destino===tab) return;
+  if(mod==="ventas") goVentasPane(destino);
+  else if(mod==="pagos") goPane(destino);
+  else if(mod==="sueldos") goSueldosTab(destino);
+  else if(mod==="config") goConfigTab(destino);
+  else if(mod==="cajaMayor" && typeof cmGoTab==="function") cmGoTab(destino);
+  else { const el = document.querySelector(d.sel + '[data-' + d.attr + '="' + destino + '"]'); if(el) el.click(); }
+}
 function aplicarGatingDeSecciones(){
   document.body.classList.add("gated");
+  aplicarGatingSubsecciones();
   let algunaVisible = false;
   let primeraVisible = null;
   document.querySelectorAll(".module-nav-item[data-module]").forEach(item=>{
@@ -3345,6 +3444,7 @@ var sueldosPendientes = {};
 var SUELDOS_PANE_ID = { esquema: "stabEsquema", liquidacion: "stabLiquidacion", nuevoEmpleado: "stabNuevoEmpleado" };
 
 function goSueldosTab(tab){
+  tab = subTabPermitida("sueldos", tab);
   var scope = document.getElementById("sueldosSubnav");
   scope.querySelectorAll(".pagos-tab").forEach(function(t){ t.classList.toggle("active", t.dataset.stab===tab); });
   scope.querySelectorAll(".pagos-pane").forEach(function(p){ p.classList.remove("active"); });
@@ -6027,7 +6127,88 @@ function cfgGoView(v){
   document.querySelectorAll(".cfg-subtab").forEach(t=>t.classList.toggle("active", t.dataset.cview===v));
   document.getElementById("cfgViewProveedores").classList.toggle("active", v==="proveedores");
   document.getElementById("cfgViewInsumos").classList.toggle("active", v==="insumos");
+  document.getElementById("cfgViewMetodos").classList.toggle("active", v==="metodos");
   cfgCloseFloating();
+  if(v==="metodos") cmMpCargar();
+}
+/* ---- Configuración › Compras › Métodos de pago (Che Mono, 09/10/2026) ---- */
+let cmMp = { lista:[], uso:{}, editando:null };
+async function cmMpCargar(){
+  const el = document.getElementById("cfgList-metodos");
+  if(el && !cmMp.lista.length) el.innerHTML = '<div class="empty-mini">Cargando…</div>';
+  const r = await sb.from("cm_metodos_pago").select("id,nombre").order("nombre");
+  if(r.error){ if(el) el.innerHTML = '<div class="empty-mini">No se pudieron cargar los métodos de pago.</div>'; return; }
+  cmMp.lista = (r.data||[]).slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+  cmMp.uso = {};
+  try{
+    const o = await sb.from("cm_ordenes").select("metodo");
+    (o.data||[]).forEach(x=>{ if(x.metodo) cmMp.uso[x.metodo] = (cmMp.uso[x.metodo]||0)+1; });
+  }catch(e){}
+  const cnt = document.getElementById("cfgCntMetodos"); if(cnt) cnt.textContent = cmMp.lista.length;
+  cmMpRender();
+}
+function cmMpRender(){
+  const el = document.getElementById("cfgList-metodos"); if(!el) return;
+  const esc = v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  el.innerHTML = cmMp.lista.map((m,i)=>{
+    const uso = cmMp.uso[m.nombre]||0;
+    if(cmMp.editando===i){
+      return `<div class="config-list-row editing">
+        <input class="edit-input" id="cmMpEdit${i}" value="${esc(m.nombre)}" onkeydown="if(event.key==='Enter')cmMpGuardar(${i});if(event.key==='Escape')cmMpCancelar()">
+        <div class="row-actions">
+          <button class="icon-btn" onclick="cmMpGuardar(${i})" title="Guardar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+          <button class="icon-btn" onclick="cmMpCancelar()" title="Cancelar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div></div>`;
+    }
+    return `<div class="config-list-row">
+      <span class="main-txt">${esc(m.nombre)}</span>
+      <span class="sub-txt" style="margin-left:auto;margin-right:10px;">${uso ? uso+" "+(uso===1?"orden":"órdenes") : "sin órdenes"}</span>
+      <div class="row-actions">
+        <button class="icon-btn" onclick="cmMpEditar(${i})" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
+        <button class="icon-btn del-btn" onclick="cmMpEliminar(${i})" title="${uso?"No se puede eliminar: tiene órdenes":"Eliminar"}" ${uso?'disabled style="opacity:.35;cursor:not-allowed"':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+      </div></div>`;
+  }).join("") || '<div class="empty-mini">Todavía no hay métodos de pago cargados.</div>';
+  if(cmMp.editando!=null){ const inp = document.getElementById("cmMpEdit"+cmMp.editando); if(inp){ inp.focus(); inp.select(); } }
+}
+function cmMpEditar(i){ cmMp.editando = i; cmMpRender(); }
+function cmMpCancelar(){ cmMp.editando = null; cmMpRender(); }
+async function cmMpRefrescarPagos(){ if(typeof pgReload==="function" && typeof pgLoaded!=="undefined" && pgLoaded){ try{ await pgReload(); }catch(e){} } }
+async function cmMpAgregar(){
+  const inp = document.getElementById("cfgNewMetodo"), val = inp.value.trim();
+  if(!val){ showToast("Escribí el nombre del método de pago", "warn"); return; }
+  if(cmMp.lista.some(m=>m.nombre.toLowerCase()===val.toLowerCase())){ showToast("Ese método de pago ya existe", "warn"); return; }
+  const { error } = await sb.from("cm_metodos_pago").insert({ nombre: val });
+  if(error){ showToast(error.code==="23505" ? "Ese método de pago ya existe" : "No se pudo agregar el método de pago", "warn"); return; }
+  inp.value = "";
+  logHistorialConfig("Creó un método de pago", `“${val}”`);
+  showToast("Método de pago agregado");
+  await cmMpCargar(); cmMpRefrescarPagos();
+}
+async function cmMpGuardar(i){
+  const m = cmMp.lista[i], val = (document.getElementById("cmMpEdit"+i).value||"").trim();
+  if(!val){ showToast("El nombre no puede quedar vacío", "warn"); return; }
+  if(val===m.nombre){ cmMpCancelar(); return; }
+  const uso = cmMp.uso[m.nombre]||0;
+  if(uso && !confirm(`Vas a renombrar “${m.nombre}” → “${val}”.
+
+Hay ${uso} órdenes de pago con ese método: se van a actualizar automáticamente.
+
+¿Continuar?`)) return;
+  const { error } = await sb.from("cm_metodos_pago").update({ nombre: val }).eq("id", m.id);
+  if(error){ showToast(error.code==="23505" ? "Ya existe un método de pago con ese nombre" : "No se pudo actualizar el método de pago", "warn"); return; }
+  cmMp.editando = null;
+  logHistorialConfig("Editó un método de pago", `“${m.nombre}” → “${val}”`);
+  showToast("Método de pago actualizado");
+  await cmMpCargar(); cmMpRefrescarPagos();
+}
+async function cmMpEliminar(i){
+  const m = cmMp.lista[i];
+  if(!confirm(`¿Eliminar el método de pago “${m.nombre}”?`)) return;
+  const { error } = await sb.from("cm_metodos_pago").delete().eq("id", m.id);
+  if(error){ showToast(error.message && /^No se puede eliminar/.test(error.message) ? error.message : "No se pudo eliminar el método de pago", "warn"); return; }
+  logHistorialConfig("Eliminó un método de pago", `“${m.nombre}”`);
+  showToast("Método de pago eliminado");
+  await cmMpCargar(); cmMpRefrescarPagos();
 }
 function cfgOnSearch(dom, val){
   cfgState[dom].search = val;
@@ -7309,6 +7490,7 @@ async function renderActividad(){
 
 /* ---------- navegación de Configuración ---------- */
 function goConfigTab(ctab){
+  ctab = subTabPermitida("config", ctab);
   const scope = document.getElementById("configSubnav");
   scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.ctab===ctab));
   scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
@@ -7515,6 +7697,8 @@ async function pgLoadMaster(){
     sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias"),
     sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
     sb.from("cm_metodos_pago").select("id,nombre,created_at"),
+    sb.from("cm_insumos").select("id,rubro_id"),
+    sb.from("cm_insumo_presentaciones").select("insumo_id,proveedor_id"),
   ]);
   const err = res.find(r=>r.error);
   if(err){ console.warn("Pagos (datos maestros):", err.error); showToast("No se pudieron cargar proveedores y métodos de pago", "warn"); return false; }
@@ -7527,6 +7711,7 @@ async function pgLoadMaster(){
     rubros: pgLinks.filter(l=>l.proveedor_id===p.id).map(l=>rubById[l.rubro_id]).filter(Boolean).sort((a,b)=>cfgCmp(a.cat+a.nombre,b.cat+b.nombre)) }))
     .sort((a,b)=>cfgCmp(a.nombre,b.nombre));
   pgProvByName = {}; pgProvs.forEach(p=>pgProvByName[p.nombre]=p);
+  pgInsList = res[5].data||[]; pgPresList = res[6].data||[];
   const ORDEN_MET = ["Bco. Galicia","Mercado Pago","Efectivo - Caja Mayor","Tarjeta de crédito","Tarjeta de débito"];
   metodosPagoConfig = (res[4].data||[]).map(m=>m.nombre).sort((a,b)=>{
     const ia = ORDEN_MET.indexOf(a), ib = ORDEN_MET.indexOf(b);
@@ -7540,6 +7725,7 @@ async function loadOrdenes(){
     const { data, error } = await sb.from("cm_ordenes").select("*").order("created_at", {ascending:false});
     if(error){ showToast("No se pudieron cargar las órdenes de pago", "warn"); return false; }
     ordenes = (data||[]).map(mapOrdenRow);
+    await pgCargarReparto();
     return true;
   }catch(e){ showToast("No se pudieron cargar las órdenes de pago", "warn"); return false; }
 }
@@ -7610,6 +7796,7 @@ async function logHistorialOrden(accion, detalle){
 
 /* ---------- navegación ---------- */
 function goPane(pane){
+  pane = subTabPermitida("pagos", pane);
   const scope = document.getElementById("pagosSubnav");
   scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.pane===pane));
   scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
@@ -7639,11 +7826,11 @@ const GRID_COLUMNS = [
     cell:o=>`<div class="cell c-proveedor pg-flex">${pgClipHtml(o.adjuntos,"compra")}<span class="pg-txt">${pgEsc(o.proveedor)}</span></div>`,
     fvals:o=>[o.proveedor], sortVal:o=>o.proveedor },
   { id:"concepto", label:"Categoría", defaultWidth:160, minWidth:90, maxWidth:300,
-    cell:o=>`<div class="cell">${pgTagHtml(o.concepto)}</div>`,
-    fvals:o=>[o.concepto||"—"], sortVal:o=>o.concepto },
+    cell:o=>pgConceptoCell(o),
+    fvals:o=>pgConceptoVals(o), sortVal:o=>o.concepto },
   { id:"rubro", label:"Rubro", defaultWidth:150, minWidth:90, maxWidth:320,
-    cell:o=>`<div class="cell c-rubro">${pgEsc(o.rubro||"—")}</div>`,
-    fvals:o=>[o.rubro||"—"], sortVal:o=>o.rubro },
+    cell:o=>pgRubroCell(o),
+    fvals:o=>pgRubroVals(o), sortVal:o=>o.rubro },
   { id:"tipo", label:"Tipo de compra", defaultWidth:152, minWidth:90, maxWidth:180,
     cell:o=>`<div class="cell">${o.comprobanteTipo?`<span class="pg-tipo">${pgEsc(o.comprobanteTipo)}</span>`:"—"}</div>`,
     fvals:o=>[o.comprobanteTipo||"—"], sortVal:o=>o.comprobanteTipo||"" },
@@ -8091,6 +8278,96 @@ function collectAdjuntoPaths(ids){
 /* =========================================================
    PANEL DE DETALLE (ver / editar · modo "registrar pago")
    ========================================================= */
+
+/* ---- Rubros por ítems (pedido de Pancho, 09/10/2026) ----
+   · Los insumos tienen su propia categoría/rubro. Si una orden tiene ítems cargados, sus rubros salen de
+     los ítems (la base guarda en la orden el rubro principal = el de mayor costo, y Análisis de resultados
+     reparte el monto a pagar en proporción al costo de los ítems de cada rubro).
+   · Proveedor con un solo rubro → automático. Proveedor con insumos y varios rubros → provisoriamente el
+     rubro principal hasta que se carguen los ítems. Proveedor con varios rubros sin insumos (ej. empleados:
+     Sueldos/Adelantos) o sin proveedor → se elige en la orden. */
+let pgReparto = {};
+async function pgCargarReparto(){
+  try{
+    const r = await sb.rpc("zz_reparto_ordenes", { p_pre: "cm" });
+    const m = {};
+    if(!r.error) (r.data||[]).forEach(x=>{ const p = Number(x.peso)||0; if(p<=0) return; (m[x.orden_id] = m[x.orden_id]||[]).push({ concepto:x.concepto, rubro:x.rubro, peso:p }); });
+    Object.values(m).forEach(a=>a.sort((x,y)=>y.peso-x.peso));
+    pgReparto = m;
+  }catch(e){ pgReparto = {}; }
+}
+function pgPartes(o){ return (o && pgReparto[o.id]) || null; }
+function pgPartesTxt(ps){ const t = ps.reduce((a,x)=>a+x.peso,0)||1; return ps.map(x=>x.rubro+" "+Math.round(x.peso*100/t)+"%").join(" · "); }
+function pgRubroCell(o){
+  const ps = pgPartes(o), rs = ps ? [...new Set(ps.map(x=>x.rubro))] : [];
+  if(rs.length>1) return `<div class="cell c-rubro" title="${pgEsc(pgPartesTxt(ps))}"><span class="pg-varios">Varios</span> <span class="pg-varios-n">${rs.length}</span></div>`;
+  return `<div class="cell c-rubro">${pgEsc(o.rubro||"—")}</div>`;
+}
+function pgRubroVals(o){ const ps = pgPartes(o); return ps ? [...new Set(ps.map(x=>x.rubro||"—"))] : [o.rubro||"—"]; }
+function pgConceptoVals(o){ const ps = pgPartes(o); return ps ? [...new Set(ps.map(x=>x.concepto||"—"))] : [o.concepto||"—"]; }
+function pgConceptoCell(o){
+  const cs = pgConceptoVals(o);
+  return cs.length>1 ? `<div class="cell" title="${pgEsc(cs.join(" · "))}">${pgTagHtml(o.concepto)} <span class="pg-varios-n">+${cs.length-1}</span></div>` : `<div class="cell">${pgTagHtml(o.concepto)}</div>`;
+}
+// Rubros (por id) de los insumos de un proveedor, con la cantidad de insumos de cada uno
+function pgInsRubrosProv(nombre){
+  const p = pgProvByName[nombre]; const out = {};
+  if(!p) return out;
+  const ids = new Set((pgPresList||[]).filter(x=>x.proveedor_id===p.id).map(x=>x.insumo_id));
+  (pgInsList||[]).forEach(i=>{ if(ids.has(i.id) && i.rubro_id && p.rubros.some(r=>r.id===i.rubro_id)) out[i.rubro_id] = (out[i.rubro_id]||0)+1; });
+  return out;
+}
+function pgRubroPrincipal(p){
+  const cnt = pgInsRubrosProv(p.nombre); if(!Object.keys(cnt).length) return null;
+  return p.rubros.slice().sort((a,b)=>(cnt[b.id]||0)-(cnt[a.id]||0))[0] || null;
+}
+function pgRubroModoItems(p){ return !!(p && p.rubros.length>1 && pgRubroPrincipal(p)); }
+var pgInsList = [], pgPresList = [];
+/* ---- Ítems de la factura desde Pagos (pedido de Pancho, 09/10/2026) ---- */
+let pgItemsOrdenId = null;
+function pgItemsElegible(o){
+  if(!o || o.proveedor===PG_SIN_PROV || o.comprobanteTipo==="NC") return false;
+  const p = pgProvByName[o.proveedor]; if(!p) return false;
+  if((pgPresList||[]).some(x=>x.proveedor_id===p.id)) return true;
+  const catsIns = new Set((pgInsList||[]).map(i=>(pgRubros.find(r=>r.id===i.rubro_id)||{}).cat).filter(Boolean));
+  return p.rubros.some(r=>catsIns.has(r.cat));
+}
+function pgRefreshItemsCard(o){
+  const card = document.getElementById("pgItemsCard"); if(!card) return;
+  const ok = pgItemsElegible(o); card.style.display = ok ? "" : "none"; if(!ok) return;
+  const ps = pgPartes(o), res = document.getElementById("pgItemsResumen");
+  if(ps){ const tot = ps.reduce((a,x)=>a+x.peso,0);
+    res.textContent = "Cargados · " + fmtMoney(tot) + " de " + fmtMoney(o.montoFactura) + (new Set(ps.map(x=>x.rubro)).size>1 ? " · " + pgPartesTxt(ps) : "");
+    document.getElementById("pgItemsBtn").textContent = "Ver / editar ítems";
+  } else { res.textContent = "Todavía no se cargaron los productos de esta factura."; document.getElementById("pgItemsBtn").textContent = "Cargar ítems"; }
+}
+async function pgAbrirItems(id){
+  const o = ordenes.find(x=>x.id===id); if(!o) return;
+  if(!pgItemsElegible(o)){ showToast("Esta orden no tiene proveedor de compras con insumos", "warn"); return; }
+  const btn = document.getElementById("pgItemsBtn"); if(btn){ btn.disabled = true; btn.textContent = "Abriendo…"; }
+  pgItemsOrdenId = id;
+  document.getElementById("pgItemsOv").style.display = "flex";
+  const ok = await window.cxAbrirOrdenEnPagos(id, document.getElementById("pgItemsHost"));
+  if(btn) btn.disabled = false;
+  if(!ok){ document.getElementById("pgItemsOv").style.display = "none"; pgItemsOrdenId = null; pgRefreshItemsCard(o); }
+}
+window.pgCerrarItemsHost = async function(){
+  document.getElementById("pgItemsOv").style.display = "none";
+  const id = pgItemsOrdenId; pgItemsOrdenId = null;
+  await pgReload();
+  const o = ordenes.find(x=>x.id===id);
+  if(o && openOrderId===id){
+    pgFillRubroSelect(document.getElementById("fRubro"), o.proveedor, { rubro:o.rubro, concepto:o.concepto });
+    document.getElementById("fConcepto").value = o.concepto || "";
+    const ps = pgPartes(o), box = document.getElementById("fRubroItems");
+    if(ps){ document.getElementById("fRubro").disabled = true; box.style.display = ""; box.innerHTML = new Set(ps.map(x=>x.rubro)).size>1 ? "Definido por los ítems de la factura: <b>"+pgEsc(pgPartesTxt(ps))+"</b>" : "Definido por los ítems de la factura."; }
+    pgRefreshItemsCard(o);
+    if(panelSnapshot){ panelSnapshot.rubro = o.rubro; panelSnapshot.concepto = o.concepto; }
+  }
+  const mc = document.getElementById("moduleCosteo");
+  if(mc && mc.classList.contains("active") && typeof cxOnEnterModule==="function") cxOnEnterModule();
+};
+
 function pgFillRubroSelect(sel, proveedor, current){
   const p = pgProvByName[proveedor];
   let rubros = p && p.rubros.length ? p.rubros : pgRubros.slice().sort((a,b)=>cfgCmp(a.cat+a.nombre,b.cat+b.nombre));
@@ -8132,6 +8409,13 @@ function openPanel(id, opts){
   document.getElementById("fProveedor").value = o.proveedor;
   document.getElementById("fProveedorWarn").style.display = "none";
   pgFillRubroSelect(document.getElementById("fRubro"), o.proveedor, { rubro:o.rubro, concepto:o.concepto });
+  {
+    const ps = pgPartes(o), pv = pgProvByName[o.proveedor], modoItems = !!ps || (pv && pgRubroModoItems(pv)), box = document.getElementById("fRubroItems");
+    document.getElementById("fRubro").disabled = modoItems;
+    box.style.display = modoItems ? "" : "none";
+    box.innerHTML = ps ? (new Set(ps.map(x=>x.rubro)).size>1 ? "Definido por los ítems de la factura: <b>"+pgEsc(pgPartesTxt(ps))+"</b>" : "Definido por los ítems de la factura.")
+                       : modoItems ? "Se define por los ítems de la factura (todavía no tiene ítems: queda en el rubro principal)." : "";
+  }
   document.getElementById("fConcepto").value = o.concepto || "";
   const metodos = metodosPagoConfig.slice(); if(o.metodo && !metodos.includes(o.metodo)) metodos.unshift(o.metodo);
   populateSelect(document.getElementById("fMetodo"), metodos, "Seleccionar…");
@@ -8168,6 +8452,7 @@ function openPanel(id, opts){
     if(!document.getElementById("fFechaPago").value) document.getElementById("fFechaPago").value = todayISO();
   }
   pgPanelRefreshPlazo();
+  pgRefreshItemsCard(o);
   panelSnapshot = deepClone(o);
   document.getElementById("overlay").classList.add("show");
   panel.classList.add("show");
@@ -8394,9 +8679,11 @@ function onProveedorChange(){
   document.getElementById("nProveedorWarn").style.display = (nombre && !p) ? "" : "none";
   const sel = document.getElementById("nRubro");
   if(p){
-    pgFillRubroSelect(sel, nombre, null);
-    sel.disabled = p.rubros.length===1;
-    document.getElementById("nRubroHint").textContent = p.rubros.length>1 ? `(el proveedor tiene ${p.rubros.length} rubros, elegí uno)` : "(según el proveedor)";
+    const princ = pgRubroModoItems(p) ? pgRubroPrincipal(p) : null;
+    pgFillRubroSelect(sel, nombre, princ ? { rubro:princ.nombre, concepto:princ.cat } : null);
+    sel.disabled = p.rubros.length===1 || !!princ;
+    document.getElementById("nRubroHint").textContent = princ ? "(se define por los ítems de la factura · hasta cargarlos: rubro principal)"
+      : p.rubros.length>1 ? `(el proveedor tiene ${p.rubros.length} rubros, elegí uno)` : "(según el proveedor)";
   } else {
     sel.innerHTML = `<option value="">Elegí primero el proveedor</option>`; sel.disabled = true;
     document.getElementById("nRubroHint").textContent = "(según el proveedor)";
@@ -8518,6 +8805,9 @@ async function saveNuevaOrden(){
   logHistorialOrden("Creó una orden de pago", `${nueva.id} (${proveedor}, ${fmtMoney(nueva.monto)})`);
   showToast("Orden "+nueva.id+" creada correctamente");
   goPane("lista");
+  if(pgItemsElegible(nueva) && confirm("Orden "+nueva.id+" creada.\n\n¿Querés cargar ahora los ítems de la factura? (también lo podés hacer después desde la orden)")){
+    openPanel(nueva.id); pgAbrirItems(nueva.id);
+  }
 }
 
 /* =========================================================
@@ -8795,6 +9085,7 @@ function goModule(mod){
   if(mod==="pagos") pgOnEnterModule();
   if(mod==="costeo") cxOnEnterModule();
   if(mod==="sueldos" && !pgLoaded) pgReload(); // Liquidación lee los adelantos pagados desde Pagos
+  asegurarSubActiva(mod);
 }
 
 
@@ -8924,12 +9215,14 @@ async function arLoadAll(force){
       puedeGastos ? arSelectAll(P+"_proveedores", "nombre,tipo_gasto") : Promise.resolve(null),
       sb.from(P+"_socios").select("id,nombre,porcentaje,orden").order("orden").order("nombre"),
       AR_SITE.ventas ? AR_SITE.ventas(force).catch(e=>{ arState.ventasErr = e.message || String(e); return null; }) : Promise.resolve(null),
-      sb.rpc(P+"_meses_liquidados")
+      sb.rpc(P+"_meses_liquidados"),
+      puedeGastos ? sb.rpc("zz_reparto_ordenes", { p_pre: P }) : Promise.resolve(null)
     ];
-    const [ord, provs, soc, ventas, liqs] = await Promise.all(tareas.map(p=>Promise.resolve(p).then(x=>x, e=>({__err:e}))));
+    const [ord, provs, soc, ventas, liqs, rep] = await Promise.all(tareas.map(p=>Promise.resolve(p).then(x=>x, e=>({__err:e}))));
     if(!puedeGastos) arState.gastosErr = "Tu usuario no tiene acceso a Pagos: los gastos no se pueden leer.";
     else if(ord && ord.__err) arState.gastosErr = "No se pudieron leer las órdenes de pago ("+(ord.__err.message||ord.__err)+").";
     arState.ordenes = Array.isArray(ord) ? ord.filter(o=>o.fecha_comprobante) : [];
+    arState.reparto = arBuildReparto(rep && !rep.__err && !rep.error ? rep.data : null);
     arState.provTipo = new Map((Array.isArray(provs)?provs:[]).map(p=>[arNorm(p.nombre), p.tipo_gasto||"puntual"]));
     arState.socios = (soc && !soc.__err && !soc.error) ? (soc.data||[]) : [];
     arState.ventas = ventas && !ventas.__err ? ventas : null;
@@ -8971,13 +9264,30 @@ function arVentasRango(desde, hasta){
   });
   return r;
 }
+/* Reparto por ítems (09/10/2026): una factura con ítems de varios rubros impacta en cada rubro en
+   proporción al costo de sus ítems (con impuestos y descuentos de línea). Sin ítems → rubro de la orden. */
+function arBuildReparto(rows){
+  const m = new Map();
+  (rows||[]).forEach(r=>{ const p = Number(r.peso)||0; if(p<=0) return;
+    if(!m.has(r.orden_id)) m.set(r.orden_id, []);
+    m.get(r.orden_id).push({ concepto:r.concepto, rubro:r.rubro, peso:p }); });
+  return m;
+}
+function arPartesOrden(o){
+  const ps = arState.reparto && arState.reparto.get(o.id);
+  if(ps && ps.length){ const tot = ps.reduce((a,x)=>a+x.peso,0); if(tot>0) return ps.map(x=>({ concepto:x.concepto, rubro:x.rubro, f:x.peso/tot })); }
+  return [{ concepto:o.concepto, rubro:o.rubro, f:1 }];
+}
 function arGastosRango(desde, hasta){
   const cats = new Map(); let total = 0;
   arState.ordenes.forEach(o=>{
     const v = arGastoEnRango(o, desde, hasta); if(!v) return;
-    const c = (o.concepto||"").trim() || "Sin categoría", rb = (o.rubro||"").trim() || "Sin rubro";
-    if(!cats.has(c)) cats.set(c, { name:c, total:0, subs:new Map(), n:0 });
-    const C = cats.get(c); C.total += v; C.n++; C.subs.set(rb, (C.subs.get(rb)||0)+v);
+    const vistas = new Set();
+    arPartesOrden(o).forEach(pt=>{
+      const c = (pt.concepto||"").trim() || "Sin categoría", rb = (pt.rubro||"").trim() || "Sin rubro", vv = v*pt.f;
+      if(!cats.has(c)) cats.set(c, { name:c, total:0, subs:new Map(), n:0 });
+      const C = cats.get(c); C.total += vv; if(!vistas.has(c)){ C.n++; vistas.add(c); } C.subs.set(rb, (C.subs.get(rb)||0)+vv);
+    });
     total += v;
   });
   return { total, cats };
@@ -9431,6 +9741,7 @@ async function arSociosGuardar(){
 }
 
 function goVentasPane(pane){
+  pane = subTabPermitida("ventas", pane);
   const scope = document.getElementById("ventasSubnav");
   scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.vpane===pane));
   scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
@@ -9591,7 +9902,7 @@ const cats = ()=>[...new Set(artsActivos().map(a=>a.categoria))].sort((a,b)=>a.l
 function orderFor(key,ids){ const saved=ST.order[key]||[]; const out=saved.filter(x=>ids.includes(x)); ids.forEach(x=>{ if(!out.includes(x)) out.push(x); }); return out; }
 function saveOrder(key,list){ ST.order[key]=list; LS.set("order",ST.order); }
 
-function goTab(t){ if(CI.ordenId){ CI.ordenId=null; const v=$("#cxOrdView"); if(v){ v.hidden=true; v.innerHTML=""; } $("#cxPaneCompras").classList.remove("ord-open"); } ST.tab=t; LS.set("tab",t); $$("#costeoSubnav .pagos-tab").forEach(b=>b.classList.toggle("active",b.dataset.cxtab===t));
+function goTab(t){ if(typeof subTabPermitida==="function") t = subTabPermitida("costeo", t); if(CI.ordenId){ CI.ordenId=null; const v=$("#cxOrdView"); if(v){ v.hidden=true; v.innerHTML=""; } $("#cxPaneCompras").classList.remove("ord-open"); } ST.tab=t; LS.set("tab",t); $$("#costeoSubnav .pagos-tab").forEach(b=>b.classList.toggle("active",b.dataset.cxtab===t));
   $$("#costeoSubnav .pagos-pane").forEach(p=>p.classList.remove("active")); $("#cxPane"+t[0].toUpperCase()+t.slice(1)).classList.add("active"); closePop(); render(); }
 function render(){ if(!loaded) return; if(ST.tab==="precios") renderPrecios(); else if(ST.tab==="recetas") renderRecetas(); else renderCompras(); updateComprasCnt(); }
 
@@ -10109,7 +10420,7 @@ function openOrden(id){ const o=D.ordenes.find(x=>x.id===id); if(!o) return; clo
     </div>
     <div class="screen-scroll" style="display:flex;flex-direction:column;min-height:0;">
       <div id="cxCiWrap">
-        <p class="config-hint">El insumo cargado tiene que coincidir con uno asignado a este proveedor en Configuración › Insumos — de ahí se toman automáticamente su Cantidad y Unidad de medida.${prov?"":` <b style="color:#B22A32">No encontré a “${esc(o.proveedor)}” en Configuración › Proveedores.</b>`}</p>
+        <p class="config-hint">El insumo cargado tiene que coincidir con uno asignado a este proveedor en Configuración › Insumos — de ahí se toman automáticamente su Cantidad, Unidad de medida y Rubro. Si no está, escribilo y usá “+ Crear / asignar insumo”.${prov?"":` <b style="color:#B22A32">No encontré a “${esc(o.proveedor)}” en Configuración › Proveedores.</b>`}</p>
         <div class="ci-ajustes">
           <div class="ci-ajustes-col"><div class="ci-ajustes-title">Impuestos generales de la factura</div>
             <div class="ci-ajustes-hint">Se calculan sobre el subtotal de ítems cargados e impactan el total de la factura (no el costo unitario de cada ítem). Ej.: percepción de IIBB.</div>
@@ -10137,7 +10448,7 @@ function openOrden(id){ const o=D.ordenes.find(x=>x.id===id); if(!o) return; clo
           <div class="ci-row ci-add-row" id="ciAddRow">
             <div class="ci-cell-item"><button type="button" class="ci-add-btn-mini" onclick="cxCI.addItem()" title="Agregar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
               <div class="ci-cell-item-inputs"><input type="text" id="ciNewNomenclatura" placeholder="Insumo…" list="cxDlProvIns" autocomplete="off" oninput="cxCI.onNewName()" onchange="cxCI.onNewName()">
-              <div class="ci-warn" id="ciNewNomenclaturaWarn" style="display:none;">No coincide con ningún insumo asignado a este proveedor</div></div></div>
+              <div class="ci-warn" id="ciNewNomenclaturaWarn" style="display:none;">No coincide con ningún insumo de este proveedor · <a class="ci-crear-ins" onclick="cxCI.crearInsumo()">+ Crear / asignar insumo</a></div></div></div>
             <input type="text" id="ciNewPrecio" placeholder="$" inputmode="decimal" oninput="cxCI.recalcNew()">
             <input type="text" id="ciNewBultos" placeholder="1" inputmode="decimal" oninput="cxCI.recalcNew()">
             <div class="ci-auto" id="ciNewPrecioBulto">$0</div>
@@ -10165,7 +10476,91 @@ function openOrden(id){ const o=D.ordenes.find(x=>x.id===id); if(!o) return; clo
   $("#cxPaneCompras").classList.add("ord-open"); v.hidden=false;
   initAddRow(); renderAjustes(); renderItems();
   if(!ciItems().length) setTimeout(()=>{ const x=$i("ciNewNomenclatura"); if(x) x.focus(); },0); }
-function volverDeOrden(){ CI.ordenId=null; CI.editing=null; const v=$("#cxOrdView"); if(v){ v.hidden=true; v.innerHTML=""; } $("#cxPaneCompras").classList.remove("ord-open"); if(loaded&&ST.tab==="compras") renderCompras(); }
+function volverDeOrden(){ CI.ordenId=null; CI.editing=null; const v=$("#cxOrdView"); if(v){ v.hidden=true; v.innerHTML=""; } $("#cxPaneCompras").classList.remove("ord-open");
+  if(PG.prev){ PG.prev.parent.insertBefore(v, PG.prev.next); PG.prev=null; if(typeof window.pgCerrarItemsHost==="function") window.pgCerrarItemsHost(); return; }
+  if(loaded&&ST.tab==="compras") renderCompras(); }
+/* ---- Detalle de factura abierto desde Pagos (pedido de Pancho, 09/10/2026) ----
+   Mismo editor y mismas tablas (cm_compra_items / cm_compra_ajustes): el impacto es idéntico al de
+   Costeo › Carga de compras. Solo se leen las tablas de compras, así funciona también para perfiles
+   que tienen Pagos y no Costeo. */
+const PG = { prev:null };
+async function loadComprasSolo(){
+  const ok = await cfgLoadAll(); if(!ok) return false;
+  try{
+    const [ordenes, items, ajFact] = await Promise.all([
+      fetchAll("cm_ordenes","id,fecha_orden,fecha_comprobante,comprobante_tipo,comprobante,proveedor,concepto,rubro,monto_factura,monto,estado,adjuntos,adjunto_nombre,adjunto_path","id"),
+      fetchAll("cm_compra_items","*","orden_index"),
+      fetchAll("cm_compra_ajustes","*")
+    ]);
+    D.ordenes=ordenes; D.items=items.map(mapItem);
+    D.aj={}; ajFact.forEach(r=>{ D.aj[r.orden_id]={ impuestos_generales:r.impuestos_generales||[], descuento_modo:r.descuento_modo||null, descuento_valor:r.descuento_valor!=null?Number(r.descuento_valor):null, justificativo_tipo:r.justificativo_tipo||null, justificativo_nota:r.justificativo_nota||null }; });
+    computeEstados(); return true;
+  }catch(e){ console.warn("Compras:",e); toast("No se pudieron cargar los ítems de compra","warn"); return false; }
+}
+window.cxAbrirOrdenEnPagos = async function(id, host){
+  if(window.IGCat) IGCat.load();
+  if(!await loadComprasSolo()) return false;
+  if(!D.ordenes.some(o=>o.id===id)) { toast("No se encontró la orden","warn"); return false; }
+  const v=$("#cxOrdView"); PG.prev={ parent:v.parentNode, next:v.nextSibling }; host.appendChild(v);
+  openOrden(id); return true;
+};
+window.cxCerrarOrdenEnPagos = function(){ if(CI.ordenId) volverDeOrden(); };
+window.cxResumenOrden = function(id){ const o=D.ordenes.find(x=>x.id===id); if(!o) return null; const its=ordItems(o); return { n:its.length, cargado: its.length?totalCalc(its,ajDe(o.id)):0, ok:!!D.estado[o.id] }; };
+/* ---- Alta (o asignación) de insumo desde la factura ---- */
+function ciCrearInsumo(){
+  const o=ciOrden(); if(!o) return; const prov=CI.provId?cfgProv(CI.provId):null;
+  if(!prov){ toast("La orden no tiene un proveedor cargado en Configuración","warn"); return; }
+  const nm=($i("ciNewNomenclatura").value||"").trim();
+  const rs=cfgRubrosDeProv(prov.id); const rubs = rs.length ? rs : cfgData.proveedores.rubros.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const cntR={}; cfgInsumosDeProv(prov.id).forEach(i=>{ if(i.rubro_id) cntR[i.rubro_id]=(cntR[i.rubro_id]||0)+1; });
+  const princ = rubs.slice().sort((a,b)=>(cntR[b.id]||0)-(cntR[a.id]||0))[0];
+  const todos = cfgData.items.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const inp='style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-size:13.5px;font-family:inherit"';
+  const ov=document.createElement("div"); ov.className="ar-modal-ov"; ov.id="ciInsModal"; ov.style.zIndex="10050";
+  ov.innerHTML='<div class="ar-modal" role="dialog" aria-modal="true" style="width:min(480px,100%)">'
+    +'<div class="ar-modal-h"><div><h3>Insumo para '+esc(prov.nombre)+'</h3><p>Si el insumo ya existe (de otro proveedor) se le asigna esta presentación; si no, se crea. Queda en Configuración › Compras › Insumos.</p></div>'
+    +'<button type="button" class="ar-x" onclick="cxCI.cerrarInsumo()" title="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+    +'<div class="ar-modal-b">'
+    +'<div class="ar-mlbl">Nombre del insumo</div><input type="text" id="ciInsNombre" list="ciInsTodos" '+inp+' value="'+esc(nm.toUpperCase())+'" oninput="cxCI.onInsNombre()"><datalist id="ciInsTodos">'+todos.map(i=>'<option value="'+esc(i.nombre)+'">').join("")+'</datalist>'
+    +'<div class="ar-note" id="ciInsExiste" style="display:none;margin-top:6px"></div>'
+    +'<div class="ar-mlbl">Categoría › Rubro</div><select id="ciInsRubro" '+inp+'>'+rubs.map(r=>'<option value="'+r.id+'"'+(princ&&princ.id===r.id?' selected':'')+'>'+esc((cfgCat("proveedores",r.catId)||{}).nombre||"")+' › '+esc(r.nombre)+'</option>').join("")+'</select>'
+    +'<div style="display:flex;gap:10px"><div style="flex:1"><div class="ar-mlbl">Cantidad por bulto</div><input type="text" id="ciInsCant" inputmode="decimal" '+inp+' placeholder="Ej. 6"></div>'
+    +'<div style="flex:1"><div class="ar-mlbl">Unidad</div><select id="ciInsUn" '+inp+'>'+CFG_UNIDADES.map(u=>'<option value="'+u.v+'" title="'+u.n+'">'+u.l+' · '+u.n+'</option>').join("")+'</select></div></div>'
+    +'<div class="ar-note">El factor de merma y las notas se completan después desde Configuración › Compras › Insumos.</div>'
+    +'</div><div class="ar-modal-f"><span class="hint"></span><button type="button" class="btn-ghost" onclick="cxCI.cerrarInsumo()">Cancelar</button><button type="button" class="btn-primary" id="ciInsGo" onclick="cxCI.guardarInsumo()">Guardar y usar</button></div></div>';
+  ov.addEventListener("mousedown",e=>{ if(e.target===ov) ciCerrarInsumo(); });
+  document.body.appendChild(ov); ciOnInsNombre();
+  setTimeout(()=>{ const el=$i(nm?"ciInsCant":"ciInsNombre"); if(el) el.focus(); },30);
+}
+function ciCerrarInsumo(){ const m=$i("ciInsModal"); if(m) m.remove(); }
+function ciInsExistente(){ const n=norm(($i("ciInsNombre")||{}).value||""); return n ? cfgData.items.find(i=>norm(i.nombre)===n) : null; }
+function ciOnInsNombre(){ const ex=ciInsExistente(), note=$i("ciInsExiste"), sel=$i("ciInsRubro"); if(!note) return;
+  if(ex){ const r=cfgRub("proveedores",ex.rubro_id); note.style.display=""; note.innerHTML="Ya existe: se le agrega esta presentación para el proveedor. Rubro: <b>"+esc(r?r.nombre:"—")+"</b>.";
+    if(r && ![...sel.options].some(o=>o.value===r.id)) sel.add(new Option(r.nombre, r.id)); if(r) sel.value=r.id; sel.disabled=true; }
+  else { note.style.display="none"; sel.disabled=false; } }
+async function ciGuardarInsumo(){
+  const o=ciOrden(); const prov=CI.provId?cfgProv(CI.provId):null; if(!o||!prov) return;
+  const nombre=($i("ciInsNombre").value||"").trim().toUpperCase(), cant=pd($i("ciInsCant").value), un=$i("ciInsUn").value, rubroId=$i("ciInsRubro").value;
+  if(!nombre){ toast("Escribí el nombre del insumo","warn"); return; }
+  if(!(cant>0)){ toast("Cargá la cantidad por bulto","warn"); return; }
+  const ex=ciInsExistente();
+  if(ex && cfgData.pres.some(p=>p.insumo_id===ex.id && p.proveedor_id===prov.id && Number(p.cantidad)===cant && p.unidad===un)){ toast("Esa presentación ya está asignada a este proveedor","warn"); return; }
+  if(!ex && !rubroId){ toast("Elegí el rubro del insumo","warn"); return; }
+  const btn=$i("ciInsGo"); btn.disabled=true; btn.textContent="Guardando…";
+  let insId = ex ? ex.id : null;
+  if(!ex){ const r=await sb.from("cm_insumos").insert({ nombre, rubro_id: rubroId, notas:"", factor_merma:0 }).select("id").single();
+    if(r.error){ btn.disabled=false; btn.textContent="Guardar y usar"; toast(r.error.code==="23505"?"Ya existe un insumo con ese nombre":"No se pudo crear el insumo: "+r.error.message,"warn"); return; } insId=r.data.id; }
+  const ordenP = cfgData.pres.filter(p=>p.insumo_id===insId).reduce((m,p)=>Math.max(m,Number(p.orden)||0),-1)+1;
+  const rp=await sb.from("cm_insumo_presentaciones").insert({ insumo_id:insId, proveedor_id:prov.id, bulto:"", cantidad:cant, unidad:un, orden:ordenP });
+  if(rp.error){ btn.disabled=false; btn.textContent="Guardar y usar"; toast("No se pudo asignar la presentación: "+rp.error.message,"warn"); return; }
+  try{ await sb.from("cm_historial").insert({ usuario_id:uid(), usuario_nombre:uname(), accion: ex?"Asignó un insumo a un proveedor":"Creó un insumo", detalle:`“${nombre}” · ${prov.nombre} (${cfgFmtNum(cant)} ${cfgUnLabel(un)}) · desde la factura ${o.id}`, modulo:"config" }); }catch(e){}
+  await cfgLoadAll(); if(typeof cfgRenderAll==="function") try{ cfgRenderAll(); }catch(e){}
+  $("#cxDlProvIns").innerHTML=ciOpts().map(x=>`<option value="${esc(x.label)}">${esc(cfgPresLabel(x.p))}</option>`).join("");
+  ciCerrarInsumo();
+  const lbl = (ciOpts().find(x=>x.ins.id===insId && Number(x.p.cantidad)===cant && x.p.unidad===un)||{}).label || nombre;
+  $i("ciNewNomenclatura").value=lbl; onNewName(); const pr=$i("ciNewPrecio"); if(pr) pr.focus();
+  toast(ex?"Insumo asignado al proveedor · completá precio y bultos":"Insumo creado · completá precio y bultos");
+}
 async function verAdjunto(i){ const f=(CI.adj||[])[i]; if(!f||!f.path) return; const {data,error}=await sb.storage.from(ADJUNTOS_BUCKET).createSignedUrl(f.path,3600);
   if(error||!data){ toast("No se pudo abrir el archivo","warn"); return; } window.open(data.signedUrl,"_blank","noopener"); }
 
@@ -10202,7 +10597,7 @@ function recalcNew(){ const m=ciMatch($i("ciNewNomenclatura").value); const h={p
   const r=computeRow(h,[...ciItems(),h],ajDe(CI.ordenId)); $i("ciNewPrecioBulto").textContent=fmtMC(r.precioBulto); $i("ciNewPunit").textContent=fmtMC(r.punit); refreshTax("new"); refreshDesc("new"); }
 async function addItem(){ if(!CI.ordenId) return; const nm=$i("ciNewNomenclatura").value.trim(), precio=pd($i("ciNewPrecio").value), bultos=pd($i("ciNewBultos").value)||1;
   if(!nm){ toast("Escribí el nombre del insumo","warn"); return; } if(!precio){ toast("Cargá el precio de lista","warn"); return; }
-  const m=ciMatch(nm); if(!m){ toast("Ese insumo no está asignado a este proveedor. Asignalo primero en Configuración › Insumos.","warn"); return; }
+  const m=ciMatch(nm); if(!m){ toast("Ese insumo no está asignado a este proveedor: usá “+ Crear / asignar insumo”.","warn"); return; }
   const o=ciOrden(); const draft={precio_lista:precio,bultos,cant_bulto:Number(m.p.cantidad)||0,impuestos:CI.newTax,descuentos:CI.newDesc};
   const row={ orden_id:o.id, insumo_id:m.ins.id, insumo_nombre:m.ins.nombre, presentacion_id:m.p.id, bultos, cantidad:bultos*(Number(m.p.cantidad)||0), unidad:m.p.unidad,
     precio_lista:precio, impuestos:CI.newTax, descuentos:CI.newDesc, total:lineTotal(draft,[...ordItems(o),draft],ajDe(o.id)),
@@ -10254,7 +10649,7 @@ function updateSummary(){ const o=ciOrden(); if(!o) return; const list=ciItems()
   else b.innerHTML=`<span class="recon-badge recon-bad">No coincide con la factura</span>`; }
 async function saveItem(id){ const nm=$i("ei_nom_"+id).value.trim(), precio=pd($i("ei_pl_"+id).value), bultos=pd($i("ei_bu_"+id).value)||1;
   if(!nm||!precio){ toast("Completá el insumo y el precio de lista","warn"); return; }
-  const m=ciMatch(nm); if(!m){ toast("Ese insumo no está asignado a este proveedor. Asignalo primero en Configuración › Insumos.","warn"); return; }
+  const m=ciMatch(nm); if(!m){ toast("Ese insumo no está asignado a este proveedor: usá “+ Crear / asignar insumo”.","warn"); return; }
   const o=ciOrden(); const impuestos=CI.editTax[id]||[], descuentos=CI.editDesc[id]||[];
   const draft={id,precio_lista:precio,bultos,cant_bulto:Number(m.p.cantidad)||0,impuestos,descuentos};
   const upd={ insumo_id:m.ins.id, insumo_nombre:m.ins.nombre, presentacion_id:m.p.id, precio_lista:precio, bultos, cantidad:bultos*(Number(m.p.cantidad)||0), unidad:m.p.unidad, impuestos, descuentos,
@@ -10270,6 +10665,7 @@ function delItem(id){ const it=D.items.find(x=>x.id===id); if(!it) return;
 
 window.cxCI = {
   volver: volverDeOrden, verAdjunto, recalcNew, onNewName, addItem, recalcEdit, saveItem, delItem,
+  crearInsumo: ciCrearInsumo, cerrarInsumo: ciCerrarInsumo, onInsNombre: ciOnInsNombre, guardarInsumo: ciGuardarInsumo,
   startEdit(id){ CI.editing=id; renderItems(); },
   cancelEdit(){ if(CI.editing){ delete CI.editTax[CI.editing]; delete CI.editDesc[CI.editing]; } CI.editing=null; renderItems(); },
   onTaxTipo(ctx){ const iva=$i(`ciTaxTipo_${ctx}`).value==="IVA"; $i(`ciTaxIVAVal_${ctx}`).style.display=iva?"":"none"; $i(`ciTaxModo_${ctx}`).style.display=iva?"none":""; $i(`ciTaxManualVal_${ctx}`).style.display=iva?"none":""; if(!iva) cxCI.onTaxModo(ctx); },
