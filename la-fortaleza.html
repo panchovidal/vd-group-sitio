@@ -1269,23 +1269,10 @@
 .sueldos-grid .c-monto-emp{font-weight:800;color:var(--text-1);text-align:right;font-variant-numeric:tabular-nums;padding-right:16px;}
 .sueldos-grid .c-fecha-emp{font-weight:600;color:var(--text-3);font-size:12px;font-variant-numeric:tabular-nums;}
 .sueldos-grid .pct-up{color:#2a9d4a;font-weight:600;}
-/* ---- Esquema del personal: separa el scroll horizontal (header+filas juntos)
-   del vertical (header fijo arriba), para que al desplazar horizontalmente
-   la fila de títulos se mueva siempre junto con el resto de la tabla, igual
-   que en Che Mono. Chrome puede desincronizar visualmente un position:sticky
-   cuando el scroll horizontal ocurre en un contenedor ANCESTRO distinto al
-   que define el "top" del sticky (bug de composición/repintado, no de
-   layout: el DOM queda perfectamente alineado, pero el frame pintado puede
-   quedar un instante atrás durante el scroll, sobre todo con zoom del
-   navegador activo, donde el redondeo a subpíxel agrava el desfasaje).
-   Forzamos que la fila de títulos Y el cuerpo de filas vivan cada uno en su
-   propia capa de composición (mismo tratamiento en ambos, para que no se
-   desincronicen entre sí) y el navegador las repinte en cada frame de
-   scroll en vez de reusar un frame cacheado. ---- */
-#stabEsquema .emp-table-outer{flex:1;display:flex;flex-direction:column;min-height:0;overflow-x:auto;overflow-y:hidden;transform:translateZ(0);backface-visibility:hidden;}
-#stabEsquema .list-scroll{flex:1;overflow-x:visible;overflow-y:auto;min-height:0;width:max-content;min-width:100%;transform:translateZ(0);backface-visibility:hidden;}
-#stabEsquema .col-head-row{will-change:transform;transform:translateZ(0);backface-visibility:hidden;}
-#stabEsquema .list{will-change:transform;transform:translateZ(0);backface-visibility:hidden;}
+/* ---- Esquema del personal: títulos y filas en UN solo contenedor de scroll (12/10/2026) ---- */
+#stabEsquema .emp-table-outer{flex:1;min-height:0;overflow:auto;position:relative;overscroll-behavior:contain;}
+#stabEsquema .list-scroll{flex:none;overflow:visible;width:max-content;min-width:100%;min-height:100%;}
+#stabEsquema .col-head-row{position:sticky;top:0;z-index:5;} /* 12/10/2026: un solo contenedor de scroll (x e y) para títulos y filas: el sticky y el scroll horizontal comparten contenedor, así la fila de títulos no puede quedar desplazada (con o sin zoom) */
 .badge-condicion{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;}
 .badge-condicion.cond-a{background:rgba(213,242,106,0.35);color:#4b5a16;}
 .badge-condicion.cond-b{background:rgba(89,119,210,0.16);color:var(--blue);}
@@ -1723,7 +1710,14 @@
   .cx-empty{padding:26px 16px;text-align:center;color:var(--text-3);font-size:12.5px;line-height:1.5}
   .cx-bigempty{background:#fff;border:1px dashed var(--border);border-radius:14px;padding:40px 24px;text-align:center;color:var(--text-2);font-size:13px;line-height:1.55}
   .cx-bigempty b{display:block;font-size:15px;color:var(--text-1);margin-bottom:6px}
-  .cx-banner{display:flex;align-items:center;gap:12px;background:var(--cx-warn-bg);border:1px solid #F1D9A6;border-radius:12px;padding:10px 14px;margin-bottom:12px;flex-wrap:wrap}
+  .cx-banner-pend{background:#FFF8E6 !important;border-color:#F4DFA6 !important;}
+.cx-banner-pend .tag{background:#FFE7A8 !important;color:#7A5200 !important;}
+.cx-banner-pend{flex-wrap:wrap;row-gap:10px;}
+.cx-banner-pend > div:first-child{display:flex;flex-direction:column;align-items:flex-start;gap:5px;}
+.cx-banner-pend .cx-grow{min-width:260px;}
+.cx-pend-acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto;}
+.cx-step{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7A5200;margin-bottom:4px;}
+.cx-banner{display:flex;align-items:center;gap:12px;background:var(--cx-warn-bg);border:1px solid #F1D9A6;border-radius:12px;padding:10px 14px;margin-bottom:12px;flex-wrap:wrap}
   .cx-banner b{font-weight:800}
   .cx-banner .tag{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--cx-warn)}
   .cx-banner .cx-grow{flex:1;min-width:200px;font-size:12.5px;color:var(--text-2)}
@@ -5936,9 +5930,10 @@ async function loadAll(){
     if(!ventasIndice) await vTryLoadIndiceFromStorage();
     const [semiCats, ajustes] = await Promise.all([
       fetchAll("lf_semi_categorias","id,nombre","nombre"),
-      fetchAll("lf_precios_venta_ajustes","id,fecha,tipo,adherido_a,usuario_nombre,detalle,anulada")
+      fetchAll("lf_precios_venta_ajustes","id,fecha,tipo,adherido_a,usuario_nombre,detalle,anulada,estado")
     ]);
-    D.ajustes = ajustes.filter(a=>!a.anulada).map(a=>({...a, tipo:a.tipo||"general", detalle:Array.isArray(a.detalle)?a.detalle:[]})).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+    D.pendAj = ajustes.find(a=>!a.anulada && a.estado==="pendiente") || null;
+    D.ajustes = ajustes.filter(a=>!a.anulada && (!a.estado || a.estado==="confirmado")).map(a=>({...a, tipo:a.tipo||"general", detalle:Array.isArray(a.detalle)?a.detalle:[]})).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
     const prevOf = lfPrecioAnteriorMap(D.ajustes);
     D.arts = recetasItems.filter(r=>r.tipo==="articulo").map(r=>{ const pv=preciosVentaItems[r.id]||{};
       return { id:r.id, nombre:r.nombre, categoria:r.concepto||"Sin categoría", activo:r.activo!==false, porciones:Number(r.porciones)||1,
@@ -6122,6 +6117,11 @@ function renderPrecios(){
       <div class="cx-grow">${t==="general"?"Cargá el precio nuevo en cada tabla, o aplicá un % a toda una categoría desde su encabezado.":ST.ajuste.adherir?"Estos precios se suman al último ajuste general: el “anterior” de cada artículo sigue siendo el previo a ese ajuste.":"Queda registrado como un ajuste propio en el historial."}</div>
       ${t==="general"?`<label class="cx-bulk" style="font-size:12px;color:var(--text-2);font-weight:600">Redondeo <select id="cxPvRound" class="cx-btn sm" style="padding:5px 8px"><option value="1">Sin redondeo</option><option value="50">a $50</option><option value="100">a $100</option><option value="500">a $500</option></select></label>`:""}</div>`;
     const rs=$("#cxPvRound"); if(rs){ rs.value=String(ST.ajuste.round); rs.onchange=()=>ST.ajuste.round=+rs.value; }
+  } else if(D.pendAj){ const p=D.pendAj, n=(p.detalle||[]).length;
+    bn.innerHTML=`<div class="cx-banner cx-banner-pend"><div><div class="tag">Ajuste ${esc(p.tipo)} · pendiente de confirmación</div><b>${n} artículo${n!==1?'s':''} · propuesto por ${esc(p.usuario_nombre||"—")} el ${fmtDT(p.fecha)}</b></div>
+      <div class="cx-grow">Los precios de la carta <b>todavía no cambiaron</b>. Revisalo y modificalo si hace falta; recién al confirmar se actualizan las listas de precios.</div>
+      <div class="cx-pend-acts"><button type="button" class="cx-btn sm" id="cxPendAnular">Anular</button><button type="button" class="cx-btn sm" id="cxPendMod">Modificar</button><button type="button" class="cx-btn pri sm" id="cxPendOk">Confirmar y actualizar precios</button></div></div>`;
+    $("#cxPendAnular").onclick=pvAnularPend; $("#cxPendMod").onclick=pvModificarPend; $("#cxPendOk").onclick=pvConfirmarPend;
   } else bn.innerHTML="";
   const C=cats(); const marks={}; if(ST.ajuste) artsActivos().forEach(a=>{ if(ST.ajuste.pend[a.id]!=null) marks[a.categoria]=true; });
   $("#cxPvChips").innerHTML=C.length?chipsHtml("precios",C.map(c=>({id:c,label:c,n:artsActivos().filter(a=>a.categoria===c&&(!ST.pvSearch||norm(a.nombre).includes(norm(ST.pvSearch)))).length})),marks):"";
@@ -6155,7 +6155,7 @@ function pvOnInput(inp){ const id=inp.dataset.id; const n=parseNum(inp.value); i
   const d=$(`[data-dif="${id}"]`); d.textContent=pctTxt(r.precioDif); d.className=r.precioDif==null?"mut":"cx-neu";
   const ic=$(`[data-inc="${id}"]`); ic.textContent=pctPlain(r.inc); ic.className="cx-inc "+incCls(r.inc); pvFooter(); }
 function pvFooter(){ const ft=$("#cxPvFoot"); if(!ST.ajuste){ ft.hidden=true; return; } ft.hidden=false; const n=Object.keys(ST.ajuste.pend).length;
-  ft.innerHTML=`<div class="cx-grow">${n?`${n} artículo${n>1?'s':''} con precio nuevo`:"Cargá el precio nuevo de los artículos que quieras actualizar."}</div><button type="button" class="cx-btn" id="cxPvCancel">Cancelar</button><button type="button" class="cx-btn pri" id="cxPvConfirm" ${n?'':'disabled'}>Revisar y confirmar</button>`;
+  ft.innerHTML=`<div class="cx-grow">${n?`${n} artículo${n>1?'s':''} con precio nuevo`:"Cargá el precio nuevo de los artículos que quieras actualizar."}</div><button type="button" class="cx-btn" id="cxPvCancel">Cancelar</button><button type="button" class="cx-btn pri" id="cxPvConfirm" ${n?'':'disabled'}>${ST.ajuste.pendId?"Revisar y guardar cambios":"Revisar y guardar propuesta"}</button>`;
   $("#cxPvCancel").onclick=()=>{ ST.ajuste=null; renderPrecios(); }; $("#cxPvConfirm").onclick=pvRevisar; }
 function pvElegirTipo(){ const lastG=D.ajustes.find(x=>x.tipo==="general"); let tipo="general", adh=false;
   const m=modal(`<div class="cx-mh"><div><h3>Nuevo ajuste de precios</h3><p>Elegí si vas a actualizar toda la carta o solo algunos artículos.</p></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
@@ -6171,11 +6171,41 @@ function pvElegirTipo(){ const lastG=D.ajustes.find(x=>x.tipo==="general"); let 
 function pvRevisar(){ const ids=Object.keys(ST.ajuste.pend); const byCat={}; ids.forEach(id=>{ const a=D.arts.find(x=>x.id===id); (byCat[a.categoria]=byCat[a.categoria]||[]).push(a); });
   let rows=""; cats().filter(c=>byCat[c]).forEach(c=>{ rows+=`<tr class="cat"><td colspan="4">${esc(c)}</td></tr>`; byCat[c].sort((x,y)=>x.nombre.localeCompare(y.nombre,"es")).forEach(a=>{ const vig=a.precio_actual, nv=ST.ajuste.pend[a.id]; rows+=`<tr><td>${esc(a.nombre)}</td><td class="r">${money0(vig)}</td><td class="r"><b>${money0(nv)}</b></td><td class="r cx-neu">${pctTxt(dif(vig,nv))}</td></tr>`; }); });
   const lastG=D.ajustes.find(x=>x.tipo==="general");
-  const m=modal(`<div class="cx-mh"><div><h3>Confirmar ajuste ${ST.ajuste.tipo}</h3><p>${ids.length} artículo${ids.length>1?'s':''}${ST.ajuste.adherir?` · se adhiere al ajuste general del ${fmtDL(lastG.fecha)}`:''}. Revisá los precios antes de guardar.</p></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
+  const m=modal(`<div class="cx-mh"><div><div class="cx-step">Paso 1 de 2 · Propuesta</div><h3>Revisar ajuste ${ST.ajuste.tipo}</h3><p>${ids.length} artículo${ids.length>1?'s':''}${ST.ajuste.adherir?` · se adhiere al ajuste general del ${fmtDL(lastG.fecha)}`:''}. Se guarda como <b>pendiente de confirmación</b>: los precios de la carta no cambian hasta que lo confirmes.</p></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
     <div class="cx-mb"><table class="cx-sum"><tr><td></td><td class="r" style="color:var(--text-3);font-size:11px">Vigente</td><td class="r" style="color:var(--text-3);font-size:11px">Nuevo</td><td class="r" style="color:var(--text-3);font-size:11px">Dif.</td></tr>${rows}</table></div>
-    <div class="cx-mf"><label class="cx-grow" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="cxOkChk"> Revisé que todos los precios estén bien</label><button type="button" class="cx-btn" data-close>Volver</button><button type="button" class="cx-btn pri" id="cxOkGo" disabled>Guardar precios</button></div>`,true);
+    <div class="cx-mf"><div class="cx-grow" style="font-size:12px;color:var(--text-3)">Después vas a poder modificarla, anularla o confirmarla.</div><button type="button" class="cx-btn" data-close>Volver a editar</button><button type="button" class="cx-btn pri" id="cxOkGo">${ST.ajuste.pendId?"Guardar cambios de la propuesta":"Guardar propuesta"}</button></div>`,true);
+  $("#cxOkGo",m).onclick=async ev=>{ ev.target.disabled=true; ev.target.textContent="Guardando…"; await pvGuardarPend(); }; }
+/* ---- Doble confirmación del ajuste de precios (pedido de Pancho, 12/10/2026; análogo a la actualización
+   de sueldos): paso 1 guarda una PROPUESTA pendiente (no toca la carta); se puede modificar o anular;
+   paso 2 confirma y recién ahí se actualizan las listas de precios. Un solo ajuste pendiente a la vez. ---- */
+async function pvGuardarPend(){ const aj=ST.ajuste; const lastG=D.ajustes.find(x=>x.tipo==="general"); const now=new Date().toISOString();
+  const det=Object.entries(aj.pend).map(([id,nv])=>{ const a=D.arts.find(x=>x.id===id); return a?{ articulo_id:a.id, nombre:a.nombre, categoria:a.categoria, precio_previo:a.precio_actual, precio_nuevo:nv }:null; }).filter(Boolean);
+  const row={ fecha:now, tipo:aj.tipo, adherido_a:aj.adherir&&lastG?lastG.id:null, usuario_id:uid(), usuario_nombre:uname(), detalle:det, estado:"pendiente" };
+  const r = aj.pendId ? await sb.from("lf_precios_venta_ajustes").update(row).eq("id",aj.pendId) : await sb.from("lf_precios_venta_ajustes").insert(row);
+  if(r.error){ toast(r.error.code==="23505"?"Ya hay otro ajuste pendiente de confirmación.":"No se pudo guardar la propuesta. Probá de nuevo.","warn"); console.warn(r.error); closeModal(); return; }
+  logCx(aj.pendId?"Modificó la propuesta de ajuste de precios":"Propuso un ajuste de precios", `${aj.tipo}${aj.adherir?" (adherido)":""} · ${det.length} artículo(s) · pendiente de confirmación`);
+  ST.ajuste=null; closeModal(); await reload(); toast(aj.pendId?"Propuesta actualizada · sigue pendiente de confirmación":"Propuesta guardada · pendiente de confirmación"); }
+function pvPendAjuste(){ const p=D.pendAj; if(!p) return null; const pend={};
+  (p.detalle||[]).forEach(d=>{ if(D.arts.some(a=>a.id===d.articulo_id)) pend[d.articulo_id]=Number(d.precio_nuevo); });
+  return { tipo:p.tipo, adherir:!!p.adherido_a, pend, round:100, pendId:p.id }; }
+function pvModificarPend(){ const aj=pvPendAjuste(); if(!aj) return; ST.ajuste=aj; renderPrecios(); toast("Editando la propuesta pendiente: cambiá lo que necesites y guardala de nuevo."); }
+function pvAnularPend(){ const p=D.pendAj; if(!p) return; const n=(p.detalle||[]).length;
+  const m=modal(`<div class="cx-mh"><div><h3>Anular propuesta</h3><p>Se descarta el ajuste ${esc(p.tipo)} pendiente (${n} artículo${n!==1?'s':''}). Ningún precio había cambiado todavía.</p></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
+    <div class="cx-mf"><button type="button" class="cx-btn" data-close>Volver</button><button type="button" class="cx-btn pri" id="cxAnGo" style="background:#C23434;border-color:#C23434">Anular propuesta</button></div>`);
+  $("#cxAnGo",m).onclick=async ev=>{ ev.target.disabled=true; const r=await sb.from("lf_precios_venta_ajustes").update({ estado:"anulado" }).eq("id",p.id);
+    if(r.error){ toast("No se pudo anular la propuesta","warn"); return; } logCx("Anuló la propuesta de ajuste de precios", `${p.tipo} · ${n} artículo(s)`); closeModal(); await reload(); toast("Propuesta anulada"); }; }
+function pvConfirmarPend(){ const aj=pvPendAjuste(); if(!aj) return; const p=D.pendAj; const ids=Object.keys(aj.pend);
+  if(!ids.length){ toast("La propuesta no tiene artículos vigentes. Anulala o modificala.","warn"); return; }
+  const byCat={}; ids.forEach(id=>{ const a=D.arts.find(x=>x.id===id); (byCat[a.categoria]=byCat[a.categoria]||[]).push(a); });
+  let cambiaron=0, rows=""; cats().filter(c=>byCat[c]).forEach(c=>{ rows+=`<tr class="cat"><td colspan="4">${esc(c)}</td></tr>`; byCat[c].sort((x,y)=>x.nombre.localeCompare(y.nombre,"es")).forEach(a=>{ const vig=a.precio_actual, nv=aj.pend[a.id];
+    const prop=(p.detalle||[]).find(d=>d.articulo_id===a.id); const mov = prop && Number(prop.precio_previo)!==Number(vig); if(mov) cambiaron++;
+    rows+=`<tr><td>${esc(a.nombre)}${mov?' <span class="cx-pill pun" title="El precio vigente cambió desde que se armó la propuesta">vigente cambió</span>':''}</td><td class="r">${money0(vig)}</td><td class="r"><b>${money0(nv)}</b></td><td class="r cx-neu">${pctTxt(dif(vig,nv))}</td></tr>`; }); });
+  const m=modal(`<div class="cx-mh"><div><div class="cx-step">Paso 2 de 2 · Confirmación</div><h3>Confirmar ajuste ${esc(aj.tipo)}</h3><p>Al confirmar se actualizan las listas de precios de ${ids.length} artículo${ids.length>1?'s':''} (propuesta de ${esc(p.usuario_nombre||"—")} del ${fmtDT(p.fecha)}).${cambiaron?` <b>${cambiaron} artículo(s) cambiaron de precio vigente desde la propuesta.</b>`:''}</p></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
+    <div class="cx-mb"><table class="cx-sum"><tr><td></td><td class="r" style="color:var(--text-3);font-size:11px">Vigente</td><td class="r" style="color:var(--text-3);font-size:11px">Nuevo</td><td class="r" style="color:var(--text-3);font-size:11px">Dif.</td></tr>${rows}</table></div>
+    <div class="cx-mf"><label class="cx-grow" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="cxOkChk"> Revisé que todos los precios estén bien</label><button type="button" class="cx-btn" id="cxCfMod">Modificar</button><button type="button" class="cx-btn pri" id="cxOkGo" disabled>Confirmar y actualizar precios</button></div>`,true);
   $("#cxOkChk",m).onchange=e=>$("#cxOkGo",m).disabled=!e.target.checked;
-  $("#cxOkGo",m).onclick=async ev=>{ ev.target.disabled=true; ev.target.textContent="Guardando…"; await pvGuardar(); }; }
+  $("#cxCfMod",m).onclick=()=>{ closeModal(); pvModificarPend(); };
+  $("#cxOkGo",m).onclick=async ev=>{ ev.target.disabled=true; ev.target.textContent="Actualizando…"; ST.ajuste=aj; await pvGuardar(); }; }
 async function pvGuardar(){ const now=new Date().toISOString(); const aj=ST.ajuste; const lastG=D.ajustes.find(x=>x.tipo==="general");
   const ups=[], det=[];
   Object.entries(aj.pend).forEach(([id,nv])=>{ const a=D.arts.find(x=>x.id===id); const ct=costoTotal(a);
@@ -6186,8 +6216,9 @@ async function pvGuardar(){ const now=new Date().toISOString(); const aj=ST.ajus
     det.push({ articulo_id:a.id, nombre:a.nombre, categoria:a.categoria, costo_previo:a.costo_ant, precio_previo:a.precio_actual, fecha_actualizacion_previa:a.fecha_actualizacion, costo_nuevo:ct, precio_nuevo:nv }); });
   const { error } = await sb.from("lf_precios_venta_items").upsert(ups,{onConflict:"articulo_id"});
   if(error){ toast("No se pudieron guardar los precios. Probá de nuevo.","warn"); console.warn(error); closeModal(); return; }
-  await sb.from("lf_precios_venta_ajustes").insert({ fecha:now, tipo:aj.tipo, adherido_a:aj.adherir&&lastG?lastG.id:null, usuario_id:uid(), usuario_nombre:uname(), detalle:det });
-  logCx(`Ajuste de precios ${aj.tipo}${aj.adherir?" (adherido)":""}`, `${det.length} artículo(s)`);
+  if(aj.pendId) await sb.from("lf_precios_venta_ajustes").update({ fecha:now, tipo:aj.tipo, adherido_a:aj.adherir&&lastG?lastG.id:null, detalle:det, estado:"confirmado", confirmado_en:now, confirmado_por:uid(), confirmado_por_nombre:uname() }).eq("id",aj.pendId);
+  else await sb.from("lf_precios_venta_ajustes").insert({ fecha:now, tipo:aj.tipo, adherido_a:aj.adherir&&lastG?lastG.id:null, usuario_id:uid(), usuario_nombre:uname(), detalle:det });
+  logCx(`${aj.pendId?"Confirmó el ajuste de precios":"Ajuste de precios"} ${aj.tipo}${aj.adherir?" (adherido)":""}`, `${det.length} artículo(s)`);
   ST.ajuste=null; closeModal(); await reload(); toast(`${det.length} precio(s) actualizado(s)`); }
 function pvHistorial(){ const roots=D.ajustes.filter(x=>!x.adherido_a);
   const tbl=it=>`<table class="cx-sum">${it.slice(0,80).map(d=>`<tr><td>${esc(d.nombre)}</td><td class="r">${money0(d.precio_previo)}</td><td class="r"><b>${money0(d.precio_nuevo)}</b></td><td class="r cx-neu">${pctTxt(dif(d.precio_previo,d.precio_nuevo))}</td></tr>`).join("")}${it.length>80?`<tr><td colspan="4" style="color:var(--text-3)">y ${it.length-80} más…</td></tr>`:''}</table>`;
@@ -6471,7 +6502,7 @@ window.cxLFVolverDeOrden = function(){ const lg=$("#costeoLegacy"); if(!lg || lg
 let bound=false;
 function bindOnce(){ if(bound) return; bound=true;
   $$("#costeoSubnav .pagos-tab").forEach(b=>b.onclick=()=>goTab(b.dataset.cxtab));
-  $("#cxPvAjuste").onclick=()=>{ if(ST.ajuste){ ST.ajuste=null; renderPrecios(); } else pvElegirTipo(); };
+  $("#cxPvAjuste").onclick=()=>{ if(ST.ajuste){ ST.ajuste=null; renderPrecios(); } else if(D.pendAj){ toast("Hay un ajuste pendiente de confirmación: modificalo, confirmalo o anulalo antes de empezar otro.","warn"); } else pvElegirTipo(); };
   $("#cxPvHist").onclick=pvHistorial;
   $("#cxPvExport").onclick=()=>{ const C=cats(); if(!C.length){ toast("Todavía no hay artículos","warn"); return; } pickCats("Descargar precios en Excel","Cada categoría elegida va en su propia pestaña, con los filtros y el orden que tenga aplicados.",C.map(c=>({id:c,label:c,n:artsActivos().filter(a=>a.categoria===c).length})),exportPrecios); };
   $("#cxPvSearch").oninput=e=>{ ST.pvSearch=e.target.value; renderPrecios(); };
@@ -15023,7 +15054,7 @@ async function loadPreciosVentaItems(){
   (data||[]).forEach(r=>{ preciosVentaItems[r.articulo_id] = r; });
 }
 async function loadPreciosVentaAjustes(){
-  const { data, error } = await sb.from("lf_precios_venta_ajustes").select("*").order("fecha", {ascending:false});
+  const { data, error } = await sb.from("lf_precios_venta_ajustes").select("*").eq("estado","confirmado").order("fecha", {ascending:false});
   if(error){ showToast("No se pudo cargar el historial de ajustes de precios", "warn"); return; }
   preciosVentaAjustes = data || [];
 }
