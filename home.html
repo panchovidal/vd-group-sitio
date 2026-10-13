@@ -457,18 +457,18 @@ const SECTIONS_BY_PROYECTO = {
     {id:"cajaMayor", nombre:"Caja Mayor", subs:[{id:"imputacion", nombre:"Imputación"},{id:"historial", nombre:"Cierres anteriores"}]},
     {id:"pagos", nombre:"Pagos / Compras", subs:[{id:"lista", nombre:"Lista de órdenes"},{id:"nueva", nombre:"Nueva orden de pago"},{id:"cuentas", nombre:"Cuentas corrientes"}]},
     {id:"costeo", nombre:"Costeo de productos", subs:[{id:"precios", nombre:"Precios"},{id:"recetas", nombre:"Recetas"},{id:"compras", nombre:"Carga de compras"}]},
-    {id:"stock", nombre:"Stock"},
+    {id:"stock", nombre:"Stock", subs:[{id:"conteos", nombre:"Conteos"},{id:"produccion", nombre:"Producción"},{id:"computo", nombre:"Cómputo de stock"}]},
     {id:"sueldos", nombre:"Sueldos", subs:[{id:"esquema", nombre:"Esquema del personal"},{id:"liquidacion", nombre:"Liquidación"}]},
-    {id:"config", nombre:"Configuración", subs:[{id:"compras", nombre:"Compras"},{id:"socios", nombre:"Socios"},{id:"actividad", nombre:"Actividad"}]},
+    {id:"config", nombre:"Configuración", subs:[{id:"compras", nombre:"Compras"},{id:"stock", nombre:"Stock"},{id:"socios", nombre:"Socios"},{id:"actividad", nombre:"Actividad"}]},
   ],
   chemono: [
     {id:"ventas", nombre:"Reporte de Ventas/Utilidades", subs:[{id:"facturacion", nombre:"Facturación"},{id:"analisis", nombre:"Análisis de resultados"}]},
     {id:"cajaMayor", nombre:"Caja Mayor", subs:[{id:"imputacion", nombre:"Imputación"},{id:"historial", nombre:"Cierres anteriores"}]},
     {id:"pagos", nombre:"Pagos / Compras", subs:[{id:"lista", nombre:"Lista de órdenes"},{id:"nueva", nombre:"Nueva orden de pago"},{id:"cuentas", nombre:"Cuentas corrientes"}]},
     {id:"costeo", nombre:"Costeo de productos", subs:[{id:"precios", nombre:"Precios"},{id:"recetas", nombre:"Recetas"},{id:"compras", nombre:"Carga de compras"}]},
-    {id:"stock", nombre:"Stock"},
+    {id:"stock", nombre:"Stock", subs:[{id:"conteos", nombre:"Conteos"},{id:"produccion", nombre:"Producción"},{id:"computo", nombre:"Cómputo de stock"}]},
     {id:"sueldos", nombre:"Sueldos", subs:[{id:"esquema", nombre:"Esquema del personal"},{id:"liquidacion", nombre:"Liquidación"}]},
-    {id:"config", nombre:"Configuración", subs:[{id:"compras", nombre:"Compras"},{id:"socios", nombre:"Socios"},{id:"actividad", nombre:"Actividad"}]},
+    {id:"config", nombre:"Configuración", subs:[{id:"compras", nombre:"Compras"},{id:"stock", nombre:"Stock"},{id:"socios", nombre:"Socios"},{id:"actividad", nombre:"Actividad"}]},
   ],
 };
 let currentPerfil = null;   // fila de public.perfiles del usuario logueado
