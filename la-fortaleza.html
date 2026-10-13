@@ -2388,6 +2388,37 @@
   .sk-t td.nm{text-align:left}
   .sk-t tr.sub td{text-align:left}
   .sk-seg button svg{width:14px;height:14px;flex-shrink:0}
+  /* ===== Sueldos · esquema tentativo (13/10/2026) ===== */
+  .sueldos-grid.row.tent-alta{background:#F1FAF4;}
+  .sueldos-grid.row.tent-alta:hover{background:#E6F5EC;}
+  .sueldos-grid.row.tent-alta .c-nombre-emp{font-style:italic;}
+  .sueldos-grid.row.tent-baja{background:#FDF2F2;}
+  .sueldos-grid.row.tent-baja .cell{color:#B9A3A3;}
+  .sueldos-grid.row.tent-baja .c-nombre-emp{text-decoration:line-through;text-decoration-color:#C23434;}
+  .sueldos-grid .c-nombre-emp.tent-cell{display:flex;align-items:center;gap:5px;}
+  .sueldos-grid .tent-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 1 auto;}
+  .sueldos-grid .c-nombre-emp .tent-tag,.sueldos-grid .c-nombre-emp .tent-chip{text-decoration:none;font-style:normal;flex-shrink:0;margin-left:0;}
+  .sueldos-grid.row.tent-baja .tent-nm{text-decoration:line-through;text-decoration-color:#C23434;}
+  .sueldos-grid.row.tent-baja .c-nombre-emp{text-decoration:none;}
+  .tent-chip.baja{background:#FBE1E1;border-color:#EBC4C1;color:#B3261E;}
+  .sueldos-grid .c-monto-emp.tent-monto{white-space:normal;line-height:1.2;display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:8px;padding-bottom:8px;}
+  .sueldos-grid .c-monto-emp.tent-monto .badge-sueldo-pendiente{margin-left:0;}
+  .tent-tag{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:800;letter-spacing:.02em;vertical-align:1px;}
+  .tent-tag.alta{background:#DDF1E5;color:#1E7A48;}
+  .tent-tag.baja{background:#FBE1E1;color:#B3261E;}
+  .tent-chip{margin-left:6px;border:1px solid #D5D9EA;background:#fff;color:var(--text-2);border-radius:99px;padding:2px 9px;font-size:10.8px;font-weight:700;cursor:pointer;font-family:inherit;vertical-align:1px;}
+  .tent-chip:hover{border-color:var(--sky);color:var(--text-1);}
+  .tent-chip.ghost{opacity:0;transition:opacity .12s;}
+  .sueldos-grid.row:hover .tent-chip.ghost{opacity:1;}
+  .tent-chip.del{color:#B3261E;border-color:#EBC4C1;}
+  .tent-delta{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:99px;font-size:11.5px;font-weight:800;background:#EEF0F7;color:var(--text-2);}
+  .tent-delta.up{background:#FCE7E7;color:#B3261E;}
+  .tent-delta.down{background:#E3F3EA;color:#1E7A48;}
+  .tent-mut{color:var(--text-3);font-weight:600;}
+  .badge-sueldo-pendiente{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:99px;font-size:10.8px;font-weight:800;background:#FFF1D6;color:#8A5A00;}
+  .tent-form label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:12px;}
+  .tent-form input,.tent-form select{display:block;width:100%;margin-top:5px;border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-size:13.5px;font-family:inherit;color:var(--text-1);text-transform:none;letter-spacing:0;font-weight:500;box-sizing:border-box;}
+  .tent-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 </style>
 </head>
 <body>
@@ -3084,7 +3115,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
             Actualización de sueldos
           </button>
-          <button class="cta-nueva" id="ctaNuevoEmpleadoBtn" onclick="goSueldosTab('nuevoEmpleado')">
+          <button class="cta-nueva" id="ctaNuevoEmpleadoBtn" onclick="abrirNuevoEmpleado()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Cargar nuevo empleado
           </button>
@@ -3202,8 +3233,8 @@
           <!-- PANE: CARGAR NUEVO EMPLEADO -->
           <section class="pagos-pane" id="stabNuevoEmpleado">
             <div class="screen-header">
-              <div class="back-btn" onclick="goSueldosTab('esquema')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
-              <div><h1 style="font-size:22px;">Cargar nuevo empleado</h1></div>
+              <div class="back-btn" onclick="cancelarNuevoEmpleado()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+              <div><h1 style="font-size:22px;" id="empFormTitle">Cargar nuevo empleado</h1></div>
             </div>
             <div class="form-card">
               <div class="form-section-title">Datos del empleado</div>
@@ -3268,7 +3299,9 @@
               </div>
               <div class="form-footer">
                 <button class="btn-primary" style="flex:1" onclick="guardarNuevoEmpleado()">Guardar empleado</button>
-                <button class="btn-primary secondary" onclick="goSueldosTab('esquema')">Cancelar</button>
+                <button class="btn-primary secondary" onclick="cancelarNuevoEmpleado()">Cancelar</button>
+                <button class="btn-primary secondary" id="btnEliminarEmpleado" onclick="empAbrirBaja(eEditId)" style="display:none;color:#B22A32;">Dar de baja</button>
+                <button class="btn-primary secondary" id="btnBorrarEmpleado" onclick="eliminarEmpleadoActual()" style="display:none;color:#B22A32;" title="Borra la ficha (solo para cargas por error)">Eliminar</button>
               </div>
             </div>
           </section>
@@ -10016,12 +10049,39 @@ function goSueldosTab(tab){
   scope.querySelectorAll(".pagos-pane").forEach(function(p){ p.classList.remove("active"); });
   var target = document.getElementById(SUELDOS_PANE_ID[tab]);
   if(target) target.classList.add("active");
-  if(tab==="nuevoEmpleado"){ resetNuevoEmpleadoForm(); }
-  if(tab==="esquema"){ renderEmpleadosTable(); renderUltimaActualizacionInfo(); }
+  if(tab==="nuevoEmpleado" && !eEditId){ resetNuevoEmpleadoForm(); }
+  if(tab==="esquema"){ renderEmpleadosTable(); renderUltimaActualizacionInfo(); renderPendienteActualizacionInfo(); }
   if(tab==="liquidacion"){ liqOnTabOpen(); if(liqInitDone && liqState.mes) liqRenderTablaLiquidacion(); }
 }
 
+/* ---- alta / edición / baja de empleados (alineado con Che Mono, 13/10/2026) ---- */
+var eEditId = null; // id del empleado en edición, o null si es un alta nueva
+function abrirNuevoEmpleado(){ eEditId = null; resetNuevoEmpleadoForm(); goSueldosTab("nuevoEmpleado"); }
+function cancelarNuevoEmpleado(){ eEditId = null; goSueldosTab("esquema"); }
+function onEmpleadoRowClick(ev, id){
+  if(modoActualizacionSueldos) return;
+  if(ev && ev.target && ev.target.closest && ev.target.closest(".sueldo-edit-input")) return;
+  editarEmpleado(id);
+}
+function editarEmpleado(id){
+  var emp = empleadosCache.find(function(e){ return e.id===id; });
+  if(!emp) return;
+  eEditId = id;
+  goSueldosTab("nuevoEmpleado");
+  document.getElementById("empFormTitle").textContent = "Editar empleado";
+  document.getElementById("eNumeracion").value = "N° " + emp.numeracion;
+  document.getElementById("eCondicion").value = emp.condicion || "";
+  document.getElementById("eNombreCompleto").value = emp.nombre_completo || "";
+  document.getElementById("eTurno").value = emp.turno || "";
+  document.getElementById("ePuesto").value = emp.puesto || "";
+  document.getElementById("eInicioActividades").value = emp.inicio_actividades ? isoToDMY(emp.inicio_actividades) : "";
+  document.getElementById("eSueldo").value = emp.sueldo ? formatearPesosVivo(emp.sueldo) : "";
+  document.getElementById("eHorasEsperadas").value = String(emp.horas_esperadas!=null ? emp.horas_esperadas : 8);
+  document.getElementById("eJornadaPartida").checked = !!emp.jornada_partida;
+}
 function resetNuevoEmpleadoForm(){
+  eEditId = null;
+  document.getElementById("empFormTitle").textContent = "Cargar nuevo empleado";
   document.getElementById("eNumeracion").value = "N° " + ((empleadosTodos.length||empleadosCache.length)+1);
   document.getElementById("eCondicion").value = "";
   document.getElementById("eNombreCompleto").value = "";
@@ -10072,6 +10132,23 @@ async function guardarNuevoEmpleado(){
 
   if(!condicion || !nombre || !turno || !puesto){
     alert("Completá todos los campos obligatorios antes de guardar.");
+    return;
+  }
+
+  if(eEditId){
+    var empPrevio = empleadosCache.find(function(e){ return e.id===eEditId; });
+    /* El SUELDO se cambia desde "Actualización de sueldos" (deja registro y se puede anular). */
+    var resEdit = await sb.from("lf_empleados").update({
+      condicion: condicion, nombre_completo: nombre, turno: turno, puesto: puesto,
+      inicio_actividades: inicioDMY ? dmyToISO(inicioDMY) : null,
+      horas_esperadas: horasEsperadas, jornada_partida: jornadaPartida
+    }).eq("id", eEditId).select().single();
+    if(resEdit.error){ showToast("No se pudieron guardar los cambios: " + resEdit.error.message, "warn"); return; }
+    [empleadosCache, empleadosTodos].forEach(function(arr){ var ix = arr.findIndex(function(e){ return e.id===eEditId; }); if(ix>-1) arr[ix] = resEdit.data; });
+    logHistorialSueldos("Edición de empleado", (empPrevio?empPrevio.nombre_completo:nombre) + ": datos actualizados.");
+    showToast("Empleado actualizado correctamente");
+    eEditId = null;
+    goSueldosTab("esquema");
     return;
   }
 
@@ -10460,7 +10537,7 @@ function renderEmpleadosTable(){
     var emp = list[j];
     var cellsHtml = "";
     for(var k=0;k<cols.length;k++){ cellsHtml += cols[k].cell(emp); }
-    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\"><div class=\"cell c-num-emp\">" + (j+1) + "</div>" + cellsHtml + "</div>";
+    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\" onclick=\"onEmpleadoRowClick(event,'" + emp.id + "')\"><div class=\"cell c-num-emp\">" + (j+1) + "</div>" + cellsHtml + "</div>";
   }
   tbody.innerHTML = rows;
 }
@@ -17468,6 +17545,335 @@ async function onEnterStock(){
   renderTab();
 }
 window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar, valuar, explode, resolverVentas, parseVentasAoa, consolidar, parseNum, costoRef } };
+})();
+</script>
+<script>
+/* =====================================================================
+   SUELDOS · ESQUEMA TENTATIVO (pedido de Pancho, 13/10/2026) — mismo código en La Fortaleza y Che Mono.
+   Extiende la "actualización preliminar" de sueldos para que la propuesta incluya, además de
+   cambios de sueldo, ALTAS tentativas (empleados que todavía no existen) y BAJAS tentativas.
+   Mientras está pendiente nada toca la planilla real: se ve la masa salarial vigente contra la
+   propuesta. "Confirmar" aplica todo (sueldos, crea las altas y da de baja con fecha de hoy);
+   "Anular pendiente" la descarta; "Anular última actualización" deshace una ya confirmada
+   (revierte sueldos, borra las altas creadas y reactiva las bajas).
+   Detalle de cada propuesta (tabla *_sueldos_actualizaciones.detalle):
+     {tipo:"sueldo", empleado_id, sueldo_previo, sueldo_nuevo, ...}   (sin tipo = sueldo, compatibilidad)
+     {tipo:"alta", tmp_id, nombre_completo, condicion, turno, puesto, inicio_actividades, sueldo_nuevo [, empleado_id al confirmar]}
+     {tipo:"baja", empleado_id, nombre_completo, puesto, sueldo_previo [, fecha_baja, rubros_quitados al confirmar]}
+   ===================================================================== */
+(function(){
+  if(typeof renderEmpleadosTable!=="function" || typeof SK_SITE==="undefined") return;
+  var PRE = SK_SITE.pre, TBL_EMP = PRE+"_empleados", TBL_ACT = PRE+"_sueldos_actualizaciones";
+  var DEF = PRE==="cm" ? { horas_semanales:48, francos_semanales:1, horas_esperadas:8, jornada_partida:false } : { horas_esperadas:8, jornada_partida:false };
+  var TENT = { altas:[], bajas:{} };
+  var esc = function(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
+  var uid = function(){ return (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null; };
+  var uname = function(){ return (typeof currentPerfil!=="undefined" && currentPerfil) ? (currentPerfil.nombre||currentPerfil.usuario) : "—"; };
+  var tipoDe = function(d){ return d.tipo || "sueldo"; };
+  var lotePend = function(){ var l = pendienteActualizacionSueldos; return (l && !l.anulada && l.estado==="pendiente") ? l : null; };
+  var empById = function(id){ return (empleadosCache||[]).find(function(e){ return e.id===id; }); };
+  var pct = function(a,b){ return a ? ((b-a)/a*100) : null; };
+  var fmtP = function(p){ return p==null ? "—" : (p>=0?"+":"") + p.toFixed(1).replace(".",",") + "%"; };
+  var pseudo = function(a, pend){ return Object.assign({ id:a.tmp_id||a.id, numeracion:9999, condicion:a.condicion||"", nombre_completo:a.nombre_completo, turno:a.turno||"", puesto:a.puesto||"",
+      inicio_actividades:a.inicio_actividades||null, sueldo: pend ? Number(a.sueldo_nuevo||0) : 0, sueldo_anterior:null, modificado_fecha:null, activo:true, _alta:true, _pend:!!pend }, DEF); };
+
+  /* ---------- masas ---------- */
+  function masaVigente(){ return (empleadosCache||[]).reduce(function(s,e){ return s + Number(e.sueldo||0); }, 0); }
+  function masaEdicion(){
+    var m = 0;
+    (empleadosCache||[]).forEach(function(e){ if(!TENT.bajas[e.id]) m += getSueldoPreview(e); });
+    TENT.altas.forEach(function(a){ m += Object.prototype.hasOwnProperty.call(sueldosPendientes, a.id) ? sueldosPendientes[a.id] : Number(a.sueldo||0); });
+    return m;
+  }
+  function masaPendiente(l){
+    var m = masaVigente();
+    (l.detalle||[]).forEach(function(d){ var t=tipoDe(d), e=d.empleado_id?empById(d.empleado_id):null;
+      if(t==="sueldo" && e) m += Number(d.sueldo_nuevo||0) - Number(e.sueldo||0);
+      else if(t==="alta") m += Number(d.sueldo_nuevo||0);
+      else if(t==="baja" && e) m -= Number(e.sueldo||0); });
+    return m;
+  }
+  function resumen(l){ var c={sueldo:0,alta:0,baja:0}; (l.detalle||[]).forEach(function(d){ c[tipoDe(d)]++; }); return c; }
+  function resumenTxt(c){ var p=[]; if(c.sueldo) p.push(c.sueldo+" cambio"+(c.sueldo===1?"":"s")+" de sueldo"); if(c.alta) p.push(c.alta+" alta"+(c.alta===1?"":"s")); if(c.baja) p.push(c.baja+" baja"+(c.baja===1?"":"s")); return p.join(" · ") || "sin cambios"; }
+
+  /* ---------- tabla: altas tentativas como filas, bajas marcadas, masa vigente vs propuesta ---------- */
+  var _sorted = getSortedEmpleados;
+  window.getSortedEmpleados = function(){
+    var list = _sorted.apply(this, arguments);
+    if(modoActualizacionSueldos) return list.concat(TENT.altas.map(function(a){ return pseudo(a,false); }));
+    var l = lotePend(); if(l) return list.concat((l.detalle||[]).filter(function(d){ return tipoDe(d)==="alta"; }).map(function(d){ return pseudo(d,true); }));
+    return list;
+  };
+  var colMasa = (typeof SUELDOS_GRID_COLUMNS!=="undefined") ? SUELDOS_GRID_COLUMNS.find(function(c){ return c.id==="pctMasa"; }) : null;
+  if(colMasa) colMasa.cell = function(e){
+    var enEd = modoActualizacionSueldos;
+    if(enEd && TENT.bajas[e.id]) return "<div class=\"cell\"><span class=\"tent-mut\">—</span></div>";
+    if(!enEd && e._pend) return "<div class=\"cell\"><span class=\"tent-mut\">—</span></div>";
+    var masa = enEd ? masaEdicion() : masaVigente();
+    var v = enEd ? (e._alta ? (Object.prototype.hasOwnProperty.call(sueldosPendientes,e.id)?sueldosPendientes[e.id]:0) : getSueldoPreview(e)) : Number(e.sueldo||0);
+    return "<div class=\"cell\">" + (masa>0 ? (v/masa*100).toFixed(1) : "0.0") + "%</div>";
+  };
+  var _render = renderEmpleadosTable;
+  window.renderEmpleadosTable = function(){ _render.apply(this, arguments); decorar(); };
+  function decorar(){
+    var body = document.getElementById("empleadosBody"); if(!body) return;
+    var enEd = modoActualizacionSueldos, l = enEd ? null : lotePend();
+    var pendBaja = {}, pendSueldo = {};
+    if(l) (l.detalle||[]).forEach(function(d){ if(tipoDe(d)==="baja") pendBaja[d.empleado_id]=1; else if(tipoDe(d)==="sueldo") pendSueldo[d.empleado_id]=d.sueldo_nuevo; });
+    body.querySelectorAll(".sueldos-grid.row").forEach(function(row){
+      var id = row.dataset.id, nm = row.querySelector(".c-nombre-emp"), emp = empById(id);
+      var alta = !emp && (enEd ? TENT.altas.some(function(a){ return a.id===id; }) : !!l);
+      row.classList.toggle("tent-alta", alta); row.classList.toggle("tent-baja", !!(emp && (enEd ? TENT.bajas[id] : pendBaja[id])));
+      if(alta){ var h=row.querySelector(".emp-drag-handle"); if(h){ h.setAttribute("draggable","false"); h.classList.add("disabled"); } }
+      if(!nm) return;
+      if(!nm.querySelector(".tent-nm")){ var t0 = nm.innerHTML; nm.innerHTML = "<span class=\"tent-nm\" title=\""+esc(nm.textContent)+"\">"+t0+"</span>"; nm.classList.add("tent-cell"); }
+      if(enEd){
+        if(alta) nm.insertAdjacentHTML("beforeend", "<span class=\"tent-tag alta\" title=\"Alta tentativa: solo existe en la propuesta\">Alta</span><button type=\"button\" class=\"tent-chip\" data-tent-edit=\""+id+"\" title=\"Editar alta tentativa\">✎</button><button type=\"button\" class=\"tent-chip del\" data-tent-quitar=\""+id+"\" title=\"Quitar de la propuesta\">✕</button>");
+        else if(emp) nm.insertAdjacentHTML("beforeend", TENT.bajas[id] ? "<button type=\"button\" class=\"tent-chip baja\" data-tent-baja=\""+id+"\" title=\"Baja tentativa: no suma a la masa propuesta. Tocá para deshacer\">Baja ↺</button>" : "<button type=\"button\" class=\"tent-chip ghost\" data-tent-baja=\""+id+"\" title=\"Simular la baja de este empleado en la propuesta\">Baja</button>");
+        if(emp && TENT.bajas[id]){ var inp=row.querySelector(".sueldo-edit-input"); if(inp){ inp.disabled=true; inp.title="Baja tentativa: no suma a la masa propuesta"; } }
+      } else if(l){
+        if(alta) nm.insertAdjacentHTML("beforeend", "<span class=\"tent-tag alta\" title=\"Alta incluida en la propuesta pendiente\">Alta</span>");
+        if(pendBaja[id]) nm.insertAdjacentHTML("beforeend", "<span class=\"tent-tag baja\" title=\"Baja incluida en la propuesta pendiente\">Baja</span>");
+        if(pendSueldo[id]!=null && !row.querySelector(".badge-sueldo-pendiente")){ var mc=row.querySelector(".c-monto-emp"); if(mc) mc.insertAdjacentHTML("beforeend","<span class=\"badge-sueldo-pendiente\">&rarr; "+fmtMoney(pendSueldo[id])+"</span>"); }
+      }
+    });
+    body.querySelectorAll(".c-monto-emp").forEach(function(c){ if(c.querySelector(".badge-sueldo-pendiente")) c.classList.add("tent-monto"); });
+    var sub = document.getElementById("masaSalarialSubtitle"); if(!sub) return;
+    var mv = masaVigente();
+    if(enEd){ var mp = masaEdicion(), d = mp-mv;
+      sub.innerHTML = "Masa salarial vigente: <b>"+fmtMoney(mv)+"</b> &nbsp;→&nbsp; propuesta: <b>"+fmtMoney(mp)+"</b> <span class=\"tent-delta "+(d>0?"up":d<0?"down":"")+"\">"+(d>=0?"+":"−")+fmtMoney(Math.abs(d)).replace("-","")+" · "+fmtP(pct(mv,mp))+"</span>"
+        + (TENT.altas.length||Object.keys(TENT.bajas).length ? " <span class=\"tent-mut\">("+[TENT.altas.length?TENT.altas.length+" alta"+(TENT.altas.length===1?"":"s"):"", Object.keys(TENT.bajas).length?Object.keys(TENT.bajas).length+" baja"+(Object.keys(TENT.bajas).length===1?"":"s"):""].filter(Boolean).join(" · ")+")</span>" : "");
+    } else if(l){ var mpp = masaPendiente(l), dd = mpp-mv;
+      sub.innerHTML = "Masa salarial vigente: <b>"+fmtMoney(mv)+"</b> &nbsp;·&nbsp; con la propuesta pendiente: <b>"+fmtMoney(mpp)+"</b> <span class=\"tent-delta "+(dd>0?"up":dd<0?"down":"")+"\">"+(dd>=0?"+":"−")+fmtMoney(Math.abs(dd)).replace("-","")+" · "+fmtP(pct(mv,mpp))+"</span>";
+    } else sub.textContent = "Masa salarial total: " + fmtMoney(mv);
+  }
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest && ev.target.closest("[data-tent-baja],[data-tent-quitar],[data-tent-edit],#tentAltaBtn"); if(!b) return;
+    ev.stopPropagation(); ev.preventDefault();
+    if(b.id==="tentAltaBtn") return altaModal(null);
+    if(b.dataset.tentBaja){ var id=b.dataset.tentBaja; if(TENT.bajas[id]) delete TENT.bajas[id]; else TENT.bajas[id]=true; return renderEmpleadosTable(); }
+    if(b.dataset.tentQuitar){ TENT.altas = TENT.altas.filter(function(a){ return a.id!==b.dataset.tentQuitar; }); delete sueldosPendientes[b.dataset.tentQuitar]; return renderEmpleadosTable(); }
+    if(b.dataset.tentEdit) return altaModal(b.dataset.tentEdit);
+  }, true);
+
+  /* ---------- modal de alta tentativa ---------- */
+  function opciones(selId, val){ var s=document.getElementById(selId); if(!s) return ""; return Array.prototype.map.call(s.options, function(o){ return "<option value=\""+esc(o.value)+"\""+(o.value===val?" selected":"")+">"+esc(o.textContent)+"</option>"; }).join(""); }
+  function altaModal(id){
+    var a = id ? TENT.altas.find(function(x){ return x.id===id; }) : null;
+    var sueldo = a ? (Object.prototype.hasOwnProperty.call(sueldosPendientes,a.id)?sueldosPendientes[a.id]:a.sueldo) : 0;
+    var ov = document.createElement("div"); ov.className="ar-modal-ov"; ov.id="tentAltaModal";
+    ov.innerHTML = '<div class="ar-modal" role="dialog" aria-modal="true" style="width:min(520px,100%)">'
+      + '<div class="ar-modal-h"><div><h3>'+(a?'Editar alta tentativa':'Alta tentativa')+'</h3><p>El empleado solo existe en esta propuesta: suma a la masa salarial propuesta y se crea de verdad recién cuando se confirma la actualización.</p></div>'
+      + '<button type="button" class="ar-x" data-x title="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+      + '<div class="ar-modal-b tent-form">'
+      + '<label>Nombre completo<input type="text" id="tentNom" value="'+esc(a?a.nombre_completo:"")+'" placeholder="Nombre y apellido (o “Cocinero a contratar”)"></label>'
+      + '<div class="tent-2"><label>Puesto<select id="tentPue">'+opciones("ePuesto", a?a.puesto:"")+'</select></label><label>Turno<select id="tentTur">'+opciones("eTurno", a?a.turno:"")+'</select></label></div>'
+      + '<div class="tent-2"><label>Condición<select id="tentCon">'+opciones("eCondicion", a?a.condicion:"")+'</select></label><label>Sueldo<input type="text" id="tentSue" value="'+(sueldo?formatearPesosVivo(sueldo):"")+'" placeholder="$0" inputmode="numeric"></label></div>'
+      + '</div><div class="ar-modal-f"><span class="hint"></span><button type="button" class="btn-ghost" data-x>Cancelar</button><button type="button" class="btn-primary" id="tentOk">'+(a?'Guardar':'Agregar a la propuesta')+'</button></div></div>';
+    var close = function(){ ov.remove(); };
+    ov.addEventListener("mousedown", function(e){ if(e.target===ov) close(); });
+    ov.querySelectorAll("[data-x]").forEach(function(x){ x.onclick = close; });
+    document.body.appendChild(ov);
+    var su = ov.querySelector("#tentSue"); su.oninput = function(){ onNuevoEmpleadoSueldoInput(su); };
+    ov.querySelector("#tentNom").focus();
+    ov.querySelector("#tentOk").onclick = function(){
+      var nom = ov.querySelector("#tentNom").value.trim(), pue = ov.querySelector("#tentPue").value, tur = ov.querySelector("#tentTur").value, con = ov.querySelector("#tentCon").value, s = parseSueldoInput(su.value);
+      if(!nom || !pue || !tur || !con){ showToast("Completá nombre, puesto, turno y condición", "warn"); return; }
+      if(!s){ showToast("Cargá el sueldo propuesto", "warn"); return; }
+      if(a){ Object.assign(a, { nombre_completo:nom, puesto:pue, turno:tur, condicion:con, sueldo:s }); sueldosPendientes[a.id] = s; }
+      else { var nid = "tmp_" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); TENT.altas.push({ id:nid, nombre_completo:nom, puesto:pue, turno:tur, condicion:con, sueldo:s, inicio_actividades:null }); sueldosPendientes[nid] = s; }
+      close(); renderEmpleadosTable();
+    };
+  }
+
+  /* ---------- entrar / salir del modo propuesta ---------- */
+  function ensureFooterBtn(){
+    var wrap = document.querySelector("#actualizacionFooter .actualizacion-buttons"); if(!wrap || document.getElementById("tentAltaBtn")) return;
+    wrap.insertAdjacentHTML("afterbegin", '<button class="btn-primary secondary" id="tentAltaBtn" type="button" title="Sumar a la propuesta un empleado que todavía no existe">+ Alta tentativa</button>');
+    var hint = document.querySelector("#actualizacionFooter .actualizacion-hint");
+    if(hint) hint.innerHTML = "Armá el esquema tentativo: editá el SUELDO de cada empleado, simulá <b>bajas</b> (botón “Baja” junto al nombre) y sumá <b>altas tentativas</b>. La masa salarial vigente vs. propuesta se ve arriba en vivo. “Guardar propuesta” la deja pendiente de confirmación: ningún sueldo ni empleado cambia hasta que la confirmes, y se puede anular para volver al esquema actual.";
+    var g = wrap.querySelector('[onclick="guardarActualizacionSueldos()"]'); if(g) g.textContent = "Guardar propuesta";
+  }
+  var _toggle = toggleActualizacionSueldos;
+  window.toggleActualizacionSueldos = function(){
+    _toggle.apply(this, arguments);
+    TENT = { altas:[], bajas:{} };
+    if(modoActualizacionSueldos){
+      ensureFooterBtn();
+      var l = lotePend();
+      if(l) (l.detalle||[]).forEach(function(d){ var t=tipoDe(d);
+        if(t==="alta"){ var nid=d.tmp_id||("tmp_"+Math.random().toString(36).slice(2,8)); TENT.altas.push({ id:nid, nombre_completo:d.nombre_completo, puesto:d.puesto, turno:d.turno, condicion:d.condicion, sueldo:Number(d.sueldo_nuevo||0), inicio_actividades:d.inicio_actividades||null }); sueldosPendientes[nid]=Number(d.sueldo_nuevo||0); }
+        else if(t==="baja") TENT.bajas[d.empleado_id]=true; });
+    }
+    renderEmpleadosTable();
+  };
+  var _cancel = cancelarActualizacionSueldos;
+  window.cancelarActualizacionSueldos = function(){ TENT = { altas:[], bajas:{} }; _cancel.apply(this, arguments); };
+  var _rpend = renderPendienteActualizacionInfo;
+  window.renderPendienteActualizacionInfo = function(){
+    _rpend.apply(this, arguments);
+    var l = lotePend(), info = document.getElementById("pendienteActualizacionInfo");
+    if(l && info) info.textContent = "Propuesta pendiente: " + fmtFechaHora(l.fecha) + " · " + (l.usuario_nombre||"—") + " · " + resumenTxt(resumen(l)) + " · esperando confirmación";
+  };
+  function salirModo(){
+    modoActualizacionSueldos = false; sueldosPendientes = {}; sueldosFrozenOrder = null; TENT = { altas:[], bajas:{} };
+    var b = document.getElementById("btnActualizarSueldos"); if(b) b.classList.remove("active");
+    var f = document.getElementById("actualizacionFooter"); if(f) f.style.display = "none";
+  }
+
+  /* ---------- guardar propuesta ---------- */
+  window.guardarActualizacionSueldos = async function(){
+    var det = [];
+    (empleadosCache||[]).forEach(function(e){
+      if(TENT.bajas[e.id]){ det.push({ tipo:"baja", empleado_id:e.id, nombre_completo:e.nombre_completo, puesto:e.puesto||"", sueldo_previo:Number(e.sueldo||0) }); return; }
+      if(Object.prototype.hasOwnProperty.call(sueldosPendientes, e.id) && sueldosPendientes[e.id] !== Number(e.sueldo||0))
+        det.push({ tipo:"sueldo", empleado_id:e.id, nombre_completo:e.nombre_completo, sueldo_previo:Number(e.sueldo||0), sueldo_nuevo:sueldosPendientes[e.id],
+          sueldo_anterior_previo: e.sueldo_anterior!=null ? Number(e.sueldo_anterior) : null, modificado_por_previo:e.modificado_por||null, modificado_fecha_previo:e.modificado_fecha||null });
+    });
+    TENT.altas.forEach(function(a){ det.push({ tipo:"alta", tmp_id:a.id, nombre_completo:a.nombre_completo, condicion:a.condicion, turno:a.turno, puesto:a.puesto, inicio_actividades:a.inicio_actividades||null,
+      sueldo_nuevo: Object.prototype.hasOwnProperty.call(sueldosPendientes,a.id) ? sueldosPendientes[a.id] : Number(a.sueldo||0) }); });
+    var l = lotePend();
+    if(!det.length){
+      if(l){ if(!confirm("La propuesta quedó sin cambios. ¿Anular la propuesta pendiente?")) return; salirModo(); await window.anularActualizacionPendiente(true); return; }
+      cancelarActualizacionSueldos(); return;
+    }
+    var mv = masaVigente(), mp = masaEdicion(), c = resumen({detalle:det});
+    if(!confirm((l?"Vas a actualizar la propuesta pendiente":"Vas a guardar una propuesta")+" de esquema de sueldos ("+resumenTxt(c)+").\n\nMasa salarial vigente: "+fmtMoney(mv)+"\nMasa salarial propuesta: "+fmtMoney(mp)+" ("+fmtP(pct(mv,mp))+")\n\nNingún sueldo ni empleado se modifica hasta que la confirmes. ¿Guardar?")) return;
+    var row = { fecha:new Date().toISOString(), usuario_id:uid(), usuario_nombre:uname(), detalle:det };
+    var res = l ? await sb.from(TBL_ACT).update(row).eq("id", l.id) : await sb.from(TBL_ACT).insert(Object.assign(row, { estado:"pendiente", anulada:false }));
+    if(res.error){ showToast("No se pudo guardar la propuesta: " + res.error.message, "warn"); return; }
+    await logHistorialSueldos(l?"Modificación de propuesta de sueldos":"Propuesta de esquema de sueldos", resumenTxt(c)+" · masa propuesta "+fmtMoney(mp)+" (vigente "+fmtMoney(mv)+").");
+    salirModo();
+    await cargarPendienteActualizacionSueldos();
+    showToast(l ? "Propuesta actualizada" : "Propuesta guardada, pendiente de confirmación");
+  };
+
+  /* ---------- confirmar (aplica sueldos, crea altas, da de baja) ---------- */
+  async function quitarRubrosSueldos(emp){
+    if(!emp.proveedor_id) return { ids:[], aviso:"" };
+    try{
+      var rr = await sb.from(PRE+"_rubros").select("id").not("clave","is",null);
+      var ids = (rr.data||[]).map(function(r){ return r.id; }); if(!ids.length) return { ids:[], aviso:"" };
+      var ten = await sb.from(PRE+"_proveedor_rubros").select("rubro_id").eq("proveedor_id", emp.proveedor_id).in("rubro_id", ids);
+      var tiene = (ten.data||[]).map(function(r){ return r.rubro_id; }); if(!tiene.length) return { ids:[], aviso:"" };
+      var del = await sb.from(PRE+"_proveedor_rubros").delete().eq("proveedor_id", emp.proveedor_id).in("rubro_id", tiene);
+      if(del.error) return { ids:[], aviso:" No se pudo quitar el proveedor de "+emp.nombre_completo+" de Sueldos/Adelantos: hacelo desde Configuración." };
+      return { ids:tiene, aviso:"" };
+    }catch(e){ return { ids:[], aviso:" No se pudo quitar el proveedor de "+emp.nombre_completo+" de Sueldos/Adelantos." }; }
+  }
+  window.confirmarActualizacionPendiente = async function(){
+    var l = lotePend(); if(!l){ showToast("No hay ninguna propuesta pendiente para confirmar.", "warn"); return; }
+    var det = l.detalle||[], mv = masaVigente(), mp = masaPendiente(l);
+    var lineas = det.map(function(d){ var t=tipoDe(d);
+      return t==="alta" ? "+ ALTA: "+d.nombre_completo+" ("+(d.puesto||"")+") "+fmtMoney(d.sueldo_nuevo) : t==="baja" ? "− BAJA: "+d.nombre_completo+" ("+fmtMoney(d.sueldo_previo)+")" : d.nombre_completo+": "+fmtMoney(d.sueldo_previo)+" → "+fmtMoney(d.sueldo_nuevo); });
+    if(!confirm("Vas a confirmar el esquema propuesto:\n\n"+lineas.join("\n")+"\n\nMasa salarial: "+fmtMoney(mv)+" → "+fmtMoney(mp)+" ("+fmtP(pct(mv,mp))+")\nLas bajas se registran con fecha de hoy ("+isoToDMY(todayISO())+").\n\n¿Confirmás?")) return;
+    var ahora = new Date().toISOString(), hoyISO = todayISO(), aplicados = [], avisos = "";
+    var maxNum = 0; (empleadosTodos&&empleadosTodos.length?empleadosTodos:empleadosCache).forEach(function(e){ if(Number(e.numeracion||0)>maxNum) maxNum=Number(e.numeracion); });
+    for(var i=0;i<det.length;i++){
+      var d = det[i], t = tipoDe(d), emp = d.empleado_id ? empById(d.empleado_id) : null, res;
+      if(t==="sueldo"){
+        if(!emp){ showToast(d.nombre_completo+" ya no está activo; se omite.", "warn"); continue; }
+        var ant = Number(emp.sueldo||0);
+        res = await sb.from(TBL_EMP).update({ sueldo:d.sueldo_nuevo, sueldo_anterior:ant, modificado_por:uid(), modificado_fecha:ahora }).eq("id", emp.id);
+        if(res.error){ showToast("No se pudo actualizar a "+d.nombre_completo+": "+res.error.message, "warn"); continue; }
+        aplicados.push(Object.assign({}, d, { tipo:"sueldo", sueldo_previo:ant, sueldo_anterior_previo: emp.sueldo_anterior!=null?Number(emp.sueldo_anterior):null, modificado_por_previo:emp.modificado_por||null, modificado_fecha_previo:emp.modificado_fecha||null }));
+        await logHistorialSueldos("Actualización de sueldo", d.nombre_completo+": "+fmtMoney(ant)+" -> "+fmtMoney(d.sueldo_nuevo)+".");
+      } else if(t==="alta"){
+        maxNum++;
+        res = await sb.from(TBL_EMP).insert(Object.assign({ condicion:d.condicion, nombre_completo:d.nombre_completo, turno:d.turno, puesto:d.puesto, numeracion:maxNum,
+          inicio_actividades:d.inicio_actividades||null, sueldo:d.sueldo_nuevo, sueldo_anterior:d.sueldo_nuevo, creado_por:uid() }, DEF)).select("id").single();
+        if(res.error){ showToast("No se pudo dar de alta a "+d.nombre_completo+": "+res.error.message, "warn"); continue; }
+        aplicados.push(Object.assign({}, d, { empleado_id:res.data.id }));
+        await logHistorialSueldos("Alta de empleado", "Se cargó a "+d.nombre_completo+" ("+(d.puesto||"")+") desde el esquema propuesto.");
+      } else if(t==="baja"){
+        if(!emp){ showToast(d.nombre_completo+" ya no está activo; se omite la baja.", "warn"); continue; }
+        res = await sb.from(TBL_EMP).update({ activo:false, fecha_baja:hoyISO, modificado_por:uid(), modificado_fecha:ahora }).eq("id", emp.id);
+        if(res.error){ showToast("No se pudo dar de baja a "+d.nombre_completo+": "+res.error.message, "warn"); continue; }
+        var q = await quitarRubrosSueldos(emp); avisos += q.aviso;
+        aplicados.push(Object.assign({}, d, { fecha_baja:hoyISO, fecha_baja_previo:emp.fecha_baja||null, proveedor_id:emp.proveedor_id||null, rubros_quitados:q.ids, modificado_por_previo:emp.modificado_por||null, modificado_fecha_previo:emp.modificado_fecha||null }));
+        await logHistorialSueldos("Baja de empleado", d.nombre_completo+" ("+(d.puesto||"")+") · fecha de baja "+isoToDMY(hoyISO)+" · desde el esquema propuesto.");
+      }
+    }
+    if(!aplicados.length){ showToast("No se pudo aplicar ningún cambio de la propuesta.", "warn"); return; }
+    await sb.from(TBL_ACT).update({ estado:"confirmada", detalle:aplicados, fecha:ahora, confirmada_en:ahora, confirmada_por:uid(), confirmada_por_nombre:uname() }).eq("id", l.id);
+    await logHistorialSueldos("Confirmación de esquema de sueldos", resumenTxt(resumen({detalle:aplicados}))+" · masa "+fmtMoney(mv)+" → "+fmtMoney(mp)+".");
+    if(typeof cfgLoaded!=="undefined") cfgLoaded = false;
+    await loadEmpleados(); await cargarUltimaActualizacionSueldos(); await cargarPendienteActualizacionSueldos();
+    showToast("Esquema confirmado."+(aplicados.some(function(a){ return tipoDe(a)==="alta"; })?" Completá los datos de presentismo de las altas desde su ficha.":"")+avisos, avisos?"warn":undefined);
+  };
+
+  /* ---------- anular propuesta pendiente ---------- */
+  window.anularActualizacionPendiente = async function(sinPreguntar){
+    var l = lotePend(); if(!l){ showToast("No hay ninguna propuesta pendiente para anular.", "warn"); return; }
+    if(sinPreguntar!==true && !confirm("Vas a anular la propuesta del "+fmtFechaHora(l.fecha)+" ("+resumenTxt(resumen(l))+").\n\nNada fue aplicado todavía: el esquema actual queda tal como está. ¿Confirmás?")) return;
+    var res = await sb.from(TBL_ACT).update({ anulada:true, anulada_en:new Date().toISOString(), anulada_por:uid(), anulada_por_nombre:uname() }).eq("id", l.id);
+    if(res.error){ showToast("No se pudo anular la propuesta: "+res.error.message, "warn"); return; }
+    await logHistorialSueldos("Anulación de propuesta de sueldos", "Se anuló la propuesta del "+fmtFechaHora(l.fecha)+" ("+resumenTxt(resumen(l))+"), sin aplicar cambios.");
+    await cargarPendienteActualizacionSueldos();
+    showToast("Propuesta anulada: se mantiene el esquema actual");
+  };
+
+  /* ---------- anular la última actualización confirmada ---------- */
+  window.anularUltimaActualizacionSueldos = async function(){
+    var l = ultimaActualizacionSueldos; if(!l || l.anulada){ showToast("No hay ninguna actualización reciente para anular.", "warn"); return; }
+    var det = l.detalle||[];
+    var lineas = det.map(function(d){ var t=tipoDe(d); return t==="alta" ? "Se elimina el alta de "+d.nombre_completo : t==="baja" ? "Se reactiva a "+d.nombre_completo : d.nombre_completo+": "+fmtMoney(d.sueldo_nuevo)+" → "+fmtMoney(d.sueldo_previo); });
+    if(!confirm("Vas a anular la actualización del "+fmtFechaHora(l.fecha)+":\n\n"+lineas.join("\n")+"\n\n¿Confirmás?")) return;
+    var aviso = "";
+    for(var i=0;i<det.length;i++){
+      var d = det[i], t = tipoDe(d), res;
+      if(t==="sueldo"){
+        res = await sb.from(TBL_EMP).update({ sueldo:d.sueldo_previo, sueldo_anterior:d.sueldo_anterior_previo, modificado_por:d.modificado_por_previo, modificado_fecha:d.modificado_fecha_previo }).eq("id", d.empleado_id);
+      } else if(t==="alta"){
+        res = await sb.from(TBL_EMP).delete().eq("id", d.empleado_id);
+        if(res.error) res = await sb.from(TBL_EMP).update({ activo:false, fecha_baja:todayISO() }).eq("id", d.empleado_id);
+      } else if(t==="baja"){
+        res = await sb.from(TBL_EMP).update({ activo:true, fecha_baja:d.fecha_baja_previo||null, modificado_por:d.modificado_por_previo||null, modificado_fecha:d.modificado_fecha_previo||null }).eq("id", d.empleado_id);
+        if(!res.error && d.proveedor_id && (d.rubros_quitados||[]).length){
+          var ins = await sb.from(PRE+"_proveedor_rubros").insert(d.rubros_quitados.map(function(r){ return { proveedor_id:d.proveedor_id, rubro_id:r }; }));
+          if(ins.error) aviso += " Reasigná el proveedor de "+d.nombre_completo+" a Sueldos/Adelantos desde Configuración.";
+        }
+      }
+      if(res && res.error) showToast("No se pudo revertir "+d.nombre_completo+": "+res.error.message, "warn");
+    }
+    await sb.from(TBL_ACT).update({ anulada:true, anulada_en:new Date().toISOString(), anulada_por:uid(), anulada_por_nombre:uname() }).eq("id", l.id);
+    await logHistorialSueldos("Anulación de actualización de sueldo", "Se anuló la actualización del "+fmtFechaHora(l.fecha)+" ("+resumenTxt(resumen(l))+").");
+    if(typeof cfgLoaded!=="undefined") cfgLoaded = false;
+    await loadEmpleados(); await cargarUltimaActualizacionSueldos();
+    showToast("Actualización anulada: se volvió al esquema anterior."+aviso, aviso?"warn":undefined);
+  };
+})();
+/* =====================================================================
+   SUELDOS · ficha del empleado (13/10/2026) — mismo código en los dos sitios.
+   Al editar: el SUELDO queda bloqueado (se cambia desde Actualización de sueldos, que deja registro
+   y se puede anular) y aparecen "Dar de baja" (conserva historial) y "Eliminar" (borra la ficha, para
+   cargas por error).
+   ===================================================================== */
+(function(){
+  if(typeof resetNuevoEmpleadoForm!=="function" || typeof SK_SITE==="undefined") return;
+  var TBL_EMP = SK_SITE.pre+"_empleados";
+  function modoFicha(editando){
+    var s = document.getElementById("eSueldo");
+    if(s){ s.disabled = !!editando; s.title = editando ? "El sueldo se modifica desde “Actualización de sueldos” (queda registrado y se puede anular)" : ""; }
+    ["btnEliminarEmpleado","btnBorrarEmpleado"].forEach(function(id){ var b=document.getElementById(id); if(b) b.style.display = editando ? "" : "none"; });
+  }
+  var _reset = resetNuevoEmpleadoForm;
+  window.resetNuevoEmpleadoForm = function(){ _reset.apply(this, arguments); modoFicha(false); };
+  if(typeof editarEmpleado==="function"){ var _ed = editarEmpleado; window.editarEmpleado = function(id){ _ed.apply(this, arguments); if(typeof eEditId!=="undefined" && eEditId) modoFicha(true); }; }
+  window.eliminarEmpleadoActual = async function(){
+    if(typeof eEditId==="undefined" || !eEditId) return;
+    var emp = (empleadosTodos||[]).concat(empleadosCache||[]).find(function(e){ return e.id===eEditId; }); if(!emp) return;
+    var l = pendienteActualizacionSueldos;
+    if(l && !l.anulada && l.estado==="pendiente" && (l.detalle||[]).some(function(d){ return d.empleado_id===emp.id; })){ showToast(emp.nombre_completo+" está en la propuesta de sueldos pendiente: confirmala o anulala antes de eliminarlo.", "warn"); return; }
+    if(!confirm("¿Eliminar definitivamente la ficha de "+emp.nombre_completo+"?\n\nUsalo solo para corregir una carga por error: se borra el empleado y no se puede deshacer.\nSi la persona trabajó, usá “Dar de baja”: sale de la planilla pero conserva su historial para liquidaciones y reportes.")) return;
+    var res = await sb.from(TBL_EMP).delete().eq("id", emp.id);
+    if(res.error){ showToast("No se pudo eliminar: "+res.error.message, "warn"); return; }
+    await logHistorialSueldos("Eliminación de empleado", "Se eliminó la ficha de "+emp.nombre_completo+" ("+(emp.puesto||"")+").");
+    eEditId = null;
+    await loadEmpleados();
+    goSueldosTab("esquema");
+    showToast("Empleado eliminado");
+  };
 })();
 </script>
 </body>
