@@ -13382,7 +13382,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
   var LSK = (typeof SK_SITE!=="undefined"?SK_SITE.pre:"x")+"_li_";
   var lsGet = function(k,d){ try{ var v=localStorage.getItem(LSK+k); return v?JSON.parse(v):d; }catch(e){ return d; } };
   var lsSet = function(k,v){ try{ localStorage.setItem(LSK+k, JSON.stringify(v)); }catch(e){} };
-  var ST = { sel:new Set(lsGet("sel",[])), q:"", soloCompras:false, rows:[], watch:null, itemsRef:null };
+  var ST = { sel:new Set(lsGet("selr",[])), q:"", soloCompras:false, rows:[], watch:null, itemsRef:null };
   var ICO = {
     srch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
     dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>',
@@ -13398,9 +13398,15 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     ST.rows = rows; ST.itemsRef = (typeof cfgData!=="undefined") ? cfgData.items : null;
     var provs = {}; rows.forEach(function(r){ var k=r.provNombre; (provs[k]=provs[k]||{n:0,c:0}).n++; if(isN(r.compra)) provs[k].c++; });
     var provList = Object.keys(provs).sort(function(a,b){ return a==="Sin proveedor"?1:b==="Sin proveedor"?-1:a.localeCompare(b,"es"); });
-    ST.sel.forEach(function(p){ if(!provs[p]) ST.sel.delete(p); });
+    // Globos de filtro = rubros de los insumos (15/10/2026), en el mismo orden que las tablas
+    var rk = function(r){ return (r.cat||"")+"\u0001"+(r.rubro||""); };
+    var rubs = {}; rows.forEach(function(r){ var k=rk(r); (rubs[k]=rubs[k]||{ cat:r.cat||"", rubro:r.rubro||"", g:new Set() }).g.add(r.grp); });
+    var rubOrd = Object.keys(rubs).sort(function(a,b){ var A=rubs[a], B=rubs[b]; var ea=!A.cat&&!A.rubro, eb=!B.cat&&!B.rubro; if(ea!==eb) return ea?1:-1; return A.cat.localeCompare(B.cat,"es") || A.rubro.localeCompare(B.rubro,"es"); });
+    var nomCnt = {}; rubOrd.forEach(function(k){ var n=nrm(rubs[k].rubro); nomCnt[n]=(nomCnt[n]||0)+1; });
+    var rubLabel = function(k){ var R=rubs[k]; if(!R.rubro) return R.cat ? R.cat+" (sin rubro)" : "Sin rubro"; return R.rubro + (nomCnt[nrm(R.rubro)]>1 && R.cat ? " ("+R.cat+")" : ""); };
+    ST.sel.forEach(function(p){ if(!rubs[p]) ST.sel.delete(p); });
     var q = nrm(ST.q);
-    var filt = rows.filter(function(r){ return (!ST.sel.size || ST.sel.has(r.provNombre)) && (!ST.soloCompras || isN(r.compra)) && (!q || nrm(r.nombre).indexOf(q)>-1 || nrm(r.provNombre).indexOf(q)>-1 || nrm(r.rubro).indexOf(q)>-1 || nrm(r.cat).indexOf(q)>-1); });
+    var filt = rows.filter(function(r){ return (!ST.sel.size || ST.sel.has(rk(r))) && (!ST.soloCompras || isN(r.compra)) && (!q || nrm(r.nombre).indexOf(q)>-1 || nrm(r.provNombre).indexOf(q)>-1 || nrm(r.rubro).indexOf(q)>-1 || nrm(r.cat).indexOf(q)>-1); });
     // cuántos proveedores tiene cada insumo (en total, sin filtros) → marca "vigente" solo si hay más de uno
     var nProvGrp = {}; rows.forEach(function(r){ nProvGrp[r.grp] = (nProvGrp[r.grp]||0) + 1; });
     // Tablas por rubro del insumo (categoría › rubro)
@@ -13414,9 +13420,9 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       + '<div class="cx-scroll"><div class="li-kpis"><span><b>'+nIns+'</b> insumos</span><span><b>'+(provList.filter(function(p){ return p!=="Sin proveedor"; }).length)+'</b> proveedores</span>'+(nMulti?'<span><b>'+nMulti+'</b> con más de un proveedor</span>':'')+'<span><b>'+nMan+'</b> con costo manual</span>'+(nSin?'<span class="w"><b>'+nSin+'</b> sin costo</span>':'')+'</div>'
       + '<div class="cx-tools"><div class="cx-search" style="max-width:420px">'+ICO.srch+'<input type="text" id="liQ" placeholder="Buscar insumo, proveedor, rubro o categoría…" value="'+esc(ST.q)+'" autocomplete="off"></div>'
       + '<label class="li-chk"><input type="checkbox" id="liSolo" '+(ST.soloCompras?"checked":"")+'> Solo con compras cargadas</label></div>'
-      + '<div class="cx-chips li-chips" id="liChips"><button type="button" class="cx-chip '+(!ST.sel.size?"on":"")+'" data-p="">Todos los proveedores <span class="n">'+rows.length+'</span></button>'
-      + provList.map(function(p){ return '<button type="button" class="cx-chip '+(ST.sel.has(p)?"on":"")+'" data-p="'+esc(p)+'">'+esc(p)+' <span class="n">'+provs[p].n+'</span></button>'; }).join("") + '</div>';
-    if(!rubKeys.length) h += '<div class="cx-bigempty"><b>'+(rows.length?"Sin resultados":"Todavía no hay insumos")+'</b>'+(rows.length?"Probá con otra búsqueda o proveedor.":"Creá el primero con “Crear nuevo insumo”.")+'</div>';
+      + '<div class="cx-chips li-chips" id="liChips"><button type="button" class="cx-chip '+(!ST.sel.size?"on":"")+'" data-p="">Todos los rubros <span class="n">'+nIns+'</span></button>'
+      + rubOrd.map(function(k){ return '<button type="button" class="cx-chip '+(ST.sel.has(k)?"on":"")+'" data-p="'+esc(k)+'" title="'+esc((rubs[k].cat||"Sin categoría")+" › "+(rubs[k].rubro||"Sin rubro"))+' · podés elegir varios">'+esc(rubLabel(k))+' <span class="n">'+rubs[k].g.size+'</span></button>'; }).join("") + '</div>';
+    if(!rubKeys.length) h += '<div class="cx-bigempty"><b>'+(rows.length?"Sin resultados":"Todavía no hay insumos")+'</b>'+(rows.length?"Probá con otra búsqueda o rubro.":"Creá el primero con “Crear nuevo insumo”.")+'</div>';
     h += '<div class="li-grid">' + rubKeys.map(function(k){
       var cr = k.split("\u0001"), L = porRub[k].sort(function(a,b){ return a.nombre.localeCompare(b.nombre,"es") || String(a.grp).localeCompare(String(b.grp)) || a.provNombre.localeCompare(b.provNombre,"es"); });
       // bloques consecutivos del mismo insumo → celdas compartidas con rowspan
@@ -13449,7 +13455,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     var P0 = pane();
     var qi = P0.querySelector("#liQ"), tm; qi.oninput = function(){ clearTimeout(tm); tm = setTimeout(function(){ ST.q = qi.value; var pos = qi.selectionStart; render().then(function(){ var n = pane().querySelector("#liQ"); if(n){ n.focus(); n.setSelectionRange(pos,pos); } }); }, 200); };
     P0.querySelector("#liSolo").onchange = function(e){ ST.soloCompras = e.target.checked; render(); };
-    P0.querySelectorAll("#liChips .cx-chip").forEach(function(b){ b.onclick = function(){ var p = b.dataset.p; if(!p) ST.sel.clear(); else if(ST.sel.has(p)) ST.sel.delete(p); else ST.sel.add(p); lsSet("sel", Array.from(ST.sel)); render(); }; });
+    P0.querySelectorAll("#liChips .cx-chip").forEach(function(b){ b.onclick = function(){ var p = b.dataset.p; if(!p) ST.sel.clear(); else if(ST.sel.has(p)) ST.sel.delete(p); else ST.sel.add(p); lsSet("selr", Array.from(ST.sel)); render(); }; });
     P0.querySelector("#liNew").onclick = function(){ if(typeof window.cxCrearInsumo==="function") window.cxCrearInsumo(); };
     P0.querySelector("#liXls").onclick = excel;
     P0.querySelectorAll(".li-in").forEach(function(inp){
@@ -13522,7 +13528,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
   function excel(){
     if(typeof XLSX==="undefined"){ toast("No se pudo cargar Excel","warn"); return; }
     var q = nrm(ST.q);
-    var L = ST.rows.filter(function(r){ return (!ST.sel.size || ST.sel.has(r.provNombre)) && (!ST.soloCompras || isN(r.compra)) && (!q || nrm(r.nombre+" "+r.provNombre+" "+r.rubro+" "+r.cat).indexOf(q)>-1); })
+    var L = ST.rows.filter(function(r){ return (!ST.sel.size || ST.sel.has((r.cat||"")+"\u0001"+(r.rubro||""))) && (!ST.soloCompras || isN(r.compra)) && (!q || nrm(r.nombre+" "+r.provNombre+" "+r.rubro+" "+r.cat).indexOf(q)>-1); })
       .sort(function(a,b){ return (a.cat||"").localeCompare(b.cat||"","es") || (a.rubro||"").localeCompare(b.rubro||"","es") || a.nombre.localeCompare(b.nombre,"es") || a.provNombre.localeCompare(b.provNombre,"es"); });
     var aoa = [["Categoría","Rubro","Insumo","Proveedor","Presentación","Unidad","Costo de compra del proveedor ($/u)","Fecha compra","Costo manual ($/u)","Usa costo manual","Factor de merma (%)","Costo unitario final ($/u)","Proveedor que define el costo","Última compra","Último proveedor"]];
     L.forEach(function(r){ aoa.push([r.cat, r.rubro, r.nombre, r.provNombre, r.pres, r.unidad, isN(r.compra)?Math.round(r.compra*100)/100:null, r.compraFecha?fD(r.compraFecha):"", isN(r.manual)?r.manual:null, r.usar?"Sí":"No", r.merma, isN(r.final)?Math.round(r.final*100)/100:null, r.usar?"(costo manual)":(r.vigProv||""), r.ultima?fD(r.ultima.fecha):"", r.ultima?r.ultima.prov:""]); });
