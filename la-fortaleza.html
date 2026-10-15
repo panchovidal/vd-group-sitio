@@ -1227,7 +1227,7 @@
 .actualizacion-pendiente-banner .pendiente-confirmar:hover{background:#734b00;}
 .actualizacion-pendiente-banner .pendiente-anular{color:#B3261E;border-color:#E3B3AF;}
 .actualizacion-pendiente-banner .pendiente-anular:hover{background:#FBE9E7;}
-.sueldos-grid{display:grid;grid-template-columns:var(--grid-template-sueldos, 56px 1fr);align-items:center;width:max-content;min-width:100%;}
+.sueldos-grid{display:grid;grid-template-columns:var(--grid-template-sueldos, 68px 1fr);align-items:center;width:max-content;min-width:100%;}
 .sueldos-grid .cell{padding:13px 8px;font-size:13.3px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sueldos-grid .c-num-emp{font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center;padding:13px 4px;}
 .sueldos-grid .c-nombre-emp{font-weight:700;color:var(--text-1);}
@@ -2501,6 +2501,20 @@
   .li-mt td{text-align:right;padding:7px 8px;border-bottom:1px solid #EEF0F7;font-variant-numeric:tabular-nums}
   .li-mt .l{text-align:left}
   .li-modal .ar-modal-f .hint{flex:1}
+  .li-ccat{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-right:6px}
+  .li-t td.li-pv{font-size:12.5px;color:var(--text-1);font-weight:600;white-space:nowrap}
+  .li-t td.li-sh{vertical-align:middle;background:#FCFCFE}
+  .li-t tr.li-multi td.nm{vertical-align:middle}
+  .li-t tr.li-gn td{border-top:1px dashed #E3E6F0}
+  .li-t tr.li-hov td{background:#F4F6FC}
+  .li-np{display:inline-block;margin-left:7px;font-size:10px;font-weight:800;color:var(--text-3);background:#EEF0F7;border-radius:99px;padding:2px 7px;vertical-align:1px}
+  .li-vig{display:inline-block;margin-right:6px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#1E7A48;background:#E3F4EA;border:1px solid #BFE3CD;border-radius:99px;padding:1px 6px;vertical-align:1px}
+  .li-t td.li-isvig{color:var(--text-1);font-weight:700}
+  .li-t{table-layout:fixed;width:100%;min-width:980px}
+  .li-t td.nm{min-width:0;overflow-wrap:anywhere}
+  .li-t td.li-pv{white-space:normal}
+  .li-t td{overflow:hidden;text-overflow:ellipsis}
+  .li-t td.li-sh .li-in{max-width:100%}
   /* ===== Arreglos de grillas (15/10/2026) ===== */
   /* Caja Mayor: tabla con encabezado fijo + bordes "separados" (con border-collapse:collapse el navegador
      desfasa las líneas entre filas al hacer scroll o con zoom) y columnas que entran en el recuadro. */
@@ -2533,6 +2547,24 @@
   .cx-chip.drop-after{box-shadow:3px 0 0 0 var(--sky);}
   /* Comparativa de proveedores (módulo nuevo, en diseño) */
   #moduleComparativa .placeholder-card{margin:60px auto;}
+
+  /* ---- Sueldos: recuadros COCINA / SALÓN / ADMIN y reordenamiento manual, igual que Che Mono (15/10/2026) ---- */
+  .sueldos-grid .c-num-emp{font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center;padding:13px 4px;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .emp-drag-handle{cursor:grab;color:var(--gray);font-size:12px;line-height:1;opacity:.55;user-select:none;letter-spacing:-1px;}
+  .emp-drag-handle:hover{opacity:1;color:var(--sky);}
+  .emp-drag-handle.disabled{cursor:not-allowed;opacity:.22;}
+  .sueldos-grid .row.dragging-row{opacity:.4;}
+  .sueldos-grid .row.drag-over{box-shadow:inset 0 2px 0 var(--blue);}
+  .list-scroll{position:relative;}
+  .emp-bracket-gutter{position:absolute;left:16px;top:0;width:44px;pointer-events:none;z-index:2;}
+  .emp-bracket{position:absolute;left:0;width:44px;}
+  .emp-bracket .eb-line{position:absolute;right:4px;top:6px;bottom:6px;width:9px;border-left:2px solid var(--c);border-top:2px solid var(--c);border-bottom:2px solid var(--c);border-top-left-radius:5px;border-bottom-left-radius:5px;}
+  .emp-bracket .eb-label{position:absolute;left:0;top:50%;width:16px;text-align:center;transform:translateY(-50%) rotate(-90deg);transform-origin:center;font-size:9.5px;font-weight:800;letter-spacing:.07em;color:var(--c);white-space:nowrap;}
+  .emp-bracket-cocina{--c:#C97C3D;}
+  .emp-bracket-salon{--c:var(--blue);}
+  #stabEsquema .list-scroll{padding-left:76px;}
+
+  .emp-bracket-admin{--c:#2F8F7B;}
 </style>
 </head>
 <body>
@@ -3269,6 +3301,7 @@
             <div class="emp-table-outer">
               <div class="list-scroll">
                 <div class="sueldos-grid col-head-row" id="sueldosColHeadRow"></div>
+                <div class="emp-bracket-gutter" id="empBracketGutter"></div>
                 <div class="list" id="empleadosBody"></div>
                 <div class="empty-state" id="empleadosEmptyState" style="display:none;">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path></svg>
@@ -10208,6 +10241,7 @@ function cancelarNuevoEmpleado(){ eEditId = null; goSueldosTab("esquema"); }
 function onEmpleadoRowClick(ev, id){
   if(modoActualizacionSueldos) return;
   if(ev && ev.target && ev.target.closest && ev.target.closest(".sueldo-edit-input")) return;
+  if(ev && ev.target && ev.target.closest && ev.target.closest(".emp-drag-handle")) return;
   editarEmpleado(id);
 }
 function editarEmpleado(id){
@@ -10459,7 +10493,7 @@ function getSueldosVisibleColumnDefs(){
 }
 function applySueldosGridTemplateColumns(){
   var cols = getSueldosVisibleColumnDefs();
-  var parts = ["56px"].concat(cols.map(function(c){ return "var(--cw-" + c.id + ", " + c.defaultWidth + "px)"; }));
+  var parts = ["68px"].concat(cols.map(function(c){ return "var(--cw-" + c.id + ", " + c.defaultWidth + "px)"; }));
   document.documentElement.style.setProperty("--grid-template-sueldos", parts.join(" "));
 }
 function renderSueldosGridHeader(){
@@ -10679,14 +10713,195 @@ function renderEmpleadosTable(){
 
   var list = getSortedEmpleados();
   var cols = getSueldosVisibleColumnDefs();
+  var dragDisabled = !!sueldosSortField; /* el reordenamiento manual sólo tiene sentido en el orden por N° (numeracion) */
   var rows = "";
   for(var j=0;j<list.length;j++){
     var emp = list[j];
     var cellsHtml = "";
     for(var k=0;k<cols.length;k++){ cellsHtml += cols[k].cell(emp); }
-    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\" onclick=\"onEmpleadoRowClick(event,'" + emp.id + "')\"><div class=\"cell c-num-emp\">" + (j+1) + "</div>" + cellsHtml + "</div>";
+    var handleTitle = dragDisabled ? "Ordená por N° para poder arrastrar y reordenar" : "Arrastrá para reordenar";
+    var handleHtml = "<span class=\"emp-drag-handle" + (dragDisabled ? " disabled" : "") + "\" draggable=\"" + (dragDisabled ? "false" : "true") + "\" title=\"" + handleTitle + "\">⋮⋮</span>";
+    var numCellTitle = dragDisabled ? " title=\"Posición según el orden actual (no es la numeración manual). Ordená por N° para ver y arrastrar el orden manual.\"" : "";
+    rows += "<div class=\"sueldos-grid row\" data-id=\"" + emp.id + "\" onclick=\"onEmpleadoRowClick(event,'" + emp.id + "')\"><div class=\"cell c-num-emp\"" + numCellTitle + ">" + handleHtml + "<span class=\"emp-num-val\">" + (j+1) + "</span></div>" + cellsHtml + "</div>";
   }
   tbody.innerHTML = rows;
+  initEmpleadosDragAndDrop();
+  requestAnimationFrame(renderEmpBrackets);
+}
+
+/* =========================================================
+   Reordenamiento manual (drag & drop) de la numeracion.
+   Sólo aplica cuando la grilla está en su orden natural (por
+   numeracion, sueldosSortField===null); en cualquier otro orden
+   de columna, arrastrar queda deshabilitado (ver dragDisabled).
+   ========================================================= */
+var empDragFromId = null;
+
+function initEmpleadosDragAndDrop(){
+  var body = document.getElementById("empleadosBody");
+  if(!body || body.dataset.dndWired) return;
+  body.dataset.dndWired = "1";
+
+  body.addEventListener("dragstart", function(ev){
+    var handle = ev.target.closest && ev.target.closest(".emp-drag-handle");
+    if(!handle || handle.classList.contains("disabled") || sueldosSortField){ ev.preventDefault(); return; }
+    var row = handle.closest(".row");
+    if(!row){ ev.preventDefault(); return; }
+    empDragFromId = row.dataset.id;
+    row.classList.add("dragging-row");
+    ev.dataTransfer.effectAllowed = "move";
+    try{ ev.dataTransfer.setData("text/plain", empDragFromId); }catch(e){}
+  });
+
+  body.addEventListener("dragover", function(ev){
+    if(!empDragFromId || sueldosSortField) return;
+    ev.preventDefault();
+    var row = ev.target.closest && ev.target.closest(".row");
+    if(!row) return;
+    body.querySelectorAll(".row.drag-over").forEach(function(r){ r.classList.remove("drag-over"); });
+    if(row.dataset.id !== empDragFromId) row.classList.add("drag-over");
+  });
+
+  body.addEventListener("dragleave", function(ev){
+    var row = ev.target.closest && ev.target.closest(".row");
+    if(row) row.classList.remove("drag-over");
+  });
+
+  body.addEventListener("drop", function(ev){
+    ev.preventDefault();
+    body.querySelectorAll(".row.drag-over").forEach(function(r){ r.classList.remove("drag-over"); });
+    body.querySelectorAll(".row.dragging-row").forEach(function(r){ r.classList.remove("dragging-row"); });
+    var fromId = empDragFromId;
+    empDragFromId = null;
+    if(!fromId || sueldosSortField) return;
+    var row = ev.target.closest && ev.target.closest(".row");
+    if(!row) return;
+    var toId = row.dataset.id;
+    if(toId===fromId) return;
+    reordenarEmpleadoManual(fromId, toId);
+  });
+
+  body.addEventListener("dragend", function(){
+    body.querySelectorAll(".row.drag-over").forEach(function(r){ r.classList.remove("drag-over"); });
+    body.querySelectorAll(".row.dragging-row").forEach(function(r){ r.classList.remove("dragging-row"); });
+    empDragFromId = null;
+  });
+}
+
+/* Mueve fromId a la posición donde estaba toId (drag & drop entre dos filas). */
+function reordenarEmpleadoManual(fromId, toId){
+  var ids = getSortedEmpleados().map(function(e){ return e.id; });
+  var fromIdx = ids.indexOf(fromId);
+  var toIdx = ids.indexOf(toId);
+  if(fromIdx<0 || toIdx<0) return;
+  ids.splice(fromIdx, 1);
+  var insertAt = ids.indexOf(toId);
+  if(insertAt<0) insertAt = ids.length;
+  ids.splice(insertAt, 0, fromId);
+  return aplicarNuevoOrdenEmpleados(ids);
+}
+
+/* Función invocable directamente (UI o tests) para mover un empleado a una
+   posición 1-based dentro del orden manual, sin pasar por drag & drop. */
+function moverEmpleado(id, nuevaPosicion){
+  var ids = getSortedEmpleados().map(function(e){ return e.id; });
+  var idx = ids.indexOf(id);
+  if(idx<0) return Promise.resolve(false);
+  ids.splice(idx, 1);
+  var target = Math.max(0, Math.min(ids.length, nuevaPosicion-1));
+  ids.splice(target, 0, id);
+  return aplicarNuevoOrdenEmpleados(ids);
+}
+
+/* Recibe el nuevo orden completo (array de ids) y persiste en la DB sólo
+   los empleados cuya numeracion realmente cambió (1..N según su nueva
+   posición). Si algo falla a mitad de camino, avisa y resincroniza desde
+   la DB para no dejar el estado a medio actualizar. */
+async function aplicarNuevoOrdenEmpleados(newOrderIds){
+  var updates = [];
+  for(var i=0;i<newOrderIds.length;i++){
+    var id = newOrderIds[i];
+    var emp = empleadosCache.find(function(e){ return e.id===id; });
+    if(!emp) continue;
+    var nuevaNum = i+1;
+    if(Number(emp.numeracion||0) !== nuevaNum){ updates.push({ id: id, numeracion: nuevaNum }); }
+  }
+  if(!updates.length) return true;
+
+  try{
+    for(var k=0;k<updates.length;k++){
+      var u = updates[k];
+      var res = await sb.from("lf_empleados").update({ numeracion: u.numeracion }).eq("id", u.id);
+      if(res.error) throw res.error;
+    }
+  }catch(err){
+    showToast("No se pudo guardar el nuevo orden: " + (err && err.message ? err.message : "error desconocido"), "warn");
+    await loadEmpleados();
+    return false;
+  }
+
+  updates.forEach(function(u){
+    var emp = empleadosCache.find(function(e){ return e.id===u.id; });
+    if(emp) emp.numeracion = u.numeracion;
+  });
+  renderEmpleadosTable();
+  return true;
+}
+
+/* =========================================================
+   Recuadro/índice visual a la izquierda de la tabla que agrupa
+   filas contiguas de Cocina y de Salón (ver puestos abajo).
+   Se recalcula después de cada render de la tabla.
+   ========================================================= */
+/* Puestos de La Fortaleza por sector (definido por Pancho, 15/10/2026). "Mantenimiento" queda sin recuadro. */
+var EMP_PUESTOS_COCINA = ["Cocinero"];
+var EMP_PUESTOS_SALON = ["Ayudante de servicio", "Cajera / Admin"];
+var EMP_PUESTOS_ADMIN = ["Encargado", "Gerente General", "Administración"];
+
+function clasificarPuestoEmpleado(puesto){
+  if(EMP_PUESTOS_COCINA.indexOf(puesto)>-1) return "cocina";
+  if(EMP_PUESTOS_SALON.indexOf(puesto)>-1) return "salon";
+  if(EMP_PUESTOS_ADMIN.indexOf(puesto)>-1) return "admin";
+  return null;
+}
+
+function renderEmpBrackets(){
+  var gutter = document.getElementById("empBracketGutter");
+  var body = document.getElementById("empleadosBody");
+  if(!gutter || !body) return;
+  gutter.innerHTML = "";
+
+  var rowEls = body.querySelectorAll(".row");
+  if(!rowEls.length) return;
+
+  var runs = [];
+  var current = null;
+  rowEls.forEach(function(rowEl){
+    var id = rowEl.dataset.id;
+    var emp = empleadosCache.find(function(e){ return e.id===id; });
+    var grupo = emp ? clasificarPuestoEmpleado(emp.puesto) : null;
+    if(grupo){
+      if(current && current.grupo===grupo){ current.last = rowEl; }
+      else { current = { grupo: grupo, first: rowEl, last: rowEl }; runs.push(current); }
+    } else {
+      current = null;
+    }
+  });
+
+  var frag = document.createDocumentFragment();
+  runs.forEach(function(run){
+    var top = run.first.offsetTop;
+    var bottom = run.last.offsetTop + run.last.offsetHeight;
+    var label = { cocina:"COCINA", salon:"SALÓN", admin:"ADMIN" }[run.grupo] || "";
+    var cls = "emp-bracket-" + run.grupo;
+    var el = document.createElement("div");
+    el.className = "emp-bracket " + cls;
+    el.style.top = top + "px";
+    el.style.height = Math.max(0, bottom-top) + "px";
+    el.innerHTML = "<div class=\"eb-line\"></div><div class=\"eb-label\">" + label + "</div>";
+    frag.appendChild(el);
+  });
+  gutter.appendChild(frag);
 }
 
 function onSueldoEditInput(id, inputEl){
@@ -18318,30 +18533,46 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     ST.sel.forEach(function(p){ if(!provs[p]) ST.sel.delete(p); });
     var q = nrm(ST.q);
     var filt = rows.filter(function(r){ return (!ST.sel.size || ST.sel.has(r.provNombre)) && (!ST.soloCompras || isN(r.compra)) && (!q || nrm(r.nombre).indexOf(q)>-1 || nrm(r.provNombre).indexOf(q)>-1 || nrm(r.rubro).indexOf(q)>-1 || nrm(r.cat).indexOf(q)>-1); });
-    var porProv = {}; filt.forEach(function(r){ (porProv[r.provNombre]=porProv[r.provNombre]||[]).push(r); });
-    var nIns = new Set(rows.map(function(r){ return r.insId; })).size, nMan = new Set(rows.filter(function(r){ return r.usar; }).map(function(r){ return r.insId; })).size, nSin = new Set(rows.filter(function(r){ return !isN(r.final); }).map(function(r){ return r.insId; })).size;
-    var h = '<div class="cx-phead"><div class="cx-grow"><h1>Lista de insumos</h1><div class="cx-sub">Costo por unidad de medida de cada insumo según las facturas cargadas (mayor $/u del mes; si no hubo compras en el mes, la última), con la opción de usar un costo manual. El <b>costo unitario final</b> (con merma) es el que usan las recetas. Tocá un insumo para editarlo y ver su última compra.</div></div>'
+    // cuántos proveedores tiene cada insumo (en total, sin filtros) → marca "vigente" solo si hay más de uno
+    var nProvGrp = {}; rows.forEach(function(r){ nProvGrp[r.grp] = (nProvGrp[r.grp]||0) + 1; });
+    // Tablas por rubro del insumo (categoría › rubro)
+    var porRub = {}; filt.forEach(function(r){ var k = (r.cat||"")+"\u0001"+(r.rubro||""); (porRub[k]=porRub[k]||[]).push(r); });
+    var rubKeys = Object.keys(porRub).sort(function(a,b){ var A=a.split("\u0001"), B=b.split("\u0001"); var ea=!A[0]&&!A[1], eb=!B[0]&&!B[1]; if(ea!==eb) return ea?1:-1; return (A[0].localeCompare(B[0],"es")) || A[1].localeCompare(B[1],"es"); });
+    var grps = new Set(rows.map(function(r){ return r.grp; }));
+    var nIns = grps.size, nMan = new Set(rows.filter(function(r){ return r.usar; }).map(function(r){ return r.grp; })).size, nSin = new Set(rows.filter(function(r){ return !isN(r.final); }).map(function(r){ return r.grp; })).size;
+    var nMulti = Object.keys(nProvGrp).filter(function(g){ return nProvGrp[g]>1; }).length;
+    var h = '<div class="cx-phead"><div class="cx-grow"><h1>Lista de insumos</h1><div class="cx-sub">Costo por unidad de medida de cada insumo, agrupado por rubro, con una fila por proveedor. El <b>costo unitario final</b> (el que usan las recetas) sale de la regla: el mayor $/u del mes entre todos sus proveedores; si no hubo compras este mes, la última compra. El costo manual (si está tildado) y la merma valen para todos los proveedores del insumo. Tocá un insumo para editarlo y ver su última compra.</div></div>'
       + '<div class="cx-actions"><button type="button" class="cx-btn" id="liXls">'+ICO.dl+'Excel</button><button type="button" class="cx-btn pri" id="liNew">'+ICO.plus+'Crear nuevo insumo</button></div></div>'
-      + '<div class="cx-scroll"><div class="li-kpis"><span><b>'+nIns+'</b> insumos</span><span><b>'+(provList.filter(function(p){ return p!=="Sin proveedor"; }).length)+'</b> proveedores</span><span><b>'+nMan+'</b> con costo manual</span>'+(nSin?'<span class="w"><b>'+nSin+'</b> sin costo</span>':'')+'</div>'
+      + '<div class="cx-scroll"><div class="li-kpis"><span><b>'+nIns+'</b> insumos</span><span><b>'+(provList.filter(function(p){ return p!=="Sin proveedor"; }).length)+'</b> proveedores</span>'+(nMulti?'<span><b>'+nMulti+'</b> con más de un proveedor</span>':'')+'<span><b>'+nMan+'</b> con costo manual</span>'+(nSin?'<span class="w"><b>'+nSin+'</b> sin costo</span>':'')+'</div>'
       + '<div class="cx-tools"><div class="cx-search" style="max-width:420px">'+ICO.srch+'<input type="text" id="liQ" placeholder="Buscar insumo, proveedor, rubro o categoría…" value="'+esc(ST.q)+'" autocomplete="off"></div>'
       + '<label class="li-chk"><input type="checkbox" id="liSolo" '+(ST.soloCompras?"checked":"")+'> Solo con compras cargadas</label></div>'
       + '<div class="cx-chips li-chips" id="liChips"><button type="button" class="cx-chip '+(!ST.sel.size?"on":"")+'" data-p="">Todos los proveedores <span class="n">'+rows.length+'</span></button>'
       + provList.map(function(p){ return '<button type="button" class="cx-chip '+(ST.sel.has(p)?"on":"")+'" data-p="'+esc(p)+'">'+esc(p)+' <span class="n">'+provs[p].n+'</span></button>'; }).join("") + '</div>';
-    var orden = provList.filter(function(p){ return porProv[p]; });
-    if(!orden.length) h += '<div class="cx-bigempty"><b>'+(rows.length?"Sin resultados":"Todavía no hay insumos")+'</b>'+(rows.length?"Probá con otra búsqueda o proveedor.":"Creá el primero con “Crear nuevo insumo”.")+'</div>';
-    h += '<div class="li-grid">' + orden.map(function(p){
-      var L = porProv[p].sort(function(a,b){ return a.nombre.localeCompare(b.nombre,"es"); });
-      return '<article class="cx-card li-card"><div class="cx-chead"><div class="cx-grow"><span class="cx-ctitle">'+esc(p)+'</span><span class="cx-cmeta">'+L.length+' insumo'+(L.length===1?"":"s")+'</span></div></div>'
-        + '<div class="cx-cbody" style="max-height:none"><table class="cx-t li-t"><thead><tr><th class="l"></th><th class="l"></th><th></th><th class="grp gs" colspan="4">$ por unidad de medida</th><th class="gs"></th></tr>'
-        + '<tr><th class="l">Insumo</th><th class="l">Categoría › Rubro</th><th>Presentación</th><th class="gs">Costo de compra</th><th>Costo manual</th><th class="c">Usar</th><th>Merma</th><th class="gs">Costo unitario final</th></tr></thead><tbody>'
-        + L.map(function(r){
-            var fin = isN(r.final) ? m2(r.final) : '<span class="li-na">sin costo</span>';
-            return '<tr data-k="'+esc(r.key)+'" class="li-row'+(r.usar?" man":"")+'"><td class="l nm">'+esc(r.nombre)+'</td><td class="l li-cr">'+esc(r.cat)+(r.rubro?' › '+esc(r.rubro):'')+'</td><td class="mut">'+esc(r.pres)+'</td>'
-              + '<td class="gs'+(r.usar?" li-off":"")+'" title="'+(r.compraFecha?"Vigente desde la compra del "+fD(r.compraFecha):"Sin compras cargadas de este proveedor")+'">'+(isN(r.compra)?m2(r.compra):'<span class="li-na">—</span>')+'<span class="li-un">/'+esc(r.unidad)+'</span></td>'
-              + '<td><input class="li-in" data-f="manual" data-id="'+esc(r.insId)+'" value="'+pIn(r.manual)+'" placeholder="$" inputmode="decimal"></td>'
-              + '<td class="c"><input type="checkbox" class="li-cb" data-f="usar" data-id="'+esc(r.insId)+'" '+(r.usar?"checked":"")+' title="Usar el costo manual en vez del de compra"></td>'
-              + '<td><input class="li-in sm" data-f="merma" data-id="'+esc(r.insId)+'" value="'+pIn(r.merma)+'" inputmode="decimal"><span class="li-un">%</span></td>'
-              + '<td class="gs strong li-fin">'+fin+'<span class="li-un">/'+esc(r.unidad)+'</span></td></tr>';
+    if(!rubKeys.length) h += '<div class="cx-bigempty"><b>'+(rows.length?"Sin resultados":"Todavía no hay insumos")+'</b>'+(rows.length?"Probá con otra búsqueda o proveedor.":"Creá el primero con “Crear nuevo insumo”.")+'</div>';
+    h += '<div class="li-grid">' + rubKeys.map(function(k){
+      var cr = k.split("\u0001"), L = porRub[k].sort(function(a,b){ return a.nombre.localeCompare(b.nombre,"es") || String(a.grp).localeCompare(String(b.grp)) || a.provNombre.localeCompare(b.provNombre,"es"); });
+      // bloques consecutivos del mismo insumo → celdas compartidas con rowspan
+      var blocks = []; L.forEach(function(r){ var bl = blocks[blocks.length-1]; if(bl && bl.grp===r.grp) bl.rows.push(r); else blocks.push({ grp:r.grp, rows:[r] }); });
+      var nI = blocks.length, nP = new Set(L.map(function(r){ return r.provNombre; })).size;
+      return '<article class="cx-card li-card"><div class="cx-chead"><div class="cx-grow">'+(cr[0]?'<span class="li-ccat">'+esc(cr[0])+' ›</span>':'')+'<span class="cx-ctitle">'+esc(cr[1]||(cr[0]?"Sin rubro":"Sin categoría ni rubro"))+'</span><span class="cx-cmeta">'+nI+' insumo'+(nI===1?"":"s")+' · '+nP+' proveedor'+(nP===1?"":"es")+'</span></div></div>'
+        + '<div class="cx-cbody" style="max-height:none"><table class="cx-t li-t"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:10%"><col style="width:15%"><col style="width:11%"><col style="width:6%"><col style="width:8%"><col style="width:12%"></colgroup><thead><tr><th class="l"></th><th class="l"></th><th></th><th class="grp gs" colspan="4">$ por unidad de medida</th><th class="gs"></th></tr>'
+        + '<tr><th class="l">Insumo</th><th class="l">Proveedor</th><th>Presentación</th><th class="gs">Costo de compra</th><th>Costo manual</th><th class="c">Usar</th><th>Merma</th><th class="gs">Costo unitario final</th></tr></thead><tbody>'
+        + blocks.map(function(bl){
+            var n = bl.rows.length, r0 = bl.rows[0], rs = n>1 ? ' rowspan="'+n+'"' : '', multi = (nProvGrp[bl.grp]||0) > 1;
+            var fin = isN(r0.final) ? m2(r0.final) : '<span class="li-na">sin costo</span>';
+            var finTit = r0.usar ? "Costo manual" + (r0.merma?" + merma":"") : (isN(r0.vigUnit) ? "Mayor $/u del mes (o última compra)" + (multi && r0.vigProv ? ": " + r0.vigProv + (r0.vigFecha?" · "+fD(r0.vigFecha):"") : "") + (r0.merma?" + merma":"") : "Sin compras cargadas");
+            return bl.rows.map(function(r, i){
+              var esVig = multi && !r.usar && (r.vigInsId ? r.vigInsId===r.insId : (r.vigProv && nrm(r.vigProv)===nrm(r.provNombre)));
+              var tr = '<tr data-k="'+esc(r.key)+'" data-g="'+esc(bl.grp)+'" class="li-row'+(r.usar?" man":"")+(i===0?" li-g0":" li-gn")+(n>1?" li-multi":"")+'">';
+              if(i===0) tr += '<td class="l nm"'+rs+'>'+esc(r.nombre)+(multi?'<span class="li-np" title="Insumo con más de un proveedor">'+(nProvGrp[bl.grp])+' prov.</span>':'')+'</td>';
+              tr += '<td class="l li-pv">'+esc(r.provNombre)+'</td><td class="mut">'+esc(r.pres)+'</td>'
+                + '<td class="gs'+(r.usar?" li-off":"")+(esVig?" li-isvig":"")+'" title="'+(r.compraFecha?"Costo de este proveedor: compra del "+fD(r.compraFecha):"Sin compras cargadas de este proveedor")+'">'+(esVig?'<span class="li-vig" title="Este proveedor define el costo del insumo">vigente</span>':'')+(isN(r.compra)?m2(r.compra):'<span class="li-na">—</span>')+'<span class="li-un">/'+esc(r.unidad)+'</span></td>';
+              if(i===0) tr += '<td'+rs+' class="li-sh"><input class="li-in" data-f="manual" data-id="'+esc(r.insId)+'" value="'+pIn(r.manual)+'" placeholder="$" inputmode="decimal"'+(multi?' title="Vale para todos los proveedores de este insumo"':'')+'></td>'
+                + '<td class="c li-sh"'+rs+'><input type="checkbox" class="li-cb" data-f="usar" data-id="'+esc(r.insId)+'" '+(r.usar?"checked":"")+' title="Usar el costo manual en vez del de compra"></td>'
+                + '<td class="li-sh"'+rs+'><input class="li-in sm" data-f="merma" data-id="'+esc(r.insId)+'" value="'+pIn(r.merma)+'" inputmode="decimal"><span class="li-un">%</span></td>'
+                + '<td class="gs strong li-fin li-sh"'+rs+' title="'+esc(finTit)+'">'+fin+'<span class="li-un">/'+esc(r.unidad)+'</span></td>';
+              return tr + '</tr>';
+            }).join("");
           }).join("") + '</tbody></table></div></article>';
     }).join("") + '</div></div>';
     P0.innerHTML = h; bind(); vigilar();
@@ -18359,7 +18590,12 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       inp.onchange = function(){ guardarCampo(inp); };
     });
     P0.querySelectorAll(".li-cb").forEach(function(cb){ cb.onclick = function(e){ e.stopPropagation(); }; cb.onchange = function(){ guardarCampo(cb); }; });
-    P0.querySelectorAll("tr.li-row").forEach(function(tr){ tr.onclick = function(e){ if(e.target.closest("input")) return; detalle(tr.dataset.k); }; });
+    P0.querySelectorAll("tr.li-row").forEach(function(tr){
+      tr.onclick = function(e){ if(e.target.closest("input")) return; detalle(tr.dataset.k); };
+      var sib = function(){ return tr.parentNode.querySelectorAll('tr.li-row[data-g="'+(window.CSS&&CSS.escape?CSS.escape(tr.dataset.g):tr.dataset.g)+'"]'); };
+      tr.onmouseenter = function(){ sib().forEach(function(x){ x.classList.add("li-hov"); }); };
+      tr.onmouseleave = function(){ sib().forEach(function(x){ x.classList.remove("li-hov"); }); };
+    });
   }
   async function guardarCampo(el){
     var id = el.dataset.id, f = el.dataset.f, r = ST.rows.find(function(x){ return x.insId===id; }); if(!r) return;
@@ -18382,19 +18618,19 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
   }
   function detalle(key){
     var r = ST.rows.find(function(x){ return x.key===key; }); if(!r) return;
-    var otros = ST.rows.filter(function(x){ return x.insId===r.insId; });
+    var otros = ST.rows.filter(function(x){ return x.grp===r.grp; }); var multi = otros.length>1;
     var ov = document.createElement("div"); ov.className = "ar-modal-ov"; ov.id = "liModal";
     var hist = (r.hist||[]).map(function(c){ return '<tr><td class="l">'+fD(c.fecha)+'</td><td class="l">'+esc(c.prov||"—")+'</td><td>'+m2(c.unit)+'</td></tr>'; }).join("");
     ov.innerHTML = '<div class="ar-modal li-modal" role="dialog" aria-modal="true" style="width:min(640px,100%)">'
       + '<div class="ar-modal-h"><div><h3>'+esc(r.nombre)+'</h3><p>'+esc(r.cat)+(r.rubro?' › '+esc(r.rubro):'')+' · se mide en <b>'+esc(r.unidad)+'</b></p></div><button type="button" class="ar-x" data-x title="Cerrar">'+ICO.x+'</button></div>'
       + '<div class="ar-modal-b">'
       + '<div class="li-ult">'+(r.ultima ? '<div><small>Última compra</small><b>'+fD(r.ultima.fecha)+'</b><span>a '+esc(r.ultima.prov||"—")+' · '+m2(r.ultima.unit)+'/'+esc(r.unidad)+'</span></div>' : '<div><small>Última compra</small><b>Sin compras cargadas</b><span>Todavía no hay facturas con este insumo</span></div>')
-      + '<div><small>Costo que usan las recetas</small><b>'+m2(r.receta)+'</b><span>'+(r.usar?"Costo manual":"Mayor $/u del mes o última compra")+' + merma</span></div></div>'
+      + '<div><small>Costo que usan las recetas</small><b>'+m2(r.receta)+'</b><span>'+(r.usar?"Costo manual":(isN(r.vigUnit)?"Mayor $/u del mes o última compra"+(multi&&r.vigProv?" · "+esc(r.vigProv):""):"Sin compras cargadas"))+(r.merma?' + merma':'')+'</span></div></div>'
       + '<div class="li-form"><label>Costo manual ($/'+esc(r.unidad)+')<input type="text" id="liMMan" value="'+pIn(r.manual)+'" inputmode="decimal" placeholder="$"></label>'
       + '<label>Factor de merma (%)<input type="text" id="liMMer" value="'+pIn(r.merma)+'" inputmode="decimal"></label>'
-      + '<label class="li-chk2"><input type="checkbox" id="liMUsar" '+(r.usar?"checked":"")+'> Usar el costo manual (en vez del de compra) en recetas</label></div>'
-      + '<div class="li-sec"><h5>Proveedores</h5><table class="li-mt"><thead><tr><th class="l">Proveedor</th><th class="l">Presentación</th><th>Costo de compra</th><th>Costo final</th></tr></thead><tbody>'
-      + otros.map(function(x){ return '<tr><td class="l">'+esc(x.provNombre)+'</td><td class="l">'+esc(x.pres)+'</td><td>'+m2(x.compra)+'</td><td><b>'+m2(x.final)+'</b></td></tr>'; }).join("") + '</tbody></table></div>'
+      + '<label class="li-chk2"><input type="checkbox" id="liMUsar" '+(r.usar?"checked":"")+'> Usar el costo manual (en vez del de compra) en recetas'+(multi?' — vale para sus '+otros.length+' proveedores':'')+'</label></div>'
+      + '<div class="li-sec"><h5>Proveedores</h5><table class="li-mt"><thead><tr><th class="l">Proveedor</th><th class="l">Presentación</th><th>Compra vigente</th><th>Costo de compra</th></tr></thead><tbody>'
+      + otros.map(function(x){ var v = multi && !x.usar && (x.vigInsId ? x.vigInsId===x.insId : (x.vigProv && nrm(x.vigProv)===nrm(x.provNombre))); return '<tr><td class="l">'+esc(x.provNombre)+(v?' <span class="li-vig">vigente</span>':'')+'</td><td class="l">'+esc(x.pres)+'</td><td>'+(x.compraFecha?fD(x.compraFecha):'—')+'</td><td><b>'+m2(x.compra)+'</b></td></tr>'; }).join("") + '</tbody></table></div>'
       + '<div class="li-sec"><h5>Últimas compras</h5>'+(hist?'<table class="li-mt"><thead><tr><th class="l">Fecha factura</th><th class="l">Proveedor</th><th>$ por '+esc(r.unidad)+'</th></tr></thead><tbody>'+hist+'</tbody></table>':'<div class="ar-note">Sin compras cargadas.</div>')+'</div>'
       + '</div><div class="ar-modal-f"><button type="button" class="btn-ghost" id="liMFicha" title="Nombre, rubro, proveedores y presentaciones">Editar ficha del insumo</button><span class="hint"></span><button type="button" class="btn-ghost" data-x>Cancelar</button><button type="button" class="btn-primary" id="liMOk">Guardar</button></div></div>';
     var onEsc = function(e){ if(e.key==="Escape") cerrar(); };
@@ -18419,10 +18655,10 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     if(typeof XLSX==="undefined"){ toast("No se pudo cargar Excel","warn"); return; }
     var q = nrm(ST.q);
     var L = ST.rows.filter(function(r){ return (!ST.sel.size || ST.sel.has(r.provNombre)) && (!ST.soloCompras || isN(r.compra)) && (!q || nrm(r.nombre+" "+r.provNombre+" "+r.rubro+" "+r.cat).indexOf(q)>-1); })
-      .sort(function(a,b){ return (a.provNombre+a.nombre).localeCompare(b.provNombre+b.nombre,"es"); });
-    var aoa = [["Proveedor","Insumo","Categoría","Rubro","Presentación","Unidad","Costo de compra ($/u)","Fecha compra vigente","Costo manual ($/u)","Usa costo manual","Factor de merma (%)","Costo unitario final ($/u)","Última compra","Último proveedor"]];
-    L.forEach(function(r){ aoa.push([r.provNombre, r.nombre, r.cat, r.rubro, r.pres, r.unidad, isN(r.compra)?Math.round(r.compra*100)/100:null, r.compraFecha?fD(r.compraFecha):"", isN(r.manual)?r.manual:null, r.usar?"Sí":"No", r.merma, isN(r.final)?Math.round(r.final*100)/100:null, r.ultima?fD(r.ultima.fecha):"", r.ultima?r.ultima.prov:""]); });
-    var ws = XLSX.utils.aoa_to_sheet(aoa); ws["!cols"] = [{wch:24},{wch:32},{wch:18},{wch:18},{wch:18},{wch:8},{wch:16},{wch:14},{wch:14},{wch:10},{wch:12},{wch:16},{wch:13},{wch:22}];
+      .sort(function(a,b){ return (a.cat||"").localeCompare(b.cat||"","es") || (a.rubro||"").localeCompare(b.rubro||"","es") || a.nombre.localeCompare(b.nombre,"es") || a.provNombre.localeCompare(b.provNombre,"es"); });
+    var aoa = [["Categoría","Rubro","Insumo","Proveedor","Presentación","Unidad","Costo de compra del proveedor ($/u)","Fecha compra","Costo manual ($/u)","Usa costo manual","Factor de merma (%)","Costo unitario final ($/u)","Proveedor que define el costo","Última compra","Último proveedor"]];
+    L.forEach(function(r){ aoa.push([r.cat, r.rubro, r.nombre, r.provNombre, r.pres, r.unidad, isN(r.compra)?Math.round(r.compra*100)/100:null, r.compraFecha?fD(r.compraFecha):"", isN(r.manual)?r.manual:null, r.usar?"Sí":"No", r.merma, isN(r.final)?Math.round(r.final*100)/100:null, r.usar?"(costo manual)":(r.vigProv||""), r.ultima?fD(r.ultima.fecha):"", r.ultima?r.ultima.prov:""]); });
+    var ws = XLSX.utils.aoa_to_sheet(aoa); ws["!cols"] = [{wch:18},{wch:18},{wch:32},{wch:24},{wch:18},{wch:8},{wch:18},{wch:12},{wch:14},{wch:10},{wch:12},{wch:16},{wch:24},{wch:13},{wch:22}];
     var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Lista de insumos");
     XLSX.writeFile(wb, "Lista de insumos "+(typeof SK_SITE!=="undefined"?SK_SITE.club:"")+" "+(typeof todayISO==="function"?todayISO():"")+".xlsx");
   }
@@ -18505,12 +18741,39 @@ function lfComprasCache(){
 }
 function lfVigente(L){ if(!L||!L.length) return null; const mes = todayISO().slice(0,7); const dm = L.filter(c=>c.fecha.slice(0,7)===mes); return dm.length ? dm.reduce((a,b)=>b.unit>a.unit?b:a) : L.reduce((a,b)=>b.key>a.key?b:a); }
 function lfConvIns(ins){ return (ins && ins.necesita_conversion && Number(ins.conversion_cantidad)>0) ? Number(ins.conversion_cantidad) : 1; }
+/* Un mismo insumo con varios proveedores = registros con el mismo nombre (sin distinguir mayúsculas ni
+   acentos) y la misma unidad efectiva (después de la conversión). El costo de las recetas se decide entre
+   todos ellos con la regla del mes (15/10/2026); el costo manual y la merma son del insumo (se guardan en
+   todos sus registros). */
+function lfNrm(s){ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim(); }
+let _lfGrp = null;
+function lfGrupos(){
+  if(_lfGrp && _lfGrp.ref===costeoInsumos && _lfGrp.n===costeoInsumos.length) return _lfGrp;
+  const of = {}, ids = {};
+  costeoInsumos.forEach(i=>{ const k = lfNrm(i.nomenclatura)+"|"+lfNrm(costeoInsumoUnidadEfectiva(i)); of[i.id]=k; (ids[k]=ids[k]||[]).push(i.id); });
+  _lfGrp = { ref:costeoInsumos, n:costeoInsumos.length, of, ids }; return _lfGrp;
+}
+function lfGrupoIds(insumoId){ const G = lfGrupos(); return G.ids[G.of[insumoId]] || [insumoId]; }
+// Compras de todo el grupo, en $ por unidad efectiva (ya convertida) de cada registro.
+function lfComprasGrupo(insumoId){
+  const by = lfComprasCache().by; const out = [];
+  lfGrupoIds(insumoId).forEach(id=>{ const ins = costeoInsumos.find(i=>i.id===id), cv = lfConvIns(ins); (by[id]||[]).forEach(c=>out.push(Object.assign({}, c, { unit:c.unit/cv, insId:id }))); });
+  return out;
+}
+function lfManualGrupo(insumoId){
+  const L = lfGrupoIds(insumoId).map(id=>costeoInsumos.find(i=>i.id===id)).filter(Boolean);
+  const conMan = L.filter(i=>i.costo_manual!=null && i.costo_manual!=="");
+  const usa = conMan.find(i=>i.usar_costo_manual);
+  const ref = usa || conMan[0] || null;
+  return { manual: ref ? Number(ref.costo_manual) : null, usar: !!usa };
+}
 function recInsumoPrecioUnitarioVigente(insumoId){ const v = lfVigente(lfComprasCache().by[insumoId]); return v ? v.unit : null; }
 function recInsumoPrecioUnitario(insumoId){
   const ins = costeoInsumos.find(i=>i.id===insumoId);
+  const M = lfManualGrupo(insumoId);
   let punit;
-  if(ins && ins.usar_costo_manual && ins.costo_manual!=null && ins.costo_manual!=="") punit = Number(ins.costo_manual);
-  else { const pc = recInsumoPrecioUnitarioVigente(insumoId); if(pc==null) return null; punit = pc / lfConvIns(ins); }
+  if(M.usar && M.manual!=null) punit = M.manual;
+  else { const v = lfVigente(lfComprasGrupo(insumoId)); if(!v) return null; punit = v.unit; }
   const merma = costeoFactorMerma(ins); if(merma>0) punit = punit*(1+merma/100);
   return punit;
 }
@@ -18522,27 +18785,29 @@ window.cxListaInsumos = function(){
     window._lfItemsRetry = true;
     Promise.all([loadCosteoCompraItems(), loadCosteoOrdenAjustes()]).then(function(){ if(costeoCompraItems.length && window.LI) LI.render(); }).catch(function(){});
   }
-  const A = lfComprasCache(); const rows = [];
+  const A = lfComprasCache(), G = lfGrupos(); const rows = [];
   costeoInsumos.forEach(ins=>{
     const pv = (typeof proveedoresConfig!=="undefined" ? proveedoresConfig.find(p=>p.id===ins.proveedor_id) : null) || (typeof cfgProv==="function" ? cfgProv(ins.proveedor_id) : null);
     const r = (typeof cfgRub==="function") ? cfgRub("proveedores", ins.rubro_id) : null, c = r ? cfgCat("proveedores", r.catId) : null;
-    const conv = lfConvIns(ins), L = (A.by[ins.id]||[]).slice().sort((a,b)=>a.key<b.key?1:-1), vg = lfVigente(A.by[ins.id]);
-    const merma = Number(ins.factor_merma)||0, man = (ins.costo_manual==null||ins.costo_manual==="") ? null : Number(ins.costo_manual), usar = !!ins.usar_costo_manual && man!=null;
-    const compra = vg ? vg.unit/conv : null, base = usar ? man : compra;
-    const un = costeoInsumoUnidadEfectiva(ins);
-    rows.push({ key:ins.id, insId:ins.id, nombre:ins.nomenclatura, provId:ins.proveedor_id||null, provNombre:pv?pv.nombre:"Sin proveedor", cat:c?c.nombre:"", rubro:r?r.nombre:"",
+    const conv = lfConvIns(ins), vg = lfVigente(A.by[ins.id]);
+    const grupo = lfComprasGrupo(ins.id), vgG = lfVigente(grupo), L = grupo.slice().sort((a,b)=>a.key<b.key?1:-1);
+    const M = lfManualGrupo(ins.id), merma = Number(ins.factor_merma)||0;
+    rows.push({ key:ins.id, insId:ins.id, grp:G.of[ins.id], nombre:ins.nomenclatura, provId:ins.proveedor_id||null, provNombre:pv?pv.nombre:"Sin proveedor", cat:c?c.nombre:"", rubro:r?r.nombre:"",
       pres:(ins.cantidad!=null?(String(ins.cantidad).replace(".",",")+" "):"")+(ins.unidad_medida||"")+(conv!==1?` (1 ${ins.unidad_medida} = ${String(conv).replace(".",",")} ${ins.conversion_unidad})`:""),
-      unidad:un, compra, compraFecha:vg?vg.fecha:null, manual:man, usar, merma, final:base==null?null:base*(1+merma/100), receta:recInsumoPrecioUnitario(ins.id),
-      ultima:L[0]?{fecha:L[0].fecha,prov:L[0].prov,unit:L[0].unit/conv}:null, hist:L.slice(0,10).map(h=>({fecha:h.fecha,prov:h.prov,unit:h.unit/conv})) });
+      unidad:costeoInsumoUnidadEfectiva(ins), compra:vg?vg.unit/conv:null, compraFecha:vg?vg.fecha:null, manual:M.manual, usar:M.usar && M.manual!=null, merma,
+      final:recInsumoPrecioUnitario(ins.id), receta:recInsumoPrecioUnitario(ins.id),
+      vigProv: vgG ? vgG.prov : null, vigInsId: vgG ? vgG.insId : null, vigUnit: vgG ? vgG.unit : null, vigFecha: vgG ? vgG.fecha : null,
+      ultima:L[0]?{fecha:L[0].fecha,prov:L[0].prov,unit:L[0].unit}:null, hist:L.slice(0,10).map(h=>({fecha:h.fecha,prov:h.prov,unit:h.unit})) });
   });
   return rows;
 };
+// El costo manual y la merma son del insumo: se guardan en todos sus registros (uno por proveedor).
 window.cxGuardarInsumoCosto = async function(insId, patch, nombre){
-  const { error } = await sb.from("lf_costeo_insumos").update(patch).eq("id", insId);
+  const ids = lfGrupoIds(insId);
+  const { error } = await sb.from("lf_costeo_insumos").update(patch).in("id", ids);
   if(error){ showToast("No se pudo guardar: "+error.message, "warn"); return false; }
-  const a = costeoInsumos.find(i=>i.id===insId); if(a) Object.assign(a, patch);
-  const b = (cfgData.items||[]).find(i=>i.id===insId); if(b) Object.assign(b, patch);
-  try{ await sb.from("lf_historial").insert({ usuario_id:currentPerfil?currentPerfil.id:null, usuario_nombre:currentPerfil?currentPerfil.nombre:"—", accion:"Actualizó el costo de un insumo", detalle:(nombre||"")+": "+Object.entries(patch).map(([k,v])=>k+"="+v).join(", "), modulo:"costeo" }); }catch(e){}
+  ids.forEach(id=>{ const a = costeoInsumos.find(i=>i.id===id); if(a) Object.assign(a, patch); const b = (cfgData.items||[]).find(i=>i.id===id); if(b) Object.assign(b, patch); });
+  try{ await sb.from("lf_historial").insert({ usuario_id:currentPerfil?currentPerfil.id:null, usuario_nombre:currentPerfil?currentPerfil.nombre:"—", accion:"Actualizó el costo de un insumo", detalle:(nombre||"")+(ids.length>1?" ("+ids.length+" proveedores)":"")+": "+Object.entries(patch).map(([k,v])=>k+"="+v).join(", "), modulo:"costeo" }); }catch(e){}
   return true;
 };
 window.cxEditarInsumo = (id, provId)=>cfgOpenInsumoForm(id, provId||undefined);
