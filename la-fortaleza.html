@@ -2515,6 +2515,11 @@
   .li-t td.li-pv{white-space:normal}
   .li-t td{overflow:hidden;text-overflow:ellipsis}
   .li-t td.li-sh .li-in{max-width:100%}
+  .li-card .li-pos{margin-right:4px}
+  .li-card.dragging{opacity:.45}
+  .li-card.drop-before{box-shadow:0 -3px 0 0 var(--sky)}
+  .li-card.drop-after{box-shadow:0 3px 0 0 var(--sky)}
+  #liChips .cx-chip[draggable=true]{cursor:grab}
   /* ===== Arreglos de grillas (15/10/2026) ===== */
   /* Caja Mayor: tabla con encabezado fijo + bordes "separados" (con border-collapse:collapse el navegador
      desfasa las líneas entre filas al hacer scroll o con zoom) y columnas que entran en el recuadro. */
@@ -2547,6 +2552,53 @@
   .cx-chip.drop-after{box-shadow:3px 0 0 0 var(--sky);}
   /* Comparativa de proveedores (módulo nuevo, en diseño) */
   #moduleComparativa .placeholder-card{margin:60px auto;}
+  /* ===== Sueldos · categorías de puestos (16/10/2026): un bloque por categoría con su recuadro ===== */
+  #empBracketGutter{display:none}
+  .emp-grp{position:relative}
+  .emp-grp:not(.sin)::before{content:"";position:absolute;left:-20px;top:6px;bottom:6px;width:9px;border:2px solid var(--c);border-right:none;border-radius:5px 0 0 5px;pointer-events:none}
+  .emp-grp-lbl{position:absolute;left:-62px;top:4px;bottom:4px;width:30px;display:flex;align-items:center;justify-content:center;pointer-events:auto;overflow:hidden}
+  .emp-grp-lbl span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--c);white-space:nowrap;max-height:100%;overflow:hidden;text-overflow:ellipsis;line-height:1}
+  .emp-grp + .emp-grp:not(.sin){margin-top:0}
+  /* modal */
+  .scat-modal{width:min(880px,100%) !important}
+  .scat-modal .ar-modal-b{padding-top:6px}
+  .scat-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px}
+  @media(max-width:760px){.scat-cols{grid-template-columns:1fr}}
+  .scat-cols h5{margin:4px 0 10px;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:800}
+  .scat-cat{display:flex;align-items:center;gap:7px;padding:7px 8px 7px 4px;border:1px solid var(--border);border-left:4px solid var(--c);border-radius:10px;margin-bottom:7px;background:#fff}
+  .scat-cat.dragging{opacity:.45}
+  .scat-cat.drop-before{box-shadow:0 -3px 0 0 var(--sky)}
+  .scat-cat.drop-after{box-shadow:0 3px 0 0 var(--sky)}
+  .scat-grip{cursor:grab;color:var(--text-3);width:18px;height:24px;display:grid;place-items:center;flex-shrink:0}
+  .scat-grip svg{width:13px;height:13px}
+  .scat-pos{width:28px;height:24px;border:1px solid var(--border);border-radius:6px;background:#FAFBFE;text-align:center;font-size:11.5px;font-weight:800;color:var(--text-2);font-family:inherit;outline:none;padding:0;flex-shrink:0}
+  .scat-sw{width:24px;height:24px;border-radius:7px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;cursor:pointer;position:relative;background:var(--c)}
+  .scat-sw input{position:absolute;inset:-6px;width:40px;height:40px;opacity:0;cursor:pointer;border:none;padding:0}
+  .scat-nm{flex:1;min-width:0;border:1px solid transparent;border-radius:7px;padding:6px 8px;font-size:13.3px;font-weight:700;font-family:inherit;color:var(--text-1);outline:none;background:transparent}
+  .scat-nm:hover{border-color:var(--border)}
+  .scat-nm:focus{border-color:var(--sky);background:#fff;box-shadow:0 0 0 3px rgba(126,136,179,.18)}
+  .scat-n{font-size:11px;color:var(--text-3);font-weight:600;white-space:nowrap}
+  .scat-del{width:28px;height:28px;border:none;background:transparent;border-radius:7px;color:var(--text-3);cursor:pointer;display:grid;place-items:center;flex-shrink:0}
+  .scat-del svg{width:15px;height:15px}
+  .scat-del:hover{background:#FBE9E7;color:#B3261E}
+  .scat-del.off{opacity:.3;cursor:not-allowed}
+  .scat-del.off:hover{background:transparent;color:var(--text-3)}
+  .scat-add{display:inline-flex;align-items:center;gap:6px;border:1px dashed var(--border);background:#FAFBFE;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--text-2);cursor:pointer;font-family:inherit;white-space:nowrap}
+  .scat-add svg{width:13px;height:13px}
+  .scat-add:hover{border-color:var(--sky);color:var(--text-1);background:#fff}
+  .scat-pu{display:grid;grid-template-columns:10px minmax(0,1fr) auto 150px 28px;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #EEF0F7}
+  .scat-dot{width:10px;height:10px;border-radius:50%}
+  .scat-pn{font-size:13px;font-weight:600;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .scat-pu select{border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12.5px;font-family:inherit;background:#fff;color:var(--text-1);outline:none;min-width:0}
+  .scat-pu select:focus{border-color:var(--sky)}
+  .scat-newpu{display:flex;gap:8px;margin-top:10px}
+  .scat-newpu input{flex:1;min-width:0;border:1px solid var(--border);border-radius:9px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none}
+  .scat-newpu input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(126,136,179,.18)}
+  .scat-empty{font-size:12.5px;color:var(--text-3);font-style:italic;padding:8px 2px}
+  .scat-modal .ar-modal-f .hint{flex:1;font-size:11.5px;color:var(--text-3)}
+  #empleadosBody{overflow:visible}
+  #empleadosBody > .row:last-child, #empleadosBody > .emp-grp:last-child > .row:last-child{border-radius:0 0 var(--radius-md) var(--radius-md)}
+  #scatBtn{white-space:nowrap}
 
   /* ---- Sueldos: recuadros COCINA / SALÓN / ADMIN y reordenamiento manual, igual que Che Mono (15/10/2026) ---- */
   .sueldos-grid .c-num-emp{font-weight:700;color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center;padding:13px 4px;display:flex;align-items:center;justify-content:center;gap:5px;}
@@ -18519,7 +18571,8 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     srch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
     dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>',
     plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>',
-    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    grip:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>'
   };
   function pane(){ return document.getElementById("cxPaneInsumos"); }
   async function render(){
@@ -18533,7 +18586,10 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     // Globos de filtro = rubros de los insumos (15/10/2026), en el mismo orden que las tablas
     var rk = function(r){ return (r.cat||"")+"\u0001"+(r.rubro||""); };
     var rubs = {}; rows.forEach(function(r){ var k=rk(r); (rubs[k]=rubs[k]||{ cat:r.cat||"", rubro:r.rubro||"", g:new Set() }).g.add(r.grp); });
-    var rubOrd = Object.keys(rubs).sort(function(a,b){ var A=rubs[a], B=rubs[b]; var ea=!A.cat&&!A.rubro, eb=!B.cat&&!B.rubro; if(ea!==eb) return ea?1:-1; return A.cat.localeCompare(B.cat,"es") || A.rubro.localeCompare(B.rubro,"es"); });
+    var rubDef = Object.keys(rubs).sort(function(a,b){ var A=rubs[a], B=rubs[b]; var ea=!A.cat&&!A.rubro, eb=!B.cat&&!B.rubro; if(ea!==eb) return ea?1:-1; return A.cat.localeCompare(B.cat,"es") || A.rubro.localeCompare(B.rubro,"es"); });
+    // Orden manual (arrastrando globos o tablas, o con el número de posición): los rubros nuevos se suman al final
+    var saved = lsGet("ord", []), rubOrd = saved.filter(function(k){ return rubs[k]; }); rubDef.forEach(function(k){ if(rubOrd.indexOf(k)<0) rubOrd.push(k); });
+    ST.rubOrd = rubOrd;
     var nomCnt = {}; rubOrd.forEach(function(k){ var n=nrm(rubs[k].rubro); nomCnt[n]=(nomCnt[n]||0)+1; });
     var rubLabel = function(k){ var R=rubs[k]; if(!R.rubro) return R.cat ? R.cat+" (sin rubro)" : "Sin rubro"; return R.rubro + (nomCnt[nrm(R.rubro)]>1 && R.cat ? " ("+R.cat+")" : ""); };
     ST.sel.forEach(function(p){ if(!rubs[p]) ST.sel.delete(p); });
@@ -18543,7 +18599,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     var nProvGrp = {}; rows.forEach(function(r){ nProvGrp[r.grp] = (nProvGrp[r.grp]||0) + 1; });
     // Tablas por rubro del insumo (categoría › rubro)
     var porRub = {}; filt.forEach(function(r){ var k = (r.cat||"")+"\u0001"+(r.rubro||""); (porRub[k]=porRub[k]||[]).push(r); });
-    var rubKeys = Object.keys(porRub).sort(function(a,b){ var A=a.split("\u0001"), B=b.split("\u0001"); var ea=!A[0]&&!A[1], eb=!B[0]&&!B[1]; if(ea!==eb) return ea?1:-1; return (A[0].localeCompare(B[0],"es")) || A[1].localeCompare(B[1],"es"); });
+    var rubKeys = rubOrd.filter(function(k){ return porRub[k]; });
     var grps = new Set(rows.map(function(r){ return r.grp; }));
     var nIns = grps.size, nMan = new Set(rows.filter(function(r){ return r.usar; }).map(function(r){ return r.grp; })).size, nSin = new Set(rows.filter(function(r){ return !isN(r.final); }).map(function(r){ return r.grp; })).size;
     var nMulti = Object.keys(nProvGrp).filter(function(g){ return nProvGrp[g]>1; }).length;
@@ -18553,14 +18609,15 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       + '<div class="cx-tools"><div class="cx-search" style="max-width:420px">'+ICO.srch+'<input type="text" id="liQ" placeholder="Buscar insumo, proveedor, rubro o categoría…" value="'+esc(ST.q)+'" autocomplete="off"></div>'
       + '<label class="li-chk"><input type="checkbox" id="liSolo" '+(ST.soloCompras?"checked":"")+'> Solo con compras cargadas</label></div>'
       + '<div class="cx-chips li-chips" id="liChips"><button type="button" class="cx-chip '+(!ST.sel.size?"on":"")+'" data-p="">Todos los rubros <span class="n">'+nIns+'</span></button>'
-      + rubOrd.map(function(k){ return '<button type="button" class="cx-chip '+(ST.sel.has(k)?"on":"")+'" data-p="'+esc(k)+'" title="'+esc((rubs[k].cat||"Sin categoría")+" › "+(rubs[k].rubro||"Sin rubro"))+' · podés elegir varios">'+esc(rubLabel(k))+' <span class="n">'+rubs[k].g.size+'</span></button>'; }).join("") + '</div>';
+      + rubOrd.map(function(k){ return '<button type="button" class="cx-chip '+(ST.sel.has(k)?"on":"")+'" data-p="'+esc(k)+'" title="'+esc((rubs[k].cat||"Sin categoría")+" › "+(rubs[k].rubro||"Sin rubro"))+' · podés elegir varios · arrastralo para reordenar (también ordena las tablas)" draggable="true">'+esc(rubLabel(k))+' <span class="n">'+rubs[k].g.size+'</span></button>'; }).join("") + '</div>';
     if(!rubKeys.length) h += '<div class="cx-bigempty"><b>'+(rows.length?"Sin resultados":"Todavía no hay insumos")+'</b>'+(rows.length?"Probá con otra búsqueda o rubro.":"Creá el primero con “Crear nuevo insumo”.")+'</div>';
     h += '<div class="li-grid">' + rubKeys.map(function(k){
       var cr = k.split("\u0001"), L = porRub[k].sort(function(a,b){ return a.nombre.localeCompare(b.nombre,"es") || String(a.grp).localeCompare(String(b.grp)) || a.provNombre.localeCompare(b.provNombre,"es"); });
       // bloques consecutivos del mismo insumo → celdas compartidas con rowspan
       var blocks = []; L.forEach(function(r){ var bl = blocks[blocks.length-1]; if(bl && bl.grp===r.grp) bl.rows.push(r); else blocks.push({ grp:r.grp, rows:[r] }); });
       var nI = blocks.length, nP = new Set(L.map(function(r){ return r.provNombre; })).size;
-      return '<article class="cx-card li-card"><div class="cx-chead"><div class="cx-grow">'+(cr[0]?'<span class="li-ccat">'+esc(cr[0])+' ›</span>':'')+'<span class="cx-ctitle">'+esc(cr[1]||(cr[0]?"Sin rubro":"Sin categoría ni rubro"))+'</span><span class="cx-cmeta">'+nI+' insumo'+(nI===1?"":"s")+' · '+nP+' proveedor'+(nP===1?"":"es")+'</span></div></div>'
+      var pos = rubOrd.indexOf(k)+1;
+      return '<article class="cx-card li-card" data-rk="'+esc(k)+'"><div class="cx-chead"><span class="cx-grip li-grip" title="Arrastrá para reordenar">'+ICO.grip+'</span><input class="cx-pos li-pos" value="'+pos+'" inputmode="numeric" title="Posición de la tabla: escribí el número y Enter"><div class="cx-grow">'+(cr[0]?'<span class="li-ccat">'+esc(cr[0])+' ›</span>':'')+'<span class="cx-ctitle">'+esc(cr[1]||(cr[0]?"Sin rubro":"Sin categoría ni rubro"))+'</span><span class="cx-cmeta">'+nI+' insumo'+(nI===1?"":"s")+' · '+nP+' proveedor'+(nP===1?"":"es")+'</span></div></div>'
         + '<div class="cx-cbody" style="max-height:none"><table class="cx-t li-t"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:10%"><col style="width:15%"><col style="width:11%"><col style="width:6%"><col style="width:8%"><col style="width:12%"></colgroup><thead><tr><th class="l"></th><th class="l"></th><th></th><th class="grp gs" colspan="4">$ por unidad de medida</th><th class="gs"></th></tr>'
         + '<tr><th class="l">Insumo</th><th class="l">Proveedor</th><th>Presentación</th><th class="gs">Costo de compra</th><th>Costo manual</th><th class="c">Usar</th><th>Merma</th><th class="gs">Costo unitario final</th></tr></thead><tbody>'
         + blocks.map(function(bl){
@@ -18588,6 +18645,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     var qi = P0.querySelector("#liQ"), tm; qi.oninput = function(){ clearTimeout(tm); tm = setTimeout(function(){ ST.q = qi.value; var pos = qi.selectionStart; render().then(function(){ var n = pane().querySelector("#liQ"); if(n){ n.focus(); n.setSelectionRange(pos,pos); } }); }, 200); };
     P0.querySelector("#liSolo").onchange = function(e){ ST.soloCompras = e.target.checked; render(); };
     P0.querySelectorAll("#liChips .cx-chip").forEach(function(b){ b.onclick = function(){ var p = b.dataset.p; if(!p) ST.sel.clear(); else if(ST.sel.has(p)) ST.sel.delete(p); else ST.sel.add(p); lsSet("selr", Array.from(ST.sel)); render(); }; });
+    bindOrden(P0);
     P0.querySelector("#liNew").onclick = function(){ if(typeof window.cxCrearInsumo==="function") window.cxCrearInsumo(); };
     P0.querySelector("#liXls").onclick = excel;
     P0.querySelectorAll(".li-in").forEach(function(inp){
@@ -18601,6 +18659,38 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       var sib = function(){ return tr.parentNode.querySelectorAll('tr.li-row[data-g="'+(window.CSS&&CSS.escape?CSS.escape(tr.dataset.g):tr.dataset.g)+'"]'); };
       tr.onmouseenter = function(){ sib().forEach(function(x){ x.classList.add("li-hov"); }); };
       tr.onmouseleave = function(){ sib().forEach(function(x){ x.classList.remove("li-hov"); }); };
+    });
+  }
+  function mover(key, toKey, after){ var L = ST.rubOrd.filter(function(k){ return k!==key; }); var i = L.indexOf(toKey); if(i<0) return; if(after) i++; L.splice(i,0,key); lsSet("ord", L); render(); }
+  function bindOrden(P0){
+    var clr = function(sel){ P0.querySelectorAll(sel).forEach(function(x){ x.classList.remove("drop-before","drop-after","dragging"); }); };
+    // globos
+    var dragC = null;
+    P0.querySelectorAll('#liChips .cx-chip[draggable="true"]').forEach(function(b){
+      b.addEventListener("dragstart", function(e){ dragC = b.dataset.p; b.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", dragC); }catch(_){} });
+      b.addEventListener("dragend", function(){ dragC = null; clr("#liChips .cx-chip"); });
+      b.addEventListener("dragover", function(e){ if(!dragC || b.dataset.p===dragC) return; e.preventDefault(); var r = b.getBoundingClientRect(), af = (e.clientX-r.left) > r.width/2; b.classList.toggle("drop-after", af); b.classList.toggle("drop-before", !af); });
+      b.addEventListener("dragleave", function(){ b.classList.remove("drop-before","drop-after"); });
+      b.addEventListener("drop", function(e){ e.preventDefault(); if(!dragC) return; var af = b.classList.contains("drop-after"), k = dragC; dragC = null; mover(k, b.dataset.p, af); });
+    });
+    // tablas (desde la manija)
+    var dragT = null;
+    P0.querySelectorAll(".li-card").forEach(function(card){
+      var g = card.querySelector(".li-grip");
+      if(g){ g.addEventListener("mousedown", function(){ card.draggable = true; }); }
+      card.addEventListener("dragstart", function(e){ if(e.target!==card) return; dragT = card.dataset.rk; card.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", dragT); }catch(_){} });
+      card.addEventListener("dragend", function(){ card.draggable = false; dragT = null; clr(".li-card"); });
+      card.addEventListener("dragover", function(e){ if(!dragT || card.dataset.rk===dragT) return; e.preventDefault(); var r = card.getBoundingClientRect(), af = (e.clientY-r.top) > r.height/2; card.classList.toggle("drop-after", af); card.classList.toggle("drop-before", !af); });
+      card.addEventListener("dragleave", function(e){ if(!card.contains(e.relatedTarget)) card.classList.remove("drop-before","drop-after"); });
+      card.addEventListener("drop", function(e){ e.preventDefault(); if(!dragT) return; var af = card.classList.contains("drop-after"), k = dragT; dragT = null; mover(k, card.dataset.rk, af); });
+      // número de posición
+      var inp = card.querySelector(".li-pos"); if(!inp) return;
+      var orig = inp.value;
+      ["mousedown","click"].forEach(function(ev){ inp.addEventListener(ev, function(e){ e.stopPropagation(); }); });
+      inp.addEventListener("focus", function(){ inp.select(); });
+      var go = function(){ var n = parseInt(inp.value,10); if(!isFinite(n) || String(n)===orig){ inp.value = orig; return; } n = Math.max(1, Math.min(ST.rubOrd.length, n)); var L = ST.rubOrd.filter(function(k){ return k!==card.dataset.rk; }); L.splice(n-1, 0, card.dataset.rk); lsSet("ord", L); render(); };
+      inp.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); go(); } if(e.key==="Escape"){ inp.value = orig; inp.blur(); } });
+      inp.addEventListener("change", go);
     });
   }
   async function guardarCampo(el){
@@ -18661,7 +18751,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     if(typeof XLSX==="undefined"){ toast("No se pudo cargar Excel","warn"); return; }
     var q = nrm(ST.q);
     var L = ST.rows.filter(function(r){ return (!ST.sel.size || ST.sel.has((r.cat||"")+"\u0001"+(r.rubro||""))) && (!ST.soloCompras || isN(r.compra)) && (!q || nrm(r.nombre+" "+r.provNombre+" "+r.rubro+" "+r.cat).indexOf(q)>-1); })
-      .sort(function(a,b){ return (a.cat||"").localeCompare(b.cat||"","es") || (a.rubro||"").localeCompare(b.rubro||"","es") || a.nombre.localeCompare(b.nombre,"es") || a.provNombre.localeCompare(b.provNombre,"es"); });
+      .sort(function(a,b){ var O = ST.rubOrd||[], ia = O.indexOf((a.cat||"")+"\u0001"+(a.rubro||"")), ib = O.indexOf((b.cat||"")+"\u0001"+(b.rubro||"")); return (ia-ib) || a.nombre.localeCompare(b.nombre,"es") || a.provNombre.localeCompare(b.provNombre,"es"); });
     var aoa = [["Categoría","Rubro","Insumo","Proveedor","Presentación","Unidad","Costo de compra del proveedor ($/u)","Fecha compra","Costo manual ($/u)","Usa costo manual","Factor de merma (%)","Costo unitario final ($/u)","Proveedor que define el costo","Última compra","Último proveedor"]];
     L.forEach(function(r){ aoa.push([r.cat, r.rubro, r.nombre, r.provNombre, r.pres, r.unidad, isN(r.compra)?Math.round(r.compra*100)/100:null, r.compraFecha?fD(r.compraFecha):"", isN(r.manual)?r.manual:null, r.usar?"Sí":"No", r.merma, isN(r.final)?Math.round(r.final*100)/100:null, r.usar?"(costo manual)":(r.vigProv||""), r.ultima?fD(r.ultima.fecha):"", r.ultima?r.ultima.prov:""]); });
     var ws = XLSX.utils.aoa_to_sheet(aoa); ws["!cols"] = [{wch:18},{wch:18},{wch:32},{wch:24},{wch:18},{wch:8},{wch:18},{wch:12},{wch:14},{wch:10},{wch:12},{wch:16},{wch:24},{wch:13},{wch:22}];
@@ -18682,24 +18772,214 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
   }
   window.LI = { render:render };
 })();
+/* (15/10/2026) Los recuadros de Sueldos ya no se miden: ver "SUELDOS · CATEGORÍAS DE PUESTOS". */
 /* =====================================================================
-   ARREGLOS DE GRILLAS (15/10/2026) — mismo código en ambos sitios.
-   Sueldos (Che Mono): los recuadros COCINA / SALÓN a la izquierda de la planilla se calculaban
-   cuando la pestaña todavía estaba oculta (posiciones en 0) y no se recalculaban al cambiar el alto
-   de las filas (zoom, columnas, fuentes) → quedaban desfasados de las filas. Ahora se recalculan
-   solos cada vez que cambia el tamaño de la planilla y nunca se dibujan con la planilla oculta.
+   SUELDOS · CATEGORÍAS DE PUESTOS (pedido de Pancho, 16/10/2026) — mismo código en ambos sitios.
+   · Botón "Categorías de puestos" en Cuadrilla de personal: crear / renombrar / colorear / ordenar /
+     eliminar categorías y asignar cada puesto a una (o dejarlo sin categoría). También se pueden
+     agregar puestos nuevos (aparecen en el formulario del empleado, agrupados por categoría).
+     Datos compartidos en {pre}_sueldos_categorias y {pre}_sueldos_puestos.
+   · La planilla se ordena por categoría (en el orden de las categorías) y dentro de cada una por el
+     orden manual (arrastrando). Un solo recuadro por categoría.
+   · Los recuadros ya NO se dibujan midiendo posiciones (eso era lo que se desfasaba al volver a abrir
+     la planilla): cada categoría es un bloque que envuelve a sus filas y el recuadro es parte de ese
+     bloque, así que siempre queda pegado a sus filas, con cualquier zoom, fuente o columna.
+   · Si se ordena por una columna (ej. Sueldo), la planilla sigue ese orden y no muestra recuadros.
    ===================================================================== */
 (function(){
-  if(typeof renderEmpBrackets!=="function") return;
-  var _r = renderEmpBrackets;
-  window.renderEmpBrackets = function(){
-    var b = document.getElementById("empleadosBody");
-    if(!b || b.offsetParent===null || !b.offsetHeight){ var g = document.getElementById("empBracketGutter"); if(g) g.innerHTML = ""; return; }
-    return _r.apply(this, arguments);
+  if(typeof renderEmpleadosTable!=="function" || typeof SK_SITE==="undefined") return;
+  var PRE = SK_SITE.pre, T_CAT = PRE+"_sueldos_categorias", T_PU = PRE+"_sueldos_puestos";
+  var S = { cats:[], pu:{}, puList:[], loaded:false };
+  var esc = function(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
+  var toast = function(m,t){ try{ showToast(m,t); }catch(e){} };
+  var nrm = function(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim(); };
+  var COLORES = ["#C97C3D","#4F6BC9","#2F8F7B","#8E5BB5","#C2476B","#3C8DAD","#9A8A2E","#6B7280"];
+  var ICO = {
+    tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+    x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>',
+    grip:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+    plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
   };
+
+  /* ---------------- datos ---------------- */
+  async function cargar(){
+    try{
+      var r = await Promise.all([ sb.from(T_CAT).select("*").order("orden"), sb.from(T_PU).select("*").order("orden") ]);
+      if(r[0].error || r[1].error){ console.warn("Categorías de puestos:", r[0].error||r[1].error); return; }
+      S.cats = r[0].data||[]; S.puList = r[1].data||[]; S.pu = {}; S.puList.forEach(function(x){ S.pu[x.puesto] = x.categoria_id; });
+      S.loaded = true; syncSelect(); try{ window.renderEmpleadosTable(); }catch(e){}
+    }catch(e){ console.warn(e); }
+  }
+  function catDe(puesto){ var id = S.pu[puesto]; if(!id) return null; for(var i=0;i<S.cats.length;i++) if(S.cats[i].id===id) return S.cats[i]; return null; }
+  function catIdx(e){ var c = e ? catDe(e.puesto) : null; return c ? S.cats.indexOf(c) : 9999; }
+  function agrupa(){ return S.loaded && !sueldosSortField; }
+  // Puestos conocidos: los de la tabla + los del formulario + los que usan los empleados
+  function todosLosPuestos(){
+    var set = {}, out = [];
+    var add = function(p){ p = String(p||"").trim(); if(!p || set[nrm(p)]) return; set[nrm(p)] = 1; out.push(p); };
+    S.puList.forEach(function(x){ add(x.puesto); });
+    var sel = document.getElementById("ePuesto"); if(sel) [].forEach.call(sel.querySelectorAll("option"), function(o){ if(o.value) add(o.value); });
+    (typeof empleadosTodos!=="undefined" && empleadosTodos && empleadosTodos.length ? empleadosTodos : empleadosCache).forEach(function(e){ add(e.puesto); });
+    return out;
+  }
+  // Formulario del empleado: puestos agrupados por categoría
+  function syncSelect(){
+    var sel = document.getElementById("ePuesto"); if(!sel) return;
+    var v = sel.value, L = todosLosPuestos(), por = {}, sin = [];
+    L.forEach(function(p){ var c = catDe(p); if(c) (por[c.id]=por[c.id]||[]).push(p); else sin.push(p); });
+    var ord = function(a,b){ var ia = S.puList.findIndex(function(x){ return x.puesto===a; }), ib = S.puList.findIndex(function(x){ return x.puesto===b; }); if(ia<0) ia = 9999; if(ib<0) ib = 9999; return (ia-ib) || a.localeCompare(b,"es"); };
+    var h = '<option value="">Seleccionar…</option>';
+    S.cats.forEach(function(c){ if(por[c.id]) h += '<optgroup label="'+esc(c.nombre)+'">' + por[c.id].sort(ord).map(function(p){ return '<option>'+esc(p)+'</option>'; }).join("") + '</optgroup>'; });
+    if(sin.length) h += '<optgroup label="Sin categoría">' + sin.sort(ord).map(function(p){ return '<option>'+esc(p)+'</option>'; }).join("") + '</optgroup>';
+    sel.innerHTML = h; sel.value = v;
+  }
+
+  /* ---------------- planilla agrupada ---------------- */
+  var _gs = window.getSortedEmpleados;
+  window.getSortedEmpleados = function(){
+    var L = _gs.apply(this, arguments);
+    if(!agrupa() || (modoActualizacionSueldos && sueldosFrozenOrder)) return L;
+    return L.map(function(e,i){ return { e:e, i:i }; }).sort(function(a,b){ return (catIdx(a.e)-catIdx(b.e)) || (a.i-b.i); }).map(function(x){ return x.e; });
+  };
+  function agrupar(){
+    var body = document.getElementById("empleadosBody"); if(!body) return;
+    var g = document.getElementById("empBracketGutter"); if(g) g.innerHTML = "";
+    if(body.querySelector(".emp-grp") || !agrupa()) return;
+    var mapa = {}; try{ window.getSortedEmpleados().forEach(function(e){ mapa[e.id] = e; }); }catch(e){}
+    var rows = [].filter.call(body.children, function(r){ return r.classList.contains("row"); }); if(!rows.length) return;
+    var cur = null, wrap = null, frag = document.createDocumentFragment();
+    rows.forEach(function(row){
+      var e = mapa[row.dataset.id] || empleadosCache.find(function(x){ return x.id===row.dataset.id; });
+      var c = e ? catDe(e.puesto) : null, k = c ? c.id : "_";
+      if(!wrap || k!==cur){
+        cur = k; wrap = document.createElement("div"); wrap.className = "emp-grp" + (c ? "" : " sin"); wrap.dataset.cat = k;
+        if(c){ wrap.style.setProperty("--c", c.color || "#5977D2"); wrap.innerHTML = '<div class="emp-grp-lbl" title="'+esc(c.nombre)+'"><span>'+esc(c.nombre)+'</span></div>'; }
+        frag.appendChild(wrap);
+      }
+      wrap.appendChild(row);
+    });
+    body.appendChild(frag);
+  }
+  window.renderEmpBrackets = agrupar;
+  var _render = window.renderEmpleadosTable;
+  window.renderEmpleadosTable = function(){ var r = _render.apply(this, arguments); try{ agrupar(); }catch(e){ console.warn(e); } return r; };
+  // Reordenar a mano solo dentro de la misma categoría
+  if(typeof reordenarEmpleadoManual==="function"){
+    var _ro = reordenarEmpleadoManual;
+    window.reordenarEmpleadoManual = function(fromId, toId){
+      if(agrupa()){
+        var m = {}; window.getSortedEmpleados().forEach(function(e){ m[e.id] = e; });
+        var a = m[fromId] ? catDe(m[fromId].puesto) : null, b = m[toId] ? catDe(m[toId].puesto) : null;
+        if((a&&a.id) !== (b&&b.id)){ toast("Solo se puede reordenar dentro de la misma categoría. Para pasarlo a otra, cambiá su puesto o la categoría del puesto en “Categorías de puestos”.", "warn"); return; }
+      }
+      return _ro.apply(this, arguments);
+    };
+  }
+
+  /* ---------------- modal: Categorías de puestos ---------------- */
+  var M = null; // borrador { cats:[{id,nombre,color,_new}], pu:{puesto:catId|null}, puestos:[...], nuevosPu:[], borradosPu:{} }
+  function nEmp(p){ return empleadosCache.filter(function(e){ return e.puesto===p; }).length; }
+  function abrir(){
+    if(!S.loaded){ toast("Cargando categorías…"); cargar(); return; }
+    M = { cats:S.cats.map(function(c){ return { id:c.id, nombre:c.nombre, color:c.color }; }), pu:{}, puestos:todosLosPuestos(), borradosPu:{} };
+    M.puestos.forEach(function(p){ M.pu[p] = S.pu[p] || ""; });
+    var ov = document.createElement("div"); ov.className = "ar-modal-ov"; ov.id = "scatModal";
+    ov.innerHTML = '<div class="ar-modal scat-modal" role="dialog" aria-modal="true"><div class="ar-modal-h"><div><h3>Categorías de puestos</h3><p>Agrupan la Cuadrilla de personal: cada categoría es un recuadro, en el orden de esta lista. Asigná cada puesto a una categoría.</p></div><button type="button" class="ar-x" data-x title="Cerrar">'+ICO.x+'</button></div>'
+      + '<div class="ar-modal-b"><div class="scat-cols"><section><h5>Categorías</h5><div id="scatCats"></div><button type="button" class="scat-add" id="scatAddCat">'+ICO.plus+'Nueva categoría</button></section>'
+      + '<section><h5>Puestos</h5><div id="scatPu"></div><div class="scat-newpu"><input type="text" id="scatPuNew" placeholder="Nuevo puesto…" maxlength="60"><button type="button" class="scat-add" id="scatAddPu">'+ICO.plus+'Agregar puesto</button></div></section></div></div>'
+      + '<div class="ar-modal-f"><span class="hint">Los cambios se aplican para todos los usuarios.</span><button type="button" class="btn-ghost" data-x>Cancelar</button><button type="button" class="btn-primary" id="scatOk">Guardar</button></div></div>';
+    var onEsc = function(e){ if(e.key==="Escape" && !e.target.closest("input")) cerrar(); };
+    var cerrar = function(){ ov.remove(); document.removeEventListener("keydown", onEsc); M = null; };
+    document.addEventListener("keydown", onEsc);
+    ov.addEventListener("mousedown", function(e){ if(e.target===ov) cerrar(); });
+    document.body.appendChild(ov);
+    ov.querySelectorAll("[data-x]").forEach(function(b){ b.onclick = cerrar; });
+    ov.querySelector("#scatAddCat").onclick = function(){ leer(); var usados = M.cats.map(function(c){ return c.color; }); var col = COLORES.find(function(c){ return usados.indexOf(c)<0; }) || COLORES[M.cats.length % COLORES.length]; M.cats.push({ id:"new_"+Date.now(), nombre:"", color:col, _new:true }); pintar(); var ins = ov.querySelectorAll(".scat-nm"); if(ins.length) ins[ins.length-1].focus(); };
+    var addPu = function(){ leer(); var i = ov.querySelector("#scatPuNew"), v = i.value.trim().replace(/\s+/g," "); if(!v) return; if(M.puestos.some(function(p){ return nrm(p)===nrm(v); })){ toast("Ese puesto ya existe","warn"); return; } M.puestos.push(v); M.pu[v] = ""; delete M.borradosPu[v]; i.value = ""; pintar(); };
+    ov.querySelector("#scatAddPu").onclick = addPu;
+    ov.querySelector("#scatPuNew").onkeydown = function(e){ if(e.key==="Enter"){ e.preventDefault(); addPu(); } };
+    ov.querySelector("#scatOk").onclick = function(ev){ leer(); guardar(ev.target, cerrar); };
+    pintar();
+  }
+  function leer(){
+    var ov = document.getElementById("scatModal"); if(!ov || !M) return;
+    ov.querySelectorAll(".scat-cat").forEach(function(r){ var c = M.cats.find(function(x){ return x.id===r.dataset.id; }); if(!c) return; c.nombre = r.querySelector(".scat-nm").value.trim().replace(/\s+/g," "); c.color = r.querySelector(".scat-col").value; });
+    ov.querySelectorAll(".scat-pu").forEach(function(r){ M.pu[r.dataset.p] = r.querySelector("select").value; });
+  }
+  function pintar(){
+    var ov = document.getElementById("scatModal"); if(!ov) return;
+    var cnt = {}; M.puestos.forEach(function(p){ var k = M.pu[p]; if(k) cnt[k] = (cnt[k]||0) + 1; });
+    ov.querySelector("#scatCats").innerHTML = M.cats.length ? M.cats.map(function(c,i){
+      return '<div class="scat-cat" data-id="'+esc(c.id)+'" style="--c:'+esc(c.color)+'"><span class="scat-grip" title="Arrastrá para reordenar">'+ICO.grip+'</span><input class="scat-pos" value="'+(i+1)+'" inputmode="numeric" title="Posición: escribí el número y Enter">'
+        + '<label class="scat-sw" title="Color del recuadro"><input type="color" class="scat-col" value="'+esc(c.color)+'"></label><input class="scat-nm" value="'+esc(c.nombre)+'" placeholder="Nombre de la categoría" maxlength="30">'
+        + '<span class="scat-n">'+(cnt[c.id]||0)+' puesto'+((cnt[c.id]||0)===1?"":"s")+'</span><button type="button" class="scat-del" data-del="'+esc(c.id)+'" title="Eliminar categoría (sus puestos quedan sin categoría)">'+ICO.del+'</button></div>';
+    }).join("") : '<div class="scat-empty">Todavía no hay categorías.</div>';
+    var opts = function(sel){ return '<option value="">Sin categoría</option>' + M.cats.map(function(c){ return '<option value="'+esc(c.id)+'"'+(sel===c.id?" selected":"")+'>'+esc(c.nombre||"(sin nombre)")+'</option>'; }).join(""); };
+    var ordP = M.puestos.slice().sort(function(a,b){ var ca = M.cats.findIndex(function(c){ return c.id===M.pu[a]; }), cb = M.cats.findIndex(function(c){ return c.id===M.pu[b]; }); if(ca<0) ca = 999; if(cb<0) cb = 999; return (ca-cb) || a.localeCompare(b,"es"); });
+    ov.querySelector("#scatPu").innerHTML = ordP.map(function(p){
+      var n = nEmp(p), c = M.cats.find(function(x){ return x.id===M.pu[p]; });
+      return '<div class="scat-pu" data-p="'+esc(p)+'"><span class="scat-dot" style="background:'+esc(c?c.color:"#D5D8E3")+'"></span><span class="scat-pn">'+esc(p)+'</span><span class="scat-n">'+(n?n+" empleado"+(n===1?"":"s"):"sin empleados")+'</span>'
+        + '<select>'+opts(M.pu[p])+'</select>'
+        + (n ? '<span class="scat-del off" title="No se puede eliminar: hay empleados con este puesto">'+ICO.del+'</span>' : '<button type="button" class="scat-del" data-delpu="'+esc(p)+'" title="Eliminar puesto">'+ICO.del+'</button>') + '</div>';
+    }).join("");
+    ov.querySelectorAll("[data-del]").forEach(function(b){ b.onclick = function(){ leer(); var id = b.dataset.del; M.cats = M.cats.filter(function(c){ return c.id!==id; }); Object.keys(M.pu).forEach(function(p){ if(M.pu[p]===id) M.pu[p] = ""; }); pintar(); }; });
+    ov.querySelectorAll("[data-delpu]").forEach(function(b){ b.onclick = function(){ leer(); var p = b.dataset.delpu; M.puestos = M.puestos.filter(function(x){ return x!==p; }); delete M.pu[p]; M.borradosPu[p] = 1; pintar(); }; });
+    ov.querySelectorAll(".scat-pu select").forEach(function(s){ s.onchange = function(){ leer(); pintar(); }; });
+    ov.querySelectorAll(".scat-nm").forEach(function(i){ i.oninput = function(){ var id = i.closest(".scat-cat").dataset.id; ov.querySelectorAll('.scat-pu select option[value="'+id+'"]').forEach(function(o){ o.textContent = i.value.trim() || "(sin nombre)"; }); }; });
+    ov.querySelectorAll(".scat-col").forEach(function(i){ i.oninput = function(){ var r = i.closest(".scat-cat"); r.style.setProperty("--c", i.value); }; i.onchange = function(){ leer(); pintar(); }; });
+    // orden de categorías: arrastrando o con el número
+    var mover = function(id, n){ leer(); var c = M.cats.find(function(x){ return x.id===id; }); if(!c) return; var L = M.cats.filter(function(x){ return x.id!==id; }); n = Math.max(1, Math.min(M.cats.length, n)); L.splice(n-1, 0, c); M.cats = L; pintar(); };
+    var dragId = null;
+    ov.querySelectorAll(".scat-cat").forEach(function(r){
+      var g = r.querySelector(".scat-grip"); g.addEventListener("mousedown", function(){ r.draggable = true; });
+      r.addEventListener("dragstart", function(e){ dragId = r.dataset.id; r.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", dragId); }catch(_){} });
+      r.addEventListener("dragend", function(){ r.draggable = false; dragId = null; ov.querySelectorAll(".scat-cat").forEach(function(x){ x.classList.remove("dragging","drop-before","drop-after"); }); });
+      r.addEventListener("dragover", function(e){ if(!dragId || dragId===r.dataset.id) return; e.preventDefault(); var b = r.getBoundingClientRect(), af = (e.clientY-b.top) > b.height/2; r.classList.toggle("drop-after", af); r.classList.toggle("drop-before", !af); });
+      r.addEventListener("dragleave", function(e){ if(!r.contains(e.relatedTarget)) r.classList.remove("drop-before","drop-after"); });
+      r.addEventListener("drop", function(e){ e.preventDefault(); if(!dragId) return; var af = r.classList.contains("drop-after"), idx = M.cats.findIndex(function(x){ return x.id===r.dataset.id; }), from = M.cats.findIndex(function(x){ return x.id===dragId; }); var n = idx + 1 + (af?1:0); if(from < idx) n--; var id = dragId; dragId = null; mover(id, n); });
+      var pi = r.querySelector(".scat-pos"); pi.addEventListener("focus", function(){ pi.select(); });
+      pi.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); var n = parseInt(pi.value,10); if(isFinite(n)) mover(r.dataset.id, n); } });
+      pi.addEventListener("change", function(){ var n = parseInt(pi.value,10); if(isFinite(n)) mover(r.dataset.id, n); });
+    });
+  }
+  async function guardar(btn, cerrar){
+    // validaciones
+    var vistos = {};
+    for(var i=0;i<M.cats.length;i++){ var c = M.cats[i]; if(!c.nombre){ toast("Poné un nombre a cada categoría","warn"); return; } if(vistos[nrm(c.nombre)]){ toast("Hay dos categorías llamadas “"+c.nombre+"”","warn"); return; } vistos[nrm(c.nombre)] = 1; }
+    btn.disabled = true;
+    try{
+      var idMap = {}, err = null;
+      // categorías: alta / modificación con su orden
+      for(var j=0;j<M.cats.length;j++){
+        var k = M.cats[j], row = { nombre:k.nombre, color:k.color, orden:j+1 };
+        if(k._new){ var r1 = await sb.from(T_CAT).insert(row).select("id").single(); if(r1.error){ err = r1.error; break; } idMap[k.id] = r1.data.id; }
+        else { var r2 = await sb.from(T_CAT).update(row).eq("id", k.id); if(r2.error){ err = r2.error; break; } idMap[k.id] = k.id; }
+      }
+      if(!err){ // puestos
+        var filas = M.puestos.map(function(p, n){ var cid = M.pu[p] ? (idMap[M.pu[p]] || null) : null; return { puesto:p, categoria_id:cid, orden:n+1 }; });
+        if(filas.length){ var r3 = await sb.from(T_PU).upsert(filas, { onConflict:"puesto" }); if(r3.error) err = r3.error; }
+      }
+      if(!err){ var bp = Object.keys(M.borradosPu).filter(function(p){ return S.pu.hasOwnProperty(p); }); if(bp.length){ var r4 = await sb.from(T_PU).delete().in("puesto", bp); if(r4.error) err = r4.error; } }
+      if(!err){ // categorías eliminadas (sus puestos quedan sin categoría por la clave foránea)
+        var vivos = M.cats.map(function(c){ return idMap[c.id]; }), borrar = S.cats.filter(function(c){ return vivos.indexOf(c.id)<0; }).map(function(c){ return c.id; });
+        if(borrar.length){ var r5 = await sb.from(T_CAT).delete().in("id", borrar); if(r5.error) err = r5.error; }
+      }
+      if(err){ toast("No se pudo guardar: "+(err.message||err), "warn"); btn.disabled = false; await cargar(); return; }
+      try{ if(typeof logHistorialSueldos==="function") logHistorialSueldos("Categorías de puestos", M.cats.map(function(c){ return c.nombre+": "+M.puestos.filter(function(p){ return M.pu[p]===c.id; }).join(", "); }).join(" · ")); }catch(e){}
+      cerrar(); await cargar(); toast("Categorías guardadas");
+    }catch(e){ toast("No se pudo guardar","warn"); btn.disabled = false; }
+  }
+  window.SCAT = { abrir:abrir, recargar:cargar };
+
   function init(){
-    var b = document.getElementById("empleadosBody"); if(!b || !window.ResizeObserver) return;
-    var t = 0; new ResizeObserver(function(){ cancelAnimationFrame(t); t = requestAnimationFrame(function(){ window.renderEmpBrackets(); }); }).observe(b);
+    var col = document.querySelector('#stabEsquema button[onclick^="toggleSueldosColumnPicker"]');
+    if(col && !document.getElementById("scatBtn")){
+      var b = document.createElement("button"); b.type = "button"; b.className = "btn-ghost"; b.id = "scatBtn"; b.title = "Agrupá los puestos de trabajo en categorías (Cocina, Salón, Admin…) y editalas";
+      b.innerHTML = ICO.tag + "Categorías de puestos"; b.onclick = abrir; col.parentNode.insertBefore(b, col);
+    }
+    var tryLoad = function(n){ if(typeof sb!=="undefined" && sb && typeof currentPerfil!=="undefined" && currentPerfil) cargar(); else if(n<60) setTimeout(function(){ tryLoad(n+1); }, 500); };
+    tryLoad(0);
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
