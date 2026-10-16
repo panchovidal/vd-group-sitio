@@ -1942,6 +1942,11 @@
   .ar-legend span{display:inline-flex;align-items:center;gap:7px;}
   i.m-circle,i.m-square,i.m-diamond{display:inline-block;width:9px;height:9px;flex-shrink:0;}
   i.m-circle{border-radius:50%;} i.m-square{border-radius:2px;} i.m-diamond{transform:rotate(45deg) scale(.85);border-radius:1px;}
+  .ar-mes-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .ar-mes-pill{padding:4px 10px;border-radius:14px;font-size:10.5px;font-weight:700;background:#F1F2FA;color:var(--text-3);border:1px solid transparent;cursor:pointer;opacity:.55;}
+  .ar-mes-pill.active{opacity:1;background:rgba(89,119,210,0.14);color:var(--blue);border-color:rgba(89,119,210,0.3);}
+  .ar-mes-pill.all{font-weight:800;}
+  .ar-mes-pill.all.active{background:#EEF0F7;color:var(--text-2);border-color:var(--border);}
   .ar-vals{margin-top:6px;}
   .ar-vals summary{font-size:11.5px;font-weight:700;color:var(--sky);cursor:pointer;list-style:none;display:inline-block;}
   .ar-vals summary::-webkit-details-marker{display:none;}
@@ -2520,8 +2525,6 @@
   .li-card.drop-before{box-shadow:0 -3px 0 0 var(--sky)}
   .li-card.drop-after{box-shadow:0 3px 0 0 var(--sky)}
   #liChips .cx-chip[draggable=true]{cursor:grab}
-  .li-modal .li-del{color:#B3261E;border-color:#E3B3AF}
-  .li-modal .li-del:hover{background:#FBE9E7}
   /* ===== Arreglos de grillas (15/10/2026) ===== */
   /* Caja Mayor: tabla con encabezado fijo + bordes "separados" (con border-collapse:collapse el navegador
      desfasa las líneas entre filas al hacer scroll o con zoom) y columnas que entran en el recuadro. */
@@ -8832,7 +8835,9 @@ async function vFetchIngestaRango(tipo){
   // por nombre de columna (no por posición) para blindarse ante un
   // reordenamiento de columnas entre envíos de ATC.
   const headerCanon = data[data.length-1].header || [];
-  const idxFechaCanon = vFindColIndex(headerCanon, ["Fecha de movimiento"]);
+  // "Fecha de movimiento" (Movimientos de caja / Compras-Ventas) o, si el tipo
+  // no la tiene, "Fecha" (reservas/cancelaciones — fix 16/10/2026, ver abajo).
+  const idxFechaCanon = vFindColIndex(headerCanon, ["Fecha de movimiento","Fecha"]);
   // Dedup por día real (25/08/2026, reporte de Pancho: Caja Mayor mostraba
   // retiros duplicados y diferencias de caja inventadas para el 18-25/08).
   // Causa: acá se juntan TODAS las ingestas "ok" de un tipo, y puede haber más
@@ -8843,9 +8848,25 @@ async function vFetchIngestaRango(tipo){
   // "Fecha de movimiento"), se usan únicamente las filas de la ingesta más
   // reciente que lo cubra — se descartan las de ese mismo día en ingestas más
   // viejas, para no duplicar ni mezclar dos versiones de un mismo día. Si el
-  // tipo de reporte no tiene columna "Fecha de movimiento" (idxFechaCanon===-1)
-  // esto no aplica y se listan todas las filas de todas las ingestas, como
-  // antes.
+  // tipo de reporte no tiene ninguna de las dos columnas de fecha
+  // (idxFechaCanon===-1) esto no aplica y se listan todas las filas de todas
+  // las ingestas, como antes.
+  //
+  // Fix 16/10/2026 (reporte de Pancho, datos reales de reservas del
+  // 17-18/09/2026): reservas y cancelaciones no tienen "Fecha de movimiento"
+  // (solo "Fecha"), así que hasta ahora idxFechaCanon daba -1 para estos dos
+  // tipos y el dedup de arriba quedaba desactivado — cualquier re-envío de
+  // ATC que solapara fechas con un envío anterior duplicaba esas reservas
+  // (y sus horas/cancelaciones) en vez de reemplazarlas. Pasó en vivo: la
+  // ingesta de reservas recibida el 29/09 y la recibida el 16/10 cubren las
+  // dos todo septiembre completo, con 1107 de 1135 reservas repetidas por
+  // mismo ID_reserva — la tarjeta de % de ocupación venía sumando casi todas
+  // las horas de septiembre dos veces (de ahí los % pegados a 100% y los
+  // valores sin sentido que reportó Pancho para el 17/09). Ahora "Fecha"
+  // entra como columna de dedup válida igual que "Fecha de movimiento", así
+  // que factor_ocupacion/reporte_cancelaciones quedan protegidos con el
+  // mismo criterio "la ingesta más reciente gana por día" que ya tenían
+  // Movimientos de caja/Compras-Ventas.
   const diasYaCubiertos = new Set();
   const rowsOut = [];
   for (let i = data.length - 1; i >= 0; i--){
@@ -8853,7 +8874,7 @@ async function vFetchIngestaRango(tipo){
     const h = ing.header || [];
     const mismoOrden = h.length===headerCanon.length && h.every((c,ci)=> (c||"").toString().trim()===((headerCanon[ci]||"").toString().trim()));
     const idxMap = mismoOrden ? null : headerCanon.map(c => h.findIndex(hc => (hc||"").toString().trim().toLowerCase()===(c||"").toString().trim().toLowerCase()));
-    const idxFechaIng = mismoOrden ? idxFechaCanon : vFindColIndex(h, ["Fecha de movimiento"]);
+    const idxFechaIng = mismoOrden ? idxFechaCanon : vFindColIndex(h, ["Fecha de movimiento","Fecha"]);
     // Los días que cubre ESTA ingesta se van juntando acá aparte y recién se
     // suman a diasYaCubiertos al terminar de procesarla entera (no fila por
     // fila): si se sumaran de a una fila, la primera fila de un día "tapaba"
@@ -9683,7 +9704,8 @@ const arState = {
   show:{ er:true, comp:true, evo:true, div:true },
   open:new Set(), loaded:false, loading:null,
   ordenes:[], provTipo:new Map(), mesesLiq:null, socios:[], ventas:null, ventasErr:null, gastosErr:null,
-  calc:null
+  calc:null,
+  mesesOcultos:new Set() // meses (clave = "desde" del mes, YYYY-MM-01) ocultos en el gráfico "Mes a mes" de Evolución de rendimientos — pedido de Pancho (16/10/2026)
 };
 
 /* ---------- utilidades de fecha (ISO "YYYY-MM-DD", sin husos horarios) ---------- */
@@ -10069,6 +10091,83 @@ function arLineChart(points, opts){
   if(o.interactive){ (window.__arCharts = window.__arCharts || {})[o.id] = { points, x:points.map((p,i)=>x(i)), w:o.w }; }
   return `<div class="ar-ch" id="${o.id}">${svg}${o.interactive?`<div class="ar-ch-tip" id="${o.id}_tip"></div>`:""}</div>`;
 }
+/* Gráfico de barras agrupadas (ventas/gastos/utilidad) — usado en "Semana a semana" de
+   Evolución de rendimientos a pedido de Pancho (16/10/2026, antes era de líneas).
+   Reutiliza la misma escala/grid/ejes que arLineChart y el tooltip genérico arChartHover
+   (ambos dependen sólo de {points,x,w} en window.__arCharts, no de cómo se dibuja la marca). */
+function arBarChart(points, opts){
+  const o = Object.assign({ w:560, h:250, interactive:true, id:"c"+Math.random().toString(36).slice(2,8) }, opts||{});
+  const n = points.length;
+  if(!n) return `<div class="ar-empty">Sin datos para graficar.</div>`;
+  const padL = 58, padR = 62, padT = 16, padB = 40;
+  const W = o.w - padL - padR, H = o.h - padT - padB;
+  const vals = points.flatMap(p=>[p.ventas, p.gastos, p.util]);
+  let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+  if(hi===lo) hi = lo + 1;
+  const rawStep = (hi-lo)/4, mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const step = [1,2,2.5,5,10].map(k=>k*mag).find(s=>s>=rawStep) || 10*mag;
+  lo = Math.floor(lo/step)*step; hi = Math.ceil(hi/step)*step;
+  const y = v => padT + H - (v-lo)/(hi-lo)*H;
+  const y0 = y(0);
+  const groupW = W/n;
+  const xc = i => padL + (i+0.5)*groupW; // centro del grupo (para hover y etiquetas)
+  let g = "";
+  for(let t=lo; t<=hi+1e-6; t+=step){
+    const yy = y(t).toFixed(1);
+    g += `<line x1="${padL}" x2="${padL+W}" y1="${yy}" y2="${yy}" class="${Math.abs(t)<1e-6?"ar-ch-zero":"ar-ch-grid"}"/>`
+      + `<text x="${padL-8}" y="${yy}" class="ar-ch-ytick" text-anchor="end" dominant-baseline="middle">${arShort(t)}</text>`;
+  }
+  const every = Math.ceil(n/12);
+  points.forEach((p,i)=>{
+    if(i%every && i!==n-1) return;
+    g += `<text x="${xc(i).toFixed(1)}" y="${padT+H+16}" class="ar-ch-xtick" text-anchor="middle">${arEsc(p.lbl)}</text>`;
+    if(p.sub) g += `<text x="${xc(i).toFixed(1)}" y="${padT+H+29}" class="ar-ch-xsub" text-anchor="middle">${arEsc(p.sub)}</text>`;
+  });
+  // barras agrupadas (ventas, gastos, utilidad): ≤24px de ancho, 4px redondeado en la punta
+  // (el extremo lejos de la base), recto en la línea de cero — spec dataviz de marcas.
+  const keys = ["ventas","gastos","util"];
+  const gap = 2, maxBarW = 24;
+  const barW = Math.max(2, Math.min(maxBarW, (groupW*0.82 - gap*(keys.length-1)) / keys.length));
+  const totalW = barW*keys.length + gap*(keys.length-1);
+  const roundedBar = (x, yTop, yBase, w, creceHaciaArriba) => {
+    const h = Math.abs(yBase - yTop);
+    if(h < 0.5) return ""; // valor ≈ 0: sin barra visible
+    const r = Math.min(4, h/2, w/2);
+    const X = x.toFixed(1), X2 = (x+w).toFixed(1), Xr = (x+r).toFixed(1), X2r = (x+w-r).toFixed(1);
+    if(creceHaciaArriba){ // valor positivo: crece desde la base (cero) hacia arriba → redondeado arriba, recto en la base
+      const Yt = yTop.toFixed(1), Ytr = (yTop+r).toFixed(1), Yb = yBase.toFixed(1);
+      return `M${X} ${Yb} L${X} ${Ytr} Q${X} ${Yt} ${Xr} ${Yt} L${X2r} ${Yt} Q${X2} ${Yt} ${X2} ${Ytr} L${X2} ${Yb} Z`;
+    }
+    // valor negativo: crece desde la base (cero) hacia abajo → recto en la base, redondeado abajo
+    const Yt = yTop.toFixed(1), Yb = yBase.toFixed(1), Ybr = (yBase-r).toFixed(1);
+    return `M${X} ${Yt} L${X2} ${Yt} L${X2} ${Ybr} Q${X2} ${Yb} ${X2r} ${Yb} L${Xr} ${Yb} Q${X} ${Yb} ${X} ${Ybr} Z`;
+  };
+  points.forEach((p,i)=>{
+    const x0 = padL + i*groupW + (groupW-totalW)/2;
+    keys.forEach((k,ki)=>{
+      const v = p[k], yy = y(v), x = x0 + ki*(barW+gap);
+      const d = v>=0 ? roundedBar(x, yy, y0, barW, true) : roundedBar(x, y0, yy, barW, false);
+      if(d) g += `<path d="${d}" fill="${AR_COLORS[k]}"/>`;
+    });
+  });
+  g += `<line x1="${padL}" x2="${padL+W}" y1="${y0.toFixed(1)}" y2="${y0.toFixed(1)}" class="ar-ch-zero"/>`;
+  // etiqueta directa selectiva: valor en la punta de cada barra, sólo en el último grupo
+  {
+    const last = points[n-1], x0 = padL + (n-1)*groupW + (groupW-totalW)/2;
+    keys.forEach((k,ki)=>{
+      const v = last[k], yy = y(v), x = x0 + ki*(barW+gap) + barW/2;
+      const ly = v>=0 ? yy - 7 : yy + 14;
+      g += `<text x="${x.toFixed(1)}" y="${ly.toFixed(1)}" class="ar-ch-dl" text-anchor="middle">${arShort(v)}</text>`;
+    });
+  }
+  let hit = "";
+  if(o.interactive){
+    points.forEach((p,i)=>{ hit += `<rect class="ar-ch-hit" x="${(padL+i*groupW).toFixed(1)}" y="${padT}" width="${groupW.toFixed(1)}" height="${H}" data-i="${i}" onmouseenter="arChartHover('${o.id}',${i})" onmouseleave="arChartHover('${o.id}',-1)"/>`; });
+  }
+  const svg = `<svg viewBox="0 0 ${o.w} ${o.h}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${arEsc(o.aria||"Evolución de ventas, gastos y utilidad")}">${g}${hit}</svg>`;
+  if(o.interactive){ (window.__arCharts = window.__arCharts || {})[o.id] = { points, x:points.map((p,i)=>xc(i)), w:o.w }; }
+  return `<div class="ar-ch" id="${o.id}">${svg}${o.interactive?`<div class="ar-ch-tip" id="${o.id}_tip"></div>`:""}</div>`;
+}
 function arChartHover(id, i){
   const C = (window.__arCharts||{})[id], tip = document.getElementById(id+"_tip"), gl = document.getElementById(id+"_guide");
   if(!C || !tip) return;
@@ -10090,20 +10189,40 @@ function arLegend(){
 function arEvoTable(points){
   return `<table class="ar-tbl"><thead><tr><th class="l">Período</th><th>Ventas</th><th>Gastos</th><th>Utilidad</th><th>Margen</th></tr></thead><tbody>${points.map(p=>`<tr><td class="l"><b>${arEsc(p.lbl)}</b>${p.sub?` <span class="mut">${arEsc(p.sub)}</span>`:""}</td><td>${arMoney(p.ventas)}</td><td>${arMoney(p.gastos)}</td><td class="${p.util<0?"neg":""}"><b>${arMoney(p.util)}</b></td><td class="mut">${arPct(p.util,p.ventas)}</td></tr>`).join("")}</tbody></table>`;
 }
+function arMesPills(meses){
+  // Pastillas para elegir qué meses mostrar en "Mes a mes" — pedido de Pancho (16/10/2026).
+  // Clave = p.desde (primer día ISO del mes), consistente y estable entre renders.
+  const hayOcultos = meses.some(p=>arState.mesesOcultos.has(p.desde));
+  return `<div class="ar-mes-pills">
+    <span class="ar-mes-pill all${hayOcultos?"":" active"}" onclick="arMesesTodos()">Todos</span>
+    ${meses.map(p=>`<span class="ar-mes-pill${arState.mesesOcultos.has(p.desde)?"":" active"}" onclick="arToggleMes('${p.desde}')">${arEsc(p.lbl)}</span>`).join("")}
+  </div>`;
+}
+function arToggleMes(key){
+  if(arState.mesesOcultos.has(key)) arState.mesesOcultos.delete(key); else arState.mesesOcultos.add(key);
+  arRenderEvo(document.getElementById("arEvo"), arState.calc, false);
+}
+function arMesesTodos(){
+  arState.mesesOcultos.clear();
+  arRenderEvo(document.getElementById("arEvo"), arState.calc, false);
+}
 function arRenderEvo(el, c, print){
   if(!el) return;
   const w = print ? 680 : 560, h = print ? 230 : 250;
+  // El filtro de meses es sólo de lectura en pantalla; el PDF siempre muestra todo el historial.
+  const mesesVis = print ? c.meses : c.meses.filter(p=>!arState.mesesOcultos.has(p.desde));
   el.innerHTML = `
     <div class="ar-evo-grid">
       <div class="ar-evo">
         <div class="ar-evo-h"><div><h4>Semana a semana</h4><div class="sub">Semanas calendario (lunes a domingo) del período · total de cada semana</div></div></div>
-        ${arLineChart(c.semanas, { w, h, interactive:!print, aria:"Ventas, gastos y utilidad por semana" })}
+        ${arBarChart(c.semanas, { w, h, interactive:!print, aria:"Ventas, gastos y utilidad por semana" })}
         ${print ? arEvoTable(c.semanas) : `<details class="ar-vals"><summary>Ver valores</summary>${arEvoTable(c.semanas)}</details>`}
       </div>
       <div class="ar-evo">
         <div class="ar-evo-h"><div><h4>Mes a mes</h4><div class="sub">Todo el historial disponible · no depende del período elegido</div></div></div>
-        ${arLineChart(c.meses, { w, h, interactive:!print, aria:"Ventas, gastos y utilidad por mes" })}
-        ${print ? arEvoTable(c.meses) : `<details class="ar-vals"><summary>Ver valores</summary>${arEvoTable(c.meses)}</details>`}
+        ${print ? "" : arMesPills(c.meses)}
+        ${mesesVis.length ? arLineChart(mesesVis, { w, h, interactive:!print, aria:"Ventas, gastos y utilidad por mes" }) : `<div class="ar-empty">Seleccioná al menos un mes para graficar.</div>`}
+        ${print ? arEvoTable(c.meses) : `<details class="ar-vals"><summary>Ver valores</summary>${arEvoTable(mesesVis)}</details>`}
       </div>
     </div>
     ${arLegend()}`;
@@ -16573,7 +16692,7 @@ const SK_SITE = {
     const [conceptos, rubros, insumos, provs, semiCats, recetas, lineas, items, ordenes, ajustes] = await Promise.all([
       fetchAll("lf_conceptos","id,nombre"),
       fetchAll("lf_rubros","id,nombre,concepto_id"),
-      fetchAll("lf_costeo_insumos","id,nomenclatura,rubro_id,proveedor_id,unidad_medida,necesita_conversion,conversion_cantidad,conversion_unidad,factor_merma,costo_manual,usar_costo_manual"),
+      fetchAll("lf_costeo_insumos","id,nomenclatura,rubro_id,proveedor_id,unidad_medida,necesita_conversion,conversion_cantidad,conversion_unidad,factor_merma"),
       fetchAll("lf_proveedores","id,nombre"),
       fetchAll("lf_semi_categorias","id,nombre"),
       fetchAll("lf_recetas_items","id,tipo,nombre,concepto,porciones,porciones_unidad,semi_categoria_id,activo"),
@@ -16585,8 +16704,6 @@ const SK_SITE = {
     const provNom = {}; provs.forEach(p=>provNom[p.id]=p.nombre);
     const nrm = s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();
     const cuenta = {}; insumos.forEach(i=>{ const k=nrm(i.nomenclatura); cuenta[k]=(cuenta[k]||0)+1; });
-    // costo manual del insumo (vale para todas sus fichas con el mismo nombre)
-    const manualDe = {}; insumos.forEach(i=>{ if(i.usar_costo_manual && i.costo_manual!=null) manualDe[nrm(i.nomenclatura)] = Number(i.costo_manual); });
     const conv = {}; insumos.forEach(i=>{ conv[i.id] = (i.necesita_conversion && Number(i.conversion_cantidad)>0) ? Number(i.conversion_cantidad) : 1; });
     const ordById = {}; ordenes.forEach(o=>ordById[o.id]=o);
     const ajDe = {}; ajustes.forEach(a=>ajDe[a.orden_id] = { impuestos_generales:a.impuestos_generales||[], descuento_modo:a.descuento_modo||null, descuento_valor:a.descuento_valor!=null?a.descuento_valor:null });
@@ -16613,7 +16730,7 @@ const SK_SITE = {
         nombre: cuenta[nrm(i.nomenclatura)]>1 ? `${i.nomenclatura} (${provNom[i.proveedor_id]||"sin proveedor"})` : i.nomenclatura,
         rubro_id:i.rubro_id,
         unidad: (i.necesita_conversion && i.conversion_unidad) ? i.conversion_unidad : (i.unidad_medida||"un"),
-        merma: Number(i.factor_merma)||0, manual: manualDe[nrm(i.nomenclatura)]!=null ? manualDe[nrm(i.nomenclatura)] : null })),
+        merma: Number(i.factor_merma)||0 })),
       semiCats: semiCats.map(c=>({ id:c.id, nombre:c.nombre })),
       semis: recetas.filter(r=>r.tipo==="semielaborado").map(r=>({ id:r.id, nombre:r.nombre, cat_id:r.semi_categoria_id, rinde:Number(r.porciones)||1,
         unidad: /^kg$/i.test(r.porciones_unidad||"") ? "kg" : /^lts?$/i.test(r.porciones_unidad||"") ? "lts" : "porc" })),
@@ -16794,7 +16911,7 @@ function buildCatalog(){
   const cat = {}; B.cats.forEach(c=>cat[c.id]=c);
   const scat = {}; B.semiCats.forEach(c=>scat[c.id]=c);
   B.insumos.forEach(i=>{ const r=rub[i.rubro_id], c=r?cat[r.cat_id]:null;
-    S.items["i:"+i.id] = { k:"i:"+i.id, t:"i", id:i.id, nombre:i.nombre, u:i.unidad||"un", merma:i.merma||0, manual:(i.manual!=null&&isFinite(i.manual))?Number(i.manual):null,
+    S.items["i:"+i.id] = { k:"i:"+i.id, t:"i", id:i.id, nombre:i.nombre, u:i.unidad||"un", merma:i.merma||0,
       gT:"rubro", gId:r?r.id:"none", gN:r?r.nombre:"Sin rubro", cId:c?c.id:"none", cN:c?c.nombre:"Sin categoría" }; });
   B.semis.forEach(s=>{ const c=scat[s.cat_id];
     S.items["s:"+s.id] = { k:"s:"+s.id, t:"s", id:s.id, nombre:s.nombre, u:s.unidad||"porc", rinde:s.rinde||1, merma:0,
@@ -16808,8 +16925,6 @@ function buildLayers(){
   S.layersI = {};
   S.base.compras.forEach(c=>{ (S.layersI[c.insumo_id]=S.layersI[c.insumo_id]||[]).push({ fecha:c.fecha, qty:c.qty, unit:c.unit, prov:c.prov }); });
   Object.values(S.layersI).forEach(L=>L.sort(asc));
-  // Insumos con "usar costo manual" (16/10/2026): se valorizan al costo manual, tengan o no compras cargadas.
-  Object.values(S.items).forEach(it=>{ if(it.t==="i" && it.manual!=null){ const L=S.layersI[it.id]||(S.layersI[it.id]=[]); L.manual=it.manual; } });
   S.layersS = {};
   const ordF = {}; S.prodOrd.forEach(o=>ordF[o.id]=o.fecha);
   S.prodIt.forEach(it=>{ const f=ordF[it.orden_id]; if(!f) return;
@@ -16838,9 +16953,7 @@ function tree(t, pred){
    ===================================================================== */
 // costo por unidad del insumo a una fecha (última compra hasta esa fecha; si no hay, la primera posterior), con merma
 function insumoCostAt(insId, fecha){
-  const L = S.layersI[insId];
-  if(L && L.manual!=null){ const it0 = S.items["i:"+insId]; return L.manual*(1+((it0&&it0.merma)||0)/100); }
-  if(!L||!L.length) return null;
+  const L = S.layersI[insId]; if(!L||!L.length) return null;
   let c = null; for(const l of L){ if(l.fecha<=fecha) c=l; else break; } if(!c) c=L[0];
   const it = S.items["i:"+insId];
   return c.unit*(1+((it&&it.merma)||0)/100);
@@ -16876,7 +16989,6 @@ function explode(t, id, qty, acc, src, full, seen){
 function valuar(L, qty, antes){
   if(qty==null || !isNum(qty)) return { monto:null, capas:[] };
   if(Math.abs(qty)<1e-9) return { monto:0, capas:[] };
-  if(L && L.manual!=null) return { monto:qty*L.manual, capas:[{ f:null, q:Math.abs(qty), u:L.manual }], manual:true };
   const ok = (L||[]).filter(l=>isNum(l.unit) && l.qty>0);
   const prev = ok.filter(l=>l.fecha<antes);
   const list = prev.length ? prev.slice().reverse() : ok.slice();
@@ -16888,7 +17000,6 @@ function valuar(L, qty, antes){
 }
 // Costo de referencia: promedio ponderado de las capas del período; si no hay, la última anterior; si no, la primera.
 function costoRef(L, desde, hasta){
-  if(L && L.manual!=null) return L.manual;
   const ok = (L||[]).filter(l=>isNum(l.unit) && l.qty>0); if(!ok.length) return null;
   const en = ok.filter(l=>l.fecha>=desde && l.fecha<hasta);
   if(en.length){ const q=sum(en,l=>l.qty); return q>0 ? sum(en,l=>l.qty*l.unit)/q : en[en.length-1].unit; }
@@ -18711,14 +18822,13 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       + '<div class="li-sec"><h5>Proveedores</h5><table class="li-mt"><thead><tr><th class="l">Proveedor</th><th class="l">Presentación</th><th>Compra vigente</th><th>Costo de compra</th></tr></thead><tbody>'
       + otros.map(function(x){ var v = multi && !x.usar && (x.vigInsId ? x.vigInsId===x.insId : (x.vigProv && nrm(x.vigProv)===nrm(x.provNombre))); return '<tr><td class="l">'+esc(x.provNombre)+(v?' <span class="li-vig">vigente</span>':'')+'</td><td class="l">'+esc(x.pres)+'</td><td>'+(x.compraFecha?fD(x.compraFecha):'—')+'</td><td><b>'+m2(x.compra)+'</b></td></tr>'; }).join("") + '</tbody></table></div>'
       + '<div class="li-sec"><h5>Últimas compras</h5>'+(hist?'<table class="li-mt"><thead><tr><th class="l">Fecha factura</th><th class="l">Proveedor</th><th>$ por '+esc(r.unidad)+'</th></tr></thead><tbody>'+hist+'</tbody></table>':'<div class="ar-note">Sin compras cargadas.</div>')+'</div>'
-      + '</div><div class="ar-modal-f"><button type="button" class="btn-ghost" id="liMFicha" title="Nombre, rubro, proveedores y presentaciones">Editar ficha del insumo</button><button type="button" class="btn-ghost li-del" id="liMDel" title="'+(SK_SITE.pre==="lf"&&multi?"Elimina solo la ficha de este proveedor":"Elimina el insumo")+'">'+(SK_SITE.pre==="lf"&&multi?"Eliminar ficha de "+esc(r.provNombre):"Eliminar insumo")+'</button><span class="hint"></span><button type="button" class="btn-ghost" data-x>Cancelar</button><button type="button" class="btn-primary" id="liMOk">Guardar</button></div></div>';
+      + '</div><div class="ar-modal-f"><button type="button" class="btn-ghost" id="liMFicha" title="Nombre, rubro, proveedores y presentaciones">Editar ficha del insumo</button><span class="hint"></span><button type="button" class="btn-ghost" data-x>Cancelar</button><button type="button" class="btn-primary" id="liMOk">Guardar</button></div></div>';
     var onEsc = function(e){ if(e.key==="Escape") cerrar(); };
     var cerrar = function(){ ov.remove(); document.removeEventListener("keydown", onEsc); };
     document.addEventListener("keydown", onEsc);
     ov.addEventListener("mousedown", function(e){ if(e.target===ov) cerrar(); });
     document.body.appendChild(ov);
     ov.querySelectorAll("[data-x]").forEach(function(x){ x.onclick = cerrar; });
-    ov.querySelector("#liMDel").onclick = function(){ cerrar(); if(typeof cfgDeleteInsumo==="function"){ var go = function(){ cfgDeleteInsumo(r.insId); }; if(typeof cfgLoaded!=="undefined" && !cfgLoaded && typeof cfgLoadAll==="function") cfgLoadAll().then(go); else go(); } };
     ov.querySelector("#liMFicha").onclick = function(){ cerrar(); if(typeof window.cxEditarInsumo==="function") window.cxEditarInsumo(r.insId, r.provId); };
     ov.querySelector("#liMOk").onclick = async function(ev){
       var man = parse(ov.querySelector("#liMMan").value), mer = parse(ov.querySelector("#liMMer").value), usar = ov.querySelector("#liMUsar").checked;
