@@ -11450,7 +11450,7 @@ const SK_SITE = {
     const [conceptos, rubros, insumos, pres, semiCats, semis, arts, lineas, items, ordenes] = await Promise.all([
       fetchAll("cm_conceptos","id,nombre"),
       fetchAll("cm_rubros","id,nombre,concepto_id"),
-      fetchAll("cm_insumos","id,nombre,rubro_id,factor_merma"),
+      fetchAll("cm_insumos","id,nombre,rubro_id,factor_merma,costo_manual,usar_costo_manual"),
       fetchAll("cm_insumo_presentaciones","id,insumo_id,unidad,orden"),
       fetchAll("cm_semi_categorias","id,nombre"),
       fetchAll("cm_semielaborados","id,nombre,categoria_id,rinde,rinde_unidad"),
@@ -11465,7 +11465,7 @@ const SK_SITE = {
     return {
       cats: conceptos.map(c=>({ id:c.id, nombre:c.nombre })),
       rubros: rubros.map(r=>({ id:r.id, nombre:r.nombre, cat_id:r.concepto_id })),
-      insumos: insumos.map(i=>({ id:i.id, nombre:i.nombre, rubro_id:i.rubro_id, unidad:unidadDe[i.id]||"un", merma:Number(i.factor_merma)||0 })),
+      insumos: insumos.map(i=>({ id:i.id, nombre:i.nombre, rubro_id:i.rubro_id, unidad:unidadDe[i.id]||"un", merma:Number(i.factor_merma)||0, manual:(i.usar_costo_manual && i.costo_manual!=null) ? Number(i.costo_manual) : null })),
       semiCats: semiCats.map(c=>({ id:c.id, nombre:c.nombre })),
       semis: semis.map(s=>({ id:s.id, nombre:s.nombre, cat_id:s.categoria_id, rinde:Number(s.rinde)||1,
         unidad: s.rinde_unidad==="kg" ? "kg" : s.rinde_unidad==="lts" ? "lts" : "porc" })),
@@ -11649,7 +11649,7 @@ function buildCatalog(){
   const cat = {}; B.cats.forEach(c=>cat[c.id]=c);
   const scat = {}; B.semiCats.forEach(c=>scat[c.id]=c);
   B.insumos.forEach(i=>{ const r=rub[i.rubro_id], c=r?cat[r.cat_id]:null;
-    S.items["i:"+i.id] = { k:"i:"+i.id, t:"i", id:i.id, nombre:i.nombre, u:i.unidad||"un", merma:i.merma||0,
+    S.items["i:"+i.id] = { k:"i:"+i.id, t:"i", id:i.id, nombre:i.nombre, u:i.unidad||"un", merma:i.merma||0, manual:(i.manual!=null&&isFinite(i.manual))?Number(i.manual):null,
       gT:"rubro", gId:r?r.id:"none", gN:r?r.nombre:"Sin rubro", cId:c?c.id:"none", cN:c?c.nombre:"Sin categoría" }; });
   B.semis.forEach(s=>{ const c=scat[s.cat_id];
     S.items["s:"+s.id] = { k:"s:"+s.id, t:"s", id:s.id, nombre:s.nombre, u:s.unidad||"porc", rinde:s.rinde||1, merma:0,
@@ -11663,6 +11663,8 @@ function buildLayers(){
   S.layersI = {};
   S.base.compras.forEach(c=>{ (S.layersI[c.insumo_id]=S.layersI[c.insumo_id]||[]).push({ fecha:c.fecha, qty:c.qty, unit:c.unit, prov:c.prov }); });
   Object.values(S.layersI).forEach(L=>L.sort(asc));
+  // Insumos con "usar costo manual" (16/10/2026): se valorizan al costo manual, tengan o no compras cargadas.
+  Object.values(S.items).forEach(it=>{ if(it.t==="i" && it.manual!=null){ const L=S.layersI[it.id]||(S.layersI[it.id]=[]); L.manual=it.manual; } });
   S.layersS = {};
   const ordF = {}; S.prodOrd.forEach(o=>ordF[o.id]=o.fecha);
   S.prodIt.forEach(it=>{ const f=ordF[it.orden_id]; if(!f) return;
@@ -11691,7 +11693,9 @@ function tree(t, pred){
    ===================================================================== */
 // costo por unidad del insumo a una fecha (última compra hasta esa fecha; si no hay, la primera posterior), con merma
 function insumoCostAt(insId, fecha){
-  const L = S.layersI[insId]; if(!L||!L.length) return null;
+  const L = S.layersI[insId];
+  if(L && L.manual!=null){ const it0 = S.items["i:"+insId]; return L.manual*(1+((it0&&it0.merma)||0)/100); }
+  if(!L||!L.length) return null;
   let c = null; for(const l of L){ if(l.fecha<=fecha) c=l; else break; } if(!c) c=L[0];
   const it = S.items["i:"+insId];
   return c.unit*(1+((it&&it.merma)||0)/100);
@@ -11727,6 +11731,7 @@ function explode(t, id, qty, acc, src, full, seen){
 function valuar(L, qty, antes){
   if(qty==null || !isNum(qty)) return { monto:null, capas:[] };
   if(Math.abs(qty)<1e-9) return { monto:0, capas:[] };
+  if(L && L.manual!=null) return { monto:qty*L.manual, capas:[{ f:null, q:Math.abs(qty), u:L.manual }], manual:true };
   const ok = (L||[]).filter(l=>isNum(l.unit) && l.qty>0);
   const prev = ok.filter(l=>l.fecha<antes);
   const list = prev.length ? prev.slice().reverse() : ok.slice();
@@ -11738,6 +11743,7 @@ function valuar(L, qty, antes){
 }
 // Costo de referencia: promedio ponderado de las capas del período; si no hay, la última anterior; si no, la primera.
 function costoRef(L, desde, hasta){
+  if(L && L.manual!=null) return L.manual;
   const ok = (L||[]).filter(l=>isNum(l.unit) && l.qty>0); if(!ok.length) return null;
   const en = ok.filter(l=>l.fecha>=desde && l.fecha<hasta);
   if(en.length){ const q=sum(en,l=>l.qty); return q>0 ? sum(en,l=>l.qty*l.unit)/q : en[en.length-1].unit; }
