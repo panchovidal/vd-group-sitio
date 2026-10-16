@@ -2520,6 +2520,8 @@
   .li-card.drop-before{box-shadow:0 -3px 0 0 var(--sky)}
   .li-card.drop-after{box-shadow:0 3px 0 0 var(--sky)}
   #liChips .cx-chip[draggable=true]{cursor:grab}
+  .li-modal .li-del{color:#B3261E;border-color:#E3B3AF}
+  .li-modal .li-del:hover{background:#FBE9E7}
   /* ===== Arreglos de grillas (15/10/2026) ===== */
   /* Caja Mayor: tabla con encabezado fijo + bordes "separados" (con border-collapse:collapse el navegador
      desfasa las líneas entre filas al hacer scroll o con zoom) y columnas que entran en el recuadro. */
@@ -18701,13 +18703,14 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       + '<div class="li-sec"><h5>Proveedores</h5><table class="li-mt"><thead><tr><th class="l">Proveedor</th><th class="l">Presentación</th><th>Compra vigente</th><th>Costo de compra</th></tr></thead><tbody>'
       + otros.map(function(x){ var v = multi && !x.usar && (x.vigInsId ? x.vigInsId===x.insId : (x.vigProv && nrm(x.vigProv)===nrm(x.provNombre))); return '<tr><td class="l">'+esc(x.provNombre)+(v?' <span class="li-vig">vigente</span>':'')+'</td><td class="l">'+esc(x.pres)+'</td><td>'+(x.compraFecha?fD(x.compraFecha):'—')+'</td><td><b>'+m2(x.compra)+'</b></td></tr>'; }).join("") + '</tbody></table></div>'
       + '<div class="li-sec"><h5>Últimas compras</h5>'+(hist?'<table class="li-mt"><thead><tr><th class="l">Fecha factura</th><th class="l">Proveedor</th><th>$ por '+esc(r.unidad)+'</th></tr></thead><tbody>'+hist+'</tbody></table>':'<div class="ar-note">Sin compras cargadas.</div>')+'</div>'
-      + '</div><div class="ar-modal-f"><button type="button" class="btn-ghost" id="liMFicha" title="Nombre, rubro, proveedores y presentaciones">Editar ficha del insumo</button><span class="hint"></span><button type="button" class="btn-ghost" data-x>Cancelar</button><button type="button" class="btn-primary" id="liMOk">Guardar</button></div></div>';
+      + '</div><div class="ar-modal-f"><button type="button" class="btn-ghost" id="liMFicha" title="Nombre, rubro, proveedores y presentaciones">Editar ficha del insumo</button><button type="button" class="btn-ghost li-del" id="liMDel" title="'+(SK_SITE.pre==="lf"&&multi?"Elimina solo la ficha de este proveedor":"Elimina el insumo")+'">'+(SK_SITE.pre==="lf"&&multi?"Eliminar ficha de "+esc(r.provNombre):"Eliminar insumo")+'</button><span class="hint"></span><button type="button" class="btn-ghost" data-x>Cancelar</button><button type="button" class="btn-primary" id="liMOk">Guardar</button></div></div>';
     var onEsc = function(e){ if(e.key==="Escape") cerrar(); };
     var cerrar = function(){ ov.remove(); document.removeEventListener("keydown", onEsc); };
     document.addEventListener("keydown", onEsc);
     ov.addEventListener("mousedown", function(e){ if(e.target===ov) cerrar(); });
     document.body.appendChild(ov);
     ov.querySelectorAll("[data-x]").forEach(function(x){ x.onclick = cerrar; });
+    ov.querySelector("#liMDel").onclick = function(){ cerrar(); if(typeof cfgDeleteInsumo==="function"){ var go = function(){ cfgDeleteInsumo(r.insId); }; if(typeof cfgLoaded!=="undefined" && !cfgLoaded && typeof cfgLoadAll==="function") cfgLoadAll().then(go); else go(); } };
     ov.querySelector("#liMFicha").onclick = function(){ cerrar(); if(typeof window.cxEditarInsumo==="function") window.cxEditarInsumo(r.insId, r.provId); };
     ov.querySelector("#liMOk").onclick = async function(ev){
       var man = parse(ov.querySelector("#liMMan").value), mer = parse(ov.querySelector("#liMMer").value), usar = ov.querySelector("#liMUsar").checked;
