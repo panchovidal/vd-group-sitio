@@ -18983,6 +18983,202 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
+/* =====================================================================
+   INSUMOS: la categoría y el rubro los define el INSUMO (pedido de Pancho, 16/10/2026).
+   Antes, al crear un insumo se elegía primero el proveedor y la categoría/rubro salían de él.
+   Ahora:  1) nombre  2) categoría › rubro (cualquiera)  3) proveedores (cualquiera, sin importar su
+   rubro; primero aparecen los que ya trabajan en ese rubro).
+   Al guardar, si un proveedor todavía no figuraba en ese rubro, se lo suma (proveedor ↔ rubro), así
+   en Proveedores y en Pagos el proveedor aparece en todos los rubros de los insumos que entrega.
+   ===================================================================== */
+(function(){
+  if(typeof SK_SITE==="undefined" || typeof cfgOpenInsumoForm!=="function") return;
+  var PRE = SK_SITE.pre, T_LINK = PRE+"_proveedor_rubros";
+  // Suma los vínculos proveedor ↔ rubro que falten
+  async function vincular(provIds, rubroId){
+    if(!rubroId) return;
+    var falta = (provIds||[]).filter(function(p){ return p && !cfgData.links.some(function(l){ return l.proveedor_id===p && l.rubro_id===rubroId; }); });
+    if(!falta.length) return;
+    var r = await sb.from(T_LINK).insert(falta.map(function(p){ return { proveedor_id:p, rubro_id:rubroId }; }));
+    if(r.error){ console.warn("vínculo proveedor-rubro:", r.error); return; }
+    falta.forEach(function(p){ cfgData.links.push({ proveedor_id:p, rubro_id:rubroId }); });
+    try{ var rb = cfgRub("proveedores", rubroId); logHistorialConfig("Sumó proveedores a un rubro", (rb?rb.nombre:"")+": "+falta.map(function(p){ return (cfgProv(p)||{}).nombre||""; }).join(", ")+" (por los insumos que entrega)"); }catch(e){}
+  }
+  window.cfgVincularProvRubro = vincular;
+
+  /* ================= CHE MONO ================= */
+  if(PRE==="cm"){
+    // Categoría y rubro siempre a mano (no dependen del proveedor)
+    window.cfgInsToggleSinProv = function(on, selRubro){
+      if(!cfgPS) return;
+      var prevRub = selRubro !== undefined ? selRubro : ((document.getElementById("cfgFRub")||{}).value || "");
+      cfgPS.sinProv = !!on;
+      var w = document.getElementById("cfgPvWrap"); if(w) w.style.display = on ? "none" : "";
+      var b = document.getElementById("cfgSinProvBox"); if(b) b.classList.toggle("on", !!on);
+      var host = document.getElementById("cfgClasif");
+      if(host && !document.getElementById("cfgFCat")){
+        var D = cfgData.proveedores;
+        var cats = D.cats.filter(function(c){ return D.rubros.some(function(r){ return r.catId===c.id; }); }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+        var catSel = prevRub ? (cfgRub("proveedores", prevRub)||{}).catId : "";
+        host.innerHTML = '<div class="field" id="cfgFldCat"><label>Categoría</label><select id="cfgFCat" onchange="cfgInsFillManual(\'\')">'+(catSel?"":'<option value="">Elegí…</option>')+cats.map(function(c){ return '<option value="'+c.id+'"'+(c.id===catSel?" selected":"")+'>'+cfgEsc(c.nombre)+'</option>'; }).join("")+'</select></div>'
+          + '<div class="field" id="cfgFldRub"><label>Rubro</label><select id="cfgFRub" onchange="cfgInsOnRub()"></select></div>';
+        cfgInsFillManual(prevRub);
+      }
+      cfgHideErr();
+    };
+    window.cfgInsFillRubros = function(){ /* el rubro lo define el insumo, no el proveedor */ };
+    var _open = cfgOpenInsumoForm;
+    window.cfgOpenInsumoForm = function(id, presetRubroId){
+      var r = _open.apply(this, arguments);
+      try{
+        var body = document.getElementById("cfgClasif"); if(!body) return r;
+        var panel = body.closest(".cfg-panel-body") || body.parentNode;
+        var titles = [].slice.call(panel.querySelectorAll(".cfg-sec-title"));
+        var tProv = titles[1], tClas = titles[2];
+        // "Categoría y rubro" pasa a ser el paso 2, antes de los proveedores
+        if(tProv && tClas){ panel.insertBefore(tClas, tProv); panel.insertBefore(body, tProv); }
+        [].slice.call(panel.querySelectorAll(".cfg-sec-title .n")).forEach(function(n, i){ n.textContent = i+1; });
+        if(tProv) tProv.lastChild.textContent = "Proveedores · cantidad y unidad de pedido";
+        var note = panel.querySelector("#cfgPvWrap .cfg-note div");
+        if(note) note.innerHTML = 'Elegí <b>todos los proveedores</b> que entregan este insumo, sin importar su rubro (primero aparecen los que ya trabajan en el rubro elegido). Para cada uno indicá <b>la cantidad y la unidad en la que se pide</b> (<b>kg</b>, <b>lts</b>, <b>un</b> o <b>pq</b>); si lo entrega de más de una forma, agregá otra línea. Si un proveedor no estaba en este rubro, se lo suma al guardar.';
+        var sp = panel.querySelector("#cfgSinProvBox small"); if(sp) sp.textContent = "El insumo se crea igual. El proveedor se puede agregar después, editando el insumo.";
+        var lbl = panel.querySelectorAll("#cfgClasif label"); lbl.forEach(function(l){ var h = l.querySelector(".hint"); if(h) h.remove(); });
+        var cat = document.getElementById("cfgFCat"); if(cat && !id && !presetRubroId) setTimeout(function(){ var n = document.getElementById("cfgFNombre"); if(n) n.focus(); }, 90);
+      }catch(e){ console.warn(e); }
+      return r;
+    };
+    // al guardar: vínculos proveedor ↔ rubro
+    var _sub = cfgInsSubmit;
+    window.cfgInsSubmit = async function(ins){
+      var rub = (document.getElementById("cfgFRub")||{}).value;
+      if(!rub){ var fc = document.getElementById("cfgFldCat"), fr = document.getElementById("cfgFldRub"); if(fc) fc.classList.toggle("error", !(document.getElementById("cfgFCat")||{}).value); if(fr) fr.classList.add("error"); cfgShowErr("Elegí la categoría y el rubro del insumo."); return false; }
+      var provs = (cfgPS && !cfgPS.sinProv) ? cfgPS.pvs.map(function(g){ return g.provId; }).filter(Boolean) : [];
+      var ok = await _sub.apply(this, arguments);
+      if(ok && rub && provs.length){ await vincular(provs, rub); try{ cfgRenderAll(); }catch(e){} }
+      return ok;
+    };
+  }
+
+  /* ================= LA FORTALEZA ================= */
+  if(PRE==="lf"){
+    // El rubro de cada insumo es el suyo (ya no se "corrige" por el rubro del proveedor)
+    var _rid = cfgInsRubroId;
+    window.cfgInsRubroId = function(ins){ if(ins && ins.rubro_id && cfgRub("proveedores", ins.rubro_id)) return ins.rubro_id; return _rid(ins); };
+    var nrm = function(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim(); };
+    // mismo insumo con otros proveedores (mismo nombre)
+    function hermanos(ins){ return cfgData.items.filter(function(i){ return i.id!==ins.id && nrm(i.nomenclatura)===nrm(ins.nomenclatura); }); }
+    window.cfgInsLfCat = function(){
+      var cat = document.getElementById("cfgFInsCat").value, sel = document.getElementById("cfgFInsRubro"), cur = sel.value;
+      var rs = cfgData.proveedores.rubros.filter(function(r){ return r.catId===cat; }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+      sel.disabled = !cat;
+      sel.innerHTML = !cat ? '<option value="">Elegí la categoría primero</option>' : ((rs.some(function(r){ return r.id===cur; }) ? "" : '<option value="">Elegí…</option>') + rs.map(function(r){ return '<option value="'+r.id+'"'+(r.id===cur?" selected":"")+'>'+cfgEsc(r.nombre)+'</option>'; }).join(""));
+      cfgInsLfRub();
+    };
+    window.cfgInsLfRub = function(){
+      cfgHideErr(); ["cfgFldInsCat","cfgFldInsRubro"].forEach(function(i){ var e = document.getElementById(i); if(e) e.classList.remove("error"); });
+      var rub = document.getElementById("cfgFInsRubro").value, ps = document.getElementById("cfgFInsProv"), cur = ps.value;
+      var del = rub ? cfgProvsDeRubro(rub) : [], ids = del.map(function(p){ return p.id; });
+      var otros = cfgData.provs.filter(function(p){ return ids.indexOf(p.id)<0; }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+      var opt = function(p){ return '<option value="'+p.id+'"'+(p.id===cur?" selected":"")+'>'+cfgEsc(p.nombre)+'</option>'; };
+      ps.innerHTML = (cur ? "" : '<option value="">Elegí un proveedor…</option>') + (del.length ? '<optgroup label="Ya trabajan en este rubro">'+del.map(opt).join("")+'</optgroup><optgroup label="Otros proveedores">'+otros.map(opt).join("")+'</optgroup>' : otros.map(opt).join(""));
+      var h = document.getElementById("cfgFInsProvHint");
+      if(h){ var nuevo = cur && rub && ids.indexOf(cur)<0; h.textContent = nuevo ? "Este proveedor todavía no figuraba en el rubro: se lo suma al guardar." : ""; }
+    };
+    window.cfgOpenInsumoForm = function(id, presetProveedorId, presetRubroId){
+      var ins = id ? cfgIns(id) : null;
+      if(id && !ins){ showToast("El insumo ya no existe", "warn"); return; }
+      if(!cfgData.provs.length){
+        cfgModal({ icon:"info", title:"Primero creá un proveedor", body:'<p>Cada insumo se compra a un proveedor, y todavía no hay ninguno cargado en Proveedores.</p>',
+          actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Crear proveedor", cls:"confirm-primary", fn:function(){ cfgOpenProvForm(null,null); }}] });
+        return;
+      }
+      var provSel = ins ? ins.proveedor_id : (presetProveedorId || "");
+      var rubSel = ins ? cfgInsRubroId(ins) : (presetRubroId || "");
+      var catSel = rubSel ? (cfgRub("proveedores", rubSel)||{}).catId : "";
+      var D = cfgData.proveedores;
+      var cats = D.cats.filter(function(c){ return D.rubros.some(function(r){ return r.catId===c.id; }); }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+      var conv = ins ? !!ins.necesita_conversion : false;
+      var her = ins ? hermanos(ins) : [];
+      cfgOpenPanel({
+        lvl:"l3", hoja:"Insumo", id:id, title: ins ? "Editar insumo" : "Nuevo insumo",
+        crumb: cfgCrumb(["Insumos", ins ? ins.nomenclatura : "Nuevo insumo"]),
+        body: '<div class="cfg-sec-title"><span class="n">1</span>Identificación</div>'
+          + cfgNameField("Nombre del insumo", ins && ins.nomenclatura, "Ej. SALMON", true)
+          + '<div class="cfg-sec-title"><span class="n">2</span>Categoría y rubro del insumo</div>'
+          + '<div class="field-row"><div class="field" id="cfgFldInsCat"><label>Categoría</label><select id="cfgFInsCat" onchange="cfgInsLfCat()">'+(catSel?"":'<option value="">Elegí…</option>')+cats.map(function(c){ return '<option value="'+c.id+'"'+(c.id===catSel?" selected":"")+'>'+cfgEsc(c.nombre)+'</option>'; }).join("")+'</select></div>'
+          + '<div class="field" id="cfgFldInsRubro"><label>Rubro</label><select id="cfgFInsRubro" onchange="cfgInsLfRub()"><option value="'+(rubSel||"")+'" selected></option></select></div></div>'
+          + (her.length ? '<div class="cfg-note">'+CFG_IC.info+'<div>Este insumo también se compra a <b>'+her.map(function(h){ return cfgEsc((cfgProv(h.proveedor_id)||{}).nombre||"—"); }).join(", ")+'</b>. Si cambiás la categoría o el rubro, se cambia para todos sus proveedores.</div></div>' : '')
+          + '<div class="cfg-sec-title"><span class="n">3</span>Proveedor</div>'
+          + '<div class="field" id="cfgFldInsProv"><label>¿A qué proveedor se le compra?</label><select id="cfgFInsProv" onchange="cfgHideErr();cfgCheckName();cfgInsLfRub()"><option value="'+(provSel||"")+'" selected></option></select>'
+          + '<div class="config-conv-hint" id="cfgFInsProvHint" style="margin-top:5px"></div><div class="config-conv-hint" style="margin-top:3px">Si el insumo se compra a más de un proveedor, creá una ficha por proveedor con el mismo nombre: en Costeo › Insumos se ven juntas y el costo sale de la regla del mes entre todos.</div></div>'
+          + '<div class="cfg-sec-title"><span class="n">4</span>Cantidad y unidad de compra</div>'
+          + '<div class="field-row"><div class="field"><label>Cantidad por unidad de compra</label><input type="text" id="cfgFInsCantidad" inputmode="decimal" value="'+(ins && ins.cantidad!=null ? ins.cantidad : "")+'" placeholder="Ej. 1"></div>'
+          + '<div class="field"><label>Unidad de medida</label><input type="text" id="cfgFInsUM" value="'+cfgEsc((ins && ins.unidad_medida)||"")+'" list="dlUnidadesMedida" placeholder="Ej. Kg, Unidad, Litro"></div></div>'
+          + '<div class="field"><label>¿Necesita conversión?</label><select id="cfgFInsConv" onchange="cfgInsConvChange()"><option value="no"'+(!conv?" selected":"")+'>No</option><option value="si"'+(conv?" selected":"")+'>Sí</option></select></div>'
+          + '<div class="config-conv-fields" id="cfgFInsConvFields" style="display:'+(conv?"":"none")+';margin-bottom:18px;">'
+          +   '<input type="text" id="cfgFInsConvCant" inputmode="decimal" value="'+(ins && ins.conversion_cantidad!=null ? ins.conversion_cantidad : "")+'" placeholder="Cant. (ej. 30)">'
+          +   '<input type="text" id="cfgFInsConvUM" value="'+cfgEsc((ins && ins.conversion_unidad)||"")+'" list="dlUnidadesMedida" placeholder="Unidad convertida (ej. Kg)">'
+          +   '<div class="config-conv-hint">Equivalencia: 1 unidad de compra = [cant.] [unidad convertida]. Es la unidad que se usa en Recetas.</div></div>'
+          + '<div class="cfg-sec-title"><span class="n">5</span>Factor de merma <span class="opt">· opcional</span></div>'
+          + '<div class="cfg-note">'+CFG_IC.info+'<div>Se suma linealmente al costo por unidad de medida. Ej.: si el Kg sale $1.000 y el insumo tiene <b>45%</b> de merma, el costo que ve Recetas es <b>$1.450/Kg</b>. Si no tiene merma, dejalo en 0%.</div></div>'
+          + '<div class="cfg-plazo" style="max-width:180px"><div class="stepper-input" style="width:150px"><button type="button" class="stepper-btn" onclick="cfgInsMermaStep(-1)">−</button><input type="text" id="cfgFInsMerma" inputmode="decimal" value="'+(ins ? (Number(ins.factor_merma)||0) : 0)+'"><button type="button" class="stepper-btn" onclick="cfgInsMermaStep(1)">+</button></div><span class="cfg-plazo-suf">%</span></div>'
+          + '<div class="cfg-err-box" id="cfgErrBox"></div>',
+        saveLabel: ins ? "Guardar cambios" : "Crear insumo",
+        nameList: function(){ var pv = (document.getElementById("cfgFInsProv")||{}).value; return cfgData.items.filter(function(i){ return i.proveedor_id===pv; }).map(function(i){ return { id:i.id, nombre:i.nomenclatura }; }); },
+        dupHint: function(){ return " para este proveedor"; },
+        submit: async function(){
+          var nombre = cfgReadName(); if(!nombre) return false;
+          var rubroId = document.getElementById("cfgFInsRubro").value;
+          document.getElementById("cfgFldInsCat").classList.toggle("error", !document.getElementById("cfgFInsCat").value);
+          document.getElementById("cfgFldInsRubro").classList.toggle("error", !rubroId);
+          if(!rubroId){ cfgShowErr("Elegí la categoría y el rubro del insumo."); return false; }
+          var provId = document.getElementById("cfgFInsProv").value;
+          document.getElementById("cfgFldInsProv").classList.toggle("error", !provId);
+          if(!provId){ cfgShowErr("Elegí a qué proveedor se le compra este insumo."); return false; }
+          var cantidad = parseDecimalCosteo(document.getElementById("cfgFInsCantidad").value);
+          if(!cantidad){ cfgShowErr("Cargá la cantidad por unidad de compra."); return false; }
+          var um = document.getElementById("cfgFInsUM").value.trim();
+          var necesitaConv = document.getElementById("cfgFInsConv").value==="si";
+          var convCant = necesitaConv ? parseDecimalCosteo(document.getElementById("cfgFInsConvCant").value) : null;
+          var convUM = necesitaConv ? document.getElementById("cfgFInsConvUM").value.trim() : null;
+          if(necesitaConv && (!convCant || !convUM)){ cfgShowErr("Completá la cantidad y la unidad de la conversión, o marcá “No” si este insumo no necesita conversión."); return false; }
+          var merma = parseDecimalCosteo(document.getElementById("cfgFInsMerma").value);
+          if(merma<0){ cfgShowErr("El factor de merma tiene que ser un porcentaje de 0 o más."); return false; }
+          var payload = { proveedor_id:provId, rubro_id:rubroId, nomenclatura:nombre, cantidad:cantidad, unidad_medida: um||null, necesita_conversion:necesitaConv, conversion_cantidad:convCant, conversion_unidad:convUM||null, factor_merma:merma };
+          var res;
+          if(ins) res = await sb.from("lf_costeo_insumos").update(payload).eq("id", ins.id);
+          else { payload.creado_por = currentPerfil?currentPerfil.id:null; res = await sb.from("lf_costeo_insumos").insert(payload); }
+          if(res.error){ cfgShowErr(cfgErrText(res.error, "un insumo")); return false; }
+          // el rubro es del insumo: también para sus otros proveedores (mismo nombre)
+          var herm = ins ? hermanos(Object.assign({}, ins, { nomenclatura:nombre })) : cfgData.items.filter(function(i){ return nrm(i.nomenclatura)===nrm(nombre) && i.proveedor_id!==provId; });
+          var cambiar = herm.filter(function(h){ return h.rubro_id!==rubroId; });
+          if(cambiar.length){ var rh = await sb.from("lf_costeo_insumos").update({ rubro_id:rubroId }).in("id", cambiar.map(function(h){ return h.id; })); if(rh.error) showToast("No se pudo actualizar el rubro en las fichas de los otros proveedores", "warn"); }
+          await vincular([provId].concat(cambiar.map(function(h){ return h.proveedor_id; })), rubroId);
+          var provN = (cfgProv(provId)||{}).nombre || "", rubN = (cfgRub("proveedores", rubroId)||{}).nombre || "", catN = (cfgCat("proveedores", (cfgRub("proveedores", rubroId)||{}).catId)||{}).nombre || "";
+          if(ins){
+            var ch = [];
+            if(ins.nomenclatura!==nombre) ch.push("“"+ins.nomenclatura+"” → “"+nombre+"”");
+            if(ins.proveedor_id!==provId) ch.push("proveedor: “"+((cfgProv(ins.proveedor_id)||{}).nombre||"")+"” → “"+provN+"”");
+            if(Number(ins.cantidad)!==cantidad || (ins.unidad_medida||"")!==um) ch.push("cantidad/unidad: "+fmtNumCosteo(ins.cantidad)+" "+(ins.unidad_medida||"—")+" → "+fmtNumCosteo(cantidad)+" "+(um||"—"));
+            if((Number(ins.factor_merma)||0)!==merma) ch.push("factor de merma: "+(Number(ins.factor_merma)||0)+"% → "+merma+"%");
+            if(cfgInsRubroId(ins)!==rubroId) ch.push("rubro: “"+((cfgRub("proveedores",cfgInsRubroId(ins))||{}).nombre||"—")+"” → “"+rubN+"”"+(cambiar.length?" (también en "+cambiar.length+" ficha"+(cambiar.length===1?"":"s")+" de otros proveedores)":""));
+            if(ch.length) logHistorialConfig("Editó un insumo", "“"+nombre+"” · "+ch.join(" · "));
+          } else logHistorialConfig("Creó un insumo", "“"+nombre+"” en "+catN+" › "+rubN+" ("+provN+")"+(merma?" · merma: "+merma+"%":""));
+          await cfgReload();
+          await loadCosteoInsumos();
+          try{ renderCosteoInsumosList(); renderCosteoProvList(); }catch(e){}
+          var rr = cfgRub("proveedores", rubroId); if(rr) cfgState.insumos.collapsed.delete(rr.catId);
+          try{ cfgRenderDom("insumos"); }catch(e){}
+          if(window.LI && document.getElementById("cxPaneInsumos") && document.getElementById("cxPaneInsumos").classList.contains("active")) try{ LI.render(); }catch(e){}
+          showToast(ins ? "Insumo actualizado" : "Insumo creado");
+          return true;
+        }
+      });
+      // completar rubro y proveedores
+      setTimeout(function(){ try{ cfgInsLfCat(); var f = document.getElementById(ins ? "cfgFInsCat" : "cfgFNombre"); if(f && !ins) f.focus(); }catch(e){ console.warn(e); } }, 0);
+    };
+  }
+})();
 </script>
 <script>
 /* =====================================================================
