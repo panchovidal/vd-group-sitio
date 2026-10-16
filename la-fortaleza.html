@@ -2977,6 +2977,7 @@
                 <span class="preset-pill" data-vpreset="ayer" onclick="setVentasPreset('ayer')">Ayer</span>
                 <span class="preset-pill" data-vpreset="semana" onclick="setVentasPreset('semana')">Última semana</span>
                 <span class="preset-pill" data-vpreset="mes" onclick="setVentasPreset('mes')">Este mes</span>
+                <span class="preset-pill" data-vpreset="mesAnt" onclick="setVentasPreset('mesAnt')">Mes anterior</span>
                 <span class="preset-pill" data-vpreset="personalizado" onclick="setVentasPreset('personalizado')">Personalizado</span>
               </div>
               <div class="vr-kpis hidden" id="vrKpis">
@@ -9129,10 +9130,13 @@ function wireIndiceBoxDrop(){
     }
   });
 }
-// Presets rápidos "tipo globito": Ayer / Última semana / Este mes calculan y
-// muestran el resultado apenas se hace clic (sin botón Continuar). Solo
-// "Personalizado" muestra el selector Desde/Hasta + Continuar, para que el
-// cálculo no dispare en cada tecla mientras se elige un rango a mano.
+// Presets rápidos "tipo globito": Ayer / Última semana / Este mes / Mes
+// anterior calculan y muestran el resultado apenas se hace clic (sin botón
+// Continuar). "Mes anterior" = primer al último día del mes calendario
+// pasado completo (mismo criterio que la pastilla "Mes anterior" de
+// Análisis de resultados). Solo "Personalizado" muestra el selector Desde/Hasta +
+// Continuar, para que el cálculo no dispare en cada tecla mientras se elige
+// un rango a mano.
 async function setVentasPreset(preset){
   document.querySelectorAll("[data-vpreset]").forEach(p=>p.classList.toggle("active", p.dataset.vpreset===preset));
   const customRow = document.getElementById("ventasCustomRange");
@@ -9155,6 +9159,11 @@ async function setVentasPreset(preset){
     const estaSemanaLunes = new Date(t); estaSemanaLunes.setDate(t.getDate()-diffToMonday);
     desde = new Date(estaSemanaLunes); desde.setDate(estaSemanaLunes.getDate()-7);
     hasta = new Date(estaSemanaLunes); hasta.setDate(estaSemanaLunes.getDate()-1);
+  }
+  else if(preset==="mesAnt"){
+    // Mes calendario anterior completo: primer día al último día del mes pasado.
+    desde = new Date(t.getFullYear(), t.getMonth()-1, 1);
+    hasta = new Date(t.getFullYear(), t.getMonth(), 0);
   }
   else { desde=new Date(t.getFullYear(),t.getMonth(),1); hasta=t; } // "mes"
   document.getElementById("vDesde").value = `${desde.getFullYear()}-${pad2(desde.getMonth()+1)}-${pad2(desde.getDate())}`;
@@ -9353,7 +9362,8 @@ function renderVentasPorConcepto(porConcepto, totalVentas, sinClasificarSet){
   const bar = rows.map((r,i)=>`<span style="width:${total?Math.max(r.total/total*100,0):0}%;background:${CATEGORICAL_PALETTE[i%CATEGORICAL_PALETTE.length]}" title="${r.name}: ${fmtMoney(r.total)}"></span>`).join("");
   const body = rows.map((r,i)=>{
     const color = CATEGORICAL_PALETTE[i%CATEGORICAL_PALETTE.length];
-    const subs = r.subs.sort((a,b)=>b.total-a.total).map(sb=>`<div class="vr-sub-row"><span>${sb.name}</span><span class="vr-pct">${vrPct(sb.total,total)}</span><span class="vr-num">${fmtMoney(sb.total)}</span></div>`).join("");
+    // El % de cada sub-índice es sobre el total de SU categoría (r.total), no sobre el total general — a pedido de Pancho (16/10/2026).
+    const subs = r.subs.sort((a,b)=>b.total-a.total).map(sb=>`<div class="vr-sub-row"><span>${sb.name}</span><span class="vr-pct">${vrPct(sb.total,r.total)}</span><span class="vr-num">${fmtMoney(sb.total)}</span></div>`).join("");
     return `<div class="vr-cat${vrState.open.has(r.name)?" open":""}" data-cat="${r.name}">
       <div class="vr-cat-row" onclick="vrToggleCat(this)">${vrChev()}<span class="sw" style="background:${color}"></span><span class="nm">${r.name}</span><span class="vr-pct">${vrPct(r.total,total)}</span><span class="vr-num">${fmtMoney(r.total)}</span></div>
       <div class="vr-sub">${subs}</div></div>`;
@@ -9657,7 +9667,7 @@ const AR_REPORTES = [
 const AR_PRESETS = [
   { id:"semana",  lbl:"Última semana" },
   { id:"mes",     lbl:"Este mes" },
-  { id:"mesAnt",  lbl:"Último mes" },
+  { id:"mesAnt",  lbl:"Mes anterior" },
   { id:"trim",    lbl:"Último trimestre" },
   { id:"anio",    lbl:"Este año" },
   { id:"custom",  lbl:"Personalizado" }
@@ -9959,7 +9969,8 @@ function arRenderER(el, c, expandAll){
     const o = opts||{}, subs = o.subs || [], open = expandAll || arState.open.has(key);
     const exp = subs.length > 0;
     const val = o.gasto ? arParen(monto) : arMoney(monto);
-    const subHtml = exp ? `<div class="ar-er-subs">${subs.map(s=>`<div class="ar-er-sub"><span class="nm">${arEsc(s[0])}</span><span class="pc">${arPct(s[1], base)}</span><span class="mt">${o.gasto?arParen(s[1]):arMoney(s[1])}</span></div>`).join("")}</div>` : "";
+    // El % de cada sub-rubro es sobre el total de SU categoría/rubro (monto), no sobre ventas totales — a pedido de Pancho (16/10/2026).
+    const subHtml = exp ? `<div class="ar-er-subs">${subs.map(s=>`<div class="ar-er-sub"><span class="nm">${arEsc(s[0])}</span><span class="pc">${arPct(s[1], monto)}</span><span class="mt">${o.gasto?arParen(s[1]):arMoney(s[1])}</span></div>`).join("")}</div>` : "";
     return `<div class="ar-er-item${open?" open":""}${exp?" exp":""}" data-key="${arEsc(key)}">
       <div class="ar-er-row"${exp && !expandAll?` onclick="arToggleER(this)"`:""}>
         <span class="chev">${exp?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`:""}</span>
@@ -9983,7 +9994,7 @@ function arRenderER(el, c, expandAll){
       ${gastosRows}
     </div>
     <div class="ar-er-util ${c.util<0?"neg":""}"><span class="bar" style="background:${AR_COLORS.util}"></span><span class="nm">Utilidad del período</span><span class="pc">${base?arPct(c.util, base):"—"}</span><span class="mt">${arMoney(c.util)}</span></div>
-    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros. Ventas por categoría del índice de artículos (Compras-Ventas); el total es el de Movimientos de caja, y la diferencia entre ambos reportes se muestra como “Diferencia de conciliación”. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes de su factura.</div>`}`;
+    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros (el % de cada sub-rubro es sobre el total de su categoría, no sobre el total general). Ventas por categoría del índice de artículos (Compras-Ventas); el total es el de Movimientos de caja, y la diferencia entre ambos reportes se muestra como “Diferencia de conciliación”. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes de su factura.</div>`}`;
 }
 function arToggleER(row){
   const it = row.parentElement, k = it.dataset.key;
