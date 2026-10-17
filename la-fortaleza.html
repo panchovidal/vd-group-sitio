@@ -8731,6 +8731,7 @@ document.addEventListener("keydown",(e)=>{
 const VENTAS_LS_INDICE = "lf_ventas_indice_v1";
 let ventasFiles = { caja:null, ventas:null, reservas:null, cancelaciones:null };
 let ventasIndice = null; // {header, rows, savedAt, fileName}
+let ventasIndiceHistorial = null; // [{header,rows,reemplazado_at}, …] versiones anteriores del índice (más nueva primero) — pedido de Pancho (16/10/2026), ver vBuildIndiceCtx
 
 function vParseFlexDate(val){
   if (val === undefined || val === null) return null;
@@ -8838,68 +8839,139 @@ async function vFetchIngestaRango(tipo){
   // "Fecha de movimiento" (Movimientos de caja / Compras-Ventas) o, si el tipo
   // no la tiene, "Fecha" (reservas/cancelaciones — fix 16/10/2026, ver abajo).
   const idxFechaCanon = vFindColIndex(headerCanon, ["Fecha de movimiento","Fecha"]);
+  // "Hora de movimiento" sólo existe en Movimientos de caja / Compras-Ventas
+  // (reservas/cancelaciones tienen "Hora", que es la hora DEL TURNO, no de
+  // movimiento — no sirve para esto). Se usa más abajo para partir cada día
+  // en madrugada/resto antes de elegir ingesta ganadora (ver fix 17/10/2026).
+  const idxHoraCanon = vFindColIndex(headerCanon, ["Hora de movimiento"]);
+  const colFecha = ing => {
+    const h = ing.header || [];
+    const mismoOrden = h.length===headerCanon.length && h.every((c,ci)=> (c||"").toString().trim()===((headerCanon[ci]||"").toString().trim()));
+    return {
+      mismoOrden,
+      idxFechaIng: mismoOrden ? idxFechaCanon : vFindColIndex(h, ["Fecha de movimiento","Fecha"]),
+      idxHoraIng: idxHoraCanon===-1 ? -1 : (mismoOrden ? idxHoraCanon : vFindColIndex(h, ["Hora de movimiento"]))
+    };
+  };
+  const remap = ing => {
+    const h = ing.header || [];
+    const { mismoOrden } = colFecha(ing);
+    return mismoOrden ? null : headerCanon.map(c => h.findIndex(hc => (hc||"").toString().trim().toLowerCase()===(c||"").toString().trim().toLowerCase()));
+  };
+  if (idxFechaCanon === -1){
+    // El tipo no tiene ninguna columna de fecha reconocible: no hay dedup
+    // posible, se listan todas las filas de todas las ingestas (sin tocar).
+    const rowsOut = [];
+    data.forEach(ing => {
+      const idxMap = remap(ing);
+      (ing.rows||[]).forEach(r => rowsOut.push(idxMap ? idxMap.map(ci => ci===-1 ? null : r[ci]) : r));
+    });
+    return {header: headerCanon, rows: rowsOut};
+  }
   // Dedup por día real (25/08/2026, reporte de Pancho: Caja Mayor mostraba
   // retiros duplicados y diferencias de caja inventadas para el 18-25/08).
   // Causa: acá se juntan TODAS las ingestas "ok" de un tipo, y puede haber más
   // de una que cubra el mismo día real (ej. una carga de prueba con ~2 meses
   // de historial + los envíos automáticos diarios reales de ATC para esas
-  // mismas fechas — ver ventas-integracion-atc.md). Se recorren las ingestas
-  // de la MÁS reciente a la más vieja y, por cada día calendario (columna
-  // "Fecha de movimiento"), se usan únicamente las filas de la ingesta más
-  // reciente que lo cubra — se descartan las de ese mismo día en ingestas más
-  // viejas, para no duplicar ni mezclar dos versiones de un mismo día. Si el
-  // tipo de reporte no tiene ninguna de las dos columnas de fecha
-  // (idxFechaCanon===-1) esto no aplica y se listan todas las filas de todas
-  // las ingestas, como antes.
+  // mismas fechas — ver ventas-integracion-atc.md).
   //
-  // Fix 16/10/2026 (reporte de Pancho, datos reales de reservas del
-  // 17-18/09/2026): reservas y cancelaciones no tienen "Fecha de movimiento"
-  // (solo "Fecha"), así que hasta ahora idxFechaCanon daba -1 para estos dos
-  // tipos y el dedup de arriba quedaba desactivado — cualquier re-envío de
-  // ATC que solapara fechas con un envío anterior duplicaba esas reservas
-  // (y sus horas/cancelaciones) en vez de reemplazarlas. Pasó en vivo: la
-  // ingesta de reservas recibida el 29/09 y la recibida el 16/10 cubren las
-  // dos todo septiembre completo, con 1107 de 1135 reservas repetidas por
-  // mismo ID_reserva — la tarjeta de % de ocupación venía sumando casi todas
-  // las horas de septiembre dos veces (de ahí los % pegados a 100% y los
-  // valores sin sentido que reportó Pancho para el 17/09). Ahora "Fecha"
-  // entra como columna de dedup válida igual que "Fecha de movimiento", así
-  // que factor_ocupacion/reporte_cancelaciones quedan protegidos con el
-  // mismo criterio "la ingesta más reciente gana por día" que ya tenían
-  // Movimientos de caja/Compras-Ventas.
-  const diasYaCubiertos = new Set();
-  const rowsOut = [];
-  for (let i = data.length - 1; i >= 0; i--){
-    const ing = data[i];
-    const h = ing.header || [];
-    const mismoOrden = h.length===headerCanon.length && h.every((c,ci)=> (c||"").toString().trim()===((headerCanon[ci]||"").toString().trim()));
-    const idxMap = mismoOrden ? null : headerCanon.map(c => h.findIndex(hc => (hc||"").toString().trim().toLowerCase()===(c||"").toString().trim().toLowerCase()));
-    const idxFechaIng = mismoOrden ? idxFechaCanon : vFindColIndex(h, ["Fecha de movimiento","Fecha"]);
-    // Los días que cubre ESTA ingesta se van juntando acá aparte y recién se
-    // suman a diasYaCubiertos al terminar de procesarla entera (no fila por
-    // fila): si se sumaran de a una fila, la primera fila de un día "tapaba"
-    // a las demás filas de ESE MISMO día dentro de la MISMA ingesta más
-    // reciente (bug encontrado el 01/09/2026: Caja Mayor decía "no se
-    // registraron salidas" para un período con retiros reales, porque de
-    // cada día sobrevivía una sola fila de las decenas que tenía).
-    const diasDeEstaIngesta = new Set();
+  // Fix 16/10/2026 (reporte de Pancho, reservas 17-18/09/2026): reservas y
+  // cancelaciones no tienen "Fecha de movimiento" (solo "Fecha"), así que
+  // idxFechaCanon daba -1 para estos dos tipos y el dedup quedaba desactivado
+  // del todo para ellos. Ahora "Fecha" entra como columna de dedup válida
+  // igual que "Fecha de movimiento".
+  //
+  // Fix 16/10/2026 — SEGUNDO hallazgo, más de fondo (reporte de Pancho:
+  // turnos del 01/10/2026 en Compras-Ventas sin su pago en Movimientos de
+  // caja). La regla de dedup original era "por cada día, se queda la ingesta
+  // MÁS RECIENTE que lo cubra, pase lo que pase" — asumiendo que un envío más
+  // nuevo siempre tiene el día más completo. Eso es falso en el borde de una
+  // ingesta: el envío automático de ATC que llegó el 01/10 a las 13:23 sólo
+  // tenía, lógicamente, lo que había pasado en el club HASTA esa hora de ese
+  // día (4 filas de "Turno / Consumos"); un envío bastante más nuevo (16/10)
+  // volvió a traer ese mismo borde del 01/10 con esas mismas 4 filas nada
+  // más — probablemente el recorte de fechas del reporte de ATC quedó a
+  // mitad del 01/10 otra vez — mientras que una ingesta intermedia (06/10)
+  // sí tenía el día 01/10 completo (50 filas). Con la regla vieja, la
+  // ingesta de 16/10 "ganaba" el 01/10 por ser la más nueva y tapaba las 46
+  // filas reales que la de 06/10 sí tenía — Compras-Ventas, en cambio, no
+  // perdió esas ventas (por eso aparecían turnos en Compras-Ventas sin pago
+  // en caja ese día, no por un desfase de fecha real). Ahora, por cada día,
+  // se cuentan las filas que aporta cada ingesta que lo cubre y gana la que
+  // tiene MÁS filas ese día (empate → la más reciente) — no la más reciente
+  // a secas. Sigue habiendo una sola ingesta "dueña" de cada día (no se
+  // mezclan dos versiones de un mismo día), sólo que ahora se elige por
+  // completitud real, no por fecha de llegada.
+  //
+  // Fix 17/10/2026 — TERCER ajuste, afinando el segundo (reporte de Pancho:
+  // rastreamos las últimas líneas sin matchear y encontramos 2 casos más: el
+  // 05/10/2026 un par de turnos tenían su pago real en la ingesta del 06/10,
+  // pero esa ingesta sólo tenía 8 filas de madrugada (00:00-04:59) contra 67
+  // filas del resto del día en OTRA ingesta — como el "más filas gana" se
+  // comparaba por DÍA ENTERO, la ingesta con más filas en total (pero cero en
+  // la madrugada) se quedaba con todo el día, incluida la franja 00:00-04:59
+  // que no tenía. Esa franja es justamente la que, por el corte de jornada
+  // 05:00, pertenece al día CALENDARIO ANTERIOR (05/10) — el recorte de
+  // ventana de ATC es más común justo ahí. Ahora, para los tipos que tienen
+  // "Hora de movimiento" (caja y Compras-Ventas), el conteo para elegir
+  // ganador se hace por separado para madrugada (00:00-04:59) y resto del
+  // día (05:00-23:59) dentro de cada fecha — así una ingesta puede ganar la
+  // madrugada de un día y otra ingesta ganar el resto, en vez de que una sola
+  // se lleve todo por tener más filas en el resto del día. No se mezclan
+  // filas de más de una ingesta dentro de la MISMA franja (sigue sin haber
+  // riesgo de duplicar: ver nota de por qué no se usa unión fila por fila
+  // en ventas-integracion-atc.md) — es la misma regla de siempre, sólo que
+  // aplicada a una franja más chica.
+  const conteoPorDia = new Map(); // claveFranja -> [{ingIdx, n, recibido_at}, …]
+  const claveFranja = (diaKey, horaTxt, idxHoraIng) => {
+    if (idxHoraIng === -1 || horaTxt == null || horaTxt === "") return diaKey;
+    return diaKey + (String(horaTxt) < "05:00" ? "|madrugada" : "|resto");
+  };
+  data.forEach((ing, ingIdx) => {
+    const { idxFechaIng, idxHoraIng } = colFecha(ing);
+    if (idxFechaIng === -1) return;
+    const n = new Map();
     (ing.rows||[]).forEach(r => {
-      if (idxFechaCanon !== -1 && idxFechaIng !== -1){
+      const fecha = vParseFlexDate(r[idxFechaIng]);
+      if (!fecha) return;
+      const diaKey = vToISODate(fecha);
+      const clave = claveFranja(diaKey, idxHoraIng===-1 ? null : r[idxHoraIng], idxHoraIng);
+      n.set(clave, (n.get(clave)||0) + 1);
+    });
+    n.forEach((cant, clave) => {
+      if (!conteoPorDia.has(clave)) conteoPorDia.set(clave, []);
+      conteoPorDia.get(clave).push({ ingIdx, n:cant, recibido_at:ing.recibido_at });
+    });
+  });
+  const ganadorPorDia = new Map(); // claveFranja -> ingIdx ganador
+  conteoPorDia.forEach((candidatos, clave) => {
+    const ganador = candidatos.reduce((mejor, c) => {
+      if (!mejor) return c;
+      if (c.n > mejor.n) return c;
+      if (c.n === mejor.n && c.recibido_at > mejor.recibido_at) return c;
+      return mejor;
+    }, null);
+    ganadorPorDia.set(clave, ganador.ingIdx);
+  });
+  const rowsOut = [];
+  data.forEach((ing, ingIdx) => {
+    const { idxFechaIng, idxHoraIng } = colFecha(ing);
+    const idxMap = remap(ing);
+    (ing.rows||[]).forEach(r => {
+      if (idxFechaIng !== -1){
         const fecha = vParseFlexDate(r[idxFechaIng]);
         if (fecha){
           const diaKey = vToISODate(fecha);
-          if (diasYaCubiertos.has(diaKey)) return; // ya lo trajo una ingesta más reciente
-          diasDeEstaIngesta.add(diaKey);
+          const clave = claveFranja(diaKey, idxHoraIng===-1 ? null : r[idxHoraIng], idxHoraIng);
+          if (ganadorPorDia.get(clave) !== ingIdx) return; // otra ingesta es la dueña de esta franja
         }
       }
-      rowsOut.push(mismoOrden ? r : idxMap.map(ci => ci===-1 ? null : r[ci]));
+      rowsOut.push(idxMap ? idxMap.map(ci => ci===-1 ? null : r[ci]) : r);
     });
-    diasDeEstaIngesta.forEach(d => diasYaCubiertos.add(d));
-  }
-  // Se recorrió de la ingesta más nueva a la más vieja (para que el dedup de
-  // arriba priorice lo más reciente); se da vuelta al final para devolver las
-  // filas en el mismo orden "más vieja primero" que ya devolvía esta función.
-  rowsOut.reverse();
+  });
+  // data está ordenada de la ingesta más vieja a la más nueva (ascending
+  // recibido_at) y se recorrió en ese mismo orden, así que rowsOut ya queda
+  // con las filas "más viejas primero", igual que siempre devolvió esta función.
   return {header: headerCanon, rows: rowsOut};
 }
 
@@ -8964,15 +9036,39 @@ function ventasZoneClick(key){ document.getElementById("vzone"+key.charAt(0).toU
 async function vTryLoadIndiceFromStorage(){
   try{
     const { data, error } = await sb.from("lf_ventas_indice").select("*").eq("id",1).maybeSingle();
-    if(error || !data) return;
-    ventasIndice = {header:data.header, rows:data.rows, savedAt:data.updated_at, fileName:data.file_name};
-    renderIndiceBox(data.updated_at, data.file_name);
+    if(!error && data){
+      ventasIndice = {header:data.header, rows:data.rows, savedAt:data.updated_at, fileName:data.file_name};
+      renderIndiceBox(data.updated_at, data.file_name);
+    }
   }catch(err){ /* sin conexión: se deja ventasIndice sin cargar (estado "no cargado") */ }
+  await vTryLoadIndiceHistorial();
+}
+// Historial de versiones anteriores del índice (altas/bajas de productos) — se carga una
+// sola vez por sesión y se cachea; vBuildIndiceCtx() lo usa como respaldo para nombres que
+// ya no están en la versión vigente. Pedido de Pancho (16/10/2026).
+async function vTryLoadIndiceHistorial(){
+  if(ventasIndiceHistorial) return;
+  try{
+    const { data, error } = await sb.from("lf_ventas_indice_historial").select("header,rows,reemplazado_at").order("reemplazado_at",{ascending:false});
+    ventasIndiceHistorial = (!error && data) ? data : [];
+  }catch(err){ ventasIndiceHistorial = []; /* sin conexión: se sigue sólo con la versión vigente */ }
 }
 async function vSaveIndiceToStorage(parsed, fileName){
   const savedAt = new Date().toISOString();
   const payload = {header:parsed.header, rows:parsed.rows, savedAt, fileName};
   try{
+    // Antes de sobrescribir la versión vigente, la archivamos en el historial — así ningún
+    // producto que se dé de baja en esta actualización pierde su clasificación anterior
+    // (pedido de Pancho, 16/10/2026; ver vBuildIndiceCtx). Se relee de la base (no del
+    // caché en memoria) para no depender de si esta sesión ya había cargado el índice.
+    const { data: vigenteActual } = await sb.from("lf_ventas_indice").select("header,rows,file_name,updated_at").eq("id",1).maybeSingle();
+    if(vigenteActual){
+      const { error: errHist } = await sb.from("lf_ventas_indice_historial").insert({
+        header: vigenteActual.header, rows: vigenteActual.rows, file_name: vigenteActual.file_name,
+        vigente_desde: vigenteActual.updated_at || null
+      });
+      if(!errHist && ventasIndiceHistorial) ventasIndiceHistorial.unshift({ header:vigenteActual.header, rows:vigenteActual.rows, reemplazado_at:savedAt });
+    }
     const { error } = await sb.from("lf_ventas_indice").upsert({
       id: 1, header: parsed.header, rows: parsed.rows, file_name: fileName,
       actualizado_por: currentPerfil ? currentPerfil.id : null,
@@ -9217,7 +9313,19 @@ const VENTAS_CAT2_ALQUILER = "Alquileres de cancha";
      el resto va a "Otros movimientos de caja".
    · Cat. 2 = "Alquileres de cancha": se abre en Turnos Fijos / Turnos Únicos según Periodicidad.
    · Conceptos legacy de alquiler (Turno, Retención de seña, etc.) van a la Cat. 1 que el
-     índice use para "Alquileres de cancha". */
+     índice use para "Alquileres de cancha".
+
+   ---- Altas/bajas del índice (pedido de Pancho, 16/10/2026) ----
+   Un producto que se da de baja del índice (se borra en una actualización posterior) no
+   debe empezar a caer en "Sin clasificar" en las ventas YA registradas con ese nombre:
+   debe seguir resolviendo a la categoría que tuvo mientras estuvo disponible para la
+   venta. Por eso el mapa se arma en dos capas: 1) la versión VIGENTE de lf_ventas_indice
+   (siempre gana — una recategorización se refleja al instante); 2) para los nombres que
+   YA NO están en la vigente, se completa con el historial de versiones anteriores
+   (ventasIndiceHistorial, de la más reciente a la más antigua — la primera que tenga ese
+   nombre define su categoría "heredada"). Esto sólo protege hacia adelante: nombres que ya
+   se perdieron antes de este cambio (índice sobrescrito sin historial) no se pueden
+   recuperar salvo que se vuelva a subir un Excel viejo del índice. */
 function vBuildIndiceCtx(){
   const iH = ventasIndice.header;
   const iNombre = vFindColIndex(iH, ["Nombre (*)","Nombre"]);
@@ -9232,7 +9340,19 @@ function vBuildIndiceCtx(){
     map.set(nombre, {cat1, cat2});
     if (!rentCat1 && cat2===VENTAS_CAT2_ALQUILER && cat1) rentCat1 = cat1;
   });
-  return { map, rentCat1: rentCat1 || VENTAS_CAT2_ALQUILER };
+  // Respaldo por historial: sólo completa nombres ausentes en la vigente, nunca pisa.
+  const deBaja = new Set();
+  (ventasIndiceHistorial||[]).forEach(snap => {
+    const hH = snap.header; if(!hH) return;
+    const hNombre = vFindColIndex(hH, ["Nombre (*)","Nombre"]), hCat1 = vFindColIndex(hH, ["Cat. 1","Cat.1","Cat 1"]), hCat2 = vFindColIndex(hH, ["Cat. 2","Cat.2","Cat 2"]);
+    if ([hNombre,hCat1,hCat2].includes(-1)) return;
+    (snap.rows||[]).forEach(r => {
+      const nombre = (r[hNombre]||"").toString().trim(); if(!nombre || map.has(nombre)) return;
+      const cat1 = (r[hCat1]||"").toString().trim(), cat2 = (r[hCat2]||"").toString().trim();
+      map.set(nombre, {cat1, cat2}); deBaja.add(nombre);
+    });
+  });
+  return { map, rentCat1: rentCat1 || VENTAS_CAT2_ALQUILER, deBaja };
 }
 
 // Devuelve {grupo, sub} (Cat. 1 / Cat. 2 del índice) para una fila de Compras-Ventas, o null si se excluye.
