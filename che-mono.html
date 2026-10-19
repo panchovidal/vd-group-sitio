@@ -2560,6 +2560,51 @@
 
   .emp-bracket-admin{--c:#2F8F7B;}
 </style>
+<style>
+  /* Tipo de gasto · mes de imputación (19/10/2026) */
+  .cfg-tg-chip em{font-style:normal;font-weight:700;opacity:.78;margin-left:4px;padding-left:5px;border-left:1px solid currentColor;}
+  .tgx-mes{margin-top:12px;border:1.5px solid #D9CCF5;background:linear-gradient(180deg,#FAF7FF,#F5F0FE);border-radius:12px;padding:12px 14px 14px;animation:tgxIn .18s ease;}
+  .tgx-mes[hidden]{display:none;}
+  @keyframes tgxIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+  .tgx-mes-h{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+  .tgx-mes-h b{display:block;font-size:12.5px;color:#4B2A93;font-weight:800;}
+  .tgx-mes-h i{display:block;font-style:normal;font-size:11.5px;color:#7C6BA6;font-weight:600;margin-top:1px;}
+  .tgx-mes-ic{width:26px;height:26px;border-radius:8px;background:#EBE2FC;color:#6A3FC1;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .tgx-mes-ic svg{width:15px;height:15px;}
+  .tgx-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#E9E0FA;border-radius:10px;padding:4px;}
+  .tgx-seg-opt{border:0;background:transparent;border-radius:8px;padding:8px 10px;text-align:left;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:2px;transition:background .15s,box-shadow .15s;}
+  .tgx-seg-opt b{font-size:12.5px;color:#5B4A85;font-weight:800;}
+  .tgx-seg-opt i{font-style:normal;font-size:11px;color:#8A7BB0;font-weight:600;line-height:1.3;}
+  .tgx-seg-opt:hover{background:rgba(255,255,255,.55);}
+  .tgx-seg-opt.on{background:#fff;box-shadow:0 1px 3px rgba(75,42,147,.18);}
+  .tgx-seg-opt.on b{color:#6A3FC1;}
+  /* Pagos · fila en el detalle de la orden */
+  .pg-panel-summary > .tgx-cell{grid-column:1/-1;}
+  .tgx-cell[hidden]{display:none;}
+  .tgx-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--text-2,#4A5470);font-weight:600;}
+  .tgx-row .tgx-imp{flex:1;min-width:150px;line-height:1.35;}
+  .tgx-row .tgx-imp b{color:var(--navy,#0B1B4D);}
+  .tgx-dim{color:var(--text-3,#8A93A8);}
+  .tgx-edit{border:1px solid var(--border,#E3E7F0);background:#fff;color:var(--navy,#0B1B4D);font-family:inherit;font-weight:800;font-size:11.5px;padding:5px 11px;border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s;}
+  .tgx-edit:hover{border-color:#C9D6EE;background:#F3F8FF;}
+  /* Modal */
+  .tgx-ov{position:fixed;inset:0;background:rgba(2,11,45,.45);display:flex;align-items:center;justify-content:center;z-index:95;opacity:0;pointer-events:none;transition:opacity .18s ease;padding:16px;}
+  .tgx-ov.show{opacity:1;pointer-events:auto;}
+  .tgx-md{background:#fff;border-radius:16px;width:520px;max-width:100%;max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 24px 60px rgba(2,11,45,.28);transform:translateY(8px) scale(.98);transition:transform .2s ease;}
+  .tgx-ov.show .tgx-md{transform:none;}
+  .tgx-md-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--border,#E3E7F0);}
+  .tgx-kick{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6A3FC1;}
+  .tgx-md-h h3{margin:3px 0 0;font-size:17px;color:var(--navy,#0B1B4D);font-weight:800;}
+  .tgx-x{width:32px;height:32px;border-radius:9px;border:1px solid var(--border,#E3E7F0);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3,#8A93A8);flex-shrink:0;}
+  .tgx-x svg{width:15px;height:15px;}
+  .tgx-md-b{padding:16px 20px 18px;}
+  .tgx-p{margin:0 0 14px;font-size:12.5px;color:var(--text-2,#4A5470);font-weight:600;line-height:1.45;}
+  .tgx-md-f{display:flex;justify-content:flex-end;gap:10px;padding:12px 20px 16px;border-top:1px solid var(--border,#E3E7F0);}
+  .tgx-btn{border:0;background:var(--navy,#0B1B4D);color:#fff;font-family:inherit;font-weight:800;font-size:13px;padding:10px 20px;border-radius:10px;cursor:pointer;}
+  .tgx-btn.ghost{background:#EEF1F6;color:var(--navy,#0B1B4D);}
+  .tgx-btn:disabled{opacity:.6;cursor:default;}
+  @media (max-width:520px){ .cfg-tg,.tgx-seg{grid-template-columns:1fr;} }
+</style>
 </head>
 <body>
 
@@ -3502,6 +3547,7 @@
     <div class="pg-panel-summary">
       <div><div class="l">Monto a pagar</div><div class="v" id="pSumMonto">—</div></div>
       <div><div class="l">Plazo de pago</div><div class="v" id="pSumPlazo">—</div></div>
+      <div class="tgx-cell" id="pSumTipo" hidden></div>
     </div>
     <div class="pg-items-card" id="pgItemsCard" style="display:none;">
       <div class="pg-items-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
@@ -6506,7 +6552,7 @@ async function cfgLoadAll(){
   const res = await Promise.all([
     sb.from("cm_conceptos").select("id,nombre"),
     sb.from("cm_rubros").select("id,nombre,concepto_id"),
-    sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto"),
+    sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion"),
     sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
     sb.from("cm_insumos").select("id,nombre,rubro_id,notas,factor_merma,costo_manual,usar_costo_manual"),
     sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden")
@@ -6936,15 +6982,19 @@ function cfgTableHtml(dom, rows){
    solo ofrece puntual / mensual. */
 const CFG_TIPO_GASTO = {
   puntual: { lbl:"Puntual", desc:"Impacta entero el día de la factura" },
-  mensual: { lbl:"Mensual", desc:"Se distribuye en todo el mes de la factura" }
+  mensual: { lbl:"Mensual", desc:"Se prorratea entre los días del mes del servicio" }
 };
 function cfgTipoGasto(p){ const t = p && p.tipo_gasto; return CFG_TIPO_GASTO[t] ? t : "puntual"; }
-function cfgTipoGastoLbl(p){ return CFG_TIPO_GASTO[cfgTipoGasto(p)].lbl; }
-function cfgTipoGastoChip(p){ const t = cfgTipoGasto(p); return `<span class="cfg-tg-chip ${t}" title="Tipo de gasto: ${CFG_TIPO_GASTO[t].desc.toLowerCase()}">${CFG_TIPO_GASTO[t].lbl}</span>`; }
+function cfgMesImp(p){ return p && p.mes_imputacion==="vencido" ? "vencido" : "corriente"; }
+function cfgTipoGastoLbl(p){ const t = cfgTipoGasto(p); return CFG_TIPO_GASTO[t].lbl + (t==="mensual" ? (cfgMesImp(p)==="vencido" ? " · mes vencido" : " · mes corriente") : ""); }
+function cfgTipoGastoChip(p){ const t = cfgTipoGasto(p), v = t==="mensual" && cfgMesImp(p)==="vencido";
+  const desc = t==="mensual" ? (v ? "se reparte en el mes anterior al de la factura (mes vencido)" : "se reparte en el mes de la factura (mes corriente)") : CFG_TIPO_GASTO[t].desc.toLowerCase();
+  return `<span class="cfg-tg-chip ${t}" title="Tipo de gasto: ${desc}">${CFG_TIPO_GASTO[t].lbl}${t==="mensual" ? `<em>${v ? "vencido" : "corriente"}</em>` : ""}</span>`; }
 function cfgTipoGastoPick(t){
   const inp = document.getElementById("cfgFTipoGasto"); if(!inp) return;
   inp.value = t;
   document.querySelectorAll("#cfgTipoGasto .cfg-tg-opt").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
+  const mb = document.getElementById("cfgMesImpBox"); if(mb) mb.hidden = t!=="mensual";
 }
 function cfgProvMetaHtml(p){
   const es = cfgEntregas(p), pl = cfgPlazoTxt(p);
@@ -7418,9 +7468,10 @@ function cfgOpenProvForm(id, presetRubroId){
       </div>
       <div class="cfg-plazo-hint" id="cfgPlazoHint"></div>
       <div class="cfg-sec-title"><span class="n">5</span>Tipo de gasto</div>
-      <div class="cfg-note">${CFG_IC.info}<div>Define cómo impactan las órdenes de pago de este proveedor en <b>Análisis de resultados</b>: entero el día de la factura, o repartido en el mes de la factura.</div></div>
+      <div class="cfg-note">${CFG_IC.info}<div>Define cómo impactan las órdenes de pago de este proveedor en <b>Análisis de resultados</b>. <b>Puntual</b> (compra de mercadería): entero en la fecha de la factura. <b>Mensual</b> (servicios): prorrateado entre todos los días del mes del servicio, que puede ser el de la factura o el anterior.</div></div>
       <input type="hidden" id="cfgFTipoGasto" value="${cfgTipoGasto(p)}">
       <div class="cfg-tg" id="cfgTipoGasto">${Object.entries(CFG_TIPO_GASTO).map(([k,v])=>`<button type="button" class="cfg-tg-opt${cfgTipoGasto(p)===k?" on":""}" data-t="${k}" onclick="cfgTipoGastoPick('${k}')"><span class="rd"></span><span class="tx"><b>${v.lbl}</b><i>${v.desc}</i></span></button>`).join("")}</div>
+      ${cfgMesImpHtml(p)}
       <div class="cfg-err-box" id="cfgErrBox"></div>`,
     saveLabel: p ? "Guardar cambios" : "Crear proveedor",
     nameList: ()=>cfgData.provs,
@@ -7444,8 +7495,9 @@ function cfgOpenProvForm(id, presetRubroId){
       if(res.error){ cfgShowErr(cfgErrText(res.error, "un proveedor")); return false; }
       const tipoGasto = (document.getElementById("cfgFTipoGasto")||{}).value || "puntual";
       const provIdGuardado = res.data || (p && p.id);
-      if(provIdGuardado && tipoGasto !== (p ? cfgTipoGasto(p) : "puntual")){
-        const rt = await sb.from("cm_proveedores").update({ tipo_gasto: tipoGasto }).eq("id", provIdGuardado);
+      const mesImp = tipoGasto==="mensual" ? ((document.getElementById("cfgFMesImp")||{}).value || "corriente") : "corriente";
+      if(provIdGuardado && (tipoGasto !== (p ? cfgTipoGasto(p) : "puntual") || mesImp !== (p ? cfgMesImp(p) : "corriente"))){
+        const rt = await sb.from("cm_proveedores").update({ tipo_gasto: tipoGasto, mes_imputacion: mesImp }).eq("id", provIdGuardado);
         if(rt.error){ cfgShowErr("El proveedor se guardó, pero no se pudo guardar el tipo de gasto: " + rt.error.message); await cfgReload(); return false; }
       }
       const rubN = ids => ids.map(i=>(cfgRub("proveedores",i)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
@@ -7457,9 +7509,9 @@ function cfgOpenProvForm(id, presetRubroId){
         const eA = cfgEntregasTxt(p, true), eD = cfgEntregasTxt({entregas}, true);
         if(eA!==eD) ch.push(`entregas: ${eA||"—"} → ${eD||"—"}`);
         if((p.plazo_pago_dias??null)!==plazo) ch.push(`plazo de pago: ${cfgPlazoTxt(p)||"—"} → ${cfgPlazoTxt({plazo_pago_dias:plazo})||"—"}`);
-        if(cfgTipoGasto(p)!==tipoGasto) ch.push(`tipo de gasto: ${cfgTipoGastoLbl(p)} → ${CFG_TIPO_GASTO[tipoGasto].lbl}`);
+        if(cfgTipoGastoLbl(p)!==cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})) ch.push(`tipo de gasto: ${cfgTipoGastoLbl(p)} → ${cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})}`);
         if(ch.length) logHistorialConfig("Editó un proveedor", `“${nombre}” · ${ch.join(" · ")}`);
-      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""} · tipo de gasto: ${CFG_TIPO_GASTO[tipoGasto].lbl}`);
+      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""} · tipo de gasto: ${cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})}`);
       await cfgReload();
       rubIds.forEach(id=>{ const r = cfgRub("proveedores", id); if(r) cfgState.proveedores.collapsed.delete(r.catId); });
       cfgRenderDom("proveedores");
@@ -9621,7 +9673,7 @@ const AR_SITE = {
    · Importe: monto a pagar (neto de retenciones; las retenciones se imputan cuando se pagan).
    · Fecha: fecha del comprobante (criterio de lo devengado: pendientes incluidas).
    · Proveedor "puntual": entero ese día. Proveedor "mensual": repartido día a
-     día en el mes calendario de esa fecha (un reporte semanal toma 7/30 del gasto).
+     día en el mes del servicio — el de la factura (mes corriente) o el anterior (mes vencido) (un reporte semanal toma 7/30 del gasto).
    · Órdenes cuyo proveedor no está en el maestro (ej. "No especifica proveedor")
      se toman como puntuales.
    ===================================================================== */
@@ -9712,7 +9764,7 @@ async function arLoadAll(force){
     const puedeGastos = AR_SITE.tieneSeccion("pagos") || AR_SITE.tieneSeccion("costeo");
     const tareas = [
       puedeGastos ? arSelectAll(P+"_ordenes", "id,proveedor,concepto,rubro,monto,monto_factura,estado,fecha_comprobante", q=>q.neq("estado","Anulado")) : Promise.resolve(null),
-      puedeGastos ? arSelectAll(P+"_proveedores", "nombre,tipo_gasto") : Promise.resolve(null),
+      puedeGastos ? arSelectAll(P+"_proveedores", "nombre,tipo_gasto,mes_imputacion") : Promise.resolve(null),
       sb.from(P+"_socios").select("id,nombre,porcentaje,orden").order("orden").order("nombre"),
       AR_SITE.ventas ? AR_SITE.ventas(force).catch(e=>{ arState.ventasErr = e.message || String(e); return null; }) : Promise.resolve(null),
       sb.rpc(P+"_meses_liquidados"),
@@ -9724,6 +9776,7 @@ async function arLoadAll(force){
     arState.ordenes = Array.isArray(ord) ? ord.filter(o=>o.fecha_comprobante) : [];
     arState.reparto = arBuildReparto(rep && !rep.__err && !rep.error ? rep.data : null);
     arState.provTipo = new Map((Array.isArray(provs)?provs:[]).map(p=>[arNorm(p.nombre), p.tipo_gasto||"puntual"]));
+    arState.provMes = new Map((Array.isArray(provs)?provs:[]).map(p=>[arNorm(p.nombre), p.mes_imputacion==="vencido" ? "vencido" : "corriente"]));
     arState.socios = (soc && !soc.__err && !soc.error) ? (soc.data||[]) : [];
     arState.ventas = ventas && !ventas.__err ? ventas : null;
     arState.mesesLiq = (liqs && !liqs.__err && !liqs.error) ? (liqs.data||[]).filter(x=>x.liquidado).map(x=>String(x.mes).slice(0,7)) : null;
@@ -9734,6 +9787,11 @@ async function arLoadAll(force){
 
 /* ---------- cálculo ---------- */
 function arTipoGasto(o){ return arState.provTipo.get(arNorm(o.proveedor)) || "puntual"; }
+// Mensual a mes vencido (19/10/2026): la factura cobra el servicio del mes anterior → se prorratea en ese mes.
+function arMesServicio(o, f){
+  if(!(arState.provMes && arState.provMes.get(arNorm(o.proveedor))==="vencido")) return f;
+  const d = arDate(arMonthStart(f)); d.setDate(0); return arISO(d);
+}
 // Monto a pagar (neto de retenciones) — decisión de Pancho 06/10/2026: las retenciones se pagan
 // aparte y son gasto del mes en que se ejecute ese pago (con su propia orden).
 function arImporteOrden(o){ return Number(o.monto)||0; }
@@ -9741,7 +9799,7 @@ function arImporteOrden(o){ return Number(o.monto)||0; }
 function arGastoEnRango(o, desde, hasta){
   const f = o.fecha_comprobante, imp = arImporteOrden(o);
   if(arTipoGasto(o)==="mensual"){
-    const ms = arMonthStart(f), me = arMonthEnd(f);
+    const fm = arMesServicio(o, f), ms = arMonthStart(fm), me = arMonthEnd(fm);
     const a = desde > ms ? desde : ms, b = hasta < me ? hasta : me;
     if(a > b) return 0;
     return imp * (arDays(a,b)+1) / (arDays(ms,me)+1);
@@ -9962,7 +10020,7 @@ function arRenderER(el, c, expandAll){
       ${gastosRows}
     </div>
     <div class="ar-er-util ${c.util<0?"neg":""}"><span class="bar" style="background:${AR_COLORS.util}"></span><span class="nm">Utilidad del período</span><span class="pc">${base?arPct(c.util, base):"—"}</span><span class="mt">${arMoney(c.util)}</span></div>
-    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros. Ventas por categoría del índice de artículos (Compras-Ventas); el total es el de Movimientos de caja, y la diferencia entre ambos reportes se muestra como “Diferencia de conciliación”. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes de su factura.</div>`}`;
+    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros. Ventas por categoría del índice de artículos (Compras-Ventas); el total es el de Movimientos de caja, y la diferencia entre ambos reportes se muestra como “Diferencia de conciliación”. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes del servicio (el de la factura, o el anterior si son a mes vencido).</div>`}`;
 }
 function arToggleER(row){
   const it = row.parentElement, k = it.dataset.key;
@@ -10169,7 +10227,7 @@ function arGenerarPdf(){
     ${sec("comp","Composición de ventas","Venta A (facturado) vs. Venta B (efectivo)", compHtml)}
     ${sec("evo","Evolución de rendimientos","", evoHtml)}
     ${sec("div","Dividendos entre socios","", divHtml)}
-    <footer class="arp-foot">Ventas: Movimientos de caja y Compras-Ventas de ATC (corte de jornada 05:00). Gastos: órdenes de pago no anuladas, por monto a pagar, imputadas por fecha de factura; proveedores mensuales repartidos en el mes de su factura. Documento generado desde el panel de administración de ${arEsc(AR_SITE.club)}.</footer>`;
+    <footer class="arp-foot">Ventas: Movimientos de caja y Compras-Ventas de ATC (corte de jornada 05:00). Gastos: órdenes de pago no anuladas, por monto a pagar, imputadas por fecha de factura; proveedores mensuales repartidos en el mes del servicio (el de la factura o, a mes vencido, el anterior). Documento generado desde el panel de administración de ${arEsc(AR_SITE.club)}.</footer>`;
   const prevTitle = document.title;
   document.title = `Analisis de resultados - ${AR_SITE.club} - ${per}`;
   document.body.classList.add("ar-printing");
@@ -14149,6 +14207,137 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       if(vdXls("Insumos " + CLUB() + " " + HOY() + ".xlsx", cols, out, "Insumos")) showToast("Excel descargado");
     };
   }
+})();
+</script>
+<script>
+/* =====================================================================
+   TIPO DE GASTO · MES DE IMPUTACIÓN (pedido de Pancho, 19/10/2026) — mismo código en ambos sitios.
+   · Puntual: compra de mercadería → se devenga entero en la fecha de la factura.
+   · Mensual: el gasto se prorratea día a día en el mes del servicio:
+       – mes corriente → el mes de la factura;
+       – mes vencido   → el mes anterior al de la factura.
+   Se define por proveedor (Configuración › Proveedores) y, con permiso de Configuración,
+   también desde el detalle de una orden en Pagos.
+   ===================================================================== */
+(function(){
+  var PRE = typeof tieneSeccionChemono==="function" ? "cm" : "lf";
+  var MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var MESIMP = {
+    corriente: { lbl:"Mes corriente", desc:"El servicio es del mismo mes de la factura" },
+    vencido:   { lbl:"Mes vencido",   desc:"La factura cobra el servicio del mes anterior" }
+  };
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function puedeConfig(){
+    try{ return PRE==="cm" ? tieneSeccionChemono("config") : tieneSeccionFortaleza("config"); }catch(e){ return false; }
+  }
+
+  /* ---------- Configuración › Proveedores: sub-opción del tipo mensual ---------- */
+  window.cfgMesImpHtml = function(p, ids){
+    ids = ids || { box:"cfgMesImpBox", inp:"cfgFMesImp", fn:"cfgMesImpPick" };
+    var m = cfgMesImp(p), on = cfgTipoGasto(p)==="mensual";
+    return '<div class="tgx-mes" id="'+ids.box+'"'+(on?"":" hidden")+'>'
+      + '<div class="tgx-mes-h"><span class="tgx-mes-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg></span>'
+      + '<div><b>¿A qué mes corresponde el servicio?</b><i>El gasto se reparte entre todos los días de ese mes.</i></div></div>'
+      + '<input type="hidden" id="'+ids.inp+'" value="'+m+'">'
+      + '<div class="tgx-seg">' + Object.keys(MESIMP).map(function(k){
+          return '<button type="button" class="tgx-seg-opt'+(m===k?" on":"")+'" data-m="'+k+'" onclick="'+ids.fn+'(\''+k+'\')"><b>'+MESIMP[k].lbl+'</b><i>'+MESIMP[k].desc+'</i></button>';
+        }).join("") + '</div></div>';
+  };
+  window.cfgMesImpPick = function(k, box, inp){
+    var i = document.getElementById(inp || "cfgFMesImp"); if(i) i.value = k;
+    document.querySelectorAll("#"+(box || "cfgMesImpBox")+" .tgx-seg-opt").forEach(function(b){ b.classList.toggle("on", b.dataset.m===k); });
+  };
+
+  /* ---------- Pagos · detalle de la orden ---------- */
+  var cache = null, cargando = null;
+  function cargar(force){
+    if(cache && !force) return Promise.resolve(cache);
+    if(cargando && !force) return cargando;
+    cargando = sb.from(PRE+"_proveedores").select("id,nombre,tipo_gasto,mes_imputacion").then(function(r){
+      cargando = null;
+      if(r.error){ console.warn("Tipo de gasto:", r.error); return cache || {}; }
+      cache = {}; (r.data||[]).forEach(function(p){ cache[p.nombre] = p; });
+      return cache;
+    });
+    return cargando;
+  }
+  function mesTxt(iso){ var a = iso.split("-"); return MES[+a[1]-1] + " " + a[0]; }
+  function mesAnterior(iso){ var a = iso.split("-").map(Number), y = a[0], m = a[1]-1; if(m<1){ m = 12; y--; } return y + "-" + String(m).padStart(2,"0") + "-01"; }
+  function imputacionTxt(p, fecha){
+    var t = cfgTipoGasto(p);
+    if(t!=="mensual") return fecha ? "Se imputa entero el <b>"+esc(isoToDMY(fecha))+"</b>, fecha de la factura." : "Se imputa entero en la fecha de la factura.";
+    var venc = cfgMesImp(p)==="vencido";
+    if(!fecha) return venc ? "Se reparte en el mes anterior al de la factura." : "Se reparte en el mes de la factura.";
+    var mes = venc ? mesAnterior(fecha) : fecha;
+    return "Se reparte en <b>"+mesTxt(mes)+"</b>"+(venc ? " (mes anterior a la factura)." : " (mes de la factura).");
+  }
+  function renderFila(){
+    var el = document.getElementById("pSumTipo"); if(!el || !openOrderId) return;
+    var o = (typeof ordenes!=="undefined" ? ordenes : []).find(function(x){ return x.id===openOrderId; }); if(!o){ el.hidden = true; return; }
+    var prov = (document.getElementById("fProveedor")||{}).value; prov = (prov||"").trim() || o.proveedor;
+    var fecha = (document.getElementById("fFechaComprobante")||{}).value || o.fechaComprobante || null;
+    el.hidden = false;
+    cargar().then(function(c){
+      if(openOrderId!==o.id) return;
+      var p = c[prov];
+      if(!p){ el.innerHTML = '<div class="l">Tipo de gasto</div><div class="tgx-row"><span class="tgx-dim">Proveedor fuera del maestro: se toma como puntual.</span></div>'; return; }
+      el.innerHTML = '<div class="l">Tipo de gasto del proveedor</div><div class="tgx-row">'+cfgTipoGastoChip(p)
+        + '<span class="tgx-imp">'+imputacionTxt(p, fecha)+'</span>'
+        + (puedeConfig() ? '<button type="button" class="tgx-edit" onclick="tgxEditar()">Cambiar</button>' : '')
+        + '</div>';
+    });
+  }
+  if(typeof pgPanelRefreshPlazo==="function"){
+    var _rp = pgPanelRefreshPlazo;
+    window.pgPanelRefreshPlazo = function(){ var r = _rp.apply(this, arguments); try{ renderFila(); }catch(e){ console.warn(e); } return r; };
+  }
+
+  /* ---------- Modal para cambiar la condición desde Pagos ---------- */
+  var md = null, mdProv = null;
+  window.tgxPickTipo = function(t){
+    document.getElementById("tgxFTipo").value = t;
+    document.querySelectorAll("#tgxTipo .cfg-tg-opt").forEach(function(b){ b.classList.toggle("on", b.dataset.t===t); });
+    var box = document.getElementById("tgxMesBox"); if(box) box.hidden = t!=="mensual";
+  };
+  window.tgxPickMes = function(k){ cfgMesImpPick(k, "tgxMesBox", "tgxFMes"); };
+  window.tgxCerrar = function(){ if(md){ md.classList.remove("show"); } };
+  window.tgxEditar = function(){
+    var o = ordenes.find(function(x){ return x.id===openOrderId; }); if(!o) return;
+    var prov = ((document.getElementById("fProveedor")||{}).value||"").trim() || o.proveedor;
+    cargar(true).then(function(c){
+      var p = c[prov]; if(!p){ showToast("Ese proveedor no está en Configuración", "warn"); return; }
+      mdProv = p;
+      if(!md){ md = document.createElement("div"); md.className = "tgx-ov"; md.onclick = function(e){ if(e.target===md) tgxCerrar(); }; document.body.appendChild(md); }
+      var t = cfgTipoGasto(p);
+      md.innerHTML = '<div class="tgx-md" role="dialog" aria-modal="true">'
+        + '<div class="tgx-md-h"><div><span class="tgx-kick">Tipo de gasto</span><h3>'+esc(p.nombre)+'</h3></div><button type="button" class="tgx-x" onclick="tgxCerrar()" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>'
+        + '<div class="tgx-md-b"><p class="tgx-p">Se aplica a <b>todas las órdenes</b> de este proveedor en <b>Análisis de resultados</b>. Es el mismo dato que en Configuración › Proveedores.</p>'
+        + '<input type="hidden" id="tgxFTipo" value="'+t+'">'
+        + '<div class="cfg-tg" id="tgxTipo">' + Object.keys(CFG_TIPO_GASTO).map(function(k){ var v = CFG_TIPO_GASTO[k];
+            return '<button type="button" class="cfg-tg-opt'+(t===k?" on":"")+'" data-t="'+k+'" onclick="tgxPickTipo(\''+k+'\')"><span class="rd"></span><span class="tx"><b>'+v.lbl+'</b><i>'+v.desc+'</i></span></button>'; }).join("") + '</div>'
+        + cfgMesImpHtml(p, { box:"tgxMesBox", inp:"tgxFMes", fn:"tgxPickMes" })
+        + '</div><div class="tgx-md-f"><button type="button" class="tgx-btn ghost" onclick="tgxCerrar()">Cancelar</button><button type="button" class="tgx-btn" id="tgxSave" onclick="tgxGuardar()">Guardar</button></div></div>';
+      requestAnimationFrame(function(){ md.classList.add("show"); });
+    });
+  };
+  window.tgxGuardar = async function(){
+    var p = mdProv; if(!p) return;
+    var t = document.getElementById("tgxFTipo").value || "puntual";
+    var m = t==="mensual" ? (document.getElementById("tgxFMes").value || "corriente") : "corriente";
+    if(t===cfgTipoGasto(p) && m===cfgMesImp(p)){ tgxCerrar(); return; }
+    var btn = document.getElementById("tgxSave"); btn.disabled = true; btn.textContent = "Guardando…";
+    var r = await sb.from(PRE+"_proveedores").update({ tipo_gasto:t, mes_imputacion:m }).eq("id", p.id).select("id");
+    btn.disabled = false; btn.textContent = "Guardar";
+    if(r.error || !r.data || !r.data.length){ showToast(r.error ? "No se pudo guardar: " + r.error.message : "No tenés permiso para editar proveedores", "warn"); return; }
+    var antes = cfgTipoGastoLbl(p), nuevo = { tipo_gasto:t, mes_imputacion:m };
+    try{ logHistorialConfig("Editó un proveedor", "“"+p.nombre+"” · tipo de gasto: "+antes+" → "+cfgTipoGastoLbl(nuevo)+" (desde Pagos)"); }catch(e){}
+    p.tipo_gasto = t; p.mes_imputacion = m;
+    try{ (cfgData.provs||[]).forEach(function(x){ if(x.id===p.id){ x.tipo_gasto = t; x.mes_imputacion = m; } }); }catch(e){}
+    try{ if(typeof arState!=="undefined" && arState.provTipo){ arState.provTipo.set(arNorm(p.nombre), t); if(arState.provMes) arState.provMes.set(arNorm(p.nombre), m); } }catch(e){}
+    tgxCerrar(); renderFila();
+    showToast("Tipo de gasto actualizado: " + cfgTipoGastoLbl(nuevo));
+  };
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && md && md.classList.contains("show")){ e.stopPropagation(); tgxCerrar(); } }, true);
 })();
 </script>
 </body>
