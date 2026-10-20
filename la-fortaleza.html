@@ -20663,7 +20663,14 @@ const CT_FORMATOS = {
 function ctId(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ("ct-"+Date.now()+"-"+Math.random().toString(36).slice(2)); }
 function ctTier(pt, bold){ return { pt, bold:!!bold, italic:false, underline:false }; }
 function ctNuevoMarco(){ return { activo:false, colorHex:"#020B2D", grosorMm:0.6 }; }
-function ctNuevaSeccion(){ return { id:ctId(), titulo:"Nueva sección", descripcion:"", columnaInicio:1, columnaSpan:1, posicionManual:false, yMm:0, marco:ctNuevoMarco(), items:[] }; }
+// itemCols (20/10/2026): cuántas columnas internas tienen los ARTÍCULOS de esta sección — totalmente
+// independiente de columnaInicio/columnaSpan, que solo deciden qué ancho/posición de la PÁGINA ocupa
+// la sección (ej.: Bebidas puede abarcar toda la carta y repartir sus artículos en 2 columnas propias,
+// mientras Comidas, debajo, también abarca toda la carta pero reparte los suyos en 3).
+// tituloAlin: alineación del título de la sección — 'seccion' (dentro de su propio ancho), 'columna'
+// (sobre una de sus propias columnas internas) o 'carta' (sobre el ancho total de la página; solo
+// tiene sentido — y solo se ofrece — cuando la sección ya abarca el 100% del ancho de la carta).
+function ctNuevaSeccion(){ return { id:ctId(), titulo:"Nueva sección", descripcion:"", columnaInicio:1, columnaSpan:1, itemCols:1, tituloAlin:{modo:"seccion",align:"izquierda",columna:1}, posicionManual:false, yMm:0, marco:ctNuevoMarco(), items:[] }; }
 function ctNuevaConfig(){
   return {
     formato:{ preset:"A4", anchoMm:210, altoMm:297, orientacion:"vertical" },
@@ -20710,18 +20717,33 @@ function ctMigrarConfig(cfgIn){
   out.secciones = (cfg.secciones||[]).map(s=>{
     const inicio = s.columnaInicio || s.columna || 1;
     const span = Math.max(1, s.columnaSpan||1);
+    const columnaSpanFinal = Math.min(span, Math.max(1, out.layout.columnas - inicio + 1));
+    // itemCols nueva (20/10/2026): en configs viejas no existía, y antes el artículo se repartía en
+    // tantas columnas como columnaSpan — se preserva ese mismo resultado visual de arranque.
+    const itemCols = Math.max(1, Math.min(8, Number(s.itemCols)||columnaSpanFinal||1));
+    const alinIn = s.tituloAlin && typeof s.tituloAlin==="object" ? s.tituloAlin : {};
+    const fullWidthMigr = (inicio===1 && columnaSpanFinal===out.layout.columnas);
+    let modoAlin = ["seccion","columna","carta"].includes(alinIn.modo) ? alinIn.modo : "seccion";
+    if(modoAlin==="carta" && !fullWidthMigr) modoAlin = "seccion";
+    if(modoAlin==="columna" && itemCols<=1) modoAlin = "seccion";
     return {
       id: s.id || ctId(),
       titulo: s.titulo || "Sección",
       descripcion: s.descripcion || "",
       columnaInicio: inicio,
-      columnaSpan: Math.min(span, Math.max(1, out.layout.columnas - inicio + 1)),
+      columnaSpan: columnaSpanFinal,
+      itemCols,
+      tituloAlin: {
+        modo: modoAlin,
+        align: ["izquierda","centro","derecha"].includes(alinIn.align) ? alinIn.align : "izquierda",
+        columna: Math.max(1, Math.min(itemCols, Number(alinIn.columna)||1)),
+      },
       posicionManual: !!s.posicionManual,
       yMm: s.yMm!=null ? Number(s.yMm) : 0,
       marco: s.marco && typeof s.marco==="object" ? { activo:!!s.marco.activo, colorHex:s.marco.colorHex||"#020B2D", grosorMm:s.marco.grosorMm!=null?s.marco.grosorMm:0.5 } : { activo:false, colorHex:"#020B2D", grosorMm:0.5 },
       items: (s.items||[]).map(it=>({
         articuloId: it.articuloId,
-        col: it.col || 1,
+        col: Math.max(1, Math.min(itemCols, Number(it.col)||1)),
         subindice: !!it.subindice,
         descExtra: it.descExtra || "",
         nombreOverride: it.nombreOverride || "",
@@ -20970,6 +20992,10 @@ const CT = {
       if(s.columnaInicio > n) s.columnaInicio = n;
       const max = n - s.columnaInicio + 1;
       if(s.columnaSpan > max) s.columnaSpan = max;
+      // "Alinear al total de la carta" solo tiene sentido si la sección sigue abarcando el 100% del
+      // ancho — si este cambio de columnas globales de posición la deja más angosta, se cae a "dentro
+      // de esta sección" (que en ese momento deja de ser lo mismo que el ancho total).
+      if(s.tituloAlin && s.tituloAlin.modo==="carta" && !(s.columnaInicio===1 && s.columnaSpan===n)) s.tituloAlin.modo = "seccion";
     });
     this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
   },
@@ -21033,7 +21059,7 @@ const CT = {
       const a = this.articulo(it.articuloId);
       const pr = this.precio(it.articuloId);
       const nombreBase = a ? a.nombre : "(artículo eliminado del catálogo)";
-      const colSel = s.columnaSpan>1 ? `<select title="Columna dentro de la sección" onchange="CT.setItemCampo('${s.id}','${it.articuloId}','col', Number(this.value))">${Array.from({length:s.columnaSpan},(_,k)=>k+1).map(n=>`<option value="${n}" ${(it.col||1)===n?"selected":""}>Col ${n}</option>`).join("")}</select>` : "";
+      const colSel = (s.itemCols||1)>1 ? `<select title="Columna dentro de la sección" onchange="CT.setItemCampo('${s.id}','${it.articuloId}','col', Number(this.value))">${Array.from({length:s.itemCols},(_,k)=>k+1).map(n=>`<option value="${n}" ${(it.col||1)===n?"selected":""}>Col ${n}</option>`).join("")}</select>` : "";
       return `<div class="ct-item-row">
         <div style="display:flex;gap:2px;flex-shrink:0;">
           <button type="button" class="ct-icon-btn" title="Subir" ${i===0?"disabled":""} onclick="CT.moverItem('${s.id}',${i},-1)">↑</button>
@@ -21054,6 +21080,10 @@ const CT = {
     const maxSpan = c.config.layout.columnas - (s.columnaInicio||1) + 1;
     const spanOpts = Array.from({length:maxSpan},(_,i)=>i+1).map(n=>`<option value="${n}" ${(s.columnaSpan||1)===n?"selected":""}>${n}</option>`).join("");
     const otrasManuales = (c.config.secciones||[]).filter(o=>o.id!==s.id && o.posicionManual);
+    const itemCols = s.itemCols||1;
+    const fullWidth = ((s.columnaInicio||1)===1 && (s.columnaSpan||1)===c.config.layout.columnas);
+    const alin = s.tituloAlin || {modo:"seccion",align:"izquierda",columna:1};
+    const colTituloOpts = Array.from({length:itemCols},(_,i)=>i+1).map(n=>`<option value="${n}" ${(alin.columna||1)===n?"selected":""}>${n}</option>`).join("");
 
     return `<div class="ct-seccion" data-sid="${s.id}">
       <div class="ct-seccion-head">
@@ -21069,13 +21099,31 @@ const CT = {
       <input type="text" placeholder="Descripción de la sección (opcional, ej. 'Los cortes se acompañan con papas fritas')" value="${this.esc(s.descripcion||"")}" oninput="CT.setSeccionCampo('${s.id}','descripcion', this.value)" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;margin:8px 0;">
 
       <div class="ct-grid" style="margin-bottom:10px;">
-        <div class="ct-field"><label>Columna inicial</label><select onchange="CT.setSeccionColumnas('${s.id}','columnaInicio', Number(this.value))">${colInicioOpts}</select></div>
-        <div class="ct-field"><label>Abarca columnas</label><select onchange="CT.setSeccionColumnas('${s.id}','columnaSpan', Number(this.value))">${spanOpts}</select></div>
+        <div class="ct-field"><label>Columna inicial (posición)</label><select onchange="CT.setSeccionColumnas('${s.id}','columnaInicio', Number(this.value))">${colInicioOpts}</select></div>
+        <div class="ct-field"><label>Abarca columnas (posición)</label><select onchange="CT.setSeccionColumnas('${s.id}','columnaSpan', Number(this.value))">${spanOpts}</select></div>
+        <div class="ct-field"><label>Columnas internas (cómo se reparten sus artículos)</label><input type="number" min="1" max="8" step="1" value="${itemCols}" onchange="CT.setSeccionItemCols('${s.id}', Number(this.value))"></div>
         <div class="ct-field">
           <label>Marco de esta sección</label>
           <div class="ct-marco-row">
             <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" ${s.marco.activo?"checked":""} onchange="CT.setMarco('seccion','${s.id}','activo', this.checked)"> Activar</label>
             ${s.marco.activo?`<input type="color" value="${s.marco.colorHex}" onchange="CT.setMarco('seccion','${s.id}','colorHex', this.value)"><input type="number" step="0.1" min="0.1" max="5" value="${s.marco.grosorMm}" onchange="CT.setMarco('seccion','${s.id}','grosorMm', Number(this.value))" style="width:54px;"> mm`:""}
+          </div>
+        </div>
+        <div class="ct-field">
+          <label>Alinear título</label>
+          <select onchange="CT.setTituloAlin('${s.id}','modo', this.value)">
+            <option value="seccion" ${alin.modo==='seccion'?'selected':''}>Dentro de esta sección</option>
+            ${itemCols>1?`<option value="columna" ${alin.modo==='columna'?'selected':''}>Sobre una columna puntual</option>`:''}
+            ${fullWidth?`<option value="carta" ${alin.modo==='carta'?'selected':''}>Sobre el ancho total de la carta</option>`:''}
+          </select>
+        </div>
+        ${alin.modo==='columna' && itemCols>1 ? `<div class="ct-field"><label>¿Cuál columna?</label><select onchange="CT.setTituloAlin('${s.id}','columna', Number(this.value))">${colTituloOpts}</select></div>` : ""}
+        <div class="ct-field">
+          <label>Alinear texto del título</label>
+          <div class="ct-seg">
+            <button type="button" class="${alin.align==='izquierda'?'on':''}" onclick="CT.setTituloAlin('${s.id}','align','izquierda')">Izq.</button>
+            <button type="button" class="${alin.align==='centro'?'on':''}" onclick="CT.setTituloAlin('${s.id}','align','centro')">Centro</button>
+            <button type="button" class="${alin.align==='derecha'?'on':''}" onclick="CT.setTituloAlin('${s.id}','align','derecha')">Der.</button>
           </div>
         </div>
         <div class="ct-field">
@@ -21171,7 +21219,27 @@ const CT = {
     } else if(campo==="columnaSpan"){
       s.columnaSpan = val;
     }
-    (s.items||[]).forEach(it=>{ if((it.col||1) > s.columnaSpan) it.col = 1; });
+    // Nota (20/10/2026): columnaInicio/columnaSpan ahora solo deciden qué ancho/posición de LA PÁGINA
+    // ocupa la sección — ya no determinan en cuántas columnas se reparten sus artículos (eso es
+    // itemCols, independiente). Por eso acá ya no se clampea it.col contra columnaSpan.
+    if(s.tituloAlin && s.tituloAlin.modo==="carta" && !(s.columnaInicio===1 && s.columnaSpan===c.config.layout.columnas)) s.tituloAlin.modo = "seccion";
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  setSeccionItemCols(sid, val){
+    const c = this.actual(); if(!c) return;
+    const s = c.config.secciones.find(x=>x.id===sid); if(!s) return;
+    s.itemCols = Math.max(1, Math.min(8, Number(val)||1));
+    (s.items||[]).forEach(it=>{ if((it.col||1) > s.itemCols) it.col = 1; });
+    s.tituloAlin = s.tituloAlin || {modo:"seccion",align:"izquierda",columna:1};
+    if(s.itemCols<=1 && s.tituloAlin.modo==="columna") s.tituloAlin.modo = "seccion";
+    if((s.tituloAlin.columna||1) > s.itemCols) s.tituloAlin.columna = 1;
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  setTituloAlin(sid, campo, val){
+    const c = this.actual(); if(!c) return;
+    const s = c.config.secciones.find(x=>x.id===sid); if(!s) return;
+    s.tituloAlin = s.tituloAlin || {modo:"seccion",align:"izquierda",columna:1};
+    s.tituloAlin[campo] = val;
     this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
   },
   alinearCon(sid, otherId){
@@ -21239,16 +21307,33 @@ const CT = {
     </div>`;
   },
 
-  renderSeccionImpresa(s, cfg, span){
-    const subCols = Math.max(1, span||1);
+  renderSeccionImpresa(s, cfg){
+    // itemCols (20/10/2026): la cantidad de columnas en que se reparten los ARTÍCULOS de esta sección
+    // ya no depende de cuántas columnas de la página ocupa (eso es columnaInicio/columnaSpan, que solo
+    // definen ancho y posición) — así Bebidas puede repartir sus artículos en 2 columnas propias y
+    // Comidas, debajo, en 3, aunque ambas abarquen el mismo ancho de página.
+    const subCols = Math.max(1, s.itemCols||1);
     const grupos = Array.from({length:subCols}, ()=>[]);
     (s.items||[]).forEach(it=>{
       const idx = Math.min(Math.max((it.col||1)-1, 0), subCols-1);
       grupos[idx].push(it);
     });
     const colsHtml = grupos.map(arr=>`<div class="ct-subcol">${arr.map(it=>this.renderItem(it,cfg)).join("")}</div>`).join("");
+    // Alineación del título: 'columna' lo angosta al ancho de UNA de las columnas internas de la
+    // sección (porcentual, para no depender de medidas en px); 'seccion' y 'carta' usan el ancho
+    // completo de la sección — y como 'carta' solo se ofrece cuando la sección ya abarca el 100% del
+    // ancho de la carta, en ese caso ese ancho completo YA ES el ancho total de la página (ver dims en
+    // renderHoja: span===cols da exactamente totalWidthPx), así que no hace falta un cálculo aparte.
+    const alin = s.tituloAlin || {modo:"seccion",align:"izquierda",columna:1};
+    const alignCss = alin.align==="centro" ? "center" : (alin.align==="derecha" ? "right" : "left");
+    let tituloStyle = `text-align:${alignCss};`;
+    if(alin.modo==="columna" && subCols>1){
+      const col = Math.min(Math.max(alin.columna||1,1), subCols);
+      const wPct = 100/subCols;
+      tituloStyle += `width:${wPct}%;margin-left:${(wPct*(col-1)).toFixed(4)}%;box-sizing:border-box;`;
+    }
     return `<div class="ct-seccion-inner">
-      <div class="ct-stitulo" style="${this.textStyleCss(cfg.estilos.subtitulo)}">${this.esc(s.titulo)}</div>
+      <div class="ct-stitulo" style="${this.textStyleCss(cfg.estilos.subtitulo)}${tituloStyle}">${this.esc(s.titulo)}</div>
       ${s.descripcion?`<div class="ct-sdesc" style="${this.textStyleCss(cfg.estilos.descripcion)}">${this.esc(s.descripcion)}</div>`:""}
       <div class="ct-subcols" style="gap:${this.mm2px(cfg.layout.margenMm/2)}px;">${colsHtml}</div>
     </div>`;
@@ -21299,7 +21384,7 @@ const CT = {
       const marcoActivo = s.marco && s.marco.activo;
       const probe = document.createElement("div");
       probe.style.cssText = `position:fixed; visibility:hidden; left:-9999px; top:0; width:${widthPx}px; font-family:'Roboto',sans-serif; ${marcoActivo?this.marcoCss(s.marco)+"padding:"+this.mm2px(3)+"px;":""}`;
-      probe.innerHTML = this.renderSeccionImpresa(s, cfg, span);
+      probe.innerHTML = this.renderSeccionImpresa(s, cfg);
       document.body.appendChild(probe);
       const heightPx = probe.offsetHeight;
       document.body.removeChild(probe);
@@ -21330,7 +21415,7 @@ const CT = {
       el.dataset.sid = s.id;
       const pad = m.marcoActivo ? `padding:${this.mm2px(3)}px;` : "";
       el.style.cssText = `position:absolute; left:${trackLeft(m.start)}px; top:${this.mm2px(tops[s.id])}px; width:${m.widthPx}px; ${pad}${this.marcoCss(s.marco)}`;
-      el.innerHTML = this.renderSeccionImpresa(s, cfg, m.span);
+      el.innerHTML = this.renderSeccionImpresa(s, cfg);
       contentWrap.appendChild(el);
     });
 
