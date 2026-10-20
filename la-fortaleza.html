@@ -2638,6 +2638,122 @@
 
   .emp-bracket-admin{--c:#2F8F7B;}
 </style>
+<style>
+  /* Tipo de gasto · mes de imputación (19/10/2026) */
+  .cfg-tg-chip em{font-style:normal;font-weight:700;opacity:.78;margin-left:4px;padding-left:5px;border-left:1px solid currentColor;}
+  .tgx-mes{margin-top:12px;border:1.5px solid #D9CCF5;background:linear-gradient(180deg,#FAF7FF,#F5F0FE);border-radius:12px;padding:12px 14px 14px;animation:tgxIn .18s ease;}
+  .tgx-mes[hidden]{display:none;}
+  @keyframes tgxIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+  .tgx-mes-h{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+  .tgx-mes-h b{display:block;font-size:12.5px;color:#4B2A93;font-weight:800;}
+  .tgx-mes-h i{display:block;font-style:normal;font-size:11.5px;color:#7C6BA6;font-weight:600;margin-top:1px;}
+  .tgx-mes-ic{width:26px;height:26px;border-radius:8px;background:#EBE2FC;color:#6A3FC1;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .tgx-mes-ic svg{width:15px;height:15px;}
+  .tgx-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#E9E0FA;border-radius:10px;padding:4px;}
+  .tgx-seg-opt{border:0;background:transparent;border-radius:8px;padding:8px 10px;text-align:left;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:2px;transition:background .15s,box-shadow .15s;}
+  .tgx-seg-opt b{font-size:12.5px;color:#5B4A85;font-weight:800;}
+  .tgx-seg-opt i{font-style:normal;font-size:11px;color:#8A7BB0;font-weight:600;line-height:1.3;}
+  .tgx-seg-opt:hover{background:rgba(255,255,255,.55);}
+  .tgx-seg-opt.on{background:#fff;box-shadow:0 1px 3px rgba(75,42,147,.18);}
+  .tgx-seg-opt.on b{color:#6A3FC1;}
+  /* Pagos · fila en el detalle de la orden */
+  .pg-panel-summary > .tgx-cell{grid-column:1/-1;}
+  .tgx-cell[hidden]{display:none;}
+  .tgx-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--text-2,#4A5470);font-weight:600;}
+  .tgx-row .tgx-imp{flex:1;min-width:150px;line-height:1.35;}
+  .tgx-row .tgx-imp b{color:var(--navy,#0B1B4D);}
+  .tgx-dim{color:var(--text-3,#8A93A8);}
+  .tgx-edit{border:1px solid var(--border,#E3E7F0);background:#fff;color:var(--navy,#0B1B4D);font-family:inherit;font-weight:800;font-size:11.5px;padding:5px 11px;border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s;}
+  .tgx-edit:hover{border-color:#C9D6EE;background:#F3F8FF;}
+  /* Modal */
+  .tgx-ov{position:fixed;inset:0;background:rgba(2,11,45,.45);display:flex;align-items:center;justify-content:center;z-index:95;opacity:0;pointer-events:none;transition:opacity .18s ease;padding:16px;}
+  .tgx-ov.show{opacity:1;pointer-events:auto;}
+  .tgx-md{background:#fff;border-radius:16px;width:520px;max-width:100%;max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 24px 60px rgba(2,11,45,.28);transform:translateY(8px) scale(.98);transition:transform .2s ease;}
+  .tgx-ov.show .tgx-md{transform:none;}
+  .tgx-md-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--border,#E3E7F0);}
+  .tgx-kick{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#6A3FC1;}
+  .tgx-md-h h3{margin:3px 0 0;font-size:17px;color:var(--navy,#0B1B4D);font-weight:800;}
+  .tgx-x{width:32px;height:32px;border-radius:9px;border:1px solid var(--border,#E3E7F0);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3,#8A93A8);flex-shrink:0;}
+  .tgx-x svg{width:15px;height:15px;}
+  .tgx-md-b{padding:16px 20px 18px;}
+  .tgx-p{margin:0 0 14px;font-size:12.5px;color:var(--text-2,#4A5470);font-weight:600;line-height:1.45;}
+  .tgx-md-f{display:flex;justify-content:flex-end;gap:10px;padding:12px 20px 16px;border-top:1px solid var(--border,#E3E7F0);}
+  .tgx-btn{border:0;background:var(--navy,#0B1B4D);color:#fff;font-family:inherit;font-weight:800;font-size:13px;padding:10px 20px;border-radius:10px;cursor:pointer;}
+  .tgx-btn.ghost{background:#EEF1F6;color:var(--navy,#0B1B4D);}
+  .tgx-btn:disabled{opacity:.6;cursor:default;}
+  @media (max-width:520px){ .cfg-tg,.tgx-seg{grid-template-columns:1fr;} }
+</style>
+<style>
+  /* Gastos semestrales / anuales (19/10/2026) */
+  .cfg-tg-chip.semestral{color:#9A5B0B;background:#FFF1DC;}
+  .cfg-tg-chip.anual{color:#1F7A5C;background:#E3F5EE;}
+  .tgx-perhint{margin-top:12px;display:flex;gap:10px;align-items:flex-start;border:1.5px solid #CDE9DD;background:#F3FBF7;border-radius:12px;padding:11px 13px;font-size:12px;color:#3C6B5A;font-weight:600;line-height:1.4;}
+  .tgx-perhint[hidden]{display:none;}
+  .tgx-perhint b{color:#1F5C46;}
+  .tgx-perhint svg{width:16px;height:16px;flex-shrink:0;color:#2E9E7E;margin-top:1px;}
+  .tgx-per[hidden]{display:none;}
+  .tgx-per{border:1.5px solid #CDE9DD;background:#F3FBF7;border-radius:12px;padding:10px 12px 11px;}
+  .tgx-per label{display:flex;align-items:center;gap:8px;}
+  .tgx-per .tgx-per-tag{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#1F7A5C;background:#DDF2E9;border-radius:6px;padding:2px 7px;}
+  .tgx-per select{width:100%;}
+  .tgx-per-hint{margin-top:6px;font-size:11.5px;color:#3C6B5A;font-weight:600;line-height:1.4;}
+  .tgx-per-hint b{color:#1F5C46;}
+  .tgx-per-hint span{display:block;color:#6E9384;font-weight:600;margin-top:2px;}
+</style>
+<style>
+  /* Rubros del proveedor ↔ insumos (19/10/2026) */
+  .cfg-ms-tag.prv-lock{background:#2B3A67;}
+  .cfg-ms-tag.prv-lock button{background:rgba(255,255,255,.16);}
+  .cfg-ms-tag.prv-lock button:hover{background:rgba(255,255,255,.3);}
+  .cfg-ms-tag.prv-lock button svg{width:10px;height:10px;}
+  .cfg-ms-tag .prv-n{font-style:normal;font-size:10px;font-weight:800;background:rgba(255,255,255,.22);border-radius:10px;padding:1px 6px;}
+  .cfg-ms-opt.prv-lock .ck{opacity:.55;}
+  .prv-bar{display:flex;align-items:center;gap:12px;margin-top:10px;padding:10px 12px;border:1px dashed #C9D3E6;border-radius:11px;background:#F8FAFE;font-size:12px;color:var(--text-2,#4A5470);font-weight:600;line-height:1.4;}
+  .prv-bar.pend{border-style:solid;border-color:#BFD5F7;background:#EFF5FF;}
+  .prv-bar.flash{animation:prvFlash .9s ease;}
+  @keyframes prvFlash{0%{box-shadow:0 0 0 0 rgba(89,119,210,.45);}100%{box-shadow:0 0 0 10px rgba(89,119,210,0);}}
+  .prv-bar-tx{flex:1;min-width:0;}
+  .prv-bar-tx svg{width:11px;height:11px;vertical-align:-1px;}
+  .prv-bar-tx b{color:var(--navy,#0B1B4D);}
+  .prv-bar-tx i{font-style:normal;font-weight:800;color:var(--navy,#0B1B4D);}
+  .prv-bar-act{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .prv-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid #C9D6EE;background:#fff;color:var(--navy,#0B1B4D);font-family:inherit;font-weight:800;font-size:11.5px;padding:6px 11px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s;}
+  .prv-btn:hover{background:#F3F8FF;border-color:#A9BEE6;}
+  .prv-btn svg{width:13px;height:13px;}
+  .prv-link{border:0;background:none;color:#5977D2;font-family:inherit;font-weight:800;font-size:11.5px;cursor:pointer;padding:4px;}
+  .prv-link:hover{text-decoration:underline;}
+  .prv-md{width:600px;display:flex;flex-direction:column;}
+  .prv-md .tgx-md-b{overflow:auto;}
+  .prv-step{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#5977D2;margin:2px 0 8px;}
+  .prv-step + .prv-sel{margin-bottom:16px;}
+  .prv-step .n{width:19px;height:19px;border-radius:6px;background:#EAF0FC;color:#5977D2;display:inline-flex;align-items:center;justify-content:center;font-size:10.5px;}
+  .prv-step-h{text-transform:none;letter-spacing:0;font-weight:600;color:var(--text-3,#8A93A8);font-size:11.5px;}
+  .prv-sel{width:100%;height:42px;border:1.5px solid var(--border,#E3E7F0);border-radius:10px;padding:0 12px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--navy,#0B1B4D);background:#fff;outline:none;}
+  .prv-sel:focus{border-color:var(--sky,#5977D2);}
+  .prv-list{border:1px solid var(--border,#E3E7F0);border-radius:12px;max-height:min(46vh,380px);overflow:auto;}
+  .prv-grp + .prv-grp{border-top:1px solid var(--border,#E3E7F0);}
+  .prv-gh{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:10px;padding:9px 12px;background:#F4F6FB;cursor:pointer;}
+  .prv-gn{flex:1;font-size:12.5px;font-weight:800;color:var(--navy,#0B1B4D);}
+  .prv-gn small{margin-left:7px;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3,#8A93A8);}
+  .prv-gc{font-size:11px;font-weight:700;color:var(--text-3,#8A93A8);}
+  .prv-grp.dest .prv-gh{background:#EEF8F3;}
+  .prv-grp.dest .prv-gc{color:#2E9E7E;}
+  .prv-it{display:flex;align-items:center;gap:10px;padding:7px 12px 7px 34px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text-2,#4A5470);transition:background .12s;}
+  .prv-it:hover{background:#F8FAFE;}
+  .prv-it.off{cursor:default;opacity:.55;}
+  .prv-it.off:hover{background:none;}
+  .prv-in{flex:1;min-width:0;}
+  .prv-tag{font-style:normal;margin-left:6px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#5977D2;background:#EAF0FC;border-radius:5px;padding:1px 5px;}
+  .prv-ot{font-size:10.5px;font-weight:700;color:#9A6A12;background:#FFF5E1;border-radius:6px;padding:2px 7px;white-space:nowrap;}
+  .prv-list input[type=checkbox]{width:15px;height:15px;accent-color:#5977D2;flex-shrink:0;cursor:pointer;}
+  .prv-sum{margin-top:12px;padding:10px 12px;border-radius:10px;background:#F4F6FB;font-size:12.5px;font-weight:600;color:var(--text-2,#4A5470);line-height:1.45;}
+  .prv-sum.ok{background:#EFF5FF;}
+  .prv-sum b{color:var(--navy,#0B1B4D);}
+  .prv-warn{display:block;margin-top:5px;color:#9A6A12;font-weight:700;}
+  .prv-md .tgx-md-f{align-items:center;}
+  .prv-foot-h{flex:1;font-size:11px;font-weight:600;color:var(--text-3,#8A93A8);}
+  @media (max-width:560px){ .prv-bar{flex-direction:column;align-items:stretch;} .prv-foot-h{display:none;} }
+</style>
 </head>
 <body>
 
@@ -2842,6 +2958,11 @@
                   <label>Proveedor</label>
                   <input type="text" id="nProveedor" list="dlProveedoresPago" autocomplete="off" placeholder="Escribí para buscar…" oninput="onProveedorChange()" onchange="onProveedorChange()">
                   <div class="rl-warn" id="nProveedorWarn" style="display:none;">No coincide con ningún proveedor cargado</div>
+                </div>
+                <div class="field tgx-per" id="fld-nPeriodo" hidden>
+                  <label>Período del servicio · desde <span class="tgx-per-tag" id="nPeriodoLbl"></span></label>
+                  <select id="nPeriodo" onchange="tgxPeriodoPick('n')"></select>
+                  <div class="tgx-per-hint" id="nPeriodoHint"></div>
                 </div>
                 <label class="check-inline">
                   <input type="checkbox" id="nSinProveedor" onchange="onSinProveedorToggle()">
@@ -4076,6 +4197,7 @@
     <div class="pg-panel-summary">
       <div><div class="l">Monto a pagar</div><div class="v" id="pSumMonto">—</div></div>
       <div><div class="l">Plazo de pago</div><div class="v" id="pSumPlazo">—</div></div>
+      <div class="tgx-cell" id="pSumTipo" hidden></div>
     </div>
     <div class="pg-items-card" id="pgItemsCard" style="display:none;">
       <div class="pg-items-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
@@ -4122,6 +4244,7 @@
       <div class="field"><label>Fecha de creación</label><input type="date" id="fFechaOrden"></div>
       <div class="field"><label>Fecha de la factura</label><input type="date" id="fFechaComprobante" onchange="pgPanelRefreshPlazo()" onfocus="this.max=todayISO()"></div>
     </div>
+    <div class="field tgx-per" id="fld-fPeriodo" hidden><label>Período del servicio · desde <span class="tgx-per-tag" id="fPeriodoLbl"></span></label><select id="fPeriodo" onchange="tgxPeriodoPick('f')"></select><div class="tgx-per-hint" id="fPeriodoHint"></div></div>
     <div class="field"><label>Observaciones</label><textarea id="fNotas"></textarea></div>
     <div class="field">
       <label>Adjuntar documento de compra <span class="pg-files-count" id="fAdjCount" style="display:none;"></span></label>
@@ -4219,6 +4342,18 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+/* Números (19/10/2026): el punto también marca decimales (tecla del teclado numérico).
+   "1.5" = 1,5 · "1,5" = 1,5 · "1.250,75" y "1,250.75" = 1250,75 (el último separador es el decimal) ·
+   "1.500.000" = un millón y medio (varios puntos = miles). */
+function vdSep(s){
+  s = String(s);
+  const c = s.lastIndexOf(","), d = s.lastIndexOf(".");
+  if(c>=0 && d>=0) return c>d ? s.replace(/\./g,"").replace(",",".") : s.replace(/,/g,"");
+  if(c>=0) return s.split(",").length>2 ? s.replace(/,/g,"") : s.replace(",",".");
+  if(d>=0 && s.split(".").length>2) return s.replace(/\./g,"");
+  return s;
+}
+
 /* =========================================================
    CONEXIÓN SUPABASE (backend real: Postgres + Supabase Auth)
    ========================================================= */
@@ -4544,7 +4679,7 @@ async function cfgLoadAll(){
   const res = await Promise.all([
     sb.from("lf_conceptos").select("id,nombre"),
     sb.from("lf_rubros").select("id,nombre,concepto_id"),
-    sb.from("lf_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto"),
+    sb.from("lf_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion"),
     sb.from("lf_proveedor_rubros").select("proveedor_id,rubro_id"),
     sb.from("lf_costeo_insumos").select("id,proveedor_id,rubro_id,nomenclatura,unidad_medida,cantidad,factor_merma,necesita_conversion,conversion_cantidad,conversion_unidad,costo_manual,usar_costo_manual")
   ]);
@@ -4958,15 +5093,22 @@ function cfgTableHtmlInsumos(rows){
    solo ofrece puntual / mensual. */
 const CFG_TIPO_GASTO = {
   puntual: { lbl:"Puntual", desc:"Impacta entero el día de la factura" },
-  mensual: { lbl:"Mensual", desc:"Se distribuye en todo el mes de la factura" }
+  mensual: { lbl:"Mensual", desc:"Se prorratea entre los días del mes del servicio" },
+  semestral: { lbl:"Semestral", desc:"Se prorratea en los 6 meses del período de cada orden" },
+  anual: { lbl:"Anual", desc:"Se prorratea en los 12 meses del período de cada orden" }
 };
 function cfgTipoGasto(p){ const t = p && p.tipo_gasto; return CFG_TIPO_GASTO[t] ? t : "puntual"; }
-function cfgTipoGastoLbl(p){ return CFG_TIPO_GASTO[cfgTipoGasto(p)].lbl; }
-function cfgTipoGastoChip(p){ const t = cfgTipoGasto(p); return `<span class="cfg-tg-chip ${t}" title="Tipo de gasto: ${CFG_TIPO_GASTO[t].desc.toLowerCase()}">${CFG_TIPO_GASTO[t].lbl}</span>`; }
+function cfgMesImp(p){ return p && p.mes_imputacion==="vencido" ? "vencido" : "corriente"; }
+function cfgTipoGastoLbl(p){ const t = cfgTipoGasto(p); return CFG_TIPO_GASTO[t].lbl + (t==="mensual" ? (cfgMesImp(p)==="vencido" ? " · mes vencido" : " · mes corriente") : ""); }
+function cfgTipoGastoChip(p){ const t = cfgTipoGasto(p), v = t==="mensual" && cfgMesImp(p)==="vencido";
+  const desc = t==="mensual" ? (v ? "se reparte en el mes anterior al de la factura (mes vencido)" : "se reparte en el mes de la factura (mes corriente)") : CFG_TIPO_GASTO[t].desc.toLowerCase();
+  return `<span class="cfg-tg-chip ${t}" title="Tipo de gasto: ${desc}">${CFG_TIPO_GASTO[t].lbl}${t==="mensual" ? `<em>${v ? "vencido" : "corriente"}</em>` : ""}</span>`; }
 function cfgTipoGastoPick(t){
   const inp = document.getElementById("cfgFTipoGasto"); if(!inp) return;
   inp.value = t;
   document.querySelectorAll("#cfgTipoGasto .cfg-tg-opt").forEach(b=>b.classList.toggle("on", b.dataset.t===t));
+  const mb = document.getElementById("cfgMesImpBox"); if(mb) mb.hidden = t!=="mensual";
+  const ph = document.getElementById("cfgPerHint"); if(ph) ph.hidden = !(t==="semestral" || t==="anual");
 }
 function cfgProvMetaHtml(p){
   const es = cfgEntregas(p), pl = cfgPlazoTxt(p);
@@ -5273,7 +5415,7 @@ function cfgCrumb(parts){
 function cfgErrText(error, que){
   const code = error && error.code;
   if(code==="23505") return `Ya existe ${que} con ese nombre (puede haberlo creado otro usuario recién).`;
-  if(code==="23503") return (error.message && /^No se puede eliminar/.test(error.message)) ? error.message : "No se puede: está siendo usado por otros registros.";
+  if(code==="23503") return (error.message && /^(No se puede eliminar|El proveedor tiene)/.test(error.message)) ? error.message : "No se puede: está siendo usado por otros registros.";
   if(code==="42501") return "No tenés permisos para modificar Configuración.";
   if(code==="22023" && error.message) return error.message;
   return "No se pudo guardar. Revisá la conexión e intentá de nuevo.";
@@ -5440,9 +5582,11 @@ function cfgOpenProvForm(id, presetRubroId){
       </div>
       <div class="cfg-plazo-hint" id="cfgPlazoHint"></div>
       <div class="cfg-sec-title"><span class="n">5</span>Tipo de gasto</div>
-      <div class="cfg-note">${CFG_IC.info}<div>Define cómo impactan las órdenes de pago de este proveedor en <b>Análisis de resultados</b>: entero el día de la factura, o repartido en el mes de la factura.</div></div>
+      <div class="cfg-note">${CFG_IC.info}<div>Define cómo impactan las órdenes de pago de este proveedor en <b>Análisis de resultados</b>. <b>Puntual</b> (compra de mercadería): entero en la fecha de la factura. <b>Mensual</b> (servicios): prorrateado entre todos los días del mes del servicio, que puede ser el de la factura o el anterior. <b>Semestral / Anual</b>: prorrateado por día en los 6 / 12 meses del período que paga cada orden.</div></div>
       <input type="hidden" id="cfgFTipoGasto" value="${cfgTipoGasto(p)}">
       <div class="cfg-tg" id="cfgTipoGasto">${Object.entries(CFG_TIPO_GASTO).map(([k,v])=>`<button type="button" class="cfg-tg-opt${cfgTipoGasto(p)===k?" on":""}" data-t="${k}" onclick="cfgTipoGastoPick('${k}')"><span class="rd"></span><span class="tx"><b>${v.lbl}</b><i>${v.desc}</i></span></button>`).join("")}</div>
+      ${cfgMesImpHtml(p)}
+      <div class="tgx-perhint" id="cfgPerHint"${["semestral","anual"].includes(cfgTipoGasto(p)) ? "" : " hidden"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg><div>El <b>período</b> (mes de inicio) se elige en cada orden de pago; por defecto es el mes de la factura. Ej.: anual pagado en agosto 2026 → <b>ago 2026 a jul 2027</b>.</div></div>
       <div class="cfg-err-box" id="cfgErrBox"></div>`,
     saveLabel: p ? "Guardar cambios" : "Crear proveedor",
     nameList: ()=>cfgData.provs,
@@ -5466,8 +5610,9 @@ function cfgOpenProvForm(id, presetRubroId){
       if(res.error){ cfgShowErr(cfgErrText(res.error, "un proveedor")); return false; }
       const tipoGasto = (document.getElementById("cfgFTipoGasto")||{}).value || "puntual";
       const provIdGuardado = res.data || (p && p.id);
-      if(provIdGuardado && tipoGasto !== (p ? cfgTipoGasto(p) : "puntual")){
-        const rt = await sb.from("lf_proveedores").update({ tipo_gasto: tipoGasto }).eq("id", provIdGuardado);
+      const mesImp = tipoGasto==="mensual" ? ((document.getElementById("cfgFMesImp")||{}).value || "corriente") : "corriente";
+      if(provIdGuardado && (tipoGasto !== (p ? cfgTipoGasto(p) : "puntual") || mesImp !== (p ? cfgMesImp(p) : "corriente"))){
+        const rt = await sb.from("lf_proveedores").update({ tipo_gasto: tipoGasto, mes_imputacion: mesImp }).eq("id", provIdGuardado);
         if(rt.error){ cfgShowErr("El proveedor se guardó, pero no se pudo guardar el tipo de gasto: " + rt.error.message); await cfgReload(); return false; }
       }
       const rubN = ids => ids.map(i=>(cfgRub("proveedores",i)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
@@ -5479,9 +5624,9 @@ function cfgOpenProvForm(id, presetRubroId){
         const eA = cfgEntregasTxt(p, true), eD = cfgEntregasTxt({entregas}, true);
         if(eA!==eD) ch.push(`entregas: ${eA||"—"} → ${eD||"—"}`);
         if((p.plazo_pago_dias??null)!==plazo) ch.push(`plazo de pago: ${cfgPlazoTxt(p)||"—"} → ${cfgPlazoTxt({plazo_pago_dias:plazo})||"—"}`);
-        if(cfgTipoGasto(p)!==tipoGasto) ch.push(`tipo de gasto: ${cfgTipoGastoLbl(p)} → ${CFG_TIPO_GASTO[tipoGasto].lbl}`);
+        if(cfgTipoGastoLbl(p)!==cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})) ch.push(`tipo de gasto: ${cfgTipoGastoLbl(p)} → ${cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})}`);
         if(ch.length) logHistorialConfig("Editó un proveedor", `“${nombre}” · ${ch.join(" · ")}`);
-      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""} · tipo de gasto: ${CFG_TIPO_GASTO[tipoGasto].lbl}`);
+      } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""} · tipo de gasto: ${cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})}`);
       await cfgReload();
       await loadMasterData();
       rubIds.forEach(id=>{ const r = cfgRub("proveedores", id); if(r) cfgState.proveedores.collapsed.delete(r.catId); });
@@ -5873,7 +6018,7 @@ function mapOrdenRow(row){
   return {
     id: row.id, fechaOrden: row.fecha_orden,
     comprobanteTipo: row.comprobante_tipo === "Pago B" ? "Compra B" : row.comprobante_tipo,
-    fechaComprobante: row.fecha_comprobante, comprobante: row.comprobante || "",
+    fechaComprobante: row.fecha_comprobante, comprobante: row.comprobante || "", periodoDesde: row.periodo_desde || null,
     proveedor: row.proveedor || "", concepto: row.concepto || "", rubro: row.rubro || "",
     montoFactura: Number(row.monto_factura||0), montoRetencion: Number(row.monto_retencion||0), monto: Number(row.monto||0),
     estado: row.estado, metodo: row.metodo || "", fechaVenc: row.fecha_venc, fechaPago: row.fecha_pago, notas: row.notas || "",
@@ -6360,7 +6505,7 @@ const money = n=>n==null||isNaN(n)?"—":"$"+Number(n).toLocaleString("es-AR",{m
 const money0 = n=>n==null||isNaN(n)?"—":"$"+Math.round(n).toLocaleString("es-AR");
 const pctTxt = v=>v==null||!isFinite(v)?"—":(v>0?"+":"")+(v*100).toLocaleString("es-AR",{maximumFractionDigits:1,minimumFractionDigits:1})+"%";
 const pctPlain = v=>v==null||!isFinite(v)?"—":(v*100).toLocaleString("es-AR",{maximumFractionDigits:1,minimumFractionDigits:1})+"%";
-const parseNum = s=>{ if(s==null) return null; s=String(s).trim().replace(/\$/g,"").replace(/\s/g,""); if(!s) return null; if(s.includes(",")) s=s.replace(/\./g,"").replace(",","."); else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,""); const n=Number(s); return isFinite(n)?n:null; };
+const parseNum = s=>{ if(s==null) return null; s=String(s).trim().replace(/\$/g,"").replace(/\s/g,""); if(!s) return null; s=vdSep(s); const n=Number(s); return isFinite(n)?n:null; };
 const fmtQ = q=>Number(q).toLocaleString("es-AR",{maximumFractionDigits:3});
 const fmtD = iso=>{ if(!iso) return "—"; const d=new Date(iso.length===10?iso+"T12:00:00":iso); return d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"}); };
 const fmtDL = iso=>{ if(!iso) return "—"; const d=new Date(iso.length===10?iso+"T12:00:00":iso); return d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"}); };
@@ -7901,6 +8046,7 @@ async function saveOrder(){
     proveedor, concepto, rubro, metodo: metodo||null,
     monto_factura: montoFactura, monto_retencion: montoRetencion, monto,
     comprobante_tipo: comprobanteTipo||null, comprobante,
+    periodo_desde: typeof tgxPeriodoVal==="function" ? tgxPeriodoVal("f") : undefined,
     fecha_orden: fechaOrden || null, fecha_comprobante: fechaComprobante || null,
     factura_pendiente: typeof pgFpVal==="function" ? pgFpVal("f", comprobanteTipo) : false,
     fecha_pago: fechaPago || null,
@@ -8184,6 +8330,7 @@ async function saveNuevaOrden(){
     monto_factura: montoFactura, monto_retencion: montoRetencion, monto: Math.max(montoFactura-montoRetencion,0),
     estado, metodo, fecha_venc: null, fecha_pago: fechaPagoISO || null, notas,
     adjuntos: pgStateToFiles("nueva"), adjuntos_pago: pgStateToFiles("nuevaPago"),
+    periodo_desde: typeof tgxPeriodoVal==="function" ? tgxPeriodoVal("n") : undefined,
     unread: true,
     creado_por: currentPerfil ? currentPerfil.id : null, creado_por_nombre: currentPerfil ? currentPerfil.nombre : "—",
     modificado_por: currentPerfil ? currentPerfil.id : null, modificado_por_nombre: currentPerfil ? currentPerfil.nombre : "—",
@@ -9818,7 +9965,9 @@ const AR_SITE = {
    · Importe: monto a pagar (neto de retenciones; las retenciones se imputan cuando se pagan).
    · Fecha: fecha del comprobante (criterio de lo devengado: pendientes incluidas).
    · Proveedor "puntual": entero ese día. Proveedor "mensual": repartido día a
-     día en el mes calendario de esa fecha (un reporte semanal toma 7/30 del gasto).
+     día en el mes del servicio — el de la factura (mes corriente) o el anterior (mes vencido).
+     Proveedor "semestral" / "anual": repartido día a día en los 6 / 12 meses del período de la
+     orden (periodo_desde = mes de inicio; si falta, el mes de la factura) (un reporte semanal toma 7/30 del gasto).
    · Órdenes cuyo proveedor no está en el maestro (ej. "No especifica proveedor")
      se toman como puntuales.
    ===================================================================== */
@@ -9910,8 +10059,8 @@ async function arLoadAll(force){
     arState.gastosErr = null; arState.ventasErr = null;
     const puedeGastos = AR_SITE.tieneSeccion("pagos") || AR_SITE.tieneSeccion("costeo");
     const tareas = [
-      puedeGastos ? arSelectAll(P+"_ordenes", "id,proveedor,concepto,rubro,monto,monto_factura,estado,fecha_comprobante", q=>q.neq("estado","Anulado")) : Promise.resolve(null),
-      puedeGastos ? arSelectAll(P+"_proveedores", "nombre,tipo_gasto") : Promise.resolve(null),
+      puedeGastos ? arSelectAll(P+"_ordenes", "id,proveedor,concepto,rubro,monto,monto_factura,estado,fecha_comprobante,periodo_desde", q=>q.neq("estado","Anulado")) : Promise.resolve(null),
+      puedeGastos ? arSelectAll(P+"_proveedores", "nombre,tipo_gasto,mes_imputacion") : Promise.resolve(null),
       sb.from(P+"_socios").select("id,nombre,porcentaje,orden").order("orden").order("nombre"),
       AR_SITE.ventas ? AR_SITE.ventas(force).catch(e=>{ arState.ventasErr = e.message || String(e); return null; }) : Promise.resolve(null),
       sb.rpc(P+"_meses_liquidados"),
@@ -9928,6 +10077,7 @@ async function arLoadAll(force){
     arState.ordenes = Array.isArray(ord) ? ord.filter(o=>o.fecha_comprobante) : [];
     arState.reparto = arBuildReparto(rep && !rep.__err && !rep.error ? rep.data : null);
     arState.provTipo = new Map((Array.isArray(provs)?provs:[]).map(p=>[arNorm(p.nombre), p.tipo_gasto||"puntual"]));
+    arState.provMes = new Map((Array.isArray(provs)?provs:[]).map(p=>[arNorm(p.nombre), p.mes_imputacion==="vencido" ? "vencido" : "corriente"]));
     arState.socios = (soc && !soc.__err && !soc.error) ? (soc.data||[]) : [];
     arState.ventas = ventas && !ventas.__err ? ventas : null;
     arState.ocupErr = (reservas && reservas.__err) ? (reservas.__err.message||String(reservas.__err)) : null;
@@ -9941,14 +10091,27 @@ async function arLoadAll(force){
 
 /* ---------- cálculo ---------- */
 function arTipoGasto(o){ return arState.provTipo.get(arNorm(o.proveedor)) || "puntual"; }
+// Mensual a mes vencido (19/10/2026): la factura cobra el servicio del mes anterior → se prorratea en ese mes.
+function arMesServicio(o, f){
+  if(!(arState.provMes && arState.provMes.get(arNorm(o.proveedor))==="vencido")) return f;
+  const d = arDate(arMonthStart(f)); d.setDate(0); return arISO(d);
+}
 // Monto a pagar (neto de retenciones) — decisión de Pancho 06/10/2026: las retenciones se pagan
 // aparte y son gasto del mes en que se ejecute ese pago (con su propia orden).
 function arImporteOrden(o){ return Number(o.monto)||0; }
 // Parte del gasto de una orden que cae en [desde, hasta] (ambos inclusive).
 function arGastoEnRango(o, desde, hasta){
-  const f = o.fecha_comprobante, imp = arImporteOrden(o);
-  if(arTipoGasto(o)==="mensual"){
-    const ms = arMonthStart(f), me = arMonthEnd(f);
+  const f = o.fecha_comprobante, imp = arImporteOrden(o), tg = arTipoGasto(o);
+  if(tg==="semestral" || tg==="anual"){
+    // Período de 6 / 12 meses desde el mes de inicio de la orden (por defecto, el de la factura), por día.
+    const ms = o.periodo_desde ? String(o.periodo_desde).slice(0,7)+"-01" : arMonthStart(f);
+    const e = arDate(ms); e.setMonth(e.getMonth() + (tg==="anual" ? 12 : 6)); e.setDate(e.getDate()-1);
+    const me = arISO(e), a = desde > ms ? desde : ms, b = hasta < me ? hasta : me;
+    if(a > b) return 0;
+    return imp * (arDays(a,b)+1) / (arDays(ms,me)+1);
+  }
+  if(tg==="mensual"){
+    const fm = arMesServicio(o, f), ms = arMonthStart(fm), me = arMonthEnd(fm);
     const a = desde > ms ? desde : ms, b = hasta < me ? hasta : me;
     if(a > b) return 0;
     return imp * (arDays(a,b)+1) / (arDays(ms,me)+1);
@@ -10281,7 +10444,7 @@ function arRenderER(el, c, expandAll){
       ${gastosRows}
     </div>
     <div class="ar-er-util ${c.util<0?"neg":""}"><span class="bar" style="background:${AR_COLORS.util}"></span><span class="nm">Utilidad del período</span><span class="pc">${base?arPct(c.util, base):"—"}</span><span class="mt">${arMoney(c.util)}</span></div>
-    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros (el % de cada sub-rubro es sobre el total de su categoría, no sobre el total general). Las ventas se miran por dos caminos que casi siempre coinciden: lo que entró a la caja, y el detalle de qué se vendió. Cuando no coinciden exactamente el mismo día (por ejemplo, alguien seña hoy una cancha que va a usar en otra fecha, o un cobro se carga como un solo movimiento de caja mientras el detalle de ventas lo abre en varios ítems), esa pequeña distancia en el tiempo aparece como “Diferencia de conciliación”: no es plata que falta ni un error, se empareja sola. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes de su factura (una semana corta de fin de mes puede concentrar el pago de sueldos y verse más alta que las demás, sin que sea un error).</div>`}`;
+    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros (el % de cada sub-rubro es sobre el total de su categoría, no sobre el total general). Las ventas se miran por dos caminos que casi siempre coinciden: lo que entró a la caja, y el detalle de qué se vendió. Cuando no coinciden exactamente el mismo día (por ejemplo, alguien seña hoy una cancha que va a usar en otra fecha, o un cobro se carga como un solo movimiento de caja mientras el detalle de ventas lo abre en varios ítems), esa pequeña distancia en el tiempo aparece como “Diferencia de conciliación”: no es plata que falta ni un error, se empareja sola. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes del servicio (el de la factura, o el anterior si son a mes vencido, como ocurre con Sueldos) y los semestrales / anuales, por día en el período de cada orden — por eso una semana corta de fin de mes puede concentrar parte de un gasto mensual y verse más alta que las demás, sin que sea un error.</div>`}`;
 }
 function arToggleER(row){
   const it = row.parentElement, k = it.dataset.key;
@@ -10633,7 +10796,7 @@ function arGenerarPdf(){
     ${sec("comp","Composición de ventas","Venta A (facturado) vs. Venta B (efectivo)", compHtml)}
     ${sec("evo","Evolución de rendimientos","", evoHtml)}
     ${sec("div","Dividendos entre socios","", divHtml)}
-    <footer class="arp-foot">Ventas: Movimientos de caja y Compras-Ventas de ATC (corte de jornada 05:00). Gastos: órdenes de pago no anuladas, por monto a pagar, imputadas por fecha de factura; proveedores mensuales repartidos en el mes de su factura. Documento generado desde el panel de administración de ${arEsc(AR_SITE.club)}.</footer>`;
+    <footer class="arp-foot">Ventas: Movimientos de caja y Compras-Ventas de ATC (corte de jornada 05:00). Gastos: órdenes de pago no anuladas, por monto a pagar, imputadas por fecha de factura; proveedores mensuales repartidos en el mes del servicio (el de la factura o, a mes vencido, el anterior); semestrales y anuales, por día en el período de cada orden. Documento generado desde el panel de administración de ${arEsc(AR_SITE.club)}.</footer>`;
   const prevTitle = document.title;
   document.title = `Analisis de resultados - ${AR_SITE.club} - ${per}`;
   document.body.classList.add("ar-printing");
@@ -14353,7 +14516,7 @@ function costeoEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":
 function parseDecimalCosteo(str){
   if(str===undefined||str===null||str==="") return 0;
   let s = String(str).trim();
-  if(s.includes(",")) s = s.replace(/\./g,"").replace(",", ".");
+  s = vdSep(s);
   const n = Number(s);
   return isNaN(n) ? 0 : n;
 }
@@ -16911,7 +17074,7 @@ async function pvDeshacerUltimoAjuste(){
   const TABLE = "lf_costeo_impuestos_cat";
   const esc = s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const nrm = s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
-  const num = s=>{ if(s==null) return null; s=String(s).trim().replace(/[$%\s]/g,""); if(!s) return null; if(s.includes(",")) s=s.replace(/\./g,"").replace(",","."); else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,""); const n=Number(s); return isFinite(n)?n:null; };
+  const num = s=>{ if(s==null) return null; s=String(s).trim().replace(/[$%\s]/g,""); if(!s) return null; s=vdSep(s); const n=Number(s); return isFinite(n)?n:null; };
   const fmt = n=>Number(n).toLocaleString("es-AR",{maximumFractionDigits:3});
   const toast=(m,t)=>{ try{ showToast(m,t); }catch(e){ console.log(m); } };
   const uid=()=>{ try{ return currentPerfil?currentPerfil.id:null; }catch(e){ return null; } };
@@ -17124,8 +17287,7 @@ const byName = (a,b)=>String(a.nombre||a.n||"").localeCompare(String(b.nombre||b
 function parseNum(v){
   if(v==null) return null; if(typeof v==="number") return isFinite(v)?v:NaN;
   let s = String(v).trim().replace(/\s/g,"").replace(/\$/g,""); if(!s) return null;
-  if(s.includes(",")) s = s.replace(/\./g,"").replace(",",".");
-  else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g,"");
+  s = vdSep(s);
   const n = Number(s); return isFinite(n)?n:NaN;
 }
 /* ---- fechas (ISO local yyyy-mm-dd) ---- */
@@ -18972,7 +19134,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
   var m2 = function(n){ return !isN(n) ? "—" : "$"+Number(n).toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2}); };
   var pIn = function(n){ return !isN(n) ? "" : String(Math.round(n*100)/100).replace(".",","); };
   var fD = function(iso){ if(!iso) return "—"; var p=String(iso).slice(0,10).split("-"); return p[2]+"/"+p[1]+"/"+p[0]; };
-  var parse = function(v){ if(v==null) return null; var s=String(v).trim().replace(/\$/g,"").replace(/\s/g,""); if(!s) return null; if(s.indexOf(",")>-1) s=s.replace(/\./g,"").replace(",","."); else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,""); var n=Number(s); return isFinite(n)?n:NaN; };
+  var parse = function(v){ if(v==null) return null; var s=String(v).trim().replace(/\$/g,"").replace(/\s/g,""); if(!s) return null; s=vdSep(s); var n=Number(s); return isFinite(n)?n:NaN; };
   var toast = function(m,t){ try{ showToast(m,t); }catch(e){} };
   var LSK = (typeof SK_SITE!=="undefined"?SK_SITE.pre:"x")+"_li_";
   var lsGet = function(k,d){ try{ var v=localStorage.getItem(LSK+k); return v?JSON.parse(v):d; }catch(e){ return d; } };
@@ -19621,7 +19783,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       var v = r[i];
       if(v===undefined || v==="—") v = null;
       if(c.t==="fecha" || c.t==="fechahora") return serial(v, c.t==="fechahora");
-      if((c.t==="num" || c.t==="int" || c.t==="$" || c.t==="%") && typeof v==="string" && v.trim()!==""){ var n = Number(v.replace(/\./g,"").replace(",", ".")); return isFinite(n) ? n : v; }
+      if((c.t==="num" || c.t==="int" || c.t==="$" || c.t==="%") && typeof v==="string" && v.trim()!==""){ var n = Number(vdSep(v)); return isFinite(n) ? n : v; }
       return v;
     }); });
     var aoa = [cols.map(function(c){ return c.h; })].concat(data.map(function(r){ return r.map(function(x){ return x===null ? undefined : x; }); }));
@@ -19827,6 +19989,454 @@ window.cxGuardarInsumoCosto = async function(insId, patch, nombre){
 window.cxEditarInsumo = (id, provId)=>cfgOpenInsumoForm(id, provId||undefined);
 window.cxCrearInsumo = ()=>cfgOpenInsumoForm(null);
 window.cxInsumosRefresh = async ()=>{ await loadCosteoInsumos(); };
+</script>
+<script>
+/* =====================================================================
+   TIPO DE GASTO · MES DE IMPUTACIÓN (pedido de Pancho, 19/10/2026) — mismo código en ambos sitios.
+   · Puntual: compra de mercadería → se devenga entero en la fecha de la factura.
+   · Mensual: el gasto se prorratea día a día en el mes del servicio:
+       – mes corriente → el mes de la factura;
+       – mes vencido   → el mes anterior al de la factura.
+   · Semestral / Anual (19/10/2026): cada orden paga un período de 6 / 12 meses que arranca en un
+     mes que se elige en la orden (por defecto, el de la factura) y se prorratea por día.
+   Se define por proveedor (Configuración › Proveedores) y, con permiso de Configuración,
+   también desde el detalle de una orden en Pagos.
+   ===================================================================== */
+(function(){
+  var PRE = typeof tieneSeccionChemono==="function" ? "cm" : "lf";
+  var MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var MESIMP = {
+    corriente: { lbl:"Mes corriente", desc:"El servicio es del mismo mes de la factura" },
+    vencido:   { lbl:"Mes vencido",   desc:"La factura cobra el servicio del mes anterior" }
+  };
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function puedeConfig(){
+    try{ return PRE==="cm" ? tieneSeccionChemono("config") : tieneSeccionFortaleza("config"); }catch(e){ return false; }
+  }
+
+  /* ---------- Configuración › Proveedores: sub-opción del tipo mensual ---------- */
+  window.cfgMesImpHtml = function(p, ids){
+    ids = ids || { box:"cfgMesImpBox", inp:"cfgFMesImp", fn:"cfgMesImpPick" };
+    var m = cfgMesImp(p), on = cfgTipoGasto(p)==="mensual";
+    return '<div class="tgx-mes" id="'+ids.box+'"'+(on?"":" hidden")+'>'
+      + '<div class="tgx-mes-h"><span class="tgx-mes-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg></span>'
+      + '<div><b>¿A qué mes corresponde el servicio?</b><i>El gasto se reparte entre todos los días de ese mes.</i></div></div>'
+      + '<input type="hidden" id="'+ids.inp+'" value="'+m+'">'
+      + '<div class="tgx-seg">' + Object.keys(MESIMP).map(function(k){
+          return '<button type="button" class="tgx-seg-opt'+(m===k?" on":"")+'" data-m="'+k+'" onclick="'+ids.fn+'(\''+k+'\')"><b>'+MESIMP[k].lbl+'</b><i>'+MESIMP[k].desc+'</i></button>';
+        }).join("") + '</div></div>';
+  };
+  window.cfgMesImpPick = function(k, box, inp){
+    var i = document.getElementById(inp || "cfgFMesImp"); if(i) i.value = k;
+    document.querySelectorAll("#"+(box || "cfgMesImpBox")+" .tgx-seg-opt").forEach(function(b){ b.classList.toggle("on", b.dataset.m===k); });
+  };
+
+  /* ---------- Pagos · detalle de la orden ---------- */
+  var cache = null, cargando = null;
+  function cargar(force){
+    if(cache && !force) return Promise.resolve(cache);
+    if(cargando && !force) return cargando;
+    cargando = sb.from(PRE+"_proveedores").select("id,nombre,tipo_gasto,mes_imputacion").then(function(r){
+      cargando = null;
+      if(r.error){ console.warn("Tipo de gasto:", r.error); return cache || {}; }
+      cache = {}; (r.data||[]).forEach(function(p){ cache[p.nombre] = p; });
+      return cache;
+    });
+    return cargando;
+  }
+  var PER_N = { semestral:6, anual:12 };
+  var MES_C = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  function addMeses(iso, n){ var a = iso.split("-").map(Number), t = a[0]*12 + (a[1]-1) + n; return Math.floor(t/12) + "-" + String(t%12+1).padStart(2,"0") + "-01"; }
+  function mesC(iso){ var a = iso.split("-"); return MES_C[+a[1]-1] + " " + a[0]; }
+  function perTxt(desde, n){ return mesC(desde) + " a " + mesC(addMeses(desde, n-1)); }
+  function mesTxt(iso){ var a = iso.split("-"); return MES[+a[1]-1] + " " + a[0]; }
+  function mesAnterior(iso){ var a = iso.split("-").map(Number), y = a[0], m = a[1]-1; if(m<1){ m = 12; y--; } return y + "-" + String(m).padStart(2,"0") + "-01"; }
+  function imputacionTxt(p, fecha, perDesde){
+    var t = cfgTipoGasto(p);
+    if(PER_N[t]){
+      var n = PER_N[t], d = perDesde || (fecha ? fecha.slice(0,7)+"-01" : null);
+      return d ? "Se reparte por día entre <b>"+mesTxt(d)+"</b> y <b>"+mesTxt(addMeses(d, n-1))+"</b> ("+n+" meses)." : "Se reparte por día en los "+n+" meses del período de la orden.";
+    }
+    if(t!=="mensual") return fecha ? "Se imputa entero el <b>"+esc(isoToDMY(fecha))+"</b>, fecha de la factura." : "Se imputa entero en la fecha de la factura.";
+    var venc = cfgMesImp(p)==="vencido";
+    if(!fecha) return venc ? "Se reparte en el mes anterior al de la factura." : "Se reparte en el mes de la factura.";
+    var mes = venc ? mesAnterior(fecha) : fecha;
+    return "Se reparte en <b>"+mesTxt(mes)+"</b>"+(venc ? " (mes anterior a la factura)." : " (mes de la factura).");
+  }
+  function renderFila(){
+    var el = document.getElementById("pSumTipo"); if(!el || !openOrderId) return;
+    var o = (typeof ordenes!=="undefined" ? ordenes : []).find(function(x){ return x.id===openOrderId; }); if(!o){ el.hidden = true; return; }
+    var prov = (document.getElementById("fProveedor")||{}).value; prov = (prov||"").trim() || o.proveedor;
+    var fecha = (document.getElementById("fFechaComprobante")||{}).value || o.fechaComprobante || null;
+    el.hidden = false;
+    cargar().then(function(c){
+      if(openOrderId!==o.id) return;
+      var p = c[prov];
+      if(!p){ el.innerHTML = '<div class="l">Tipo de gasto</div><div class="tgx-row"><span class="tgx-dim">Proveedor fuera del maestro: se toma como puntual.</span></div>'; return; }
+      el.innerHTML = '<div class="l">Tipo de gasto del proveedor</div><div class="tgx-row">'+cfgTipoGastoChip(p)
+        + '<span class="tgx-imp">'+imputacionTxt(p, fecha, tgxPeriodoVal("f"))+'</span>'
+        + (puedeConfig() ? '<button type="button" class="tgx-edit" onclick="tgxEditar()">Cambiar</button>' : '')
+        + '</div>';
+    });
+  }
+  if(typeof pgPanelRefreshPlazo==="function"){
+    var _rp = pgPanelRefreshPlazo;
+    window.pgPanelRefreshPlazo = function(){ var r = _rp.apply(this, arguments); try{ cargar().then(function(){ sync("f"); }); renderFila(); }catch(e){ console.warn(e); } return r; };
+  }
+
+  /* ---------- Período del servicio (semestral / anual) en los formularios de Pagos ---------- */
+  function tipoDe(nombre){ var p = cache && cache[nombre]; return p ? cfgTipoGasto(p) : null; }
+  function provDe(pref){
+    if(pref==="n"){ var sp = document.getElementById("nSinProveedor"); if(sp && sp.checked) return ""; }
+    return ((document.getElementById(pref==="n" ? "nProveedor" : "fProveedor")||{}).value||"").trim();
+  }
+  function fechaDe(pref){
+    if(pref==="f") return (document.getElementById("fFechaComprobante")||{}).value || null;
+    var v = ((document.getElementById("nFechaComprobante")||{}).value||"").trim(), m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    return m ? m[3]+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0") : null;
+  }
+  function hoyMes(){ var d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-01"; }
+  function opciones(sel){
+    var base = hoyMes(), h = "", vistos = {};
+    for(var i = -24; i <= 18; i++){ var v = addMeses(base, i); vistos[v] = 1; h += '<option value="'+v+'"'+(v===sel?" selected":"")+'>'+mesC(v)+'</option>'; }
+    if(sel && !vistos[sel]) h = '<option value="'+sel+'" selected>'+mesC(sel)+'</option>' + h;
+    return h;
+  }
+  function sync(pref){
+    var fld = document.getElementById("fld-"+pref+"Periodo"), sel = document.getElementById(pref+"Periodo"); if(!fld || !sel) return;
+    var t = tipoDe(provDe(pref)), n = PER_N[t];
+    if(!n){ fld.hidden = true; return; }
+    fld.hidden = false;
+    var f = fechaDe(pref), auto = sel.dataset.auto!=="0";
+    var v = auto || !sel.value ? (f ? f.slice(0,7)+"-01" : hoyMes()) : sel.value;
+    if(sel.dataset.v!==v || !sel.options.length){ sel.innerHTML = opciones(v); sel.dataset.v = v; }
+    sel.value = v;
+    var lb = document.getElementById(pref+"PeriodoLbl"); if(lb) lb.textContent = (t==="anual" ? "Anual" : "Semestral") + " · " + n + " meses";
+    var hn = document.getElementById(pref+"PeriodoHint");
+    if(hn) hn.innerHTML = "Cubre <b>"+perTxt(v, n)+"</b>. El gasto se reparte por día en todo el período." + (auto ? " <span>Por defecto, el mes de la factura: cambialo si el período empieza en otro mes.</span>" : "");
+  }
+  window.tgxPeriodoPick = function(pref){
+    var sel = document.getElementById(pref+"Periodo"); if(!sel) return;
+    sel.dataset.auto = "0"; sel.dataset.v = sel.value; sync(pref);
+    if(pref==="f") renderFila();
+  };
+  // Valor a grabar en la orden: mes de inicio si el proveedor es semestral/anual, null si no;
+  // undefined (no tocar la columna) mientras no se conoce el tipo del proveedor.
+  window.tgxPeriodoVal = function(pref){
+    if(!cache) return undefined;
+    var t = tipoDe(provDe(pref)); if(!PER_N[t]) return null;
+    var sel = document.getElementById(pref+"Periodo");
+    if(sel && sel.dataset.auto==="0" && sel.value) return sel.value;
+    var f = fechaDe(pref); return f ? f.slice(0,7)+"-01" : hoyMes();
+  };
+  function setDesdeOrden(){
+    var sel = document.getElementById("fPeriodo"); if(!sel) return;
+    var o = (typeof ordenes!=="undefined" ? ordenes : []).find(function(x){ return x.id===openOrderId; });
+    var v = o && o.periodoDesde ? String(o.periodoDesde).slice(0,7)+"-01" : "";
+    sel.dataset.auto = v ? "0" : "1"; sel.dataset.v = ""; sel.innerHTML = v ? opciones(v) : ""; if(v) sel.value = v;
+  }
+  function envolver(nombre, despues){
+    if(typeof window[nombre]!=="function") return;
+    var f = window[nombre];
+    window[nombre] = function(){ var r = f.apply(this, arguments); try{ despues.apply(this, arguments); }catch(e){ console.warn(e); } return r; };
+  }
+  envolver("onProveedorChange", function(){ cargar().then(function(){ sync("n"); }); });
+  envolver("onSinProveedorToggle", function(){ sync("n"); });
+  envolver("pgUpdateNuevaPlazoHint", function(){ sync("n"); });
+  envolver("resetNuevaOrdenForm", function(){ var s = document.getElementById("nPeriodo"); if(s){ s.dataset.auto = "1"; s.innerHTML = ""; s.dataset.v = ""; } cargar(true).then(function(){ sync("n"); }); });
+  envolver("onPanelProveedorChange", function(){ cargar().then(function(){ sync("f"); renderFila(); }); });
+  envolver("openPanel", function(){ setDesdeOrden(); cargar().then(function(){ sync("f"); renderFila(); }); });
+  document.addEventListener("change", function(e){ if(e.target && e.target.id==="nFechaComprobante") sync("n"); });
+
+  /* ---------- Modal para cambiar la condición desde Pagos ---------- */
+  var md = null, mdProv = null;
+  window.tgxPickTipo = function(t){
+    document.getElementById("tgxFTipo").value = t;
+    document.querySelectorAll("#tgxTipo .cfg-tg-opt").forEach(function(b){ b.classList.toggle("on", b.dataset.t===t); });
+    var box = document.getElementById("tgxMesBox"); if(box) box.hidden = t!=="mensual";
+  };
+  window.tgxPickMes = function(k){ cfgMesImpPick(k, "tgxMesBox", "tgxFMes"); };
+  window.tgxCerrar = function(){ if(md){ md.classList.remove("show"); } };
+  window.tgxEditar = function(){
+    var o = ordenes.find(function(x){ return x.id===openOrderId; }); if(!o) return;
+    var prov = ((document.getElementById("fProveedor")||{}).value||"").trim() || o.proveedor;
+    cargar(true).then(function(c){
+      var p = c[prov]; if(!p){ showToast("Ese proveedor no está en Configuración", "warn"); return; }
+      mdProv = p;
+      if(!md){ md = document.createElement("div"); md.className = "tgx-ov"; md.onclick = function(e){ if(e.target===md) tgxCerrar(); }; document.body.appendChild(md); }
+      var t = cfgTipoGasto(p);
+      md.innerHTML = '<div class="tgx-md" role="dialog" aria-modal="true">'
+        + '<div class="tgx-md-h"><div><span class="tgx-kick">Tipo de gasto</span><h3>'+esc(p.nombre)+'</h3></div><button type="button" class="tgx-x" onclick="tgxCerrar()" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>'
+        + '<div class="tgx-md-b"><p class="tgx-p">Se aplica a <b>todas las órdenes</b> de este proveedor en <b>Análisis de resultados</b>. Es el mismo dato que en Configuración › Proveedores.</p>'
+        + '<input type="hidden" id="tgxFTipo" value="'+t+'">'
+        + '<div class="cfg-tg" id="tgxTipo">' + Object.keys(CFG_TIPO_GASTO).map(function(k){ var v = CFG_TIPO_GASTO[k];
+            return '<button type="button" class="cfg-tg-opt'+(t===k?" on":"")+'" data-t="'+k+'" onclick="tgxPickTipo(\''+k+'\')"><span class="rd"></span><span class="tx"><b>'+v.lbl+'</b><i>'+v.desc+'</i></span></button>'; }).join("") + '</div>'
+        + cfgMesImpHtml(p, { box:"tgxMesBox", inp:"tgxFMes", fn:"tgxPickMes" })
+        + '</div><div class="tgx-md-f"><button type="button" class="tgx-btn ghost" onclick="tgxCerrar()">Cancelar</button><button type="button" class="tgx-btn" id="tgxSave" onclick="tgxGuardar()">Guardar</button></div></div>';
+      requestAnimationFrame(function(){ md.classList.add("show"); });
+    });
+  };
+  window.tgxGuardar = async function(){
+    var p = mdProv; if(!p) return;
+    var t = document.getElementById("tgxFTipo").value || "puntual";
+    var m = t==="mensual" ? (document.getElementById("tgxFMes").value || "corriente") : "corriente";
+    if(t===cfgTipoGasto(p) && m===cfgMesImp(p)){ tgxCerrar(); return; }
+    var btn = document.getElementById("tgxSave"); btn.disabled = true; btn.textContent = "Guardando…";
+    var r = await sb.from(PRE+"_proveedores").update({ tipo_gasto:t, mes_imputacion:m }).eq("id", p.id).select("id");
+    btn.disabled = false; btn.textContent = "Guardar";
+    if(r.error || !r.data || !r.data.length){ showToast(r.error ? "No se pudo guardar: " + r.error.message : "No tenés permiso para editar proveedores", "warn"); return; }
+    var antes = cfgTipoGastoLbl(p), nuevo = { tipo_gasto:t, mes_imputacion:m };
+    try{ logHistorialConfig("Editó un proveedor", "“"+p.nombre+"” · tipo de gasto: "+antes+" → "+cfgTipoGastoLbl(nuevo)+" (desde Pagos)"); }catch(e){}
+    p.tipo_gasto = t; p.mes_imputacion = m;
+    try{ (cfgData.provs||[]).forEach(function(x){ if(x.id===p.id){ x.tipo_gasto = t; x.mes_imputacion = m; } }); }catch(e){}
+    try{ if(typeof arState!=="undefined" && arState.provTipo){ arState.provTipo.set(arNorm(p.nombre), t); if(arState.provMes) arState.provMes.set(arNorm(p.nombre), m); } }catch(e){}
+    tgxCerrar(); sync("f"); renderFila();
+    showToast("Tipo de gasto actualizado: " + cfgTipoGastoLbl(nuevo));
+  };
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && md && md.classList.contains("show")){ e.stopPropagation(); tgxCerrar(); } }, true);
+})();
+</script>
+<script>
+/* =====================================================================
+   RUBROS DEL PROVEEDOR ↔ RUBROS DE SUS INSUMOS (19/10/2026) — mismo código en ambos sitios.
+   Regla: el insumo define su rubro y el proveedor toma los rubros de sus insumos.
+   · Un rubro en el que el proveedor tiene insumos se muestra con candado y la cantidad.
+   · Para cambiarle el rubro al proveedor se mueven sus insumos: "Mover insumos de rubro" abre una
+     ventana para elegir el rubro de destino y qué insumos pasan (los demás quedan donde están).
+   · Los movimientos quedan pendientes y se graban recién con "Guardar cambios". Al grabar, el
+     proveedor suma el rubro de destino y deja los rubros que quedaron sin insumos.
+   · El rubro es del insumo: en Che Mono cambia para todos sus proveedores; en La Fortaleza se
+     aplica también a las fichas del mismo nombre de otros proveedores. Las órdenes con esos
+     insumos se re-sincronizan solas en la base (zz_insumo_rubro_cambio).
+   ===================================================================== */
+(function(){
+  if(typeof cfgMsToggle!=="function" || typeof cfgMsRender!=="function" || typeof cfgOpenProvForm!=="function") return;
+  var CM = typeof tieneSeccionChemono==="function", PRE = CM ? "cm" : "lf";
+  var S = null; // { provId, ps, moves:Map(insId→rubroId), snap:Set|null }
+  var ICO_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  var ICO_MOVE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/><path d="M5 5v14" opacity=".45"/></svg>';
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function nrm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim(); }
+  function rub(id){ return cfgRub("proveedores", id) || null; }
+  function rubNom(id){ var r = rub(id); return r ? r.nombre : "Sin rubro"; }
+  function catNom(id){ var r = rub(id); var c = r ? cfgCat("proveedores", r.catId) : null; return c ? c.nombre : ""; }
+  function provNom(id){ var p = (cfgData.provs||[]).find(function(x){ return x.id===id; }); return p ? p.nombre : ""; }
+
+  /* Insumos del proveedor en edición, con su rubro efectivo (contando los movimientos pendientes). */
+  function insumos(){
+    if(!S || !S.provId) return [];
+    var out = [];
+    if(CM){
+      var pres = cfgData.pres || [], mios = new Set(pres.filter(function(p){ return p.proveedor_id===S.provId; }).map(function(p){ return p.insumo_id; }));
+      (cfgData.items||[]).forEach(function(i){
+        if(!mios.has(i.id)) return;
+        var otros = []; pres.forEach(function(p){ if(p.insumo_id===i.id && p.proveedor_id && p.proveedor_id!==S.provId){ var n = provNom(p.proveedor_id); if(n && otros.indexOf(n)<0) otros.push(n); } });
+        out.push({ id:i.id, nombre:i.nombre||"", orig:i.rubro_id||null, otros:otros });
+      });
+    } else {
+      var items = cfgData.items || [];
+      items.forEach(function(i){
+        if(i.proveedor_id!==S.provId) return;
+        var k = nrm(i.nomenclatura), otros = [];
+        items.forEach(function(x){ if(x.id!==i.id && x.proveedor_id!==S.provId && nrm(x.nomenclatura)===k){ var n = provNom(x.proveedor_id); if(n && otros.indexOf(n)<0) otros.push(n); } });
+        out.push({ id:i.id, nombre:i.nomenclatura||"", orig:i.rubro_id || (typeof cfgInsRubroId==="function" ? cfgInsRubroId(i) : null), otros:otros });
+      });
+    }
+    out.forEach(function(x){ x.rubro = S.moves.has(x.id) ? S.moves.get(x.id) : x.orig; });
+    return out.sort(function(a,b){ return cfgCmp(a.nombre, b.nombre); });
+  }
+  function porRubro(){
+    var m = new Map();
+    insumos().forEach(function(x){ if(!x.rubro) return; if(!m.has(x.rubro)) m.set(x.rubro, []); m.get(x.rubro).push(x); });
+    return m;
+  }
+
+  /* ---------- apertura del formulario de proveedor ---------- */
+  var _open = cfgOpenProvForm;
+  window.cfgOpenProvForm = function(id){
+    var r = _open.apply(this, arguments);
+    var ps = cfgPS;
+    S = { provId:id || null, ps:ps, moves:new Map(), snap:null };
+    if(ps && typeof ps.submit==="function" && !ps.__prv){
+      var sub = ps.submit; ps.__prv = true;
+      ps.submit = async function(){
+        if(S && S.ps===ps && S.moves.size){
+          var ok = await grabarMovimientos(); if(!ok) return false;
+        }
+        return sub.apply(this, arguments);
+      };
+    }
+    try{ cfgMsRender(); }catch(e){}
+    return r;
+  };
+
+  async function grabarMovimientos(){
+    var porDest = new Map(), ins = insumos(), detalle = [];
+    S.moves.forEach(function(dest, insId){
+      var x = ins.find(function(i){ return i.id===insId; }); if(!x || x.orig===dest) return;
+      var ids = [insId];
+      if(!CM){ var k = nrm(x.nombre); (cfgData.items||[]).forEach(function(i){ if(i.id!==insId && nrm(i.nomenclatura)===k) ids.push(i.id); }); }
+      if(!porDest.has(dest)) porDest.set(dest, []);
+      ids.forEach(function(i){ if(porDest.get(dest).indexOf(i)<0) porDest.get(dest).push(i); });
+      detalle.push(x.nombre + " (" + rubNom(x.orig) + " → " + rubNom(dest) + ")");
+    });
+    for(var [dest, ids] of porDest){
+      var r = await sb.from(CM ? "cm_insumos" : "lf_costeo_insumos").update({ rubro_id:dest }).in("id", ids).select("id");
+      if(r.error || !r.data || !r.data.length){
+        cfgShowErr("No se pudieron mover los insumos al rubro “" + esc(rubNom(dest)) + "”" + (r.error ? ": " + esc(r.error.message) : " (sin permiso para editar insumos).") );
+        try{ await cfgReload(); }catch(e){}
+        return false;
+      }
+    }
+    if(detalle.length){ try{ logHistorialConfig("Movió insumos de rubro", "“" + provNom(S.provId) + "” · " + detalle.join(" · ")); }catch(e){} }
+    S.moves.clear(); S.snap = null;
+    return true;
+  }
+
+  /* ---------- multiselect de rubros: candado + botón para mover ---------- */
+  var _tog = cfgMsToggle;
+  window.cfgMsToggle = function(id){
+    if(S && S.provId && cfgPS===S.ps && cfgPS.msSel && cfgPS.msSel.has(id)){
+      var l = porRubro().get(id);
+      if(l && l.length){ abrirModal(id); return; }
+    }
+    return _tog.apply(this, arguments);
+  };
+  var _render = cfgMsRender;
+  window.cfgMsRender = function(){
+    var r = _render.apply(this, arguments);
+    try{ decorar(); }catch(e){ console.warn(e); }
+    return r;
+  };
+  function decorar(){
+    if(!S || cfgPS!==S.ps) return;
+    var m = porRubro();
+    document.querySelectorAll("#cfgMsSel .cfg-ms-tag").forEach(function(tag){
+      var b = tag.querySelector("button"); if(!b) return;
+      var mm = /cfgMsToggle\('([^']+)'\)/.exec(b.getAttribute("onclick")||""); if(!mm) return;
+      var l = m.get(mm[1]); if(!l || !l.length) return;
+      tag.classList.add("prv-lock");
+      tag.title = l.length + (l.length===1 ? " insumo" : " insumos") + " de este proveedor en este rubro: " + l.map(function(x){ return x.nombre; }).join(", ");
+      b.innerHTML = ICO_LOCK; b.title = "Mover sus insumos a otro rubro";
+      var n = document.createElement("i"); n.className = "prv-n"; n.textContent = l.length; tag.insertBefore(n, b);
+    });
+    document.querySelectorAll("#cfgMsList .cfg-ms-opt.on").forEach(function(o){
+      var mm = /cfgMsToggle\('([^']+)'\)/.exec(o.getAttribute("onclick")||""); if(!mm) return;
+      var l = m.get(mm[1]); if(l && l.length){ o.classList.add("prv-lock"); o.title = "Tiene " + l.length + (l.length===1 ? " insumo" : " insumos") + ": tocá para moverlos a otro rubro"; }
+    });
+    var ms = document.getElementById("cfgMs"); if(!ms) return;
+    var bar = document.getElementById("prvBar");
+    var total = insumos().length;
+    if(!total){ if(bar) bar.remove(); return; }
+    if(!bar){ bar = document.createElement("div"); bar.id = "prvBar"; bar.className = "prv-bar"; ms.parentNode.insertBefore(bar, ms.nextSibling); }
+    var pend = pendientes();
+    bar.innerHTML = '<div class="prv-bar-tx">' + (pend.length
+        ? '<b>Al guardar</b> ' + pend.map(function(g){ return g.n + (g.n===1 ? " insumo pasa" : " insumos pasan") + ' de <i>' + esc(g.de) + '</i> a <i>' + esc(g.a) + '</i>'; }).join(" · ") + '.'
+        : 'Los rubros con ' + ICO_LOCK + ' tienen insumos de este proveedor. Para cambiarle el rubro, mové sus insumos.')
+      + '</div><div class="prv-bar-act">' + (pend.length ? '<button type="button" class="prv-link" onclick="prvDeshacer()">Deshacer</button>' : '')
+      + '<button type="button" class="prv-btn" onclick="prvAbrir()">' + ICO_MOVE + 'Mover insumos de rubro</button></div>';
+    bar.classList.toggle("pend", !!pend.length);
+  }
+  function pendientes(){
+    var g = new Map();
+    insumos().forEach(function(x){ if(!S.moves.has(x.id) || x.orig===x.rubro) return; var k = x.orig + ">" + x.rubro; if(!g.has(k)) g.set(k, { de:rubNom(x.orig), a:rubNom(x.rubro), n:0 }); g.get(k).n++; });
+    return [...g.values()];
+  }
+  window.prvAbrir = function(){ abrirModal(null); };
+  window.prvDeshacer = function(){
+    if(!S) return;
+    S.moves.clear();
+    if(S.snap){ cfgPS.msSel.clear(); S.snap.forEach(function(id){ cfgPS.msSel.add(id); }); S.snap = null; }
+    cfgHideErr(); cfgMsRender();
+  };
+
+  /* ---------- ventana "Mover insumos de rubro" ---------- */
+  var md = null, M = null; // M: { dest, sel:Set }
+  function cerrar(){ if(md) md.classList.remove("show"); }
+  window.prvCerrar = cerrar;
+  function abrirModal(rubroOrigen){
+    var ins = insumos(); if(!ins.length) return;
+    var sel = new Set(rubroOrigen ? ins.filter(function(x){ return x.rubro===rubroOrigen; }).map(function(x){ return x.id; }) : []);
+    // destino sugerido: un rubro recién agregado al proveedor que todavía no tiene insumos
+    var m = porRubro(), sug = null;
+    if(cfgPS && cfgPS.msSel) cfgPS.msSel.forEach(function(id){ if(!sug && !(m.get(id)||[]).length) sug = id; });
+    M = { dest:sug, sel:sel, foco:rubroOrigen };
+    if(!md){
+      md = document.createElement("div"); md.className = "tgx-ov prv-ov";
+      md.addEventListener("mousedown", function(e){ if(e.target===md) cerrar(); });
+      document.body.appendChild(md);
+    }
+    pintar();
+    requestAnimationFrame(function(){ md.classList.add("show"); });
+  }
+  function opcionesDestino(){
+    var D = cfgData.proveedores, h = '<option value="">Elegí el rubro de destino…</option>';
+    D.cats.slice().sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); }).forEach(function(c){
+      var rs = D.rubros.filter(function(r){ return r.catId===c.id; }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+      if(!rs.length) return;
+      h += '<optgroup label="' + esc(c.nombre) + '">' + rs.map(function(r){ return '<option value="' + r.id + '"' + (M.dest===r.id ? " selected" : "") + '>' + esc(r.nombre) + '</option>'; }).join("") + '</optgroup>';
+    });
+    return h;
+  }
+  function pintar(){
+    var ins = insumos(), grupos = new Map();
+    ins.forEach(function(x){ var k = x.rubro || ""; if(!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(x); });
+    var orden = [...grupos.keys()].sort(function(a,b){ if(a===M.foco) return -1; if(b===M.foco) return 1; return cfgCmp(catNom(a)+rubNom(a), catNom(b)+rubNom(b)); });
+    var movibles = ins.filter(function(x){ return M.sel.has(x.id) && x.rubro!==M.dest; });
+    var listas = orden.map(function(k){
+      var l = grupos.get(k), enDest = !!M.dest && k===M.dest;
+      var nSel = l.filter(function(x){ return M.sel.has(x.id); }).length;
+      var all = !enDest && nSel===l.length, some = !enDest && nSel>0 && !all;
+      return '<div class="prv-grp' + (enDest ? " dest" : "") + '">'
+        + '<label class="prv-gh"><input type="checkbox" ' + (all ? "checked " : "") + (enDest ? "disabled " : "") + 'data-g="' + k + '"' + (some ? ' data-ind="1"' : '') + '><span class="prv-gn">' + esc(rubNom(k)) + '<small>' + esc(catNom(k)) + '</small></span>'
+        + '<span class="prv-gc">' + (enDest ? "ya está en el destino" : nSel + " de " + l.length) + '</span></label>'
+        + l.map(function(x){
+            return '<label class="prv-it' + (enDest ? " off" : "") + '"><input type="checkbox" ' + (M.sel.has(x.id) && !enDest ? "checked " : "") + (enDest ? "disabled " : "") + 'data-i="' + x.id + '">'
+              + '<span class="prv-in">' + esc(x.nombre) + (S.moves.has(x.id) && x.orig!==x.rubro ? '<em class="prv-tag">pendiente</em>' : '') + '</span>'
+              + (x.otros.length ? '<span class="prv-ot" title="El rubro es del insumo: también cambia para ' + esc(x.otros.join(", ")) + '">también ' + esc(x.otros.length===1 ? x.otros[0] : x.otros.length + " proveedores") + '</span>' : '')
+              + '</label>';
+          }).join("") + '</div>';
+    }).join("");
+    // rubros que quedarían vacíos
+    var quedan = new Map(); ins.forEach(function(x){ var r = movibles.indexOf(x)>=0 ? M.dest : x.rubro; if(r) quedan.set(r, (quedan.get(r)||0)+1); });
+    var vacios = [...new Set(movibles.map(function(x){ return x.rubro; }))].filter(function(r){ return r && !quedan.get(r); });
+    var compartidos = movibles.filter(function(x){ return x.otros.length; });
+    var resumen = !M.dest ? "Elegí el rubro de destino." : !movibles.length ? "Marcá los insumos que pasan a <b>" + esc(rubNom(M.dest)) + "</b>." :
+      "Pasan <b>" + movibles.length + (movibles.length===1 ? " insumo" : " insumos") + "</b> a <b>" + esc(rubNom(M.dest)) + "</b>."
+      + (vacios.length ? " El proveedor deja de estar en <b>" + vacios.map(function(r){ return esc(rubNom(r)); }).join("</b>, <b>") + "</b>." : "")
+      + (compartidos.length ? '<span class="prv-warn">' + compartidos.length + (compartidos.length===1 ? " insumo también lo venden" : " insumos también los venden") + " otros proveedores: el rubro cambia para todos." + '</span>' : "");
+    md.innerHTML = '<div class="tgx-md prv-md" role="dialog" aria-modal="true">'
+      + '<div class="tgx-md-h"><div><span class="tgx-kick">Mover insumos de rubro</span><h3>' + esc(provNom(S.provId)) + '</h3></div><button type="button" class="tgx-x" onclick="prvCerrar()" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>'
+      + '<div class="tgx-md-b">'
+      + '<div class="prv-step"><span class="n">1</span>Rubro de destino</div>'
+      + '<select class="prv-sel" id="prvDest">' + opcionesDestino() + '</select>'
+      + '<div class="prv-step"><span class="n">2</span>Insumos que pasan <span class="prv-step-h">los que no marques quedan en su rubro</span></div>'
+      + '<div class="prv-list">' + listas + '</div>'
+      + '<div class="prv-sum' + (M.dest && movibles.length ? " ok" : "") + '">' + resumen + '</div>'
+      + '</div><div class="tgx-md-f"><span class="prv-foot-h">Se graba al tocar “Guardar cambios” del proveedor.</span><button type="button" class="tgx-btn ghost" onclick="prvCerrar()">Cancelar</button><button type="button" class="tgx-btn" id="prvOk"' + (M.dest && movibles.length ? "" : " disabled") + ' onclick="prvAplicar()">' + (movibles.length ? "Mover " + movibles.length + (movibles.length===1 ? " insumo" : " insumos") : "Mover") + '</button></div></div>';
+    md.querySelectorAll("input[data-ind]").forEach(function(i){ i.indeterminate = true; });
+    md.querySelector("#prvDest").onchange = function(){ M.dest = this.value || null; var st = md.querySelector(".prv-list").scrollTop; pintar(); md.querySelector(".prv-list").scrollTop = st; };
+    md.querySelectorAll("input[data-i]").forEach(function(c){ c.onchange = function(){ c.checked ? M.sel.add(c.dataset.i) : M.sel.delete(c.dataset.i); var st = md.querySelector(".prv-list").scrollTop; pintar(); md.querySelector(".prv-list").scrollTop = st; }; });
+    md.querySelectorAll("input[data-g]").forEach(function(c){ c.onchange = function(){
+      var k = c.dataset.g; ins.filter(function(x){ return (x.rubro||"")===k; }).forEach(function(x){ c.checked ? M.sel.add(x.id) : M.sel.delete(x.id); });
+      var st = md.querySelector(".prv-list").scrollTop; pintar(); md.querySelector(".prv-list").scrollTop = st; }; });
+  }
+  window.prvAplicar = function(){
+    if(!M || !M.dest) return;
+    var ins = insumos(), mov = ins.filter(function(x){ return M.sel.has(x.id) && x.rubro!==M.dest; });
+    if(!mov.length) return;
+    if(!S.snap) S.snap = new Set(cfgPS.msSel);
+    var antes = new Set(ins.map(function(x){ return x.rubro; }).filter(Boolean));
+    mov.forEach(function(x){ if(x.orig===M.dest) S.moves.delete(x.id); else S.moves.set(x.id, M.dest); });
+    var despues = porRubro();
+    cfgPS.msSel.add(M.dest);
+    antes.forEach(function(r){ if(!(despues.get(r)||[]).length) cfgPS.msSel.delete(r); });
+    var el = document.getElementById("cfgMs"); if(el) el.classList.remove("err");
+    cfgHideErr(); cerrar(); cfgMsRender();
+    var bar = document.getElementById("prvBar"); if(bar){ bar.scrollIntoView({ block:"nearest", behavior:"smooth" }); bar.classList.remove("flash"); void bar.offsetWidth; bar.classList.add("flash"); }
+  };
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && md && md.classList.contains("show")){ e.stopPropagation(); cerrar(); } }, true);
+})();
 </script>
 </body>
 </html>
