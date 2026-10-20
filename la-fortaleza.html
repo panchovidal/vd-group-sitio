@@ -901,6 +901,12 @@
   .pv-row{border-bottom:1px solid var(--border);font-size:12.5px;transition:background .12s;}
   .pv-row:last-child{border-bottom:none;}
   .pv-nombre{font-weight:700;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* Cat. 3 (sub_concepto, 20/10/2026): se muestra como una segunda línea chica debajo del nombre —
+     por eso .pv-nombre pasa a columna flex en vez de depender solo del white-space:nowrap de una sola
+     línea, así el nombre largo se sigue truncando con elipsis pero la sub-categoría no lo corta. */
+  .pv-nombre.has-sub{display:flex;flex-direction:column;gap:1px;white-space:normal;}
+  .pv-nombre .pvn-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pv-nombre .pvn-sub{font-size:9.5px;font-weight:600;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .pv-num{font-variant-numeric:tabular-nums;color:var(--text-2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .pv-inc-badge{display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11.5px;padding:4px 10px;border-radius:20px;min-width:52px;}
   .pv-inc-red{background:#FCE6E7;color:#B22A32;}
@@ -1005,6 +1011,7 @@
   .rec-item-head .edit-input, .rec-item-head .edit-select{flex:1;min-width:140px;padding:7px 10px;border-radius:7px;border:1px solid var(--sky);font-size:12.8px;outline:none;}
   .rec-item-head .ri-name{font-weight:800;color:var(--text-1);font-size:13.8px;flex:1;min-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .rec-item-head .ri-concepto{font-size:10.5px;font-weight:800;color:var(--sky);background:#EAF0FF;border-radius:20px;padding:3px 10px;flex-shrink:0;white-space:nowrap;}
+  .rec-item-head .ri-subconcepto{font-size:10px;font-weight:700;color:var(--text-3);background:#F2F3F7;border-radius:20px;padding:3px 10px;flex-shrink:0;white-space:nowrap;}
   .rec-item-head .ri-porc{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2);font-weight:700;flex-shrink:0;text-transform:uppercase;letter-spacing:.02em;}
   .rec-item-head .ri-porc input{width:52px;padding:5px 7px;border-radius:6px;border:1px solid var(--border);font-size:12.5px;text-align:center;outline:none;text-transform:none;letter-spacing:normal;}
   .rec-item-head .ri-porc input:focus{border-color:var(--sky);}
@@ -2687,6 +2694,7 @@
   .ct-pick-col{flex:1;min-width:0;border:1px solid var(--border);border-radius:10px;background:#fff;max-height:260px;overflow-y:auto;}
   .ct-pick-col h4{position:sticky;top:0;background:#fff;margin:0;padding:8px 10px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);border-bottom:1px solid var(--border);}
   .ct-pick-grp{font-size:10.5px;font-weight:800;color:var(--sky);padding:8px 10px 2px;text-transform:uppercase;letter-spacing:.04em;}
+  .ct-pick-subgrp{font-size:10px;font-weight:700;color:var(--text-3);padding:4px 10px 2px 18px;text-transform:uppercase;letter-spacing:.03em;}
   .ct-pick-row{display:flex;align-items:center;gap:7px;padding:5px 10px;font-size:12.5px;color:var(--text-1);cursor:pointer;}
   .ct-pick-row:hover{background:#f5f6fb;}
   .ct-pick-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -10328,7 +10336,7 @@ function arDividendos(util){
 
 /* ---- Ocupación de canchas en Análisis de Resultados (pedido de Pancho, 19/10/2026) ----
    Es LA MISMA métrica y las mismas reglas que la tarjeta "Canchas" de Facturación
-   (ver BASE_HORAS_*/vContarDiasSemanaEnRango/renderOcupacionCanchas más arriba): tarde (L a V)
+   (ver BASE_HORAS_* / vContarDiasSemanaEnRango / renderOcupacionCanchas más arriba): tarde (L a V)
    = reservas "Normal", mañana (L a V) = reservas "Profesores", sábado = turno único, domingo
    excluido. La única diferencia es la fuente de datos: en vez de depender de ventasFiles (que
    sólo existe si se visitó la pantalla de Ventas), lee arState.reservas/arState.cancelaciones,
@@ -16173,6 +16181,7 @@ function recRenderItem(it){
     head = `<div class="rec-item-head">
       <span class="ri-name">${costeoEsc(it.nombre)}</span>
       <span class="ri-concepto">${costeoEsc(it.concepto)}</span>
+      ${it.sub_concepto ? `<span class="ri-subconcepto">${costeoEsc(it.sub_concepto)}</span>` : ""}
       <span class="ri-porc">${esKg?"Peso total (Kg)":"Porciones"}<input type="text" inputmode="decimal" value="${fmtNumCosteo(it.porciones)}" onchange="recUpdatePorciones('${it.id}', this.value)"></span>
       <span class="ri-costo">${esKg?"$/Kg":"$/porc."}<strong>${costoTxt}</strong></span>
       <button type="button" class="ri-toggle-btn ${isOpen?'open':''}" onclick="recToggleDetail('${it.id}')">${isOpen?'Ocultar receta':'Ver receta'}</button>
@@ -16261,17 +16270,22 @@ function recIndiceArticulosDisponibles(){
   const iNombre = vFindColIndex(h, ["Nombre (*)","Nombre"]);
   const iCat1 = vFindColIndex(h, ["Cat. 1","Cat.1","Cat 1"]);
   const iCat2 = vFindColIndex(h, ["Cat. 2","Cat.2","Cat 2"]);
+  // Cat. 3 (agregada 20/10/2026): sub-categoría opcional dentro de la Cat. 2, para dar un filtro más
+  // preciso en Recetas/Carta/Precios de venta (ej.: "Servicio de cocina" se divide en Cafetería/Menú
+  // cocina/Parrilla). Es opcional: si el índice todavía no la tiene, todo sigue funcionando igual.
+  const iCat3 = vFindColIndex(h, ["Cat. 3","Cat.3","Cat 3"]);
   if([iNombre,iCat1,iCat2].includes(-1)) return [];
   const seen = new Set(); const out = [];
   ventasIndice.rows.forEach(r=>{
     const nombre = (r[iNombre]||"").toString().trim();
     const cat1 = (r[iCat1]||"").toString().trim();
     const cat2 = (r[iCat2]||"").toString().trim();
+    const cat3 = iCat3>=0 ? (r[iCat3]||"").toString().trim() : "";
     if(!nombre || cat1==="Caja") return; // Caja: movimientos internos, no son artículos de venta
     const key = nombre.toLowerCase();
     if(seen.has(key)) return;
     seen.add(key);
-    out.push({ nombre, concepto: recArticuloConceptoDesdeCats(cat1,cat2) });
+    out.push({ nombre, concepto: recArticuloConceptoDesdeCats(cat1,cat2), subConcepto: cat3 || null });
   });
   return out;
 }
@@ -16302,6 +16316,17 @@ async function recSyncArticulosFromIndice(opts){
   const nombresIndice = new Set(disponibles.map(d=>d.nombre.toLowerCase()));
   const existentesPorNombre = new Map(recetasItems.filter(r=>r.tipo==="articulo").map(r=>[r.nombre.toLowerCase(), r]));
   const aInsertar = disponibles.filter(d=>!existentesPorNombre.has(d.nombre.toLowerCase()));
+  // Artículos que ya están cargados pero cuya clasificación (Cat. 2 / Cat. 3) cambió en el Índice
+  // (ej.: Pancho resubió el índice con una Cat. 3 nueva o corrigió una Cat. 2) — agregado 20/10/2026.
+  // A diferencia de la baja, esto no pierde datos (receta e historial de precio quedan intactos), así
+  // que corre tanto en la sincronización silenciosa como en la manual, igual que el alta.
+  const aActualizar = disponibles.filter(d=>{
+    const ex = existentesPorNombre.get(d.nombre.toLowerCase());
+    if(!ex) return false;
+    const subNuevo = d.subConcepto || null;
+    const subActual = ex.sub_concepto || null;
+    return ex.concepto !== d.concepto || subActual !== subNuevo;
+  });
   // Artículos cargados acá que ya NO figuran en el Índice (se dieron de baja del punto de venta,
   // se renombraron, etc.) — pedido de Pancho, 03/09/2026: la sincronización tiene que reflejar el
   // Índice tanto para lo que se agrega como para lo que ya no está.
@@ -16310,7 +16335,7 @@ async function recSyncArticulosFromIndice(opts){
   // Índice"), nunca en la sincronización silenciosa que se dispara sola al abrir la pestaña — borrar
   // recetas/historial de precio sin que nadie lo pida no es aceptable, aunque sea "lo que dice el
   // índice". Por eso, si hay algo para eliminar, se pide confirmación explícita antes de tocar nada.
-  if(!aInsertar.length && !aEliminar.length){
+  if(!aInsertar.length && !aActualizar.length && !aEliminar.length){
     if(!opts.silent) showToast("Ya está todo sincronizado con el índice");
     return;
   }
@@ -16318,13 +16343,15 @@ async function recSyncArticulosFromIndice(opts){
     const nombres = aEliminar.map(r=>r.nombre).join(", ");
     const ok = confirm(`${aEliminar.length} artículo(s) ya no están en el Índice: ${nombres}.\n\nSi confirmás, se van a eliminar del recetario junto con su receta y su historial de precio de venta (acción irreversible). Si alguno se usa como ingrediente en otra receta, no se va a poder eliminar hasta que lo saques de ahí primero.\n\n¿Eliminarlos?`);
     if(!ok){
-      // Se cancela la baja, pero igual se agregan los nuevos (son dos operaciones independientes).
+      // Se cancela la baja, pero igual se agregan/actualizan los demás (son operaciones independientes).
       if(aInsertar.length) await recSyncInsertarArticulos(aInsertar);
-      showToast(aInsertar.length ? `${aInsertar.length} artículo(s) nuevo(s) sincronizado(s) — no se eliminó nada` : "No se eliminó nada");
+      if(aActualizar.length) await recSyncActualizarArticulos(aActualizar, existentesPorNombre);
+      showToast((aInsertar.length||aActualizar.length) ? `${aInsertar.length} artículo(s) nuevo(s), ${aActualizar.length} actualizado(s) — no se eliminó nada` : "No se eliminó nada");
       return;
     }
   }
   if(aInsertar.length) await recSyncInsertarArticulos(aInsertar);
+  if(aActualizar.length) await recSyncActualizarArticulos(aActualizar, existentesPorNombre);
   let eliminados = 0; const bloqueados = [];
   for(const r of aEliminar){
     const { error } = await sb.from("lf_recetas_items").delete().eq("id", r.id);
@@ -16338,14 +16365,33 @@ async function recSyncArticulosFromIndice(opts){
   }
   const partes = [];
   if(aInsertar.length) partes.push(`${aInsertar.length} nuevo(s)`);
+  if(aActualizar.length) partes.push(`${aActualizar.length} actualizado(s)`);
   if(eliminados) partes.push(`${eliminados} eliminado(s)`);
   if(bloqueados.length) partes.push(`${bloqueados.length} no se pudo eliminar (se usan como ingrediente en otra receta): ${bloqueados.join(", ")}`);
   showToast(partes.length ? `Sincronizado: ${partes.join(", ")}` : "Ya está todo sincronizado con el índice", bloqueados.length ? "warn" : undefined);
 }
 async function recSyncInsertarArticulos(aInsertar){
-  const payload = aInsertar.map(d=>({ tipo:"articulo", nombre:d.nombre, concepto:d.concepto, porciones:1, creado_por: currentPerfil?currentPerfil.id:null }));
+  const payload = aInsertar.map(d=>({ tipo:"articulo", nombre:d.nombre, concepto:d.concepto, sub_concepto:d.subConcepto||null, porciones:1, creado_por: currentPerfil?currentPerfil.id:null }));
   const { error } = await sb.from("lf_recetas_items").insert(payload);
   if(error){ showToast("No se pudieron sincronizar todos los artículos nuevos", "warn"); }
+  await loadRecetasItems();
+  renderRecList();
+  recRenderSyncStatus();
+}
+async function recSyncActualizarArticulos(aActualizar, existentesPorNombre){
+  // Actualiza concepto/sub_concepto de artículos ya cargados cuando el Índice trae una clasificación
+  // distinta — nunca toca nombre, receta ni historial de precio. Agregado 20/10/2026 junto con la Cat. 3.
+  let huboError = false;
+  for(const d of aActualizar){
+    const ex = existentesPorNombre.get(d.nombre.toLowerCase());
+    if(!ex) continue;
+    const { error } = await sb.from("lf_recetas_items").update({
+      concepto: d.concepto, sub_concepto: d.subConcepto || null,
+      modificado_por: currentPerfil?currentPerfil.id:null, modificado_fecha: new Date().toISOString()
+    }).eq("id", ex.id);
+    if(error) huboError = true;
+  }
+  if(huboError) showToast("No se pudieron actualizar todas las clasificaciones", "warn");
   await loadRecetasItems();
   renderRecList();
   recRenderSyncStatus();
@@ -16977,7 +17023,7 @@ function pvRenderRow(a){
   const varPrecio = pvVar(hintPrecio, precioVigente);
   const pct = pvIncidencia(costoAnterior, precioVigente);
   return `<div class="pv-row">
-    <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
+    <div class="pv-nombre${a.sub_concepto?" has-sub":""}" title="${costeoEsc(a.nombre)}"><span class="pvn-txt">${costeoEsc(a.nombre)}</span>${a.sub_concepto?`<span class="pvn-sub">${costeoEsc(a.sub_concepto)}</span>`:""}</div>
     <div class="pv-num">${pv && pv.fecha_actualizacion ? fmtFechaHora(pv.fecha_actualizacion).split(" ")[0] : "— (nunca)"}</div>
     <div class="pv-num">${costoAnterior==null?"—":fmtMoneyCosteo(costoAnterior)}</div>
     <div class="pv-num">${costoNuevo==null?"—":fmtMoneyCosteo(costoNuevo)}</div>
@@ -17004,7 +17050,7 @@ function pvRenderRowAjuste(a){
   const varPrecio = precioNuevoNum!=null ? pvVar(precioAnterior, precioNuevoNum) : null;
   const incidenciaNueva = pvIncidencia(costoNuevo, precioNuevoNum!=null ? precioNuevoNum : precioAnterior);
   return `<div class="pv-row" id="pvRow_${a.id}">
-    <div class="pv-nombre" title="${costeoEsc(a.nombre)}">${costeoEsc(a.nombre)}</div>
+    <div class="pv-nombre${a.sub_concepto?" has-sub":""}" title="${costeoEsc(a.nombre)}"><span class="pvn-txt">${costeoEsc(a.nombre)}</span>${a.sub_concepto?`<span class="pvn-sub">${costeoEsc(a.sub_concepto)}</span>`:""}</div>
     <div class="pv-num">${promedioSemanal==null?"—":promedioSemanal.toLocaleString("es-AR",{maximumFractionDigits:1})+"/sem."}</div>
     <div class="pv-num">${costoAnterior==null?"—":fmtMoneyCosteo(costoAnterior)}</div>
     <div class="pv-num">${costoNuevo==null?"—":fmtMoneyCosteo(costoNuevo)}</div>
@@ -20935,6 +20981,15 @@ const CT = {
     return secciones.map((s,idx)=>this.renderSeccion(c, s, idx, secciones.length, grupos)).join("");
   },
 
+  filaCatalogoRow(s, a, itemsSel){
+    const checked = itemsSel.has(a.id);
+    const pr = this.precio(a.id);
+    return `<div class="ct-pick-row"><label style="display:flex;align-items:center;gap:7px;width:100%;cursor:pointer;">
+      <input type="checkbox" ${checked?"checked":""} onchange="CT.toggleItem('${s.id}','${a.id}', this.checked)">
+      <span class="nm">${this.esc(a.nombre)}</span>
+      <span class="pr">${pr!=null?fmtMoney(pr):"—"}</span>
+    </label></div>`;
+  },
   renderFilasCatalogo(s, grupos, filtro){
     const itemsSel = new Set((s.items||[]).map(it=>it.articuloId));
     const q = (filtro.q||"").trim().toLowerCase();
@@ -20942,16 +20997,27 @@ const CT = {
     const bloques = cats.map(cat=>{
       const arts = (grupos[cat]||[]).filter(a=> !q || a.nombre.toLowerCase().includes(q));
       if(!arts.length) return "";
-      const rows = arts.map(a=>{
-        const checked = itemsSel.has(a.id);
-        const pr = this.precio(a.id);
-        return `<div class="ct-pick-row"><label style="display:flex;align-items:center;gap:7px;width:100%;cursor:pointer;">
-          <input type="checkbox" ${checked?"checked":""} onchange="CT.toggleItem('${s.id}','${a.id}', this.checked)">
-          <span class="nm">${this.esc(a.nombre)}</span>
-          <span class="pr">${pr!=null?fmtMoney(pr):"—"}</span>
-        </label></div>`;
-      }).join("");
-      return `<div class="ct-pick-grp">${this.esc(cat)}</div>${rows}`;
+      // Cat. 3 (sub_concepto, agregada 20/10/2026): cuando algún artículo del rubro la tiene cargada,
+      // se arma un sub-encabezado para encontrar más rápido (ej.: dentro de "Servicio de cocina",
+      // separar Cafetería / Menú cocina / Parrilla). Si ningún artículo la tiene, se lista plano como antes.
+      const tieneSub = arts.some(a=>a.sub_concepto);
+      let rowsHtml;
+      if(tieneSub){
+        const bySub = {};
+        arts.forEach(a=>{ const k = a.sub_concepto || "Sin sub-categoría"; (bySub[k] = bySub[k]||[]).push(a); });
+        const subKeys = Object.keys(bySub).sort((x,y)=>{
+          if(x==="Sin sub-categoría") return 1;
+          if(y==="Sin sub-categoría") return -1;
+          return x.localeCompare(y,"es");
+        });
+        rowsHtml = subKeys.map(sub=>{
+          const rows = bySub[sub].map(a=>this.filaCatalogoRow(s,a,itemsSel)).join("");
+          return `<div class="ct-pick-subgrp">${this.esc(sub)}</div>${rows}`;
+        }).join("");
+      } else {
+        rowsHtml = arts.map(a=>this.filaCatalogoRow(s,a,itemsSel)).join("");
+      }
+      return `<div class="ct-pick-grp">${this.esc(cat)}</div>${rowsHtml}`;
     }).join("");
     return bloques || '<div class="ct-empty-mini">Sin resultados con este filtro.</div>';
   },
