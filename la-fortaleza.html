@@ -2748,6 +2748,14 @@
   .ct-sheet .ct-subcol{flex:1;min-width:0;}
   .ct-sheet .ct-guide{position:absolute;left:0;right:0;border-top:1px dashed #B33A3A;pointer-events:none;}
   .ct-sheet .ct-guide-label{position:absolute;right:0;top:-13px;font-size:8px;color:#B33A3A;background:#fff;padding:0 3px;font-family:'Inter',sans-serif;}
+  /* Lienzo arrastrable de Diseño (20/10/2026) */
+  .ct-lienzo-outer{margin-bottom:4px;}
+  .ct-lienzo-col-guia{background:rgba(89,119,210,.05);border-left:1px dashed #D7DCF5;border-right:1px dashed #D7DCF5;pointer-events:none;}
+  .ct-lienzo-col-num{position:absolute;top:2px;left:4px;font-size:8px;font-weight:800;color:#AEB6DC;text-transform:uppercase;letter-spacing:.04em;font-family:'Inter',sans-serif;}
+  .ct-seccion-imp.ct-lienzo-sec{cursor:grab;outline:1.5px dashed transparent;outline-offset:2px;transition:outline-color .12s;}
+  .ct-seccion-imp.ct-lienzo-sec:hover{outline-color:#5977D2;}
+  .ct-seccion-imp.ct-lienzo-sec.dragging{cursor:grabbing;outline-color:#B33A3A;z-index:5;opacity:.9;}
+  .ct-lienzo-sec-tag{position:absolute;top:-17px;left:0;font-size:9px;font-weight:800;color:#fff;background:#020B2D;padding:2px 7px;border-radius:5px 5px 0 0;white-space:nowrap;font-family:'Inter',sans-serif;pointer-events:none;}
   @media print{
     body > *:not(#ctPrintRoot){display:none !important;}
     #ctPrintRoot{display:block !important;position:fixed;inset:0;margin:0;padding:0;background:#fff;}
@@ -20679,7 +20687,7 @@ function ctNuevaConfig(){
       titulo: ctTier(30,true), subtitulo: ctTier(15,true), descripcion: ctTier(10,false),
       articulo: ctTier(12.5,false), precio: ctTier(12.5,false), subindice: ctTier(9.5,false),
     },
-    layout:{ columnas:2, margenMm:14, espacioMm:9, alinPrecio:"derecha", marco: ctNuevoMarco() },
+    layout:{ columnas:2, margenMm:14, espacioMm:9, espacioTituloMm:8, alinPrecio:"derecha", marco: ctNuevoMarco() },
     secciones:[]
   };
 }
@@ -20711,6 +20719,9 @@ function ctMigrarConfig(cfgIn){
     columnas: lay.columnas || 2,
     margenMm: lay.margenMm!=null ? lay.margenMm : 14,
     espacioMm: lay.espacioMm!=null ? lay.espacioMm : 9,
+    // Distancia entre el título/subtítulo (de la carta, o de cada sección) y el cuerpo que sigue
+    // (agregado 20/10/2026, pedido de Pancho). Antes estaba fijo en 8mm sin forma de tocarlo.
+    espacioTituloMm: lay.espacioTituloMm!=null ? lay.espacioTituloMm : 8,
     alinPrecio: lay.alinPrecio || "derecha",
     marco: lay.marco && typeof lay.marco==="object" ? { activo:!!lay.marco.activo, colorHex:lay.marco.colorHex||"#020B2D", grosorMm:lay.marco.grosorMm!=null?lay.marco.grosorMm:0.6 } : ctNuevoMarco(),
   };
@@ -20963,6 +20974,7 @@ const CT = {
           </div>
           <div class="ct-field"><label>Márgenes (mm)</label><input type="number" min="0" max="60" value="${cfg.layout.margenMm}" onchange="CT.set('layout.margenMm', Number(this.value))"></div>
           <div class="ct-field"><label>Espacio entre secciones (mm)</label><input type="number" min="0" max="40" value="${cfg.layout.espacioMm}" onchange="CT.set('layout.espacioMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Distancia título/subtítulo → cuerpo (mm)</label><input type="number" min="0" max="40" step="0.5" value="${cfg.layout.espacioTituloMm}" onchange="CT.set('layout.espacioTituloMm', Number(this.value))"></div>
           <div class="ct-field"><label>Alineación de precios</label>
             <div class="ct-seg">
               <button type="button" class="${cfg.layout.alinPrecio==='derecha'?'on':''}" onclick="CT.set('layout.alinPrecio','derecha')">Derecha, con guía</button>
@@ -20978,11 +20990,18 @@ const CT = {
       </div>
 
       <div class="ct-block">
+        <h3>Ubicación de las secciones</h3>
+        <div class="ct-sub" style="margin-bottom:8px;">Arrastrá cada sección para moverla de columna o cambiarle la altura — se suelta tomando la columna de posición más cercana y queda con "Manual" activado. Para un ajuste más fino, usá los campos numéricos de cada sección más abajo.</div>
+        <div id="ctDisenoLienzoWrap"></div>
+      </div>
+
+      <div class="ct-block">
         <h3>Secciones y artículos</h3>
         <div id="ctSecciones">${this.renderSecciones(c)}</div>
         <button type="button" class="ct-btn" onclick="CT.agregarSeccion()">+ Agregar sección</button>
       </div>
     `;
+    this.pintarDisenoLienzo();
   },
 
   setColumnas(n){
@@ -21332,43 +21351,27 @@ const CT = {
       const wPct = 100/subCols;
       tituloStyle += `width:${wPct}%;margin-left:${(wPct*(col-1)).toFixed(4)}%;box-sizing:border-box;`;
     }
+    // Distancia título/subtítulo → cuerpo (20/10/2026, pedido de Pancho — antes era fija/pegada):
+    // se aplica como margen inferior del último elemento de la cabecera de la sección (la
+    // descripción si existe, si no el título), justo antes de que arranquen los artículos.
+    const espacioTitulo = cfg.layout.espacioTituloMm!=null ? cfg.layout.espacioTituloMm : 8;
+    const espacioTituloPx = this.mm2px(espacioTitulo);
     return `<div class="ct-seccion-inner">
-      <div class="ct-stitulo" style="${this.textStyleCss(cfg.estilos.subtitulo)}${tituloStyle}">${this.esc(s.titulo)}</div>
-      ${s.descripcion?`<div class="ct-sdesc" style="${this.textStyleCss(cfg.estilos.descripcion)}">${this.esc(s.descripcion)}</div>`:""}
+      <div class="ct-stitulo" style="${this.textStyleCss(cfg.estilos.subtitulo)}${tituloStyle}${!s.descripcion?`margin-bottom:${espacioTituloPx}px;`:""}">${this.esc(s.titulo)}</div>
+      ${s.descripcion?`<div class="ct-sdesc" style="${this.textStyleCss(cfg.estilos.descripcion)}margin-bottom:${espacioTituloPx}px;">${this.esc(s.descripcion)}</div>`:""}
       <div class="ct-subcols" style="gap:${this.mm2px(cfg.layout.margenMm/2)}px;">${colsHtml}</div>
     </div>`;
   },
 
-  renderHoja(c){
-    const cfg = c.config;
+  // ---- cálculo de layout compartido (20/10/2026): antes vivía duplicado dentro de renderHoja;
+  // ahora lo usan tanto la vista previa de Impresión como el lienzo arrastrable de Diseño, para que
+  // las dos coincidan siempre en dónde cae cada sección. Hace la medición real en el DOM (igual que
+  // antes) y devuelve posiciones/tamaños en px, más una función trackLeft(col) para la X de cada
+  // columna de posición. ----
+  calcularLayout(cfg){
     const {w,h} = this.dims(cfg);
     const pxW = this.mm2px(w), pxH = this.mm2px(h);
-    const scale = Math.min(1, 640/pxW);
     const margenPx = this.mm2px(cfg.layout.margenMm);
-
-    const wrap = document.createElement("div");
-    wrap.className = "ct-print-card";
-    wrap.innerHTML = `
-      <div class="ct-print-name">${this.esc(c.nombre)} <span style="color:var(--text-3);font-weight:400;">(${w}×${h} mm)</span>
-        <button type="button" class="ct-btn sm pri" onclick="CT.imprimir('${c.id}')">Imprimir / Guardar PDF</button>
-      </div>
-      <div class="ct-sheet-wrap" style="width:${(pxW*scale).toFixed(0)}px;height:${(pxH*scale).toFixed(0)}px;">
-        <div class="ct-sheet" style="width:${pxW}px;height:${pxH}px;transform:scale(${scale});transform-origin:top left;padding:${margenPx}px;${this.marcoCss(cfg.layout.marco)}"></div>
-      </div>`;
-    const sheetEl = wrap.querySelector(".ct-sheet");
-    sheetEl.id = "ctSheet-"+c.id;
-    sheetEl.style.boxSizing = "border-box";
-    sheetEl.style.fontFamily = "'Roboto',sans-serif";
-
-    const head = document.createElement("div");
-    head.innerHTML = this.renderEncabezado(cfg);
-    sheetEl.appendChild(head);
-
-    const contentWrap = document.createElement("div");
-    contentWrap.className = "ct-cols-wrap";
-    contentWrap.style.cssText = "position:relative;margin-top:"+this.mm2px(8)+"px;";
-    sheetEl.appendChild(contentWrap);
-
     const cols = cfg.layout.columnas;
     const totalWidthPx = pxW - margenPx*2;
     const gapPx = margenPx;
@@ -21408,38 +21411,193 @@ const CT = {
       tracks.forEach(t=>{ cursorMm[t] = Math.max(cursorMm[t], topMm + heightMm); });
     });
 
-    secciones.forEach(s=>{
-      const m = medidas[s.id];
-      const el = document.createElement("div");
-      el.className = "ct-seccion-imp";
-      el.dataset.sid = s.id;
-      const pad = m.marcoActivo ? `padding:${this.mm2px(3)}px;` : "";
-      el.style.cssText = `position:absolute; left:${trackLeft(m.start)}px; top:${this.mm2px(tops[s.id])}px; width:${m.widthPx}px; ${pad}${this.marcoCss(s.marco)}`;
-      el.innerHTML = this.renderSeccionImpresa(s, cfg);
-      contentWrap.appendChild(el);
-    });
-
-    // Líneas guía: secciones con posición manual que comparten (casi) el mismo Y
-    const manuales = secciones.filter(s=>s.posicionManual);
-    const vistos = new Set();
-    manuales.forEach(s=>{
-      if(vistos.has(s.id)) return;
-      const grupo = manuales.filter(o=>!vistos.has(o.id) && Math.abs(tops[o.id]-tops[s.id])<0.6);
-      if(grupo.length>1){
-        grupo.forEach(o=>vistos.add(o.id));
-        const linea = document.createElement("div");
-        linea.className = "ct-guide";
-        linea.style.top = this.mm2px(tops[s.id])+"px";
-        linea.innerHTML = '<span class="ct-guide-label">alineado</span>';
-        contentWrap.appendChild(linea);
-      }
-    });
-
     const maxAuto = Math.max(0, ...cursorMm.slice(1));
     const maxManual = Math.max(0, ...secciones.filter(s=>s.posicionManual).map(s=>{
       const m = medidas[s.id]; return tops[s.id] + m.heightPx/(96/25.4) + (m.marcoActivo ? (this.mm2px(3)*2)/(96/25.4) : 0);
     }));
-    contentWrap.style.height = this.mm2px(Math.max(maxAuto, maxManual)) + "px";
+    const contentHeightMm = Math.max(maxAuto, maxManual);
+
+    return { pxW, pxH, margenPx, cols, colWidthPx, gapPx, trackLeft, secciones, medidas, tops, contentHeightMm };
+  },
+
+  pintarGuias(contentWrap, L){
+    // Líneas guía: secciones con posición manual que comparten (casi) el mismo Y.
+    const manuales = L.secciones.filter(s=>s.posicionManual);
+    const vistos = new Set();
+    manuales.forEach(s=>{
+      if(vistos.has(s.id)) return;
+      const grupo = manuales.filter(o=>!vistos.has(o.id) && Math.abs(L.tops[o.id]-L.tops[s.id])<0.6);
+      if(grupo.length>1){
+        grupo.forEach(o=>vistos.add(o.id));
+        const linea = document.createElement("div");
+        linea.className = "ct-guide";
+        linea.style.top = this.mm2px(L.tops[s.id])+"px";
+        linea.innerHTML = '<span class="ct-guide-label">alineado</span>';
+        contentWrap.appendChild(linea);
+      }
+    });
+  },
+
+  // ---- lienzo arrastrable de la pestaña Diseño (20/10/2026) ----
+  // Usa el mismo cálculo de posiciones que la vista previa de Impresión (calcularLayout) para que
+  // lo que se ve acá coincida siempre con lo que se va a imprimir. Cada sección se puede arrastrar
+  // con el mouse: al soltar, el eje X se "engancha" a la columna de posición más cercana (columnaInicio)
+  // y el eje Y se guarda en mm como posición manual (yMm, posicionManual:true) — es decir, arrastrar
+  // hace exactamente lo mismo que tocar esos campos a mano, pero visualmente.
+  pintarDisenoLienzo(){
+    const host = document.getElementById("ctDisenoLienzoWrap"); if(!host) return;
+    const c = this.actual();
+    if(!c){ host.innerHTML = '<div class="ct-empty-mini">Elegí o creá una carta para ubicar sus secciones acá.</div>'; return; }
+    if(!(c.config.secciones||[]).length){ host.innerHTML = '<div class="ct-empty-mini">Todavía no hay secciones — agregalas más abajo y van a aparecer acá para poder ubicarlas.</div>'; return; }
+    const cfg = c.config;
+    const L = this.calcularLayout(cfg);
+    const scale = Math.min(1, 640/L.pxW);
+    const espacioTitulo = cfg.layout.espacioTituloMm!=null ? cfg.layout.espacioTituloMm : 8;
+    // Margen de maniobra: deja lugar de sobra debajo del contenido actual para poder arrastrar una
+    // sección más abajo de donde ya llega el contenido (el preview de Impresión no necesita esto,
+    // porque ahí el alto real del papel es lo que manda).
+    const bufferMm = 40;
+
+    host.innerHTML = "";
+    const wrap = document.createElement("div");
+    wrap.className = "ct-sheet-wrap ct-lienzo-outer";
+    wrap.style.cssText = `width:${(L.pxW*scale).toFixed(0)}px;`;
+    const sheetEl = document.createElement("div");
+    sheetEl.className = "ct-sheet";
+    sheetEl.style.cssText = `width:${L.pxW}px;box-sizing:border-box;padding:${L.margenPx}px;transform:scale(${scale});transform-origin:top left;font-family:'Roboto',sans-serif;${this.marcoCss(cfg.layout.marco)}`;
+    wrap.appendChild(sheetEl);
+    host.appendChild(wrap);
+
+    const head = document.createElement("div");
+    head.innerHTML = this.renderEncabezado(cfg);
+    sheetEl.appendChild(head);
+
+    const contentWrap = document.createElement("div");
+    contentWrap.className = "ct-cols-wrap";
+    contentWrap.style.cssText = "position:relative;margin-top:"+this.mm2px(espacioTitulo)+"px;";
+    sheetEl.appendChild(contentWrap);
+
+    for(let t=1; t<=L.cols; t++){
+      const guia = document.createElement("div");
+      guia.className = "ct-lienzo-col-guia";
+      guia.style.cssText = `position:absolute; left:${L.trackLeft(t)}px; top:0; width:${L.colWidthPx}px; height:100%;`;
+      guia.innerHTML = `<span class="ct-lienzo-col-num">Columna ${t}</span>`;
+      contentWrap.appendChild(guia);
+    }
+
+    L.secciones.forEach(s=>{
+      const m = L.medidas[s.id];
+      const el = document.createElement("div");
+      el.className = "ct-seccion-imp ct-lienzo-sec";
+      el.dataset.sid = s.id;
+      const pad = m.marcoActivo ? `padding:${this.mm2px(3)}px;` : "";
+      el.style.cssText = `position:absolute; left:${L.trackLeft(m.start)}px; top:${this.mm2px(L.tops[s.id])}px; width:${m.widthPx}px; ${pad}${this.marcoCss(s.marco)}`;
+      el.innerHTML = `<div class="ct-lienzo-sec-tag">${this.esc(s.titulo)}${s.posicionManual?"":" · automática"}</div>` + this.renderSeccionImpresa(s, cfg);
+      this.wireDragSeccion(el, s, L, ()=>scale);
+      contentWrap.appendChild(el);
+    });
+
+    this.pintarGuias(contentWrap, L);
+    contentWrap.style.height = this.mm2px(L.contentHeightMm + bufferMm) + "px";
+
+    // El alto del wrap (visible) se toma recién acá, ya con todo dibujado — así no hace falta
+    // adivinar de antemano cuánto mide el encabezado real.
+    wrap.style.height = (sheetEl.getBoundingClientRect().height) + "px";
+  },
+
+  wireDragSeccion(el, s, L, getScale){
+    let dragging = false, startX = 0, startY = 0, origLeftPx = 0, origTopPx = 0;
+    const onMove = (ev)=>{
+      if(!dragging) return;
+      const scale = getScale();
+      const dx = (ev.clientX - startX)/scale, dy = (ev.clientY - startY)/scale;
+      el.style.left = (origLeftPx + dx) + "px";
+      el.style.top = (origTopPx + dy) + "px";
+    };
+    const onUp = (ev)=>{
+      if(!dragging) return;
+      dragging = false;
+      el.classList.remove("dragging");
+      document.body.style.userSelect = "";
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      const scale = getScale();
+      const dx = (ev.clientX - startX)/scale, dy = (ev.clientY - startY)/scale;
+      const newLeftPx = origLeftPx + dx;
+      const newTopPx = Math.max(0, origTopPx + dy);
+      const span = L.medidas[s.id].span;
+      let bestStart = 1, bestDist = Infinity;
+      for(let start=1; start+span-1<=L.cols; start++){
+        const dist = Math.abs(L.trackLeft(start) - newLeftPx);
+        if(dist < bestDist){ bestDist = dist; bestStart = start; }
+      }
+      const newYmm = Math.round((newTopPx/(96/25.4))*10)/10;
+      const c = this.actual(); if(!c) return;
+      const sec = c.config.secciones.find(x=>x.id===s.id); if(!sec) return;
+      sec.columnaInicio = bestStart;
+      sec.posicionManual = true;
+      sec.yMm = newYmm;
+      if(sec.tituloAlin && sec.tituloAlin.modo==="carta" && !(sec.columnaInicio===1 && sec.columnaSpan===L.cols)) sec.tituloAlin.modo = "seccion";
+      this.guardarDebounced();
+      this.renderEditor();
+      this.renderImpresionSiActiva();
+    };
+    el.addEventListener("mousedown", (ev)=>{
+      if(ev.button!==0) return;
+      ev.preventDefault();
+      dragging = true;
+      el.classList.add("dragging");
+      document.body.style.userSelect = "none";
+      startX = ev.clientX; startY = ev.clientY;
+      origLeftPx = L.trackLeft(L.medidas[s.id].start);
+      origTopPx = this.mm2px(L.tops[s.id]);
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  },
+
+  renderHoja(c){
+    const cfg = c.config;
+    const L = this.calcularLayout(cfg);
+    const scale = Math.min(1, 640/L.pxW);
+    const espacioTitulo = cfg.layout.espacioTituloMm!=null ? cfg.layout.espacioTituloMm : 8;
+
+    const wrap = document.createElement("div");
+    wrap.className = "ct-print-card";
+    wrap.innerHTML = `
+      <div class="ct-print-name">${this.esc(c.nombre)} <span style="color:var(--text-3);font-weight:400;">(${this.dims(cfg).w}×${this.dims(cfg).h} mm)</span>
+        <button type="button" class="ct-btn sm pri" onclick="CT.imprimir('${c.id}')">Imprimir / Guardar PDF</button>
+      </div>
+      <div class="ct-sheet-wrap" style="width:${(L.pxW*scale).toFixed(0)}px;height:${(L.pxH*scale).toFixed(0)}px;">
+        <div class="ct-sheet" style="width:${L.pxW}px;height:${L.pxH}px;transform:scale(${scale});transform-origin:top left;padding:${L.margenPx}px;${this.marcoCss(cfg.layout.marco)}"></div>
+      </div>`;
+    const sheetEl = wrap.querySelector(".ct-sheet");
+    sheetEl.id = "ctSheet-"+c.id;
+    sheetEl.style.boxSizing = "border-box";
+    sheetEl.style.fontFamily = "'Roboto',sans-serif";
+
+    const head = document.createElement("div");
+    head.innerHTML = this.renderEncabezado(cfg);
+    sheetEl.appendChild(head);
+
+    const contentWrap = document.createElement("div");
+    contentWrap.className = "ct-cols-wrap";
+    contentWrap.style.cssText = "position:relative;margin-top:"+this.mm2px(espacioTitulo)+"px;";
+    sheetEl.appendChild(contentWrap);
+
+    L.secciones.forEach(s=>{
+      const m = L.medidas[s.id];
+      const el = document.createElement("div");
+      el.className = "ct-seccion-imp";
+      el.dataset.sid = s.id;
+      const pad = m.marcoActivo ? `padding:${this.mm2px(3)}px;` : "";
+      el.style.cssText = `position:absolute; left:${L.trackLeft(m.start)}px; top:${this.mm2px(L.tops[s.id])}px; width:${m.widthPx}px; ${pad}${this.marcoCss(s.marco)}`;
+      el.innerHTML = this.renderSeccionImpresa(s, cfg);
+      contentWrap.appendChild(el);
+    });
+
+    this.pintarGuias(contentWrap, L);
+    contentWrap.style.height = this.mm2px(L.contentHeightMm) + "px";
 
     return wrap;
   },
