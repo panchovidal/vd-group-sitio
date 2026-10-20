@@ -6,7 +6,7 @@
 <title>VD Group · Administración — La Fortaleza</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
@@ -2638,6 +2638,94 @@
 
   .emp-bracket-admin{--c:#2F8F7B;}
 </style>
+<style id="ctStyles">
+  /* ===== MÓDULO CARTA ===== */
+  .ct-wrap{display:flex;height:100%;min-height:0;}
+  .ct-list{width:280px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;background:#fbfbfd;}
+  .ct-list-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 12px;}
+  .ct-list-head h2{font-size:15px;font-weight:800;margin:0;color:var(--text-1);}
+  .ct-list-items{flex:1;overflow-y:auto;padding:0 10px 16px;}
+  .ct-card{padding:12px 12px;border-radius:var(--radius-md);cursor:pointer;margin-bottom:6px;border:1px solid transparent;transition:background .12s ease,border-color .12s ease;}
+  .ct-card:hover{background:#fff;border-color:var(--border);}
+  .ct-card.active{background:#fff;border-color:var(--blue);box-shadow:var(--shadow-sm);}
+  .ct-card .ctc-nombre{font-weight:800;font-size:13.5px;color:var(--text-1);margin-bottom:3px;}
+  .ct-card .ctc-meta{font-size:11.5px;color:var(--text-3);}
+  .ct-loading, .ct-empty{padding:40px 24px;text-align:center;color:var(--text-3);font-size:13px;}
+  .ct-editor{flex:1;min-width:0;overflow-y:auto;padding:22px 30px 60px;}
+  .ct-ehead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;}
+  .ct-ehead h1{font-size:21px;margin:0 0 4px;font-weight:800;color:var(--text-1);}
+  .ct-ehead .ct-sub{font-size:12.5px;color:var(--text-2);}
+  .ct-btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text-1);display:inline-flex;align-items:center;gap:6px;transition:background .12s ease;}
+  .ct-btn:hover{background:#f2f3f8;}
+  .ct-btn.pri{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .ct-btn.pri:hover{background:var(--navy);}
+  .ct-btn.danger{color:#B33A3A;border-color:#f0d3d3;}
+  .ct-btn.danger:hover{background:#fdf1f1;}
+  .ct-btn.sm{padding:5px 10px;font-size:11.5px;border-radius:8px;}
+  .ct-section-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:16px;}
+  .ct-block{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:18px;}
+  .ct-block h3{font-size:13px;font-weight:800;margin:0 0 14px;color:var(--text-1);text-transform:uppercase;letter-spacing:.04em;}
+  .ct-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+  .ct-field{display:flex;flex-direction:column;gap:5px;}
+  .ct-field label{font-size:11px;font-weight:700;color:var(--text-2);}
+  .ct-field input[type=text], .ct-field input[type=number], .ct-field select, .ct-field textarea{
+    border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text-1);background:#fff;}
+  .ct-field textarea{resize:vertical;min-height:48px;}
+  .ct-field input:focus, .ct-field select:focus, .ct-field textarea:focus{outline:2px solid var(--sky);outline-offset:0;}
+  .ct-seg{display:inline-flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+  .ct-seg button{border:none;background:#fff;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-2);border-right:1px solid var(--border);}
+  .ct-seg button:last-child{border-right:none;}
+  .ct-seg button.on{background:var(--blue);color:#fff;}
+  .ct-seccion{border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:12px;background:#fcfcfe;}
+  .ct-seccion-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .ct-seccion-head input[type=text]{flex:1;font-weight:800;font-size:13.5px;border:1px solid transparent;background:transparent;padding:4px 6px;border-radius:6px;}
+  .ct-seccion-head input[type=text]:hover, .ct-seccion-head input[type=text]:focus{border-color:var(--border);background:#fff;}
+  .ct-seccion-tools{display:flex;gap:4px;}
+  .ct-icon-btn{border:none;background:transparent;color:var(--text-3);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:13px;line-height:1;}
+  .ct-icon-btn:hover{background:#eef0f7;color:var(--text-1);}
+  .ct-pick{display:flex;gap:14px;margin-top:10px;}
+  .ct-pick-col{flex:1;min-width:0;border:1px solid var(--border);border-radius:10px;background:#fff;max-height:260px;overflow-y:auto;}
+  .ct-pick-col h4{position:sticky;top:0;background:#fff;margin:0;padding:8px 10px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);border-bottom:1px solid var(--border);}
+  .ct-pick-grp{font-size:10.5px;font-weight:800;color:var(--sky);padding:8px 10px 2px;text-transform:uppercase;letter-spacing:.04em;}
+  .ct-pick-row{display:flex;align-items:center;gap:7px;padding:5px 10px;font-size:12.5px;color:var(--text-1);cursor:pointer;}
+  .ct-pick-row:hover{background:#f5f6fb;}
+  .ct-pick-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ct-pick-row .pr{color:var(--text-3);font-size:11.5px;flex-shrink:0;}
+  .ct-item-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid var(--border);font-size:12.5px;}
+  .ct-item-row:last-child{border-bottom:none;}
+  .ct-item-row .nm{flex:1;min-width:0;font-weight:600;}
+  .ct-item-row .nm input{width:100%;border:1px solid transparent;background:transparent;font-size:12.5px;font-weight:600;padding:2px 4px;border-radius:5px;}
+  .ct-item-row .nm input:hover, .ct-item-row .nm input:focus{border-color:var(--border);background:#fff;}
+  .ct-item-row .pr{color:var(--text-2);font-variant-numeric:tabular-nums;flex-shrink:0;width:74px;text-align:right;}
+  .ct-item-row label.sub{display:flex;align-items:center;gap:3px;font-size:10.5px;color:var(--text-3);flex-shrink:0;white-space:nowrap;}
+  .ct-empty-mini{padding:14px;text-align:center;color:var(--text-3);font-size:12px;}
+  .ct-search{position:relative;margin:8px 0;}
+  .ct-search input{width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12.5px;}
+
+  /* Impresión / vista previa */
+  .ct-print-scroll{flex:1;overflow-y:auto;padding:24px 30px 60px;display:flex;flex-direction:column;gap:30px;align-items:center;}
+  .ct-print-card{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .ct-print-name{font-size:13px;font-weight:800;color:var(--text-1);display:flex;align-items:center;gap:10px;}
+  .ct-sheet-wrap{box-shadow:var(--shadow-md);background:#fff;overflow:hidden;}
+  .ct-sheet{background:#FFFDF8;color:#1C1C1C;position:relative;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+  .ct-sheet .ct-titulo{font-family:'Syne',sans-serif;font-weight:800;color:#020B2D;text-align:center;}
+  .ct-sheet .ct-subtitulo{text-align:center;color:#5977D2;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+  .ct-sheet .ct-cols{display:flex;height:100%;}
+  .ct-sheet .ct-col{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .ct-sheet .ct-stitulo{font-family:'Syne',sans-serif;font-weight:800;color:#020B2D;}
+  .ct-sheet .ct-sdesc{color:#5977D2;font-style:italic;}
+  .ct-sheet .ct-fila{display:flex;align-items:baseline;gap:8px;}
+  .ct-sheet .ct-fila .n{flex:1;min-width:0;}
+  .ct-sheet .ct-fila .n .extra{display:block;font-style:italic;opacity:.75;}
+  .ct-sheet .ct-fila.sub{opacity:.82;}
+  .ct-sheet .ct-fila .d{flex:0 0 auto;border-bottom:1px dotted #CACEE0;height:1px;min-width:8px;margin-bottom:.45em;}
+  .ct-sheet .ct-fila .p{flex-shrink:0;font-variant-numeric:tabular-nums;}
+  @media print{
+    body > *:not(#ctPrintRoot){display:none !important;}
+    #ctPrintRoot{display:block !important;position:fixed;inset:0;margin:0;padding:0;background:#fff;}
+    .ct-sheet-wrap{box-shadow:none !important;}
+  }
+</style>
 <style>
   /* Tipo de gasto · mes de imputación (19/10/2026) */
   .cfg-tg-chip em{font-style:normal;font-weight:700;opacity:.78;margin-left:4px;padding-left:5px;border-left:1px solid currentColor;}
@@ -2827,6 +2915,10 @@
     <div class="module-nav-item" data-module="config" onclick="goModule('config')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       <span class="nav-label">Configuración</span>
+    </div>
+    <div class="module-nav-item" data-module="carta" onclick="goModule('carta')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M15 2v5h5"/><line x1="7.5" y1="11" x2="16.5" y2="11"/><line x1="7.5" y1="14.3" x2="13" y2="14.3"/><line x1="7.5" y1="17.6" x2="16.5" y2="17.6"/></svg>
+      <span class="nav-label">Carta</span>
     </div>
 
     <div class="sidebar-footer" id="sidebarFooter" onclick="toggleUserMenu(event)">
@@ -4177,6 +4269,47 @@
 
         </div>
       </div>
+    </section>
+
+    <!-- MÓDULO CARTA: diseño e impresión de la carta de bar/cocina (primera versión, 20/10/2026) -->
+    <section class="module-screen" id="moduleCarta">
+      <div class="pagos-shell" id="cartaSubnav">
+        <div class="pagos-topbar">
+          <div class="pagos-tab active" data-cttab="diseno" onclick="goCartaTab('diseno')">Diseño</div>
+          <div class="pagos-tab" data-cttab="impresion" onclick="goCartaTab('impresion')">Impresión</div>
+        </div>
+        <div class="pagos-body">
+
+          <!-- DISEÑO -->
+          <section class="pagos-pane active" id="cttabDiseno">
+            <div class="ct-wrap">
+              <aside class="ct-list">
+                <div class="ct-list-head">
+                  <h2>Cartas</h2>
+                  <button type="button" class="ct-btn pri" onclick="CT.nuevaCarta()">+ Nueva</button>
+                </div>
+                <div class="ct-list-items" id="ctListaItems"><div class="ct-loading">Cargando…</div></div>
+              </aside>
+              <main class="ct-editor" id="ctEditor">
+                <div class="ct-empty">Elegí una carta de la lista o creá una nueva para empezar a diseñarla.</div>
+              </main>
+            </div>
+          </section>
+
+          <!-- IMPRESIÓN -->
+          <section class="pagos-pane" id="cttabImpresion">
+            <div class="cx-phead">
+              <div class="cx-grow">
+                <h1>Impresión</h1>
+                <div class="cx-sub">Vista previa de cada carta tal cual se configuró en Diseño, con los precios vigentes en Precios de venta. Se actualiza sola con cada cambio.</div>
+              </div>
+            </div>
+            <div class="ct-print-scroll" id="ctImpresionList"><div class="ct-loading">Cargando…</div></div>
+          </section>
+
+        </div>
+      </div>
+      <div class="ct-layer" id="ctLayer"></div>
     </section>
 
   </main>
@@ -6338,7 +6471,7 @@ function applyPerfilSession(perfil){
 }
 // Secciones del módulo La Fortaleza (deben coincidir con SECTIONS_BY_PROYECTO.fortaleza en home.html
 // y con los data-module de la barra lateral). El dueño siempre tiene acceso a todas.
-const FORTALEZA_SECCIONES = ["ventas","cajaMayor","pagos","costeo","comparativa","stock","sueldos","config"];
+const FORTALEZA_SECCIONES = ["ventas","cajaMayor","pagos","costeo","comparativa","stock","sueldos","config","carta"];
 function tieneSeccionFortaleza(mod){
   if(!currentPerfil) return false;
   if(currentPerfil.rol === "dueño") return true;
@@ -7185,6 +7318,7 @@ function goModule(mod){
   if(mod==="cajaMayor"){ cmInit(); }
   if(mod==="costeo"){ cxOnEnterModule(); }
   if(mod==="stock"){ SK.onEnterStock(); }
+  if(mod==="carta"){ CT.onEnterModule(); }
   asegurarSubActiva(mod);
 }
 function goVentasPane(pane){
@@ -20438,6 +20572,450 @@ window.cxInsumosRefresh = async ()=>{ await loadCosteoInsumos(); };
   document.addEventListener("keydown", function(e){ if(e.key==="Escape" && md && md.classList.contains("show")){ e.stopPropagation(); cerrar(); } }, true);
 })();
 </script>
+<script>
+/* =========================================================================
+   MÓDULO CARTA — diseño e impresión de la carta de bar/cocina
+   Primera versión (20/10/2026, pedido de Pancho: "hagamos una primera
+   prueba, veamos cómo queda cada sección y desde ahí iremos modificando").
+
+   Permite armar N "cartas" (documentos de menú) distintas, cada una con su
+   propio formato de página, título, estilos de texto y secciones con los
+   artículos elegidos. Los artículos y sus precios SIEMPRE se leen en vivo
+   desde lf_recetas_items / lf_precios_venta_items — el mismo catálogo que
+   usa Costeo > Precios de venta — así que acá nunca se guarda un nombre ni
+   un precio: solo el articulo_id y cómo se quiere mostrar. Si el precio se
+   actualiza en Precios de venta, la carta lo refleja solo.
+
+   Persistencia: tabla lf_cartas (una fila por carta, config en jsonb).
+   ========================================================================= */
+const CT_FORMATOS = {
+  A4:    {anchoMm:210, altoMm:297},
+  Carta: {anchoMm:216, altoMm:279},
+  A3:    {anchoMm:297, altoMm:420},
+};
+function ctId(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ("ct-"+Date.now()+"-"+Math.random().toString(36).slice(2)); }
+function ctNuevaConfig(){
+  return {
+    formato:{ preset:"A4", anchoMm:210, altoMm:297, orientacion:"vertical" },
+    titulo:"Menú", subtitulo:"",
+    estilos:{ tituloPt:30, subtituloPt:15, descripcionPt:10, articuloPt:12.5, precioPt:12.5, subindicePt:9.5 },
+    layout:{ columnas:2, margenMm:14, espacioMm:9, alinPrecio:"derecha" },
+    secciones:[]
+  };
+}
+
+function goCartaTab(cttab){
+  const scope = document.getElementById("cartaSubnav"); if(!scope) return;
+  scope.querySelectorAll(".pagos-tab").forEach(t=>t.classList.toggle("active", t.dataset.cttab===cttab));
+  scope.querySelectorAll(".pagos-pane").forEach(p=>p.classList.remove("active"));
+  const pane = document.getElementById("cttab"+cttab.charAt(0).toUpperCase()+cttab.slice(1));
+  if(pane) pane.classList.add("active");
+  if(cttab==="impresion") CT.renderImpresion();
+}
+
+const CT = {
+  cartas:[], activeId:null, _loaded:false, _saveTimers:{},
+
+  async onEnterModule(){
+    if(!this._loaded){
+      this._loaded = true;
+      await Promise.all([ this.cargarCartas(), this.refrescarCatalogo() ]);
+    } else {
+      this.refrescarCatalogo(); // en segundo plano: no bloquea el render con lo ya cargado
+    }
+    this.renderLista();
+    this.renderEditor();
+    this.renderImpresionSiActiva();
+  },
+
+  async refrescarCatalogo(){
+    try{
+      if(typeof loadRecetasItems==="function") await loadRecetasItems();
+      if(typeof loadPreciosVentaItems==="function") await loadPreciosVentaItems();
+    }catch(e){ console.warn("Carta: no se pudo refrescar el catálogo de precios", e); }
+  },
+
+  async cargarCartas(){
+    const { data, error } = await sb.from("lf_cartas").select("*").order("orden",{ascending:true});
+    if(error){ showToast("No se pudieron cargar las cartas: "+error.message, "warn"); this.cartas = []; return; }
+    this.cartas = data || [];
+    if(!this.cartas.some(c=>c.id===this.activeId)) this.activeId = this.cartas.length ? this.cartas[0].id : null;
+  },
+
+  actual(){ return this.cartas.find(c=>c.id===this.activeId) || null; },
+
+  esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;" }[m])); },
+
+  async nuevaCarta(){
+    const row = { nombre:"Carta "+(this.cartas.length+1), orden:this.cartas.length, config: ctNuevaConfig(),
+      creado_por: currentPerfil?currentPerfil.id:null, modificado_por: currentPerfil?currentPerfil.id:null };
+    const { data, error } = await sb.from("lf_cartas").insert(row).select().single();
+    if(error){ showToast("No se pudo crear la carta: "+error.message, "warn"); return; }
+    this.cartas.push(data);
+    this.activeId = data.id;
+    this.renderLista(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+
+  async eliminarCarta(id){
+    if(!confirm("¿Eliminar esta carta? Esta acción no se puede deshacer.")) return;
+    const { error } = await sb.from("lf_cartas").delete().eq("id", id);
+    if(error){ showToast("No se pudo eliminar: "+error.message, "warn"); return; }
+    this.cartas = this.cartas.filter(c=>c.id!==id);
+    if(this.activeId===id) this.activeId = this.cartas.length ? this.cartas[0].id : null;
+    this.renderLista(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+
+  seleccionar(id){ this.activeId = id; this.renderLista(); this.renderEditor(); },
+
+  guardarDebounced(){
+    const id = this.activeId; if(!id) return;
+    clearTimeout(this._saveTimers[id]);
+    this._saveTimers[id] = setTimeout(()=>this.guardarAhora(id), 550);
+  },
+  async guardarAhora(id){
+    const c = this.cartas.find(x=>x.id===id); if(!c) return;
+    const { error } = await sb.from("lf_cartas").update({ nombre:c.nombre, config:c.config,
+      modificado_por: currentPerfil?currentPerfil.id:null, modificado_en:new Date().toISOString() }).eq("id", id);
+    if(error) showToast("No se pudo guardar el cambio: "+error.message, "warn");
+  },
+
+  renderImpresionSiActiva(){
+    const impPane = document.getElementById("cttabImpresion");
+    if(impPane && impPane.classList.contains("active")) this.renderImpresion();
+  },
+
+  // ---- catálogo agrupado por rubro de resto-bar (mismos 3 conceptos que Costeo/Precios de venta) ----
+  catalogo(){
+    const activos = (typeof pvArticulos==="function" ? pvArticulos() : []).filter(a=>a.activo!==false);
+    const grupos = {};
+    (typeof COSTEO_CONCEPTOS!=="undefined" ? COSTEO_CONCEPTOS : []).forEach(cat=>{
+      grupos[cat] = activos.filter(a=>a.concepto===cat).sort((a,b)=>{
+        const oa = (typeof pvOrdenEfectivo==="function")?pvOrdenEfectivo(a):0, ob=(typeof pvOrdenEfectivo==="function")?pvOrdenEfectivo(b):0;
+        if(oa!==ob) return oa-ob;
+        return a.nombre.localeCompare(b.nombre,"es");
+      });
+    });
+    return grupos;
+  },
+  articulo(id){ return (typeof recetasItems!=="undefined" ? recetasItems : []).find(r=>r.id===id) || null; },
+  precio(id){ const pv = (typeof preciosVentaItems!=="undefined" ? preciosVentaItems : {})[id]; return (pv && pv.precio_actual!=null) ? Number(pv.precio_actual) : null; },
+
+  dims(cfg){
+    const f = cfg.formato; let w = f.anchoMm, h = f.altoMm;
+    if(f.orientacion==="horizontal" && w < h){ const t=w; w=h; h=t; }
+    if(f.orientacion==="vertical" && w > h){ const t=w; w=h; h=t; }
+    return {w,h};
+  },
+
+  // ---- render: lista de cartas (columna izquierda de Diseño) ----
+  renderLista(){
+    const box = document.getElementById("ctListaItems"); if(!box) return;
+    if(!this.cartas.length){ box.innerHTML = '<div class="ct-empty-mini">Todavía no hay ninguna carta creada.</div>'; return; }
+    box.innerHTML = this.cartas.map(c=>{
+      const nArts = (c.config.secciones||[]).reduce((n,s)=>n+(s.items||[]).length,0);
+      const nSecs = (c.config.secciones||[]).length;
+      return `<div class="ct-card ${c.id===this.activeId?'active':''}" onclick="CT.seleccionar('${c.id}')">
+        <div class="ctc-nombre">${this.esc(c.nombre)}</div>
+        <div class="ctc-meta">${this.esc(c.config.formato?.preset||"A4")} · ${nSecs} sección(es) · ${nArts} artículo(s)</div>
+      </div>`;
+    }).join("");
+  },
+
+  campoPt(label, path, val){
+    return `<div class="ct-field"><label>${label}</label><input type="number" min="6" max="90" step="0.5" value="${val}" onchange="CT.set('${path}', Number(this.value))"></div>`;
+  },
+
+  // ---- render: editor de la carta activa ----
+  renderEditor(){
+    const box = document.getElementById("ctEditor"); if(!box) return;
+    const c = this.actual();
+    if(!c){ box.innerHTML = '<div class="ct-empty">Elegí una carta de la lista o creá una nueva para empezar a diseñarla.</div>'; return; }
+    const cfg = c.config;
+    const presetOpts = Object.keys(CT_FORMATOS).concat(["Custom"]).map(p=>`<option value="${p}" ${cfg.formato.preset===p?'selected':''}>${p==="Custom"?"Personalizado":p}</option>`).join("");
+    box.innerHTML = `
+      <div class="ct-ehead">
+        <div>
+          <h1><input type="text" value="${this.esc(c.nombre)}" oninput="CT.renombrar(this.value)" style="border:none;background:transparent;font:inherit;font-weight:800;font-size:21px;width:100%;padding:2px 4px;border-radius:6px;" onfocus="this.style.background='#fff';this.style.border='1px solid var(--border)'" onblur="this.style.background='transparent';this.style.border='none'"></h1>
+          <div class="ct-sub">Nombre interno de esta carta (no se imprime).</div>
+        </div>
+        <button type="button" class="ct-btn danger sm" onclick="CT.eliminarCarta('${c.id}')">Eliminar carta</button>
+      </div>
+
+      <div class="ct-block">
+        <h3>Formato y título</h3>
+        <div class="ct-grid">
+          <div class="ct-field"><label>Formato de página</label><select onchange="CT.setFormatoPreset(this.value)">${presetOpts}</select></div>
+          <div class="ct-field"><label>Ancho (mm)</label><input type="number" min="50" max="1200" value="${cfg.formato.anchoMm}" ${cfg.formato.preset!=="Custom"?"disabled":""} onchange="CT.set('formato.anchoMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Alto (mm)</label><input type="number" min="50" max="1600" value="${cfg.formato.altoMm}" ${cfg.formato.preset!=="Custom"?"disabled":""} onchange="CT.set('formato.altoMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Orientación</label>
+            <div class="ct-seg">
+              <button type="button" class="${cfg.formato.orientacion==='vertical'?'on':''}" onclick="CT.set('formato.orientacion','vertical')">Vertical</button>
+              <button type="button" class="${cfg.formato.orientacion==='horizontal'?'on':''}" onclick="CT.set('formato.orientacion','horizontal')">Horizontal</button>
+            </div>
+          </div>
+        </div>
+        <div class="ct-grid" style="margin-top:12px;">
+          <div class="ct-field" style="grid-column:span 2;"><label>Título impreso</label><input type="text" value="${this.esc(cfg.titulo)}" oninput="CT.set('titulo', this.value, {skipRender:true})"></div>
+          <div class="ct-field" style="grid-column:span 2;"><label>Bajada / subtítulo (opcional)</label><input type="text" value="${this.esc(cfg.subtitulo)}" oninput="CT.set('subtitulo', this.value, {skipRender:true})"></div>
+        </div>
+      </div>
+
+      <div class="ct-block">
+        <h3>Estilos de texto (tamaño en pt)</h3>
+        <div class="ct-grid">
+          ${this.campoPt('Título de la carta','estilos.tituloPt',cfg.estilos.tituloPt)}
+          ${this.campoPt('Títulos de sección','estilos.subtituloPt',cfg.estilos.subtituloPt)}
+          ${this.campoPt('Descripciones','estilos.descripcionPt',cfg.estilos.descripcionPt)}
+          ${this.campoPt('Nombre de artículo','estilos.articuloPt',cfg.estilos.articuloPt)}
+          ${this.campoPt('Precio','estilos.precioPt',cfg.estilos.precioPt)}
+          ${this.campoPt('Subíndices','estilos.subindicePt',cfg.estilos.subindicePt)}
+        </div>
+      </div>
+
+      <div class="ct-block">
+        <h3>Diseño de página</h3>
+        <div class="ct-grid">
+          <div class="ct-field"><label>Columnas</label>
+            <div class="ct-seg">${[1,2,3].map(n=>`<button type="button" class="${cfg.layout.columnas===n?'on':''}" onclick="CT.set('layout.columnas', ${n})">${n}</button>`).join("")}</div>
+          </div>
+          <div class="ct-field"><label>Márgenes (mm)</label><input type="number" min="0" max="60" value="${cfg.layout.margenMm}" onchange="CT.set('layout.margenMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Espacio entre secciones (mm)</label><input type="number" min="0" max="40" value="${cfg.layout.espacioMm}" onchange="CT.set('layout.espacioMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Alineación de precios</label>
+            <div class="ct-seg">
+              <button type="button" class="${cfg.layout.alinPrecio==='derecha'?'on':''}" onclick="CT.set('layout.alinPrecio','derecha')">Derecha, con guía</button>
+              <button type="button" class="${cfg.layout.alinPrecio==='junto'?'on':''}" onclick="CT.set('layout.alinPrecio','junto')">Junto al nombre</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ct-block">
+        <h3>Secciones y artículos</h3>
+        <div id="ctSecciones">${this.renderSecciones(c)}</div>
+        <button type="button" class="ct-btn" onclick="CT.agregarSeccion()">+ Agregar sección</button>
+      </div>
+    `;
+  },
+
+  renderSecciones(c){
+    const secciones = c.config.secciones||[];
+    if(!secciones.length) return '<div class="ct-empty-mini">Todavía no agregaste ninguna sección.</div>';
+    const grupos = this.catalogo();
+    return secciones.map((s,idx)=>this.renderSeccion(c, s, idx, secciones.length, grupos)).join("");
+  },
+
+  renderSeccion(c, s, idx, total, grupos){
+    const itemsSel = new Set((s.items||[]).map(it=>it.articuloId));
+    const pickCols = (typeof COSTEO_CONCEPTOS!=="undefined"?COSTEO_CONCEPTOS:[]).map(cat=>{
+      const arts = grupos[cat]||[];
+      if(!arts.length) return "";
+      const rows = arts.map(a=>{
+        const checked = itemsSel.has(a.id);
+        const pr = this.precio(a.id);
+        return `<div class="ct-pick-row"><label style="display:flex;align-items:center;gap:7px;width:100%;cursor:pointer;">
+          <input type="checkbox" ${checked?"checked":""} onchange="CT.toggleItem('${s.id}','${a.id}', this.checked)">
+          <span class="nm">${this.esc(a.nombre)}</span>
+          <span class="pr">${pr!=null?fmtMoney(pr):"—"}</span>
+        </label></div>`;
+      }).join("");
+      return `<div class="ct-pick-grp">${this.esc(cat)}</div>${rows}`;
+    }).join("");
+
+    const itemsArr = s.items||[];
+    const itemsHtml = itemsArr.map((it,i)=>{
+      const a = this.articulo(it.articuloId);
+      const pr = this.precio(it.articuloId);
+      const nombre = a ? a.nombre : "(artículo eliminado del catálogo)";
+      return `<div class="ct-item-row">
+        <div style="display:flex;gap:2px;">
+          <button type="button" class="ct-icon-btn" title="Subir" ${i===0?"disabled":""} onclick="CT.moverItem('${s.id}',${i},-1)">↑</button>
+          <button type="button" class="ct-icon-btn" title="Bajar" ${i===itemsArr.length-1?"disabled":""} onclick="CT.moverItem('${s.id}',${i},1)">↓</button>
+        </div>
+        <div class="nm">${this.esc(nombre)}<input type="text" placeholder="Descripción opcional (ej. ingredientes)" value="${this.esc(it.descExtra||"")}" oninput="CT.setItemCampo('${s.id}','${it.articuloId}','descExtra', this.value)"></div>
+        <label class="sub"><input type="checkbox" ${it.subindice?"checked":""} onchange="CT.setItemCampo('${s.id}','${it.articuloId}','subindice', this.checked)"> subíndice</label>
+        <div class="pr">${pr!=null?fmtMoney(pr):"—"}</div>
+        <button type="button" class="ct-icon-btn" title="Quitar" onclick="CT.toggleItem('${s.id}','${it.articuloId}', false)">✕</button>
+      </div>`;
+    }).join("");
+
+    const colOpts = Array.from({length:c.config.layout.columnas},(_,i)=>i+1).map(n=>`<option value="${n}" ${(s.columna||1)===n?"selected":""}>Columna ${n}</option>`).join("");
+
+    return `<div class="ct-seccion" data-sid="${s.id}">
+      <div class="ct-seccion-head">
+        <div style="display:flex;gap:2px;">
+          <button type="button" class="ct-icon-btn" title="Subir sección" ${idx===0?"disabled":""} onclick="CT.moverSeccion('${s.id}',-1)">↑</button>
+          <button type="button" class="ct-icon-btn" title="Bajar sección" ${idx===total-1?"disabled":""} onclick="CT.moverSeccion('${s.id}',1)">↓</button>
+        </div>
+        <input type="text" value="${this.esc(s.titulo)}" oninput="CT.setSeccionCampo('${s.id}','titulo', this.value)">
+        <select onchange="CT.setSeccionCampo('${s.id}','columna', Number(this.value), {rerender:true})" title="Columna">${colOpts}</select>
+        <div class="ct-seccion-tools">
+          <button type="button" class="ct-icon-btn" title="Eliminar sección" onclick="CT.eliminarSeccion('${s.id}')">🗑</button>
+        </div>
+      </div>
+      <input type="text" placeholder="Descripción de la sección (opcional, ej. 'Los cortes se acompañan con papas fritas')" value="${this.esc(s.descripcion||"")}" oninput="CT.setSeccionCampo('${s.id}','descripcion', this.value)" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;margin-bottom:8px;">
+      <div class="ct-pick">
+        <div class="ct-pick-col"><h4>Catálogo (clic para sumar/quitar)</h4>${pickCols || '<div class="ct-empty-mini">Sin artículos activos.</div>'}</div>
+        <div class="ct-pick-col">${itemsHtml || '<div class="ct-empty-mini">Sin artículos todavía — elegilos de la lista de la izquierda.</div>'}</div>
+      </div>
+    </div>`;
+  },
+
+  // ---- mutaciones: campos generales (dot-path dentro de config) ----
+  set(path, value, opts={}){
+    const c = this.actual(); if(!c) return;
+    const keys = path.split(".");
+    let o = c.config;
+    for(let i=0;i<keys.length-1;i++) o = o[keys[i]];
+    o[keys[keys.length-1]] = value;
+    this.guardarDebounced();
+    if(!opts.skipRender){ this.renderEditor(); this.renderLista(); }
+    this.renderImpresionSiActiva();
+  },
+  renombrar(v){ const c=this.actual(); if(!c) return; c.nombre=v; this.guardarDebounced(); this.renderLista(); },
+  setFormatoPreset(preset){
+    const c = this.actual(); if(!c) return;
+    c.config.formato.preset = preset;
+    if(preset!=="Custom" && CT_FORMATOS[preset]){
+      c.config.formato.anchoMm = CT_FORMATOS[preset].anchoMm;
+      c.config.formato.altoMm = CT_FORMATOS[preset].altoMm;
+    }
+    this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
+  },
+
+  // ---- mutaciones: secciones ----
+  agregarSeccion(){
+    const c = this.actual(); if(!c) return;
+    c.config.secciones = c.config.secciones || [];
+    c.config.secciones.push({ id: ctId(), titulo:"Nueva sección", descripcion:"", columna:1, items:[] });
+    this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
+  },
+  eliminarSeccion(sid){
+    const c = this.actual(); if(!c) return;
+    if(!confirm("¿Eliminar esta sección y los artículos que tenía elegidos?")) return;
+    c.config.secciones = (c.config.secciones||[]).filter(s=>s.id!==sid);
+    this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
+  },
+  moverSeccion(sid, dir){
+    const c = this.actual(); if(!c) return;
+    const arr = c.config.secciones; const i = arr.findIndex(s=>s.id===sid); const j=i+dir;
+    if(i<0||j<0||j>=arr.length) return;
+    const t=arr[i]; arr[i]=arr[j]; arr[j]=t;
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  setSeccionCampo(sid, campo, val, opts={}){
+    const c = this.actual(); if(!c) return;
+    const s = c.config.secciones.find(x=>x.id===sid); if(!s) return;
+    s[campo] = val;
+    this.guardarDebounced();
+    if(opts.rerender) this.renderEditor();
+    this.renderImpresionSiActiva();
+  },
+
+  // ---- mutaciones: artículos dentro de una sección ----
+  toggleItem(sid, artId, incluir){
+    const c = this.actual(); if(!c) return;
+    const s = c.config.secciones.find(x=>x.id===sid); if(!s) return;
+    s.items = s.items || [];
+    if(incluir){
+      if(!s.items.some(it=>it.articuloId===artId)) s.items.push({ articuloId:artId, subindice:false, descExtra:"" });
+    } else {
+      s.items = s.items.filter(it=>it.articuloId!==artId);
+    }
+    this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
+  },
+  setItemCampo(sid, artId, campo, val){
+    const c = this.actual(); if(!c) return;
+    const s = c.config.secciones.find(x=>x.id===sid); if(!s) return;
+    const it = (s.items||[]).find(x=>x.articuloId===artId); if(!it) return;
+    it[campo] = val;
+    this.guardarDebounced(); this.renderImpresionSiActiva();
+  },
+  moverItem(sid, idx, dir){
+    const c = this.actual(); if(!c) return;
+    const s = c.config.secciones.find(x=>x.id===sid); if(!s) return;
+    const j = idx+dir; if(j<0||j>=s.items.length) return;
+    const t=s.items[idx]; s.items[idx]=s.items[j]; s.items[j]=t;
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+
+  // ---- render: Impresión ----
+  mm2px(mm){ return mm * 96 / 25.4; },
+
+  renderImpresion(){
+    const box = document.getElementById("ctImpresionList"); if(!box) return;
+    if(!this.cartas.length){ box.innerHTML = '<div class="ct-empty-mini">Todavía no hay ninguna carta creada en Diseño.</div>'; return; }
+    box.innerHTML = this.cartas.map(c=>this.renderHoja(c)).join("");
+  },
+
+  renderHoja(c){
+    const cfg = c.config;
+    const {w,h} = this.dims(cfg);
+    const pxW = this.mm2px(w), pxH = this.mm2px(h);
+    const scale = Math.min(1, 640/pxW);
+    const gapCols = this.mm2px(cfg.layout.margenMm);
+    const cols = [];
+    for(let i=1;i<=cfg.layout.columnas;i++) cols.push(i);
+    const colsHtml = cols.map(colN=>{
+      const secs = (cfg.secciones||[]).filter(s=>(s.columna||1)===colN);
+      return `<div class="ct-col" style="gap:${this.mm2px(cfg.layout.espacioMm)}px;">${secs.map(s=>this.renderSeccionImpresa(s, cfg)).join("")}</div>`;
+    }).join("");
+    return `<div class="ct-print-card">
+      <div class="ct-print-name">${this.esc(c.nombre)} <span style="color:var(--text-3);font-weight:400;">(${w}×${h} mm)</span>
+        <button type="button" class="ct-btn sm pri" onclick="CT.imprimir('${c.id}')">Imprimir / Guardar PDF</button>
+      </div>
+      <div class="ct-sheet-wrap" style="width:${(pxW*scale).toFixed(0)}px;height:${(pxH*scale).toFixed(0)}px;">
+        <div class="ct-sheet" id="ctSheet-${c.id}" style="width:${pxW}px;height:${pxH}px;transform:scale(${scale});transform-origin:top left;padding:${this.mm2px(cfg.layout.margenMm)}px;">
+          <div class="ct-titulo" style="font-size:${cfg.estilos.tituloPt}pt;">${this.esc(cfg.titulo)}</div>
+          ${cfg.subtitulo?`<div class="ct-subtitulo" style="font-size:${cfg.estilos.descripcionPt}pt;margin-top:6px;">${this.esc(cfg.subtitulo)}</div>`:""}
+          <div class="ct-cols" style="margin-top:${this.mm2px(8)}px;gap:${gapCols}px;">${colsHtml}</div>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  renderSeccionImpresa(s, cfg){
+    const junto = cfg.layout.alinPrecio==="junto";
+    const items = (s.items||[]).map(it=>{
+      const a = this.articulo(it.articuloId); if(!a) return "";
+      const pr = this.precio(it.articuloId);
+      const nombre = this.esc(a.nombre) + (it.descExtra?`<span class="extra">${this.esc(it.descExtra)}</span>`:"");
+      const ptArticulo = it.subindice ? cfg.estilos.subindicePt : cfg.estilos.articuloPt;
+      return `<div class="ct-fila ${it.subindice?'sub':''}" style="font-size:${ptArticulo}pt;margin-bottom:.35em;">
+        <div class="n">${nombre}${junto?` — <b style="font-size:${cfg.estilos.precioPt}pt;">${pr!=null?fmtMoney(pr):"—"}</b>`:""}</div>
+        ${!junto?`<div class="d"></div><div class="p" style="font-size:${cfg.estilos.precioPt}pt;">${pr!=null?fmtMoney(pr):"—"}</div>`:""}
+      </div>`;
+    }).join("");
+    return `<div class="ct-seccion-imp">
+      <div class="ct-stitulo" style="font-size:${cfg.estilos.subtituloPt}pt;">${this.esc(s.titulo)}</div>
+      ${s.descripcion?`<div class="ct-sdesc" style="font-size:${cfg.estilos.descripcionPt}pt;">${this.esc(s.descripcion)}</div>`:""}
+      <div class="ct-items">${items}</div>
+    </div>`;
+  },
+
+  imprimir(id){
+    const original = document.getElementById("ctSheet-"+id); if(!original){ showToast("No se encontró la vista previa de esta carta", "warn"); return; }
+    const c = this.cartas.find(x=>x.id===id); if(!c) return;
+    const {w,h} = this.dims(c.config);
+    let root = document.getElementById("ctPrintRoot");
+    if(root) root.remove();
+    root = document.createElement("div");
+    root.id = "ctPrintRoot";
+    root.style.cssText = "display:none;";
+    const clone = original.cloneNode(true);
+    clone.style.transform = "none";
+    clone.removeAttribute("id");
+    root.appendChild(clone);
+    document.body.appendChild(root);
+    let pageStyle = document.getElementById("ctPageStyle");
+    if(!pageStyle){ pageStyle = document.createElement("style"); pageStyle.id = "ctPageStyle"; document.head.appendChild(pageStyle); }
+    pageStyle.textContent = "@page{ size:"+w+"mm "+h+"mm; margin:0; }";
+    const cleanup = ()=>{ const r = document.getElementById("ctPrintRoot"); if(r) r.remove(); window.removeEventListener("afterprint", cleanup); };
+    window.addEventListener("afterprint", cleanup);
+    setTimeout(()=>window.print(), 60);
+  },
+};
+</script>
+
 </body>
 </html>
 
