@@ -10307,7 +10307,8 @@ function arDividendos(util){
 
 /* ---- Ocupación de canchas en Análisis de Resultados (pedido de Pancho, 19/10/2026) ----
    Es LA MISMA métrica y las mismas reglas que la tarjeta "Canchas" de Facturación
-   (ver BASE_HORAS_*/vContarDiasSemanaEnRango/renderOcupacionCanchas más arriba): tarde (L a V)
+   (ver BASE_HORAS_MANANA_LV, BASE_HORAS_TARDE_LV, BASE_HORAS_SABADO, vContarDiasSemanaEnRango y
+   renderOcupacionCanchas más arriba): tarde (L a V)
    = reservas "Normal", mañana (L a V) = reservas "Profesores", sábado = turno único, domingo
    excluido. La única diferencia es la fuente de datos: en vez de depender de ventasFiles (que
    sólo existe si se visitó la pantalla de Ventas), lee arState.reservas/arState.cancelaciones,
