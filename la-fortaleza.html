@@ -21721,7 +21721,7 @@ const CT = {
     return `<div class="ct-seccion-inner">
       <div class="ct-stitulo" style="${this.textStyleCss(cfg.estilos.subtitulo)}${tituloStyle}${!s.descripcion?`margin-bottom:${espacioTituloPx}px;`:""}">${this.esc(s.titulo)}</div>
       ${s.descripcion?`<div class="ct-sdesc" style="${this.textStyleCss(cfg.estilos.descripcion)}margin-bottom:${espacioTituloPx}px;">${this.esc(s.descripcion)}</div>`:""}
-      <div class="ct-subcols" style="gap:${this.mm2px(cfg.layout.margenMm/2)}px;">${colsHtml}</div>
+      <div class="ct-subcols" style="gap:${this.mm2px(cfg.layout.margenMm)}px;">${colsHtml}</div>
     </div>`;
   },
 
@@ -21859,10 +21859,12 @@ const CT = {
       const toolbar = document.createElement("div");
       toolbar.className = "ct-lienzo-toolbar";
       const multi = this._seleccion.size>1;
+      const puedeDistribuirSec = this._seleccion.size>=3;
       toolbar.innerHTML = `<span class="ct-lienzo-toolbar-txt">${this._seleccion.size} sección(es) seleccionada(s)</span>
         <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('superior')">Alinear arriba</button>
         <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('centro')">Alinear al centro</button>
         <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('inferior')">Alinear abajo</button>
+        <button type="button" class="ct-btn sm" ${puedeDistribuirSec?"":"disabled"} title="${puedeDistribuirSec?"":"Elegí al menos 3 secciones"}" onclick="CT.distribuirSeleccion()">Distribuir uniformemente</button>
         <span style="width:1px;height:18px;background:#D7DCF5;"></span>
         <button type="button" class="ct-btn sm" onclick="CT.centrarSeleccionPagina('horizontal')">Centrar horizontalmente en la hoja</button>
         <button type="button" class="ct-btn sm" onclick="CT.centrarSeleccionPagina('vertical')">Centrar verticalmente en la hoja</button>
@@ -21986,6 +21988,40 @@ const CT = {
       s.posicionManual = true;
       s.alinBorde = borde;
       s.yMm = Math.round(refY*10)/10;
+    });
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  // Distribuye uniformemente las secciones tildadas a lo largo del eje vertical: deja la de más
+  // arriba y la de más abajo donde están, y reparte el resto con el mismo espacio entre cada una —
+  // mismo criterio que CT.distribuirSeleccionImg() para imágenes (pedido de Pancho 21/10/2026:
+  // "espaciado uniforme... entre grupos de secciones que están alineadas, verticalmente sobre las
+  // columnas"). Necesita al menos 3 para tener sentido. Como cada sección puede tener un alinBorde
+  // distinto ('superior'/'centro'/'inferior', ver nota de v5: yMm es la posición de ESE borde, no
+  // necesariamente del tope), se calcula el nuevo tope real de cada una y recién ahí se convierte a
+  // yMm según su propio alinBorde, para no alterar a qué borde quedó "pegada" cada sección.
+  distribuirSeleccion(){
+    const c = this.actual(); if(!c) return;
+    const ids = Array.from(this._seleccion);
+    let secciones = ids.map(id=>c.config.secciones.find(s=>s.id===id)).filter(Boolean);
+    if(secciones.length<3){ showToast("Elegí al menos 3 secciones (con sus casillas) para distribuirlas uniformemente", "warn"); return; }
+    const L = this.calcularLayout(c.config);
+    const alturaMm = (s)=> { const m=L.medidas[s.id]; return m ? (m.heightPx/(96/25.4) + (m.marcoActivo ? (this.mm2px(3)*2)/(96/25.4) : 0)) : 0; };
+    secciones = secciones.slice().sort((a,b)=> L.tops[a.id]-L.tops[b.id]);
+    const startMm = L.tops[secciones[0].id];
+    const last = secciones[secciones.length-1];
+    const endMm = L.tops[last.id] + alturaMm(last);
+    const totalAltoMm = secciones.reduce((sum,s)=>sum+alturaMm(s), 0);
+    const gapMm = (endMm - startMm - totalAltoMm) / (secciones.length-1);
+    let cursor = startMm;
+    secciones.forEach(s=>{
+      const h = alturaMm(s);
+      let nuevoYMm;
+      if(s.alinBorde==="inferior") nuevoYMm = cursor + h;
+      else if(s.alinBorde==="centro") nuevoYMm = cursor + h/2;
+      else nuevoYMm = cursor;
+      s.posicionManual = true;
+      s.yMm = Math.round(nuevoYMm*10)/10;
+      cursor += h + gapMm;
     });
     this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
   },
