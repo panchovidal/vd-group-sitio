@@ -2752,10 +2752,18 @@
   .ct-lienzo-outer{margin-bottom:4px;}
   .ct-lienzo-col-guia{background:rgba(89,119,210,.05);border-left:1px dashed #D7DCF5;border-right:1px dashed #D7DCF5;pointer-events:none;}
   .ct-lienzo-col-num{position:absolute;top:2px;left:4px;font-size:8px;font-weight:800;color:#AEB6DC;text-transform:uppercase;letter-spacing:.04em;font-family:'Inter',sans-serif;}
-  .ct-seccion-imp.ct-lienzo-sec{cursor:grab;outline:1.5px dashed transparent;outline-offset:2px;transition:outline-color .12s;}
+  .ct-seccion-imp.ct-lienzo-sec{cursor:grab;outline:1.5px dashed transparent;outline-offset:2px;transition:outline-color .12s, background-color .12s;}
   .ct-seccion-imp.ct-lienzo-sec:hover{outline-color:#5977D2;}
   .ct-seccion-imp.ct-lienzo-sec.dragging{cursor:grabbing;outline-color:#B33A3A;z-index:5;opacity:.9;}
-  .ct-lienzo-sec-tag{position:absolute;top:-17px;left:0;font-size:9px;font-weight:800;color:#fff;background:#020B2D;padding:2px 7px;border-radius:5px 5px 0 0;white-space:nowrap;font-family:'Inter',sans-serif;pointer-events:none;}
+  .ct-seccion-imp.ct-lienzo-sec.selected{outline:1.5px solid #5977D2;outline-offset:2px;background:rgba(89,119,210,.07);box-shadow:0 0 0 4px rgba(89,119,210,.08);}
+  .ct-seccion-imp.ct-lienzo-sec.selected.dragging{outline-color:#B33A3A;background:rgba(179,58,58,.06);box-shadow:0 0 0 4px rgba(179,58,58,.08);}
+  .ct-lienzo-sec-tag{position:absolute;top:-17px;left:0;font-size:9px;font-weight:800;color:#fff;background:#020B2D;padding:2px 7px 2px 5px;border-radius:5px 5px 0 0;white-space:nowrap;font-family:'Inter',sans-serif;pointer-events:auto;cursor:grab;display:inline-flex;align-items:center;gap:5px;}
+  .ct-lienzo-sec-tag input[type=checkbox]{width:11px;height:11px;margin:0;cursor:pointer;accent-color:#5977D2;}
+  .ct-seccion-imp.ct-lienzo-sec.selected .ct-lienzo-sec-tag{background:#5977D2;}
+  .ct-lienzo-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;padding:7px 10px;background:#EEF1FC;border:1px solid #D7DCF5;border-radius:10px;}
+  .ct-lienzo-toolbar-txt{font-size:12px;font-weight:700;color:var(--navy);margin-right:2px;}
+  .ct-lienzo-toolbar .ct-btn[disabled]{opacity:.4;cursor:not-allowed;}
+  .ct-lienzo-toolbar .ct-btn[disabled]:hover{background:#fff;}
   @media print{
     body > *:not(#ctPrintRoot){display:none !important;}
     #ctPrintRoot{display:block !important;position:fixed;inset:0;margin:0;padding:0;background:#fff;}
@@ -20678,7 +20686,14 @@ function ctNuevoMarco(){ return { activo:false, colorHex:"#020B2D", grosorMm:0.6
 // tituloAlin: alineación del título de la sección — 'seccion' (dentro de su propio ancho), 'columna'
 // (sobre una de sus propias columnas internas) o 'carta' (sobre el ancho total de la página; solo
 // tiene sentido — y solo se ofrece — cuando la sección ya abarca el 100% del ancho de la carta).
-function ctNuevaSeccion(){ return { id:ctId(), titulo:"Nueva sección", descripcion:"", columnaInicio:1, columnaSpan:1, itemCols:1, tituloAlin:{modo:"seccion",align:"izquierda",columna:1}, posicionManual:false, yMm:0, marco:ctNuevoMarco(), items:[] }; }
+// alinBorde (20/10/2026): de qué borde de la sección es la cifra "yMm" cuando la posición es manual
+// — 'superior' (yMm = borde de arriba, default/comportamiento de siempre), 'centro' (yMm = punto
+// medio vertical) o 'inferior' (yMm = borde de abajo). Permite alinear por abajo o por el medio dos
+// secciones de distinta altura, no solo por arriba. "Alinear con…" y las líneas guía siguen
+// comparando el valor de yMm tal cual, así que funcionan igual sin cambios: si dos secciones
+// terminan con el mismo yMm, sus bordes elegidos (sean el de arriba, el medio o el de abajo de cada
+// una) coinciden en ese punto, sea cuál sea el borde que elija cada una.
+function ctNuevaSeccion(){ return { id:ctId(), titulo:"Nueva sección", descripcion:"", columnaInicio:1, columnaSpan:1, itemCols:1, tituloAlin:{modo:"seccion",align:"izquierda",columna:1}, posicionManual:false, yMm:0, alinBorde:"superior", marco:ctNuevoMarco(), items:[] }; }
 function ctNuevaConfig(){
   return {
     formato:{ preset:"A4", anchoMm:210, altoMm:297, orientacion:"vertical" },
@@ -20751,6 +20766,7 @@ function ctMigrarConfig(cfgIn){
       },
       posicionManual: !!s.posicionManual,
       yMm: s.yMm!=null ? Number(s.yMm) : 0,
+      alinBorde: ["superior","centro","inferior"].includes(s.alinBorde) ? s.alinBorde : "superior",
       marco: s.marco && typeof s.marco==="object" ? { activo:!!s.marco.activo, colorHex:s.marco.colorHex||"#020B2D", grosorMm:s.marco.grosorMm!=null?s.marco.grosorMm:0.5 } : { activo:false, colorHex:"#020B2D", grosorMm:0.5 },
       items: (s.items||[]).map(it=>({
         articuloId: it.articuloId,
@@ -20775,6 +20791,9 @@ function goCartaTab(cttab){
 
 const CT = {
   cartas:[], activeId:null, _loaded:false, _saveTimers:{}, _filtro:{},
+  // Selección múltiple de secciones en el lienzo de Diseño (20/10/2026) — para moverlas juntas o
+  // alinearlas entre sí de una. Es estado de UI nomás (no se guarda en la carta).
+  _seleccion: new Set(),
 
   async onEnterModule(){
     if(!this._loaded){
@@ -20825,7 +20844,7 @@ const CT = {
     this.renderLista(); this.renderEditor(); this.renderImpresionSiActiva();
   },
 
-  seleccionar(id){ this.activeId = id; this.renderLista(); this.renderEditor(); },
+  seleccionar(id){ this.activeId = id; this._seleccion.clear(); this.renderLista(); this.renderEditor(); },
 
   guardarDebounced(){
     const id = this.activeId; if(!id) return;
@@ -20887,6 +20906,10 @@ const CT = {
   // ---- render: lista de cartas (columna izquierda de Diseño) ----
   renderLista(){
     const box = document.getElementById("ctListaItems"); if(!box) return;
+    // Se preserva el scroll (20/10/2026): como esto se re-dibuja entero después de casi cualquier
+    // cambio, sin esto el scroll volvía a 0 cada vez que se tocaba algo (reemplazar el innerHTML de
+    // un contenedor resetea su scrollTop) y Pancho tenía que volver a bajar manualmente cada vez.
+    const scrollTop = box.scrollTop;
     if(!this.cartas.length){ box.innerHTML = '<div class="ct-empty-mini">Todavía no hay ninguna carta creada.</div>'; return; }
     box.innerHTML = this.cartas.map(c=>{
       const nArts = (c.config.secciones||[]).reduce((n,s)=>n+(s.items||[]).length,0);
@@ -20896,6 +20919,7 @@ const CT = {
         <div class="ctc-meta">${this.esc(c.config.formato?.preset||"A4")} · ${nSecs} sección(es) · ${nArts} artículo(s)</div>
       </div>`;
     }).join("");
+    box.scrollTop = scrollTop;
   },
 
   campoPt(label, path, val){
@@ -20921,8 +20945,13 @@ const CT = {
   // ---- render: editor de la carta activa ----
   renderEditor(){
     const box = document.getElementById("ctEditor"); if(!box) return;
+    // Se preserva el scroll (20/10/2026, pedido de Pancho): esto se redibuja entero después de
+    // cualquier cambio (tocar un campo, soltar un arrastre en el lienzo de ubicación, etc.) y,
+    // como reemplazar el innerHTML de un contenedor resetea su scrollTop a 0, sin esto el panel
+    // volvía de golpe arriba de todo y había que volver a bajar manualmente cada vez.
+    const scrollTop = box.scrollTop;
     const c = this.actual();
-    if(!c){ box.innerHTML = '<div class="ct-empty">Elegí una carta de la lista o creá una nueva para empezar a diseñarla.</div>'; return; }
+    if(!c){ box.innerHTML = '<div class="ct-empty">Elegí una carta de la lista o creá una nueva para empezar a diseñarla.</div>'; box.scrollTop = scrollTop; return; }
     const cfg = c.config;
     const presetOpts = Object.keys(CT_FORMATOS).concat(["Custom"]).map(p=>`<option value="${p}" ${cfg.formato.preset===p?'selected':''}>${p==="Custom"?"Personalizado":p}</option>`).join("");
     const marcoGen = cfg.layout.marco;
@@ -21002,6 +21031,7 @@ const CT = {
       </div>
     `;
     this.pintarDisenoLienzo();
+    box.scrollTop = scrollTop;
   },
 
   setColumnas(n){
@@ -21150,7 +21180,14 @@ const CT = {
           <label style="display:flex;align-items:center;gap:6px;font-size:12px;"><input type="checkbox" ${s.posicionManual?"checked":""} onchange="CT.setSeccionCampo('${s.id}','posicionManual', this.checked, {rerender:true})"> Manual (si no, se apila automático)</label>
         </div>
         ${s.posicionManual?`
-        <div class="ct-field"><label>Posición vertical (mm desde el inicio del contenido)</label><input type="number" step="0.5" value="${s.yMm}" onchange="CT.setSeccionCampo('${s.id}','yMm', Number(this.value))"></div>
+        <div class="ct-field"><label>Medir la posición desde…</label>
+          <div class="ct-seg">
+            <button type="button" class="${(s.alinBorde||'superior')==='superior'?'on':''}" onclick="CT.setSeccionCampo('${s.id}','alinBorde','superior',{rerender:true})">Borde superior</button>
+            <button type="button" class="${s.alinBorde==='centro'?'on':''}" onclick="CT.setSeccionCampo('${s.id}','alinBorde','centro',{rerender:true})">Centro</button>
+            <button type="button" class="${s.alinBorde==='inferior'?'on':''}" onclick="CT.setSeccionCampo('${s.id}','alinBorde','inferior',{rerender:true})">Borde inferior</button>
+          </div>
+        </div>
+        <div class="ct-field"><label>Posición ${s.alinBorde==='inferior'?'del borde inferior':s.alinBorde==='centro'?'del centro':'del borde superior'} (mm desde el inicio del contenido)</label><input type="number" step="0.5" value="${s.yMm}" onchange="CT.setSeccionCampo('${s.id}','yMm', Number(this.value))"></div>
         <div class="ct-field"><label>Alinear con…</label><select onchange="if(this.value) CT.alinearCon('${s.id}', this.value); this.selectedIndex=0;">
           <option value="">— elegir sección —</option>
           ${otrasManuales.map(o=>`<option value="${o.id}">${this.esc(o.titulo)}</option>`).join("")}
@@ -21211,6 +21248,7 @@ const CT = {
     const c = this.actual(); if(!c) return;
     if(!confirm("¿Eliminar esta sección y los artículos que tenía elegidos?")) return;
     c.config.secciones = (c.config.secciones||[]).filter(s=>s.id!==sid);
+    this._seleccion.delete(sid);
     this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
   },
   moverSeccion(sid, dir){
@@ -21399,15 +21437,19 @@ const CT = {
     secciones.forEach(s=>{
       const m = medidas[s.id]; const tracks = [];
       for(let t=m.start; t<m.start+m.span && t<=cols; t++) tracks.push(t);
+      const heightMm = m.heightPx/(96/25.4) + (m.marcoActivo ? (this.mm2px(3)*2)/(96/25.4) : 0);
       let topMm;
       if(s.posicionManual){
-        topMm = Number(s.yMm)||0;
+        // yMm es la posición del borde que esta sección elija (superior/centro/inferior) — se
+        // traduce siempre a la posición del borde SUPERIOR (topMm) para poder dibujarla, sea cual
+        // sea el borde elegido.
+        const yVal = Number(s.yMm)||0;
+        topMm = s.alinBorde==="inferior" ? (yVal - heightMm) : s.alinBorde==="centro" ? (yVal - heightMm/2) : yVal;
       } else {
         const baseMm = tracks.length ? Math.max(...tracks.map(t=>cursorMm[t])) : 0;
         topMm = baseMm>0 ? baseMm + cfg.layout.espacioMm : 0;
       }
       tops[s.id] = topMm;
-      const heightMm = m.heightPx/(96/25.4) + (m.marcoActivo ? (this.mm2px(3)*2)/(96/25.4) : 0);
       tracks.forEach(t=>{ cursorMm[t] = Math.max(cursorMm[t], topMm + heightMm); });
     });
 
@@ -21421,17 +21463,22 @@ const CT = {
   },
 
   pintarGuias(contentWrap, L){
-    // Líneas guía: secciones con posición manual que comparten (casi) el mismo Y.
+    // Líneas guía: secciones con posición manual cuyo borde elegido (superior/centro/inferior) cae
+    // en (casi) el mismo Y. Se compara el yMm crudo de cada una (no L.tops, que siempre es el borde
+    // SUPERIOR) porque yMm ya es, por construcción, la posición exacta del borde que cada sección
+    // eligió — así dos secciones de distinta altura, una alineada "por abajo" y otra "por arriba",
+    // muestran la línea justo donde sus bordes elegidos realmente coinciden.
     const manuales = L.secciones.filter(s=>s.posicionManual);
+    const edgeY = (s)=> Number(s.yMm)||0;
     const vistos = new Set();
     manuales.forEach(s=>{
       if(vistos.has(s.id)) return;
-      const grupo = manuales.filter(o=>!vistos.has(o.id) && Math.abs(L.tops[o.id]-L.tops[s.id])<0.6);
+      const grupo = manuales.filter(o=>!vistos.has(o.id) && Math.abs(edgeY(o)-edgeY(s))<0.6);
       if(grupo.length>1){
         grupo.forEach(o=>vistos.add(o.id));
         const linea = document.createElement("div");
         linea.className = "ct-guide";
-        linea.style.top = this.mm2px(L.tops[s.id])+"px";
+        linea.style.top = this.mm2px(edgeY(s))+"px";
         linea.innerHTML = '<span class="ct-guide-label">alineado</span>';
         contentWrap.appendChild(linea);
       }
@@ -21458,7 +21505,25 @@ const CT = {
     // porque ahí el alto real del papel es lo que manda).
     const bufferMm = 40;
 
+    // Selección múltiple (20/10/2026): se descartan ids de secciones que ya no existen en esta
+    // carta (se borró la sección, se cambió de carta, etc.).
+    const idsValidos = new Set(L.secciones.map(s=>s.id));
+    Array.from(this._seleccion).forEach(id=>{ if(!idsValidos.has(id)) this._seleccion.delete(id); });
+
     host.innerHTML = "";
+
+    if(this._seleccion.size){
+      const toolbar = document.createElement("div");
+      toolbar.className = "ct-lienzo-toolbar";
+      const multi = this._seleccion.size>1;
+      toolbar.innerHTML = `<span class="ct-lienzo-toolbar-txt">${this._seleccion.size} sección(es) seleccionada(s)</span>
+        <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('superior')">Alinear arriba</button>
+        <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('centro')">Alinear al centro</button>
+        <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('inferior')">Alinear abajo</button>
+        <button type="button" class="ct-btn sm" onclick="CT.limpiarSeleccion()">Deseleccionar todo</button>`;
+      host.appendChild(toolbar);
+    }
+
     const wrap = document.createElement("div");
     wrap.className = "ct-sheet-wrap ct-lienzo-outer";
     wrap.style.cssText = `width:${(L.pxW*scale).toFixed(0)}px;`;
@@ -21488,12 +21553,13 @@ const CT = {
     L.secciones.forEach(s=>{
       const m = L.medidas[s.id];
       const el = document.createElement("div");
-      el.className = "ct-seccion-imp ct-lienzo-sec";
+      const marcada = this._seleccion.has(s.id);
+      el.className = "ct-seccion-imp ct-lienzo-sec" + (marcada?" selected":"");
       el.dataset.sid = s.id;
       const pad = m.marcoActivo ? `padding:${this.mm2px(3)}px;` : "";
       el.style.cssText = `position:absolute; left:${L.trackLeft(m.start)}px; top:${this.mm2px(L.tops[s.id])}px; width:${m.widthPx}px; ${pad}${this.marcoCss(s.marco)}`;
-      el.innerHTML = `<div class="ct-lienzo-sec-tag">${this.esc(s.titulo)}${s.posicionManual?"":" · automática"}</div>` + this.renderSeccionImpresa(s, cfg);
-      this.wireDragSeccion(el, s, L, ()=>scale);
+      el.innerHTML = `<label class="ct-lienzo-sec-tag"><input type="checkbox" ${marcada?"checked":""} onmousedown="event.stopPropagation()" onchange="CT.toggleSeleccionSeccion('${s.id}')"> ${this.esc(s.titulo)}${s.posicionManual?"":" · automática"}</label>` + this.renderSeccionImpresa(s, cfg);
+      this.wireDragSeccion(el, s, L, ()=>scale, contentWrap);
       contentWrap.appendChild(el);
     });
 
@@ -21505,39 +21571,79 @@ const CT = {
     wrap.style.height = (sheetEl.getBoundingClientRect().height) + "px";
   },
 
-  wireDragSeccion(el, s, L, getScale){
-    let dragging = false, startX = 0, startY = 0, origLeftPx = 0, origTopPx = 0;
+  toggleSeleccionSeccion(sid){
+    if(this._seleccion.has(sid)) this._seleccion.delete(sid); else this._seleccion.add(sid);
+    this.pintarDisenoLienzo();
+  },
+  limpiarSeleccion(){
+    this._seleccion.clear();
+    this.pintarDisenoLienzo();
+  },
+  // Alinea entre sí (no respecto a la página) todas las secciones tildadas, por el borde elegido —
+  // toma como referencia la posición actual de la primera seleccionada y mueve el resto a juntarse
+  // con ella en ese borde (20/10/2026, pedido de Pancho).
+  alinearSeleccion(borde){
+    const c = this.actual(); if(!c) return;
+    const ids = Array.from(this._seleccion);
+    const secciones = ids.map(id=>c.config.secciones.find(s=>s.id===id)).filter(Boolean);
+    if(secciones.length<2){ showToast("Elegí al menos 2 secciones (con las casillas) para alinearlas entre sí", "warn"); return; }
+    const L = this.calcularLayout(c.config);
+    const alturaMm = (s)=> { const m=L.medidas[s.id]; return m ? (m.heightPx/(96/25.4) + (m.marcoActivo ? (this.mm2px(3)*2)/(96/25.4) : 0)) : 0; };
+    const edgeActual = (s)=>{
+      const h = alturaMm(s);
+      const top = L.tops[s.id]!=null ? L.tops[s.id] : 0; // ya resuelto por calcularLayout, sea manual o automática
+      if(borde==="inferior") return top+h;
+      if(borde==="centro") return top+h/2;
+      return top;
+    };
+    const refY = edgeActual(secciones[0]);
+    secciones.forEach(s=>{
+      s.posicionManual = true;
+      s.alinBorde = borde;
+      s.yMm = Math.round(refY*10)/10;
+    });
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+
+  // Arrastre de una sección — o, si forma parte de la selección múltiple actual (≥2 tildadas), de
+  // TODO el grupo seleccionado en conjunto, manteniendo sus posiciones relativas (20/10/2026).
+  wireDragSeccion(el, s, L, getScale, contentWrap){
+    let dragging = false, startX = 0, startY = 0, grupo = [];
     const onMove = (ev)=>{
       if(!dragging) return;
       const scale = getScale();
       const dx = (ev.clientX - startX)/scale, dy = (ev.clientY - startY)/scale;
-      el.style.left = (origLeftPx + dx) + "px";
-      el.style.top = (origTopPx + dy) + "px";
+      grupo.forEach(g=>{ g.el.style.left = (g.origLeft+dx)+"px"; g.el.style.top = (g.origTop+dy)+"px"; });
     };
     const onUp = (ev)=>{
       if(!dragging) return;
       dragging = false;
-      el.classList.remove("dragging");
+      grupo.forEach(g=>g.el.classList.remove("dragging"));
       document.body.style.userSelect = "";
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);
       const scale = getScale();
       const dx = (ev.clientX - startX)/scale, dy = (ev.clientY - startY)/scale;
-      const newLeftPx = origLeftPx + dx;
-      const newTopPx = Math.max(0, origTopPx + dy);
-      const span = L.medidas[s.id].span;
-      let bestStart = 1, bestDist = Infinity;
-      for(let start=1; start+span-1<=L.cols; start++){
-        const dist = Math.abs(L.trackLeft(start) - newLeftPx);
-        if(dist < bestDist){ bestDist = dist; bestStart = start; }
-      }
-      const newYmm = Math.round((newTopPx/(96/25.4))*10)/10;
       const c = this.actual(); if(!c) return;
-      const sec = c.config.secciones.find(x=>x.id===s.id); if(!sec) return;
-      sec.columnaInicio = bestStart;
-      sec.posicionManual = true;
-      sec.yMm = newYmm;
-      if(sec.tituloAlin && sec.tituloAlin.modo==="carta" && !(sec.columnaInicio===1 && sec.columnaSpan===L.cols)) sec.tituloAlin.modo = "seccion";
+      grupo.forEach(g=>{
+        const sec = c.config.secciones.find(x=>x.id===g.id); if(!sec) return;
+        const m = L.medidas[g.id]; if(!m) return;
+        const newLeftPx = g.origLeft + dx;
+        const newTopPx = Math.max(0, g.origTop + dy);
+        let bestStart = 1, bestDist = Infinity;
+        for(let start=1; start+m.span-1<=L.cols; start++){
+          const dist = Math.abs(L.trackLeft(start) - newLeftPx);
+          if(dist < bestDist){ bestDist = dist; bestStart = start; }
+        }
+        const heightMm = m.heightPx/(96/25.4) + (m.marcoActivo ? (this.mm2px(3)*2)/(96/25.4) : 0);
+        const topMmNew = newTopPx/(96/25.4);
+        const borde = sec.alinBorde || "superior";
+        const yMmNew = borde==="inferior" ? (topMmNew+heightMm) : borde==="centro" ? (topMmNew+heightMm/2) : topMmNew;
+        sec.columnaInicio = bestStart;
+        sec.posicionManual = true;
+        sec.yMm = Math.round(yMmNew*10)/10;
+        if(sec.tituloAlin && sec.tituloAlin.modo==="carta" && !(sec.columnaInicio===1 && sec.columnaSpan===L.cols)) sec.tituloAlin.modo = "seccion";
+      });
       this.guardarDebounced();
       this.renderEditor();
       this.renderImpresionSiActiva();
@@ -21546,11 +21652,16 @@ const CT = {
       if(ev.button!==0) return;
       ev.preventDefault();
       dragging = true;
-      el.classList.add("dragging");
       document.body.style.userSelect = "none";
       startX = ev.clientX; startY = ev.clientY;
-      origLeftPx = L.trackLeft(L.medidas[s.id].start);
-      origTopPx = this.mm2px(L.tops[s.id]);
+      const idsGrupo = (this._seleccion.has(s.id) && this._seleccion.size>1) ? Array.from(this._seleccion) : [s.id];
+      grupo = idsGrupo.map(id=>{
+        if(!L.medidas[id]) return null;
+        const elG = id===s.id ? el : contentWrap.querySelector('[data-sid="'+id+'"]');
+        if(!elG) return null;
+        elG.classList.add("dragging");
+        return { id, el:elG, origLeft:L.trackLeft(L.medidas[id].start), origTop:this.mm2px(L.tops[id]) };
+      }).filter(Boolean);
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
     });
