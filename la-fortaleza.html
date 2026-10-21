@@ -2704,6 +2704,8 @@
   .ct-seccion-head input[type=text]{flex:1;font-weight:800;font-size:13.5px;border:1px solid transparent;background:transparent;padding:4px 6px;border-radius:6px;}
   .ct-seccion-head input[type=text]:hover, .ct-seccion-head input[type=text]:focus{border-color:var(--border);background:#fff;}
   .ct-seccion-tools{display:flex;gap:4px;}
+  /* Cuadro de texto (21/10/2026) — insignia chica junto al título para distinguirlo de una sección de menú */
+  .ct-chip-tipo{flex-shrink:0;font-size:10.5px;font-weight:800;color:#5B6478;background:#EEF1F6;border-radius:20px;padding:3px 9px;white-space:nowrap;}
   .ct-icon-btn{border:none;background:transparent;color:var(--text-3);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:13px;line-height:1;}
   .ct-icon-btn:hover{background:#eef0f7;color:var(--text-1);}
   .ct-pick{display:flex;gap:14px;margin-top:10px;}
@@ -2740,6 +2742,11 @@
   .ct-sheet .ct-col{flex:1;min-width:0;display:flex;flex-direction:column;}
   .ct-sheet .ct-stitulo{font-family:'Syne',sans-serif;font-weight:800;color:#020B2D;}
   .ct-sheet .ct-sdesc{color:#5977D2;font-style:italic;}
+  /* Cuadro de texto (21/10/2026) — a diferencia de la bajada de una sección (.ct-sdesc sola, azul e
+     itálica, pensada para una aclaración corta), el contenido de un cuadro de texto es el mensaje
+     principal del bloque, así que se resetea a texto normal (negro, sin itálica); el tamaño lo sigue
+     definiendo el mismo estilo global "Descripciones". */
+  .ct-sheet .ct-texto-libre{color:#1B2033;font-style:normal;}
   .ct-sheet .ct-fila{display:flex;align-items:baseline;gap:8px;}
   .ct-sheet .ct-fila .n{flex:1;min-width:0;}
   .ct-sheet .ct-fila .n .extra{display:block;font-style:italic;opacity:.75;}
@@ -20730,7 +20737,20 @@ function ctNuevoMarco(){ return { activo:false, colorHex:"#020B2D", grosorMm:0.6
 // comparando el valor de yMm tal cual, así que funcionan igual sin cambios: si dos secciones
 // terminan con el mismo yMm, sus bordes elegidos (sean el de arriba, el medio o el de abajo de cada
 // una) coinciden en ese punto, sea cuál sea el borde que elija cada una.
-function ctNuevaSeccion(){ return { id:ctId(), titulo:"Nueva sección", descripcion:"", columnaInicio:1, columnaSpan:1, itemCols:1, tituloAlin:{modo:"seccion",align:"izquierda",columna:1}, posicionManual:false, yMm:0, alinBorde:"superior", marco:ctNuevoMarco(), items:[] }; }
+function ctNuevaSeccion(){ return { id:ctId(), tipo:"menu", titulo:"Nueva sección", descripcion:"", textoLibre:"", columnaInicio:1, columnaSpan:1, itemCols:1, tituloAlin:{modo:"seccion",align:"izquierda",columna:1}, posicionManual:false, yMm:0, alinBorde:"superior", marco:ctNuevoMarco(), items:[] }; }
+// Cuadro de texto (21/10/2026, pedido de Pancho: "poder agregar un cuadro de texto a colocar en las
+// columnas, análogo a las secciones"). Es el mismo objeto "sección" — se ubica en la misma grilla de
+// columnas, se arrastra, se alinea y se distribuye igual (toda esa maquinaria ya existía) — solo que
+// con tipo:"texto": en vez de título+artículos del catálogo, lleva un bloque de texto libre
+// (textoLibre) para avisos, horarios, aclaraciones, etc. Ver renderSeccionImpresa para el único
+// punto donde realmente cambia qué se dibuja.
+function ctNuevoCuadroTexto(){
+  const s = ctNuevaSeccion();
+  s.tipo = "texto";
+  s.titulo = "";
+  s.textoLibre = "Escribí acá el texto (por ejemplo, un aviso, los horarios de atención o una aclaración).";
+  return s;
+}
 // Imágenes de la carta (20/10/2026, pedido de Pancho): a diferencia de las secciones, se ubican
 // LIBREMENTE (xMm/yMm/widthMm/heightMm en mm, sin engancharse a ninguna columna) — un logo o una
 // foto no tiene por qué alinearse con el texto. Igual se ofrecen accesos para centrarlas respecto
@@ -20808,8 +20828,12 @@ function ctMigrarConfig(cfgIn){
     if(modoAlin==="columna" && itemCols<=1) modoAlin = "seccion";
     return {
       id: s.id || ctId(),
-      titulo: s.titulo || "Sección",
+      // tipo (21/10/2026): "menu" = sección con título+artículos (todo lo de siempre); "texto" =
+      // cuadro de texto libre (nuevo). Configs viejas no tienen el campo → caen siempre en "menu".
+      tipo: s.tipo==="texto" ? "texto" : "menu",
+      titulo: s.titulo || (s.tipo==="texto" ? "" : "Sección"),
       descripcion: s.descripcion || "",
+      textoLibre: s.textoLibre || "",
       columnaInicio: inicio,
       columnaSpan: columnaSpanFinal,
       itemCols,
@@ -21098,9 +21122,12 @@ const CT = {
       </div>
 
       <div class="ct-block">
-        <h3>Secciones y artículos</h3>
+        <h3>Secciones, cuadros de texto y artículos</h3>
         <div id="ctSecciones">${this.renderSecciones(c)}</div>
-        <button type="button" class="ct-btn" onclick="CT.agregarSeccion()">+ Agregar sección</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="ct-btn" onclick="CT.agregarSeccion()">+ Agregar sección</button>
+          <button type="button" class="ct-btn" onclick="CT.agregarCuadroTexto()">+ Agregar cuadro de texto</button>
+        </div>
       </div>
 
       <div class="ct-block">
@@ -21170,7 +21197,7 @@ const CT = {
       const oculta = this._ocultas.has(s.id);
       return `<div class="ct-layer-row ${oculta?'oculta':''}">
         <button type="button" class="ct-layer-eye" title="${oculta?'Mostrar':'Ocultar'}" onclick="CT.toggleOcultar('${s.id}')">${oculta?'🙈':'👁'}</button>
-        <button type="button" class="ct-layer-nombre" title="Ver solo esta — toca para aislarla y saltar a ella" onclick="CT.aislarElemento('${s.id}')">${idx+1}. ${this.esc(s.titulo||"(sin título)")}</button>
+        <button type="button" class="ct-layer-nombre" title="Ver solo esta — toca para aislarla y saltar a ella" onclick="CT.aislarElemento('${s.id}')">${idx+1}. ${this.esc(s.titulo || (s.tipo==="texto"?"Cuadro de texto":"(sin título)"))}</button>
       </div>`;
     };
     const filaImg = (im,idx)=>{
@@ -21262,6 +21289,9 @@ const CT = {
   },
 
   renderSeccion(c, s, idx, total, grupos){
+    // Cuadro de texto (21/10/2026): mismo objeto/tarjeta que una sección de menú, pero sin catálogo
+    // ni lista de artículos — en su lugar, un textarea de texto libre. Ver ctNuevoCuadroTexto().
+    const esTexto = s.tipo === "texto";
     const filtro = this.filtroDe(s.id);
     const chips = (typeof COSTEO_CONCEPTOS!=="undefined"?COSTEO_CONCEPTOS:[]).map(cat=>
       `<button type="button" class="ct-chip ${filtro.cats.has(cat)?'on':''}" onclick="CT.toggleFiltroCat('${s.id}','${cat}')">${this.esc(cat)}</button>`
@@ -21301,20 +21331,23 @@ const CT = {
     return `<div class="ct-seccion" data-sid="${s.id}" id="ct-card-${s.id}">
       <div class="ct-seccion-head">
         <div style="display:flex;gap:2px;">
-          <button type="button" class="ct-icon-btn" title="Subir sección" ${idx===0?"disabled":""} onclick="CT.moverSeccion('${s.id}',-1)">↑</button>
-          <button type="button" class="ct-icon-btn" title="Bajar sección" ${idx===total-1?"disabled":""} onclick="CT.moverSeccion('${s.id}',1)">↓</button>
+          <button type="button" class="ct-icon-btn" title="Subir" ${idx===0?"disabled":""} onclick="CT.moverSeccion('${s.id}',-1)">↑</button>
+          <button type="button" class="ct-icon-btn" title="Bajar" ${idx===total-1?"disabled":""} onclick="CT.moverSeccion('${s.id}',1)">↓</button>
         </div>
-        <input type="text" value="${this.esc(s.titulo)}" oninput="CT.setSeccionCampo('${s.id}','titulo', this.value)">
+        <input type="text" placeholder="${esTexto?"Título (opcional)":"Nueva sección"}" value="${this.esc(s.titulo)}" oninput="CT.setSeccionCampo('${s.id}','titulo', this.value)">
+        ${esTexto?'<span class="ct-chip-tipo" title="Cuadro de texto">🖊 texto</span>':''}
         <div class="ct-seccion-tools">
-          <button type="button" class="ct-icon-btn" title="Eliminar sección" onclick="CT.eliminarSeccion('${s.id}')">🗑</button>
+          <button type="button" class="ct-icon-btn" title="Eliminar" onclick="CT.eliminarSeccion('${s.id}')">🗑</button>
         </div>
       </div>
-      <input type="text" placeholder="Descripción de la sección (opcional, ej. 'Los cortes se acompañan con papas fritas')" value="${this.esc(s.descripcion||"")}" oninput="CT.setSeccionCampo('${s.id}','descripcion', this.value)" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;margin:8px 0;">
+      ${esTexto
+        ? `<textarea placeholder="Escribí acá el texto de este cuadro…" oninput="CT.setSeccionCampo('${s.id}','textoLibre', this.value)" style="width:100%;min-height:90px;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12.5px;font-family:inherit;margin:8px 0;resize:vertical;">${this.esc(s.textoLibre||"")}</textarea>`
+        : `<input type="text" placeholder="Descripción de la sección (opcional, ej. 'Los cortes se acompañan con papas fritas')" value="${this.esc(s.descripcion||"")}" oninput="CT.setSeccionCampo('${s.id}','descripcion', this.value)" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;margin:8px 0;">`}
 
       <div class="ct-grid" style="margin-bottom:10px;">
         <div class="ct-field"><label>Columna inicial (posición)</label><select onchange="CT.setSeccionColumnas('${s.id}','columnaInicio', Number(this.value))">${colInicioOpts}</select></div>
         <div class="ct-field"><label>Abarca columnas (posición)</label><select onchange="CT.setSeccionColumnas('${s.id}','columnaSpan', Number(this.value))">${spanOpts}</select></div>
-        <div class="ct-field"><label>Columnas internas (cómo se reparten sus artículos)</label><input type="number" min="1" max="8" step="1" value="${itemCols}" onchange="CT.setSeccionItemCols('${s.id}', Number(this.value))"></div>
+        ${esTexto?"":`<div class="ct-field"><label>Columnas internas (cómo se reparten sus artículos)</label><input type="number" min="1" max="8" step="1" value="${itemCols}" onchange="CT.setSeccionItemCols('${s.id}', Number(this.value))"></div>`}
         <div class="ct-field">
           <label>Marco de esta sección</label>
           <div class="ct-marco-row">
@@ -21326,11 +21359,11 @@ const CT = {
           <label>Alinear título</label>
           <select onchange="CT.setTituloAlin('${s.id}','modo', this.value)">
             <option value="seccion" ${alin.modo==='seccion'?'selected':''}>Dentro de esta sección</option>
-            ${itemCols>1?`<option value="columna" ${alin.modo==='columna'?'selected':''}>Sobre una columna puntual</option>`:''}
+            ${!esTexto && itemCols>1?`<option value="columna" ${alin.modo==='columna'?'selected':''}>Sobre una columna puntual</option>`:''}
             ${fullWidth?`<option value="carta" ${alin.modo==='carta'?'selected':''}>Sobre el ancho total de la carta</option>`:''}
           </select>
         </div>
-        ${alin.modo==='columna' && itemCols>1 ? `<div class="ct-field"><label>¿Cuál columna?</label><select onchange="CT.setTituloAlin('${s.id}','columna', Number(this.value))">${colTituloOpts}</select></div>` : ""}
+        ${!esTexto && alin.modo==='columna' && itemCols>1 ? `<div class="ct-field"><label>¿Cuál columna?</label><select onchange="CT.setTituloAlin('${s.id}','columna', Number(this.value))">${colTituloOpts}</select></div>` : ""}
         <div class="ct-field">
           <label>Alinear texto del título</label>
           <div class="ct-seg">
@@ -21358,7 +21391,7 @@ const CT = {
         </select></div>`:""}
       </div>
 
-      <div class="ct-pick">
+      ${esTexto ? "" : `<div class="ct-pick">
         <div class="ct-pick-col">
           <h4>Catálogo</h4>
           <div class="ct-pick-toolbar">
@@ -21368,7 +21401,7 @@ const CT = {
           <div id="ctPickRows-${s.id}">${this.renderFilasCatalogo(s, grupos, filtro)}</div>
         </div>
         <div class="ct-pick-col">${itemsHtml || '<div class="ct-empty-mini">Sin artículos todavía — elegilos de la lista de la izquierda.</div>'}</div>
-      </div>
+      </div>`}
     </div>`;
   },
 
@@ -21456,9 +21489,19 @@ const CT = {
     c.config.secciones.push(ctNuevaSeccion());
     this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
   },
+  // Cuadro de texto (21/10/2026): misma mecánica que agregarSeccion, se guarda en el mismo arreglo
+  // c.config.secciones — ver nota en ctNuevoCuadroTexto().
+  agregarCuadroTexto(){
+    const c = this.actual(); if(!c) return;
+    c.config.secciones = c.config.secciones || [];
+    c.config.secciones.push(ctNuevoCuadroTexto());
+    this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
+  },
   eliminarSeccion(sid){
     const c = this.actual(); if(!c) return;
-    if(!confirm("¿Eliminar esta sección y los artículos que tenía elegidos?")) return;
+    const s = (c.config.secciones||[]).find(x=>x.id===sid);
+    const msg = s && s.tipo==="texto" ? "¿Eliminar este cuadro de texto?" : "¿Eliminar esta sección y los artículos que tenía elegidos?";
+    if(!confirm(msg)) return;
     c.config.secciones = (c.config.secciones||[]).filter(s=>s.id!==sid);
     this._seleccion.delete(sid);
     this._ocultas.delete(sid);
@@ -21689,6 +21732,27 @@ const CT = {
   },
 
   renderSeccionImpresa(s, cfg){
+    // Distancia título/subtítulo → cuerpo (20/10/2026, pedido de Pancho — antes era fija/pegada):
+    // se aplica como margen inferior del último elemento de la cabecera de la sección (la
+    // descripción si existe, si no el título), justo antes de que arranquen los artículos/el texto.
+    const espacioTitulo = cfg.layout.espacioTituloMm!=null ? cfg.layout.espacioTituloMm : 8;
+    const espacioTituloPx = this.mm2px(espacioTitulo);
+    // Cuadro de texto (21/10/2026, pedido de Pancho: "poder agregar un cuadro de texto a colocar en
+    // las columnas, análogo a las secciones"): usa el mismo posicionamiento/alineación/marco que una
+    // sección de menú (todo eso lo resuelve calcularLayout igual para cualquier tipo, porque mide lo
+    // que este método devuelva), pero en vez de título+artículos del catálogo dibuja un bloque de
+    // texto libre. itemCols/alineación "por columna interna" no aplican acá (son de la lista de
+    // artículos) — si quedó guardada esa opción de una migración rara, se ignora y se trata como
+    // alineación "dentro de la sección".
+    if(s.tipo==="texto"){
+      const alinT = s.tituloAlin || {modo:"seccion",align:"izquierda",columna:1};
+      const alignCssT = alinT.align==="centro" ? "center" : (alinT.align==="derecha" ? "right" : "left");
+      const textoHtml = this.esc(s.textoLibre||"").replace(/\n/g,"<br>");
+      return `<div class="ct-seccion-inner">
+        ${s.titulo?`<div class="ct-stitulo" style="${this.textStyleCss(cfg.estilos.subtitulo)}text-align:${alignCssT};margin-bottom:${espacioTituloPx}px;">${this.esc(s.titulo)}</div>`:""}
+        <div class="ct-sdesc ct-texto-libre" style="${this.textStyleCss(cfg.estilos.descripcion)}text-align:${alignCssT};">${textoHtml}</div>
+      </div>`;
+    }
     // itemCols (20/10/2026): la cantidad de columnas en que se reparten los ARTÍCULOS de esta sección
     // ya no depende de cuántas columnas de la página ocupa (eso es columnaInicio/columnaSpan, que solo
     // definen ancho y posición) — así Bebidas puede repartir sus artículos en 2 columnas propias y
@@ -21713,11 +21777,6 @@ const CT = {
       const wPct = 100/subCols;
       tituloStyle += `width:${wPct}%;margin-left:${(wPct*(col-1)).toFixed(4)}%;box-sizing:border-box;`;
     }
-    // Distancia título/subtítulo → cuerpo (20/10/2026, pedido de Pancho — antes era fija/pegada):
-    // se aplica como margen inferior del último elemento de la cabecera de la sección (la
-    // descripción si existe, si no el título), justo antes de que arranquen los artículos.
-    const espacioTitulo = cfg.layout.espacioTituloMm!=null ? cfg.layout.espacioTituloMm : 8;
-    const espacioTituloPx = this.mm2px(espacioTitulo);
     return `<div class="ct-seccion-inner">
       <div class="ct-stitulo" style="${this.textStyleCss(cfg.estilos.subtitulo)}${tituloStyle}${!s.descripcion?`margin-bottom:${espacioTituloPx}px;`:""}">${this.esc(s.titulo)}</div>
       ${s.descripcion?`<div class="ct-sdesc" style="${this.textStyleCss(cfg.estilos.descripcion)}margin-bottom:${espacioTituloPx}px;">${this.esc(s.descripcion)}</div>`:""}
@@ -21926,7 +21985,7 @@ const CT = {
       el.dataset.sid = s.id;
       const pad = m.marcoActivo ? `padding:${this.mm2px(3)}px;` : "";
       el.style.cssText = `position:absolute; left:${L.trackLeft(m.start)}px; top:${this.mm2px(L.tops[s.id])}px; width:${m.widthPx}px; ${pad}${this.marcoCss(s.marco)}`;
-      el.innerHTML = `<label class="ct-lienzo-sec-tag"><input type="checkbox" ${marcada?"checked":""} onmousedown="event.stopPropagation()" onchange="CT.toggleSeleccionSeccion('${s.id}')"> ${this.esc(s.titulo)}${s.posicionManual?"":" · automática"}</label>` + this.renderSeccionImpresa(s, cfg);
+      el.innerHTML = `<label class="ct-lienzo-sec-tag"><input type="checkbox" ${marcada?"checked":""} onmousedown="event.stopPropagation()" onchange="CT.toggleSeleccionSeccion('${s.id}')"> ${this.esc(s.titulo || (s.tipo==="texto"?"🖊 Cuadro de texto":"Sección"))}${s.posicionManual?"":" · automática"}</label>` + this.renderSeccionImpresa(s, cfg);
       this.wireDragSeccion(el, s, L, ()=>scale, contentWrap);
       contentWrap.appendChild(el);
     });
@@ -22294,7 +22353,29 @@ const CT = {
     pageStyle.textContent = "@page{ size:"+w+"mm "+h+"mm; margin:0; }";
     const cleanup = ()=>{ const r = document.getElementById("ctPrintRoot"); if(r) r.remove(); window.removeEventListener("afterprint", cleanup); };
     window.addEventListener("afterprint", cleanup);
-    setTimeout(()=>window.print(), 60);
+    // Antes se imprimía 60ms después de armar el clon, sin importar si las imágenes de la carta
+    // (vienen de un bucket remoto, no están embebidas) ya habían terminado de cargar — si la red
+    // tardaba más que eso, el PDF podía salir sin la imagen o con ella a medio renderizar (reportado
+    // por Pancho: "la imagen queda corrida y no se llega a leer bien el texto"; reproducido de forma
+    // controlada: con la imagen todavía cargando, el PDF generado directamente no la incluye).
+    // Ahora se espera explícitamente a que decodifiquen TODAS las imágenes del clon antes de
+    // imprimir, con un máximo de 4s por si alguna fallara (imagen rota, sin conexión), para no dejar
+    // a Pancho esperando una impresión que nunca llega.
+    if(clone.querySelector("img")) showToast("Preparando PDF…", "ok");
+    this._esperarImagenesParaImprimir(clone).then(()=> window.print());
+  },
+  // Devuelve una promesa que se resuelve cuando todas las <img> dentro de `root` terminaron de
+  // decodificar (o fallaron, para no trabar la impresión con una imagen rota), con un tope de 4s.
+  _esperarImagenesParaImprimir(root){
+    const imgs = Array.from(root.querySelectorAll("img"));
+    if(!imgs.length) return new Promise(res=>setTimeout(res, 60));
+    const esperas = imgs.map(img=>{
+      if(img.complete && img.naturalWidth>0) return Promise.resolve();
+      if(img.decode) return img.decode().catch(()=>{});
+      return new Promise(res=>{ img.onload = res; img.onerror = res; });
+    });
+    const tope = new Promise(res=>setTimeout(res, 4000));
+    return Promise.race([Promise.all(esperas), tope]);
   },
 };
 </script>
