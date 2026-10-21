@@ -2764,6 +2764,16 @@
   .ct-lienzo-toolbar-txt{font-size:12px;font-weight:700;color:var(--navy);margin-right:2px;}
   .ct-lienzo-toolbar .ct-btn[disabled]{opacity:.4;cursor:not-allowed;}
   .ct-lienzo-toolbar .ct-btn[disabled]:hover{background:#fff;}
+  /* Imágenes en el lienzo de Diseño (20/10/2026) — libres, no enganchadas a columna */
+  .ct-lienzo-img{cursor:grab;outline:1.5px dashed transparent;outline-offset:2px;box-sizing:border-box;transition:outline-color .12s, background-color .12s;}
+  .ct-lienzo-img:hover{outline-color:#1F9D6B;}
+  .ct-lienzo-img.dragging{cursor:grabbing;outline-color:#B33A3A;z-index:5;opacity:.9;}
+  .ct-lienzo-img.resizing{outline-color:#B33A3A;z-index:5;}
+  .ct-lienzo-img.selected{outline:1.5px solid #1F9D6B;outline-offset:2px;background:rgba(31,157,107,.07);box-shadow:0 0 0 4px rgba(31,157,107,.08);}
+  .ct-lienzo-img-tag{background:#1F9D6B !important;}
+  .ct-lienzo-img-resize{position:absolute;right:-5px;bottom:-5px;width:11px;height:11px;border-radius:3px;background:#1F9D6B;border:1.5px solid #fff;cursor:nwse-resize;}
+  .ct-imagen-card .ct-seccion-head{gap:8px;}
+  .ct-imagen-card .ct-seccion-head input[type=checkbox]{width:14px;height:14px;cursor:pointer;}
   @media print{
     body > *:not(#ctPrintRoot){display:none !important;}
     #ctPrintRoot{display:block !important;position:fixed;inset:0;margin:0;padding:0;background:#fff;}
@@ -7832,6 +7842,10 @@ const ATTACH_LABELS = {
   panelPago:"Adjuntar comprobante de pago", nuevaPago:"Adjuntar comprobante de pago"
 };
 const ADJUNTOS_BUCKET = "lf-adjuntos";
+// Bucket público (20/10/2026) para las imágenes que se insertan en el módulo Carta (logo, fotos de
+// platos, etc.) — público porque son imágenes decorativas/de marca, no datos sensibles, y así no
+// hace falta regenerar una URL firmada cada hora mientras se diseña o se imprime la carta.
+const CT_IMG_BUCKET = "lf-carta-imagenes";
 // crypto.randomUUID() requiere un contexto seguro (https/localhost); si el sitio
 // se abre como archivo local (file://) no está disponible, así que usamos un
 // generador propio como respaldo para no romper la carga de adjuntos en pruebas locales.
@@ -20694,6 +20708,23 @@ function ctNuevoMarco(){ return { activo:false, colorHex:"#020B2D", grosorMm:0.6
 // terminan con el mismo yMm, sus bordes elegidos (sean el de arriba, el medio o el de abajo de cada
 // una) coinciden en ese punto, sea cuál sea el borde que elija cada una.
 function ctNuevaSeccion(){ return { id:ctId(), titulo:"Nueva sección", descripcion:"", columnaInicio:1, columnaSpan:1, itemCols:1, tituloAlin:{modo:"seccion",align:"izquierda",columna:1}, posicionManual:false, yMm:0, alinBorde:"superior", marco:ctNuevoMarco(), items:[] }; }
+// Imágenes de la carta (20/10/2026, pedido de Pancho): a diferencia de las secciones, se ubican
+// LIBREMENTE (xMm/yMm/widthMm/heightMm en mm, sin engancharse a ninguna columna) — un logo o una
+// foto no tiene por qué alinearse con el texto. Igual se ofrecen accesos para centrarlas respecto
+// a una columna puntual o a toda la página (CT.centrarImagen/alinearSeleccionImg), y para
+// distribuir varias de manera uniforme (CT.distribuirSeleccionImg) — eso sí lo pidió explícitamente.
+function ctNuevaImagen(path, widthMm, heightMm){ return { id:ctId(), path, xMm:10, yMm:10, widthMm:Math.max(5,widthMm||40), heightMm:Math.max(5,heightMm||40) }; }
+// Dimensiones naturales de la imagen elegida, para que el tamaño inicial en la carta respete su
+// proporción (ancho fijo en 50mm, alto calculado) en vez de aparecer estirada o aplastada.
+function ctImageDims(file){
+  return new Promise((resolve)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{ URL.revokeObjectURL(url); resolve({ w: img.naturalWidth||1, h: img.naturalHeight||1 }); };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); resolve({ w:1, h:1 }); };
+    img.src = url;
+  });
+}
 function ctNuevaConfig(){
   return {
     formato:{ preset:"A4", anchoMm:210, altoMm:297, orientacion:"vertical" },
@@ -20703,7 +20734,7 @@ function ctNuevaConfig(){
       articulo: ctTier(12.5,false), precio: ctTier(12.5,false), subindice: ctTier(9.5,false),
     },
     layout:{ columnas:2, margenMm:14, espacioMm:9, espacioTituloMm:8, alinPrecio:"derecha", marco: ctNuevoMarco() },
-    secciones:[]
+    secciones:[], imagenes:[]
   };
 }
 // Sube cualquier config vieja (v1: estilos.*Pt planos, sección.columna único, sin marco/posición/col/nombreOverride) al esquema v2.
@@ -20777,6 +20808,16 @@ function ctMigrarConfig(cfgIn){
       })),
     };
   });
+  // imagenes (20/10/2026): posición y tamaño libres en mm — si una config vieja no tiene nada,
+  // queda en [] sin romper nada; cada imagen sin "path" (dato corrupto/incompleto) se descarta.
+  out.imagenes = (cfg.imagenes||[]).map(im=>({
+    id: im.id || ctId(),
+    path: im.path || "",
+    xMm: Number(im.xMm)||0,
+    yMm: Number(im.yMm)||0,
+    widthMm: Math.max(5, Number(im.widthMm)||40),
+    heightMm: Math.max(5, Number(im.heightMm)||40),
+  })).filter(im=>im.path);
   return out;
 }
 
@@ -20794,6 +20835,10 @@ const CT = {
   // Selección múltiple de secciones en el lienzo de Diseño (20/10/2026) — para moverlas juntas o
   // alinearlas entre sí de una. Es estado de UI nomás (no se guarda en la carta).
   _seleccion: new Set(),
+  // Mismo mecanismo para imágenes (20/10/2026) — se tildan desde la lista "Imágenes" o desde su
+  // casilla en el lienzo, para moverlas juntas, centrarlas o distribuirlas entre sí.
+  _seleccionImg: new Set(),
+  _imgSubiendo: false,
 
   async onEnterModule(){
     if(!this._loaded){
@@ -20844,7 +20889,7 @@ const CT = {
     this.renderLista(); this.renderEditor(); this.renderImpresionSiActiva();
   },
 
-  seleccionar(id){ this.activeId = id; this._seleccion.clear(); this.renderLista(); this.renderEditor(); },
+  seleccionar(id){ this.activeId = id; this._seleccion.clear(); this._seleccionImg.clear(); this.renderLista(); this.renderEditor(); },
 
   guardarDebounced(){
     const id = this.activeId; if(!id) return;
@@ -21019,8 +21064,8 @@ const CT = {
       </div>
 
       <div class="ct-block">
-        <h3>Ubicación de las secciones</h3>
-        <div class="ct-sub" style="margin-bottom:8px;">Arrastrá cada sección para moverla de columna o cambiarle la altura — se suelta tomando la columna de posición más cercana y queda con "Manual" activado. Para un ajuste más fino, usá los campos numéricos de cada sección más abajo.</div>
+        <h3>Ubicación de las secciones e imágenes</h3>
+        <div class="ct-sub" style="margin-bottom:8px;">Arrastrá cada sección para moverla de columna o cambiarle la altura — se suelta tomando la columna de posición más cercana y queda con "Manual" activado. Las imágenes (abajo del todo, con el ícono 🖼) se mueven y redimensionan libremente, tirando desde la esquina. Para un ajuste más fino, usá los campos numéricos de cada sección o imagen más abajo.</div>
         <div id="ctDisenoLienzoWrap"></div>
       </div>
 
@@ -21028,6 +21073,14 @@ const CT = {
         <h3>Secciones y artículos</h3>
         <div id="ctSecciones">${this.renderSecciones(c)}</div>
         <button type="button" class="ct-btn" onclick="CT.agregarSeccion()">+ Agregar sección</button>
+      </div>
+
+      <div class="ct-block">
+        <h3>Imágenes</h3>
+        <div class="ct-sub" style="margin-bottom:8px;">Subí el logo del club, fotos de platos u otras imágenes para incluir en la carta. Se ubican y redimensionan arrastrándolas en el dibujo de arriba, o con los campos de cada una acá abajo.</div>
+        <div id="ctImagenes">${this.renderImagenes(c)}</div>
+        <input type="file" id="ctImgInput" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="CT.onImagenFileChange(event)">
+        <button type="button" class="ct-btn" ${this._imgSubiendo?"disabled":""} onclick="document.getElementById('ctImgInput').click()">${this._imgSubiendo?"Subiendo…":"+ Agregar imagen"}</button>
       </div>
     `;
     this.pintarDisenoLienzo();
@@ -21208,6 +21261,52 @@ const CT = {
     </div>`;
   },
 
+  imgUrl(path){
+    if(!path) return "";
+    try{ return sb.storage.from(CT_IMG_BUCKET).getPublicUrl(path).data.publicUrl; }catch(e){ return ""; }
+  },
+
+  renderImagenes(c){
+    const imgs = c.config.imagenes||[];
+    if(!imgs.length) return '<div class="ct-empty-mini">Todavía no hay imágenes — subí una con el botón de abajo.</div>';
+    const cols = c.config.layout.columnas;
+    const puedeDistribuir = this._seleccionImg.size>=3;
+    const toolbar = this._seleccionImg.size ? `<div class="ct-lienzo-toolbar" style="margin-bottom:10px;">
+      <span class="ct-lienzo-toolbar-txt">${this._seleccionImg.size} imagen(es) seleccionada(s)</span>
+      ${Array.from({length:cols},(_,i)=>i+1).map(n=>`<button type="button" class="ct-btn sm" onclick="CT.alinearSeleccionImg('col${n}')">Centrar en col. ${n}</button>`).join("")}
+      <button type="button" class="ct-btn sm" onclick="CT.alinearSeleccionImg('pagina')">Centrar en la página</button>
+      <button type="button" class="ct-btn sm" ${puedeDistribuir?"":"disabled"} title="${puedeDistribuir?"":"Elegí al menos 3 imágenes"}" onclick="CT.distribuirSeleccionImg()">Distribuir uniformemente</button>
+      <button type="button" class="ct-btn sm" onclick="CT.limpiarSeleccionImg()">Deseleccionar todo</button>
+    </div>` : "";
+    const filas = imgs.map((im,idx)=>{
+      const marcada = this._seleccionImg.has(im.id);
+      return `<div class="ct-seccion ct-imagen-card" data-iid="${im.id}">
+        <div class="ct-seccion-head">
+          <label style="display:flex;align-items:center;" title="Seleccionar para mover/alinear junto con otras"><input type="checkbox" ${marcada?"checked":""} onchange="CT.toggleSeleccionImg('${im.id}')"></label>
+          <img src="${this.imgUrl(im.path)}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid var(--border);flex-shrink:0;">
+          <div style="font-size:12px;font-weight:700;flex:1;">Imagen ${idx+1}</div>
+          <div class="ct-seccion-tools">
+            <button type="button" class="ct-icon-btn" title="Eliminar imagen" onclick="CT.eliminarImagen('${im.id}')">🗑</button>
+          </div>
+        </div>
+        <div class="ct-grid" style="margin-top:8px;">
+          <div class="ct-field"><label>X (mm desde el borde izq. del contenido)</label><input type="number" step="0.5" value="${im.xMm}" onchange="CT.setImagenCampo('${im.id}','xMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Y (mm desde el inicio del contenido)</label><input type="number" step="0.5" value="${im.yMm}" onchange="CT.setImagenCampo('${im.id}','yMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Ancho (mm)</label><input type="number" min="5" step="0.5" value="${im.widthMm}" onchange="CT.setImagenCampo('${im.id}','widthMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Alto (mm)</label><input type="number" min="5" step="0.5" value="${im.heightMm}" onchange="CT.setImagenCampo('${im.id}','heightMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Centrar horizontalmente en…</label>
+            <select onchange="if(this.value) CT.centrarImagen('${im.id}', this.value); this.selectedIndex=0;">
+              <option value="">— elegir —</option>
+              ${Array.from({length:cols},(_,i)=>i+1).map(n=>`<option value="col${n}">Columna ${n}</option>`).join("")}
+              <option value="pagina">Toda la página</option>
+            </select>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+    return toolbar + filas;
+  },
+
   // ---- mutaciones: campos generales (dot-path dentro de config) ----
   set(path, value, opts={}){
     const c = this.actual(); if(!c) return;
@@ -21307,6 +21406,100 @@ const CT = {
     this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
   },
 
+  // ---- mutaciones: imágenes (posición/tamaño libres, 20/10/2026) ----
+  async onImagenFileChange(ev){
+    const file = (ev.target.files||[])[0];
+    ev.target.value = "";
+    if(!file) return;
+    const c = this.actual(); if(!c){ showToast("Elegí o creá una carta antes de subir una imagen", "warn"); return; }
+    if(!/^image\/(png|jpe?g|webp)$/i.test(file.type)){ showToast("La imagen tiene que ser PNG, JPG o WEBP", "warn"); return; }
+    const MAX_BYTES = 8*1024*1024;
+    if(file.size > MAX_BYTES){ showToast("La imagen pesa más de 8 MB, no se puede subir", "warn"); return; }
+    this._imgSubiendo = true; this.renderEditor();
+    try{
+      const dims = await ctImageDims(file);
+      const widthMm = 50;
+      const heightMm = Math.max(5, Math.round(widthMm * (dims.h/dims.w) * 10)/10);
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${c.id}/${ctId()}-${safeName}`;
+      const { error } = await sb.storage.from(CT_IMG_BUCKET).upload(path, file, { upsert:false, contentType:file.type });
+      if(error) throw error;
+      c.config.imagenes = c.config.imagenes || [];
+      c.config.imagenes.push(ctNuevaImagen(path, widthMm, heightMm));
+      this.guardarDebounced();
+    }catch(e){
+      showToast("No se pudo subir la imagen: "+(e.message||e), "warn");
+    }finally{
+      this._imgSubiendo = false;
+      this.renderEditor(); this.renderImpresionSiActiva();
+    }
+  },
+  async eliminarImagen(iid){
+    const c = this.actual(); if(!c) return;
+    const im = (c.config.imagenes||[]).find(x=>x.id===iid); if(!im) return;
+    if(!confirm("¿Eliminar esta imagen de la carta?")) return;
+    c.config.imagenes = (c.config.imagenes||[]).filter(x=>x.id!==iid);
+    this._seleccionImg.delete(iid);
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+    if(im.path) sb.storage.from(CT_IMG_BUCKET).remove([im.path]).catch(()=>{});
+  },
+  setImagenCampo(iid, campo, val){
+    const c = this.actual(); if(!c) return;
+    const im = (c.config.imagenes||[]).find(x=>x.id===iid); if(!im) return;
+    im[campo] = Math.max(campo==="xMm"||campo==="yMm" ? -9999 : 5, Number(val)||0);
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  toggleSeleccionImg(iid){
+    if(this._seleccionImg.has(iid)) this._seleccionImg.delete(iid); else this._seleccionImg.add(iid);
+    this.renderEditor();
+  },
+  limpiarSeleccionImg(){
+    this._seleccionImg.clear();
+    this.renderEditor();
+  },
+  // Centra horizontalmente UNA imagen respecto a una columna puntual ("col1","col2"…) o a toda la
+  // página ("pagina") — no toca Y ni el tamaño. Reutilizado tanto desde el select de cada fila como
+  // desde la barra de selección múltiple.
+  _centrarImgEnDestino(im, destino, cfg){
+    const L = this.calcularLayout(cfg);
+    let centerPx;
+    if(destino==="pagina"){
+      centerPx = (L.colWidthPx*L.cols + L.gapPx*(L.cols-1)) / 2;
+    } else {
+      const n = Math.max(1, Math.min(L.cols, Number(String(destino).replace("col",""))||1));
+      centerPx = L.trackLeft(n) + L.colWidthPx/2;
+    }
+    im.xMm = Math.round(this.px2mm(centerPx - this.mm2px(im.widthMm)/2) * 10) / 10;
+  },
+  centrarImagen(iid, destino){
+    const c = this.actual(); if(!c) return;
+    const im = (c.config.imagenes||[]).find(x=>x.id===iid); if(!im) return;
+    this._centrarImgEnDestino(im, destino, c.config);
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  alinearSeleccionImg(destino){
+    const c = this.actual(); if(!c) return;
+    const imgs = (c.config.imagenes||[]).filter(im=>this._seleccionImg.has(im.id));
+    if(!imgs.length){ showToast("Tildá al menos una imagen (con su casilla) para centrarla", "warn"); return; }
+    imgs.forEach(im=>this._centrarImgEnDestino(im, destino, c.config));
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  // Distribuye uniformemente las imágenes seleccionadas: deja la de más a la izquierda y la de más
+  // a la derecha donde están, y reparte el resto con el mismo espacio horizontal entre cada una
+  // (pedido explícito de Pancho — "espaciar uniformemente"). Necesita al menos 3 para tener sentido.
+  distribuirSeleccionImg(){
+    const c = this.actual(); if(!c) return;
+    const imgs = (c.config.imagenes||[]).filter(im=>this._seleccionImg.has(im.id)).sort((a,b)=>a.xMm-b.xMm);
+    if(imgs.length<3){ showToast("Elegí al menos 3 imágenes (con sus casillas) para distribuirlas uniformemente", "warn"); return; }
+    const startMm = imgs[0].xMm;
+    const endMm = imgs[imgs.length-1].xMm + imgs[imgs.length-1].widthMm;
+    const totalAnchoMm = imgs.reduce((s,im)=>s+im.widthMm, 0);
+    const gapMm = (endMm - startMm - totalAnchoMm) / (imgs.length-1);
+    let cursor = startMm;
+    imgs.forEach(im=>{ im.xMm = Math.round(cursor*10)/10; cursor += im.widthMm + gapMm; });
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+
   // ---- mutaciones: artículos dentro de una sección ----
   toggleItem(sid, artId, incluir){
     const c = this.actual(); if(!c) return;
@@ -21336,6 +21529,7 @@ const CT = {
 
   // ---- render: Impresión (motor de layout por columnas con medición real en el DOM) ----
   mm2px(mm){ return mm * 96 / 25.4; },
+  px2mm(px){ return px * 25.4 / 96; },
   textStyleCss(tier){ return `font-size:${tier.pt}pt;font-weight:${tier.bold?800:400};${tier.italic?"font-style:italic;":""}${tier.underline?"text-decoration:underline;":""}`; },
   marcoCss(m){ return (m && m.activo) ? `border:${m.grosorMm}mm solid ${m.colorHex};box-sizing:border-box;` : ""; },
 
@@ -21457,9 +21651,14 @@ const CT = {
     const maxManual = Math.max(0, ...secciones.filter(s=>s.posicionManual).map(s=>{
       const m = medidas[s.id]; return tops[s.id] + m.heightPx/(96/25.4) + (m.marcoActivo ? (this.mm2px(3)*2)/(96/25.4) : 0);
     }));
-    const contentHeightMm = Math.max(maxAuto, maxManual);
+    // Las imágenes (20/10/2026) se posicionan libres en mm, así que no necesitan medición de DOM —
+    // alcanza con sumar su propio borde inferior (yMm+heightMm) a lo que ya ocupan las secciones,
+    // para que la hoja impresa reserve suficiente alto si una imagen queda más abajo que todo el texto.
+    const imagenes = cfg.imagenes||[];
+    const maxImg = Math.max(0, ...imagenes.map(im=>(Number(im.yMm)||0) + (Number(im.heightMm)||0)));
+    const contentHeightMm = Math.max(maxAuto, maxManual, maxImg);
 
-    return { pxW, pxH, margenPx, cols, colWidthPx, gapPx, trackLeft, secciones, medidas, tops, contentHeightMm };
+    return { pxW, pxH, margenPx, cols, colWidthPx, gapPx, trackLeft, secciones, medidas, tops, contentHeightMm, imagenes };
   },
 
   pintarGuias(contentWrap, L){
@@ -21495,7 +21694,7 @@ const CT = {
     const host = document.getElementById("ctDisenoLienzoWrap"); if(!host) return;
     const c = this.actual();
     if(!c){ host.innerHTML = '<div class="ct-empty-mini">Elegí o creá una carta para ubicar sus secciones acá.</div>'; return; }
-    if(!(c.config.secciones||[]).length){ host.innerHTML = '<div class="ct-empty-mini">Todavía no hay secciones — agregalas más abajo y van a aparecer acá para poder ubicarlas.</div>'; return; }
+    if(!(c.config.secciones||[]).length && !(c.config.imagenes||[]).length){ host.innerHTML = '<div class="ct-empty-mini">Todavía no hay secciones ni imágenes — agregalas más abajo y van a aparecer acá para poder ubicarlas.</div>'; return; }
     const cfg = c.config;
     const L = this.calcularLayout(cfg);
     const scale = Math.min(1, 640/L.pxW);
@@ -21560,6 +21759,22 @@ const CT = {
       el.style.cssText = `position:absolute; left:${L.trackLeft(m.start)}px; top:${this.mm2px(L.tops[s.id])}px; width:${m.widthPx}px; ${pad}${this.marcoCss(s.marco)}`;
       el.innerHTML = `<label class="ct-lienzo-sec-tag"><input type="checkbox" ${marcada?"checked":""} onmousedown="event.stopPropagation()" onchange="CT.toggleSeleccionSeccion('${s.id}')"> ${this.esc(s.titulo)}${s.posicionManual?"":" · automática"}</label>` + this.renderSeccionImpresa(s, cfg);
       this.wireDragSeccion(el, s, L, ()=>scale, contentWrap);
+      contentWrap.appendChild(el);
+    });
+
+    // Imágenes (20/10/2026): se dibujan libres (no enganchadas a columna) — se arrastran por
+    // cualquier parte de la caja y se redimensionan tirando desde la manija de la esquina.
+    L.imagenes.forEach(im=>{
+      const el = document.createElement("div");
+      const marcada = this._seleccionImg.has(im.id);
+      el.className = "ct-lienzo-img" + (marcada?" selected":"");
+      el.dataset.iid = im.id;
+      el.style.cssText = `position:absolute; left:${this.mm2px(im.xMm)}px; top:${this.mm2px(im.yMm)}px; width:${this.mm2px(im.widthMm)}px; height:${this.mm2px(im.heightMm)}px;`;
+      el.innerHTML = `<label class="ct-lienzo-sec-tag ct-lienzo-img-tag"><input type="checkbox" ${marcada?"checked":""} onmousedown="event.stopPropagation()" onchange="CT.toggleSeleccionImg('${im.id}')"> 🖼 imagen</label>
+        <img src="${this.imgUrl(im.path)}" alt="" style="width:100%;height:100%;object-fit:contain;pointer-events:none;">
+        <div class="ct-lienzo-img-resize" title="Arrastrar para cambiar el tamaño"></div>`;
+      this.wireDragImagen(el, im, ()=>scale, contentWrap);
+      this.wireResizeImagen(el.querySelector(".ct-lienzo-img-resize"), im, el, ()=>scale);
       contentWrap.appendChild(el);
     });
 
@@ -21667,6 +21882,93 @@ const CT = {
     });
   },
 
+  // Arrastre LIBRE de una imagen (sin enganche a columna) — o, si forma parte de la selección
+  // múltiple de imágenes actual, de todo el grupo tildado en conjunto (igual idea que con secciones).
+  wireDragImagen(el, im, getScale, contentWrap){
+    let dragging = false, startX = 0, startY = 0, grupo = [];
+    const onMove = (ev)=>{
+      if(!dragging) return;
+      const scale = getScale();
+      const dx = (ev.clientX - startX)/scale, dy = (ev.clientY - startY)/scale;
+      grupo.forEach(g=>{ g.el.style.left = (g.origLeft+dx)+"px"; g.el.style.top = (g.origTop+dy)+"px"; });
+    };
+    const onUp = (ev)=>{
+      if(!dragging) return;
+      dragging = false;
+      grupo.forEach(g=>g.el.classList.remove("dragging"));
+      document.body.style.userSelect = "";
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      const scale = getScale();
+      const dx = (ev.clientX - startX)/scale, dy = (ev.clientY - startY)/scale;
+      const c = this.actual(); if(!c) return;
+      grupo.forEach(g=>{
+        const target = (c.config.imagenes||[]).find(x=>x.id===g.id); if(!target) return;
+        target.xMm = Math.round(this.px2mm(Math.max(0, g.origLeft+dx)) * 10) / 10;
+        target.yMm = Math.round(this.px2mm(Math.max(0, g.origTop+dy)) * 10) / 10;
+      });
+      this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+    };
+    el.addEventListener("mousedown", (ev)=>{
+      if(ev.button!==0) return;
+      if(ev.target.closest(".ct-lienzo-img-resize")) return; // esa manija tiene su propio arrastre
+      ev.preventDefault();
+      dragging = true;
+      document.body.style.userSelect = "none";
+      startX = ev.clientX; startY = ev.clientY;
+      const idsGrupo = (this._seleccionImg.has(im.id) && this._seleccionImg.size>1) ? Array.from(this._seleccionImg) : [im.id];
+      grupo = idsGrupo.map(id=>{
+        const elG = id===im.id ? el : contentWrap.querySelector('[data-iid="'+id+'"]');
+        if(!elG) return null;
+        elG.classList.add("dragging");
+        return { id, el:elG, origLeft:parseFloat(elG.style.left)||0, origTop:parseFloat(elG.style.top)||0 };
+      }).filter(Boolean);
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  },
+
+  // Redimensiona una imagen tirando desde su manija inferior-derecha — ancho y alto libres (sin
+  // mantener proporción fija; si se necesita, el usuario puede ajustar luego los mm a mano).
+  wireResizeImagen(handleEl, im, el, getScale){
+    if(!handleEl) return;
+    let resizing = false, startX = 0, startY = 0, startW = 0, startH = 0;
+    const onMove = (ev)=>{
+      if(!resizing) return;
+      const scale = getScale();
+      const dx = (ev.clientX - startX)/scale, dy = (ev.clientY - startY)/scale;
+      const w = Math.max(this.mm2px(5), startW+dx), h = Math.max(this.mm2px(5), startH+dy);
+      el.style.width = w+"px"; el.style.height = h+"px";
+    };
+    const onUp = (ev)=>{
+      if(!resizing) return;
+      resizing = false;
+      el.classList.remove("resizing");
+      document.body.style.userSelect = "";
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      const scale = getScale();
+      const dx = (ev.clientX - startX)/scale, dy = (ev.clientY - startY)/scale;
+      const c = this.actual(); if(!c) return;
+      const target = (c.config.imagenes||[]).find(x=>x.id===im.id); if(!target) return;
+      target.widthMm = Math.max(5, Math.round(this.px2mm(startW+dx) * 10) / 10);
+      target.heightMm = Math.max(5, Math.round(this.px2mm(startH+dy) * 10) / 10);
+      this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+    };
+    handleEl.addEventListener("mousedown", (ev)=>{
+      if(ev.button!==0) return;
+      ev.preventDefault(); ev.stopPropagation();
+      resizing = true;
+      document.body.style.userSelect = "none";
+      el.classList.add("resizing");
+      startX = ev.clientX; startY = ev.clientY;
+      startW = parseFloat(el.style.width)||el.offsetWidth;
+      startH = parseFloat(el.style.height)||el.offsetHeight;
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  },
+
   renderHoja(c){
     const cfg = c.config;
     const L = this.calcularLayout(cfg);
@@ -21704,6 +22006,14 @@ const CT = {
       const pad = m.marcoActivo ? `padding:${this.mm2px(3)}px;` : "";
       el.style.cssText = `position:absolute; left:${L.trackLeft(m.start)}px; top:${this.mm2px(L.tops[s.id])}px; width:${m.widthPx}px; ${pad}${this.marcoCss(s.marco)}`;
       el.innerHTML = this.renderSeccionImpresa(s, cfg);
+      contentWrap.appendChild(el);
+    });
+
+    L.imagenes.forEach(im=>{
+      const el = document.createElement("img");
+      el.src = this.imgUrl(im.path);
+      el.alt = "";
+      el.style.cssText = `position:absolute; left:${this.mm2px(im.xMm)}px; top:${this.mm2px(im.yMm)}px; width:${this.mm2px(im.widthMm)}px; height:${this.mm2px(im.heightMm)}px; object-fit:contain;`;
       contentWrap.appendChild(el);
     });
 
