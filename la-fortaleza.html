@@ -2658,6 +2658,22 @@
   .ct-card .ctc-nombre{font-weight:800;font-size:13.5px;color:var(--text-1);margin-bottom:3px;}
   .ct-card .ctc-meta{font-size:11.5px;color:var(--text-3);}
   .ct-loading, .ct-empty{padding:40px 24px;text-align:center;color:var(--text-3);font-size:13px;}
+  /* Menú lateral de secciones/imágenes ("capas", 21/10/2026) — para no tener que scrollear por todo
+     el formulario largo de abajo cada vez que se busca una sección puntual; ver CT.renderCapas(). */
+  .ct-layers{width:198px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:14px 10px 24px;background:#fbfbfd;}
+  .ct-layers-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .ct-layers-head h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3);margin:0;}
+  .ct-layers-tools{display:flex;gap:4px;}
+  .ct-layers-tools button{border:none;background:none;font-size:10.5px;font-weight:700;color:var(--blue);cursor:pointer;padding:2px 4px;border-radius:5px;}
+  .ct-layers-tools button:hover{background:#EEF1FC;}
+  .ct-layers-list{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+  .ct-layer-row{display:flex;align-items:center;gap:4px;}
+  .ct-layer-row.oculta{opacity:.5;}
+  .ct-layer-eye{border:none;background:none;cursor:pointer;font-size:12px;padding:3px 4px;border-radius:5px;flex-shrink:0;line-height:1;}
+  .ct-layer-eye:hover{background:#EEF1FC;}
+  .ct-layer-nombre{flex:1;min-width:0;text-align:left;border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-1);padding:5px 6px;border-radius:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ct-layer-nombre:hover{background:#fff;box-shadow:0 0 0 1px var(--border);}
+  .ct-layers .ct-empty-mini{padding:4px 2px;}
   .ct-editor{flex:1;min-width:0;overflow-y:auto;padding:22px 30px 60px;}
   .ct-ehead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;}
   .ct-ehead h1{font-size:21px;margin:0 0 4px;font-weight:800;color:var(--text-1);}
@@ -2774,6 +2790,12 @@
   .ct-lienzo-img-resize{position:absolute;right:-5px;bottom:-5px;width:11px;height:11px;border-radius:3px;background:#1F9D6B;border:1.5px solid #fff;cursor:nwse-resize;}
   .ct-imagen-card .ct-seccion-head{gap:8px;}
   .ct-imagen-card .ct-seccion-head input[type=checkbox]{width:14px;height:14px;cursor:pointer;}
+  /* Límite real de la hoja en el lienzo (21/10/2026) — se mueve solo al cambiar orientación/formato */
+  .ct-lienzo-pagefin{border-top:2px dashed #B33A3A;pointer-events:none;z-index:1;}
+  .ct-lienzo-pagefin-label{position:absolute;right:0;top:3px;font-size:9px;font-weight:800;color:#B33A3A;background:#fff;padding:1px 5px;border-radius:4px;font-family:'Inter',sans-serif;white-space:nowrap;}
+  .ct-lienzo-fuera{background:repeating-linear-gradient(135deg, rgba(179,58,58,.05), rgba(179,58,58,.05) 6px, rgba(179,58,58,.09) 6px, rgba(179,58,58,.09) 12px);pointer-events:none;z-index:0;}
+  .ct-seccion-oculta{border-style:dashed;background:#f4f4f8;padding:10px 16px;margin-bottom:6px;}
+  .ct-seccion-oculta .ct-seccion-head{margin-bottom:0;}
   @media print{
     body > *:not(#ctPrintRoot){display:none !important;}
     #ctPrintRoot{display:block !important;position:fixed;inset:0;margin:0;padding:0;background:#fff;}
@@ -4345,6 +4367,7 @@
                 </div>
                 <div class="ct-list-items" id="ctListaItems"><div class="ct-loading">Cargando…</div></div>
               </aside>
+              <aside class="ct-layers" id="ctLayersWrap"></aside>
               <main class="ct-editor" id="ctEditor">
                 <div class="ct-empty">Elegí una carta de la lista o creá una nueva para empezar a diseñarla.</div>
               </main>
@@ -20839,6 +20862,11 @@ const CT = {
   // casilla en el lienzo, para moverlas juntas, centrarlas o distribuirlas entre sí.
   _seleccionImg: new Set(),
   _imgSubiendo: false,
+  // Menú lateral de "Secciones" (21/10/2026, pedido de Pancho): ids de secciones/imágenes cuya
+  // tarjeta larga de edición está colapsada/oculta en los bloques "Secciones y artículos" e
+  // "Imágenes" — para no tener que scrollear por todo cada vez que se busca una puntual. Es estado
+  // de UI nomás (no se guarda en la carta); ver CT.renderCapas().
+  _ocultas: new Set(),
 
   async onEnterModule(){
     if(!this._loaded){
@@ -20889,7 +20917,7 @@ const CT = {
     this.renderLista(); this.renderEditor(); this.renderImpresionSiActiva();
   },
 
-  seleccionar(id){ this.activeId = id; this._seleccion.clear(); this._seleccionImg.clear(); this.renderLista(); this.renderEditor(); },
+  seleccionar(id){ this.activeId = id; this._seleccion.clear(); this._seleccionImg.clear(); this._ocultas.clear(); this.renderLista(); this.renderEditor(); },
 
   guardarDebounced(){
     const id = this.activeId; if(!id) return;
@@ -20996,7 +21024,7 @@ const CT = {
     // volvía de golpe arriba de todo y había que volver a bajar manualmente cada vez.
     const scrollTop = box.scrollTop;
     const c = this.actual();
-    if(!c){ box.innerHTML = '<div class="ct-empty">Elegí una carta de la lista o creá una nueva para empezar a diseñarla.</div>'; box.scrollTop = scrollTop; return; }
+    if(!c){ box.innerHTML = '<div class="ct-empty">Elegí una carta de la lista o creá una nueva para empezar a diseñarla.</div>'; box.scrollTop = scrollTop; this.renderCapas(); return; }
     const cfg = c.config;
     const presetOpts = Object.keys(CT_FORMATOS).concat(["Custom"]).map(p=>`<option value="${p}" ${cfg.formato.preset===p?'selected':''}>${p==="Custom"?"Personalizado":p}</option>`).join("");
     const marcoGen = cfg.layout.marco;
@@ -21084,6 +21112,7 @@ const CT = {
       </div>
     `;
     this.pintarDisenoLienzo();
+    this.renderCapas();
     box.scrollTop = scrollTop;
   },
 
@@ -21106,7 +21135,89 @@ const CT = {
     const secciones = c.config.secciones||[];
     if(!secciones.length) return '<div class="ct-empty-mini">Todavía no agregaste ninguna sección.</div>';
     const grupos = this.catalogo();
-    return secciones.map((s,idx)=>this.renderSeccion(c, s, idx, secciones.length, grupos)).join("");
+    return secciones.map((s,idx)=>{
+      if(this._ocultas.has(s.id)) return this.renderTarjetaOculta(s.id, s.titulo||"Sección");
+      return this.renderSeccion(c, s, idx, secciones.length, grupos);
+    }).join("");
+  },
+
+  // Tarjeta colapsada para una sección/imagen oculta desde el menú lateral de "Secciones" — se deja
+  // una fila angosta en su lugar (no desaparece del todo) para que no parezca que se borró, con un
+  // botón directo para volver a mostrarla.
+  renderTarjetaOculta(id, nombre){
+    return `<div class="ct-seccion ct-seccion-oculta" id="ct-card-${id}">
+      <div class="ct-seccion-head">
+        <div style="flex:1;font-size:13px;font-weight:700;color:var(--text-3);">${this.esc(nombre)} <span style="font-weight:400;">— oculta</span></div>
+        <button type="button" class="ct-btn sm" onclick="CT.toggleOcultar('${id}')">Mostrar</button>
+      </div>
+    </div>`;
+  },
+
+  // ---- menú lateral de secciones/imágenes ("capas", 21/10/2026) ----
+  renderCapas(){
+    const host = document.getElementById("ctLayersWrap"); if(!host) return;
+    const c = this.actual();
+    if(!c){ host.innerHTML = ""; return; }
+    const secciones = c.config.secciones||[];
+    const imagenes = c.config.imagenes||[];
+    const idsValidos = new Set([...secciones.map(s=>s.id), ...imagenes.map(im=>im.id)]);
+    Array.from(this._ocultas).forEach(id=>{ if(!idsValidos.has(id)) this._ocultas.delete(id); });
+    if(!secciones.length && !imagenes.length){
+      host.innerHTML = '<div class="ct-layers-head"><h4>Secciones</h4></div><div class="ct-empty-mini">Todavía no hay nada — agregá una sección o imagen más abajo.</div>';
+      return;
+    }
+    const filaSec = (s,idx)=>{
+      const oculta = this._ocultas.has(s.id);
+      return `<div class="ct-layer-row ${oculta?'oculta':''}">
+        <button type="button" class="ct-layer-eye" title="${oculta?'Mostrar':'Ocultar'}" onclick="CT.toggleOcultar('${s.id}')">${oculta?'🙈':'👁'}</button>
+        <button type="button" class="ct-layer-nombre" title="Ver solo esta — toca para aislarla y saltar a ella" onclick="CT.aislarElemento('${s.id}')">${idx+1}. ${this.esc(s.titulo||"(sin título)")}</button>
+      </div>`;
+    };
+    const filaImg = (im,idx)=>{
+      const oculta = this._ocultas.has(im.id);
+      return `<div class="ct-layer-row ${oculta?'oculta':''}">
+        <button type="button" class="ct-layer-eye" title="${oculta?'Mostrar':'Ocultar'}" onclick="CT.toggleOcultar('${im.id}')">${oculta?'🙈':'👁'}</button>
+        <button type="button" class="ct-layer-nombre" title="Ver sola esta imagen — toca para aislarla y saltar a ella" onclick="CT.aislarElemento('${im.id}')">🖼 Imagen ${idx+1}</button>
+      </div>`;
+    };
+    host.innerHTML = `
+      <div class="ct-layers-head">
+        <h4>Secciones</h4>
+        <div class="ct-layers-tools">
+          <button type="button" title="Mostrar todas" onclick="CT.mostrarTodasCapas()">Todas</button>
+          <button type="button" title="Ocultar todas" onclick="CT.ocultarTodasCapas()">Ninguna</button>
+        </div>
+      </div>
+      <div class="ct-layers-list">${secciones.length?secciones.map(filaSec).join(""):'<div class="ct-empty-mini">Sin secciones</div>'}</div>
+      ${imagenes.length?`<div class="ct-layers-head"><h4>Imágenes</h4></div><div class="ct-layers-list">${imagenes.map(filaImg).join("")}</div>`:""}
+    `;
+  },
+  toggleOcultar(id){
+    if(this._ocultas.has(id)) this._ocultas.delete(id); else this._ocultas.add(id);
+    this.renderEditor();
+  },
+  // "Aislar": oculta todas las demás secciones/imágenes y deja solo esta visible, además de
+  // saltar directo a su tarjeta — para encontrar y trabajar sobre una puntual sin scrollear por
+  // todas las demás (pedido de Pancho, 21/10/2026).
+  aislarElemento(id){
+    const c = this.actual(); if(!c) return;
+    const todos = [...(c.config.secciones||[]).map(s=>s.id), ...(c.config.imagenes||[]).map(im=>im.id)];
+    this._ocultas = new Set(todos.filter(x=>x!==id));
+    this.renderEditor();
+    requestAnimationFrame(()=>{
+      const el = document.getElementById("ct-card-"+id);
+      if(el) el.scrollIntoView({ block:"start", behavior:"smooth" });
+    });
+  },
+  mostrarTodasCapas(){
+    this._ocultas.clear();
+    this.renderEditor();
+  },
+  ocultarTodasCapas(){
+    const c = this.actual(); if(!c) return;
+    const todos = [...(c.config.secciones||[]).map(s=>s.id), ...(c.config.imagenes||[]).map(im=>im.id)];
+    this._ocultas = new Set(todos);
+    this.renderEditor();
   },
 
   filaCatalogoRow(s, a, itemsSel){
@@ -21187,7 +21298,7 @@ const CT = {
     const alin = s.tituloAlin || {modo:"seccion",align:"izquierda",columna:1};
     const colTituloOpts = Array.from({length:itemCols},(_,i)=>i+1).map(n=>`<option value="${n}" ${(alin.columna||1)===n?"selected":""}>${n}</option>`).join("");
 
-    return `<div class="ct-seccion" data-sid="${s.id}">
+    return `<div class="ct-seccion" data-sid="${s.id}" id="ct-card-${s.id}">
       <div class="ct-seccion-head">
         <div style="display:flex;gap:2px;">
           <button type="button" class="ct-icon-btn" title="Subir sección" ${idx===0?"disabled":""} onclick="CT.moverSeccion('${s.id}',-1)">↑</button>
@@ -21274,13 +21385,15 @@ const CT = {
     const toolbar = this._seleccionImg.size ? `<div class="ct-lienzo-toolbar" style="margin-bottom:10px;">
       <span class="ct-lienzo-toolbar-txt">${this._seleccionImg.size} imagen(es) seleccionada(s)</span>
       ${Array.from({length:cols},(_,i)=>i+1).map(n=>`<button type="button" class="ct-btn sm" onclick="CT.alinearSeleccionImg('col${n}')">Centrar en col. ${n}</button>`).join("")}
-      <button type="button" class="ct-btn sm" onclick="CT.alinearSeleccionImg('pagina')">Centrar en la página</button>
+      <button type="button" class="ct-btn sm" onclick="CT.alinearSeleccionImg('pagina')">Centrar horizontalmente en la página</button>
+      <button type="button" class="ct-btn sm" onclick="CT.centrarSeleccionImgVertical()">Centrar verticalmente en la página</button>
       <button type="button" class="ct-btn sm" ${puedeDistribuir?"":"disabled"} title="${puedeDistribuir?"":"Elegí al menos 3 imágenes"}" onclick="CT.distribuirSeleccionImg()">Distribuir uniformemente</button>
       <button type="button" class="ct-btn sm" onclick="CT.limpiarSeleccionImg()">Deseleccionar todo</button>
     </div>` : "";
     const filas = imgs.map((im,idx)=>{
+      if(this._ocultas.has(im.id)) return this.renderTarjetaOculta(im.id, "Imagen "+(idx+1));
       const marcada = this._seleccionImg.has(im.id);
-      return `<div class="ct-seccion ct-imagen-card" data-iid="${im.id}">
+      return `<div class="ct-seccion ct-imagen-card" data-iid="${im.id}" id="ct-card-${im.id}">
         <div class="ct-seccion-head">
           <label style="display:flex;align-items:center;" title="Seleccionar para mover/alinear junto con otras"><input type="checkbox" ${marcada?"checked":""} onchange="CT.toggleSeleccionImg('${im.id}')"></label>
           <img src="${this.imgUrl(im.path)}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid var(--border);flex-shrink:0;">
@@ -21348,6 +21461,7 @@ const CT = {
     if(!confirm("¿Eliminar esta sección y los artículos que tenía elegidos?")) return;
     c.config.secciones = (c.config.secciones||[]).filter(s=>s.id!==sid);
     this._seleccion.delete(sid);
+    this._ocultas.delete(sid);
     this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
   },
   moverSeccion(sid, dir){
@@ -21440,6 +21554,7 @@ const CT = {
     if(!confirm("¿Eliminar esta imagen de la carta?")) return;
     c.config.imagenes = (c.config.imagenes||[]).filter(x=>x.id!==iid);
     this._seleccionImg.delete(iid);
+    this._ocultas.delete(iid);
     this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
     if(im.path) sb.storage.from(CT_IMG_BUCKET).remove([im.path]).catch(()=>{});
   },
@@ -21497,6 +21612,21 @@ const CT = {
     const gapMm = (endMm - startMm - totalAnchoMm) / (imgs.length-1);
     let cursor = startMm;
     imgs.forEach(im=>{ im.xMm = Math.round(cursor*10)/10; cursor += im.widthMm + gapMm; });
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  // Centra verticalmente el grupo de imágenes tildadas respecto de TODA LA HOJA — mismo criterio que
+  // CT.centrarSeleccionPagina('vertical') para secciones (21/10/2026), para completar el par
+  // horizontal/vertical también acá (antes solo existía el centrado horizontal de imágenes).
+  centrarSeleccionImgVertical(){
+    const c = this.actual(); if(!c) return;
+    const imgs = (c.config.imagenes||[]).filter(im=>this._seleccionImg.has(im.id));
+    if(!imgs.length){ showToast("Tildá al menos una imagen (con su casilla) para centrarla", "warn"); return; }
+    const L = this.calcularLayout(c.config);
+    const topMm = Math.min(...imgs.map(im=>im.yMm));
+    const bottomMm = Math.max(...imgs.map(im=>im.yMm + im.heightMm));
+    const idealTopMm = Math.max(0, (L.availableContentHeightMm - (bottomMm-topMm)) / 2);
+    const shiftMm = idealTopMm - topMm;
+    imgs.forEach(im=>{ im.yMm = Math.round((im.yMm + shiftMm) * 10) / 10; });
     this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
   },
 
@@ -21610,6 +21740,20 @@ const CT = {
     const colWidthPx = (totalWidthPx - gapPx*(cols-1)) / cols;
     const trackLeft = (col)=> (col-1)*(colWidthPx+gapPx);
 
+    // Alto real del encabezado (título/subtítulo), medido en el DOM igual que se mide cada sección
+    // más abajo — hace falta para saber cuánto espacio vertical le queda disponible al CONTENIDO
+    // dentro de toda la hoja (availableContentHeightMm), y así poder centrar un grupo de secciones
+    // o imágenes respecto de la página completa, no solo entre sí (CT.centrarSeleccionPagina /
+    // CT.centrarSeleccionImgVertical, 21/10/2026).
+    const probeHead = document.createElement("div");
+    probeHead.style.cssText = `position:fixed; visibility:hidden; left:-9999px; top:0; width:${totalWidthPx}px; font-family:'Roboto',sans-serif;`;
+    probeHead.innerHTML = this.renderEncabezado(cfg);
+    document.body.appendChild(probeHead);
+    const headerHeightPx = probeHead.offsetHeight;
+    document.body.removeChild(probeHead);
+    const espacioTituloMm = cfg.layout.espacioTituloMm!=null ? cfg.layout.espacioTituloMm : 8;
+    const availableContentHeightMm = Math.max(0, h - cfg.layout.margenMm*2 - this.px2mm(headerHeightPx) - espacioTituloMm);
+
     const secciones = cfg.secciones||[];
     const medidas = {};
     secciones.forEach(s=>{
@@ -21658,7 +21802,7 @@ const CT = {
     const maxImg = Math.max(0, ...imagenes.map(im=>(Number(im.yMm)||0) + (Number(im.heightMm)||0)));
     const contentHeightMm = Math.max(maxAuto, maxManual, maxImg);
 
-    return { pxW, pxH, margenPx, cols, colWidthPx, gapPx, trackLeft, secciones, medidas, tops, contentHeightMm, imagenes };
+    return { pxW, pxH, margenPx, cols, colWidthPx, gapPx, trackLeft, secciones, medidas, tops, contentHeightMm, imagenes, totalWidthPx, availableContentHeightMm };
   },
 
   pintarGuias(contentWrap, L){
@@ -21719,6 +21863,9 @@ const CT = {
         <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('superior')">Alinear arriba</button>
         <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('centro')">Alinear al centro</button>
         <button type="button" class="ct-btn sm" ${multi?"":"disabled"} onclick="CT.alinearSeleccion('inferior')">Alinear abajo</button>
+        <span style="width:1px;height:18px;background:#D7DCF5;"></span>
+        <button type="button" class="ct-btn sm" onclick="CT.centrarSeleccionPagina('horizontal')">Centrar horizontalmente en la hoja</button>
+        <button type="button" class="ct-btn sm" onclick="CT.centrarSeleccionPagina('vertical')">Centrar verticalmente en la hoja</button>
         <button type="button" class="ct-btn sm" onclick="CT.limpiarSeleccion()">Deseleccionar todo</button>`;
       host.appendChild(toolbar);
     }
@@ -21748,6 +21895,26 @@ const CT = {
       guia.innerHTML = `<span class="ct-lienzo-col-num">Columna ${t}</span>`;
       contentWrap.appendChild(guia);
     }
+
+    // Límite real de la hoja (21/10/2026, corrige que el lienzo no se "acomodaba" al cambiar la
+    // orientación): antes el alto visible del lienzo dependía únicamente de cuánto contenido había
+    // cargado, nunca del alto de página configurado (cfg.formato.altoMm) — por eso al pasar a
+    // horizontal (hoja más baja) no se notaba ningún cambio acá, aunque el ancho de columnas sí se
+    // hubiera achicado. Ahora se dibuja una línea en la posición real donde termina la hoja
+    // (L.availableContentHeightMm, ya calculado en calcularLayout) y se sombrea todo lo que queda
+    // por debajo como "fuera de la hoja", para que se note de inmediato con cualquier cambio de
+    // orientación/formato y se pueda reacomodar el contenido para que entre.
+    const limiteMm = L.availableContentHeightMm;
+    const limiteLinea = document.createElement("div");
+    limiteLinea.className = "ct-lienzo-pagefin";
+    limiteLinea.style.cssText = `position:absolute; left:0; right:0; top:${this.mm2px(limiteMm)}px;`;
+    const {w:hojaW, h:hojaH} = this.dims(cfg);
+    limiteLinea.innerHTML = `<span class="ct-lienzo-pagefin-label">Fin de la hoja (${Math.round(hojaW)}×${Math.round(hojaH)}mm, ${cfg.formato.orientacion==='horizontal'?'horizontal':'vertical'})</span>`;
+    contentWrap.appendChild(limiteLinea);
+    const fueraDeHoja = document.createElement("div");
+    fueraDeHoja.className = "ct-lienzo-fuera";
+    fueraDeHoja.style.cssText = `position:absolute; left:0; right:0; top:${this.mm2px(limiteMm)}px; bottom:0;`;
+    contentWrap.appendChild(fueraDeHoja);
 
     L.secciones.forEach(s=>{
       const m = L.medidas[s.id];
@@ -21779,7 +21946,10 @@ const CT = {
     });
 
     this.pintarGuias(contentWrap, L);
-    contentWrap.style.height = this.mm2px(L.contentHeightMm + bufferMm) + "px";
+    // El lienzo siempre muestra un poco más allá de la línea de "fin de hoja" (aunque el contenido
+    // actual no llegue), para que el límite real de la página quede visible de entrada apenas se
+    // cambia la orientación o el formato — no solo cuando ya hay contenido desbordando.
+    contentWrap.style.height = this.mm2px(Math.max(L.contentHeightMm + bufferMm, L.availableContentHeightMm + 20)) + "px";
 
     // El alto del wrap (visible) se toma recién acá, ya con todo dibujado — así no hace falta
     // adivinar de antemano cuánto mide el encabezado real.
@@ -21817,6 +21987,52 @@ const CT = {
       s.alinBorde = borde;
       s.yMm = Math.round(refY*10)/10;
     });
+    this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
+  },
+  // Centra el grupo tildado respecto de TODA LA HOJA (no entre sí, a diferencia de alinearSeleccion
+  // arriba) — pedido de Pancho (21/10/2026): tildar 1 o más secciones y poder centrarlas horizontal
+  // o verticalmente respecto de la carta entera. Funciona incluso con una sola tildada.
+  centrarSeleccionPagina(eje){
+    const c = this.actual(); if(!c) return;
+    const ids = Array.from(this._seleccion);
+    const secciones = ids.map(id=>c.config.secciones.find(s=>s.id===id)).filter(Boolean);
+    if(!secciones.length){ showToast("Tildá al menos una sección para centrarla", "warn"); return; }
+    const L = this.calcularLayout(c.config);
+    const alturaMm = (s)=> { const m=L.medidas[s.id]; return m ? (m.heightPx/(96/25.4) + (m.marcoActivo ? (this.mm2px(3)*2)/(96/25.4) : 0)) : 0; };
+    if(eje==="horizontal"){
+      // Las secciones no tienen X libre — viven en columnas (columnaInicio/columnaSpan) — así que
+      // "centrar horizontalmente" es: calcular dónde caería el grupo (de la más a la izquierda a la
+      // más a la derecha de las tildadas) si quedara centrado en el ancho total, y después engancharla
+      // a la columna de inicio más cercana a eso (mismo criterio de "snap" que ya usa el arrastre).
+      const minStart = Math.min(...secciones.map(s=>L.medidas[s.id].start));
+      const maxEndCol = Math.max(...secciones.map(s=>L.medidas[s.id].start + L.medidas[s.id].span - 1));
+      const groupLeftPx = L.trackLeft(minStart);
+      const groupWidthPx = (L.trackLeft(maxEndCol) + L.colWidthPx) - groupLeftPx;
+      const shiftPx = (L.totalWidthPx - groupWidthPx)/2 - groupLeftPx;
+      secciones.forEach(s=>{
+        const m = L.medidas[s.id];
+        const newLeftPx = L.trackLeft(m.start) + shiftPx;
+        let bestStart = m.start, bestDist = Infinity;
+        for(let start=1; start+m.span-1<=L.cols; start++){
+          const dist = Math.abs(L.trackLeft(start) - newLeftPx);
+          if(dist < bestDist){ bestDist = dist; bestStart = start; }
+        }
+        s.columnaInicio = bestStart;
+        if(s.tituloAlin && s.tituloAlin.modo==="carta" && !(s.columnaInicio===1 && s.columnaSpan===c.config.layout.columnas)) s.tituloAlin.modo = "seccion";
+      });
+    } else {
+      // Vertical: yMm ya es "la posición del borde que esa sección eligió" (ver nota de v5), así que
+      // sumarle el mismo desplazamiento a TODAS las tildadas mantiene sus posiciones relativas sin
+      // tener que mirar el alinBorde de cada una por separado.
+      const topMm = Math.min(...secciones.map(s=>L.tops[s.id]));
+      const bottomMm = Math.max(...secciones.map(s=>L.tops[s.id] + alturaMm(s)));
+      const idealTopMm = Math.max(0, (L.availableContentHeightMm - (bottomMm-topMm)) / 2);
+      const shiftMm = idealTopMm - topMm;
+      secciones.forEach(s=>{
+        s.posicionManual = true;
+        s.yMm = Math.round(((Number(s.yMm)||0) + shiftMm) * 10) / 10;
+      });
+    }
     this.guardarDebounced(); this.renderEditor(); this.renderImpresionSiActiva();
   },
 
