@@ -2657,6 +2657,9 @@
   .ct-card.active{background:#fff;border-color:var(--blue);box-shadow:var(--shadow-sm);}
   .ct-card .ctc-nombre{font-weight:800;font-size:13.5px;color:var(--text-1);margin-bottom:3px;}
   .ct-card .ctc-meta{font-size:11.5px;color:var(--text-3);}
+  /* Reordenar cartas en la lista (27/10/2026, pedido de Pancho) */
+  .ct-card .ctc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}
+  .ct-card .ctc-mover{display:flex;gap:2px;flex-shrink:0;}
   .ct-loading, .ct-empty{padding:40px 24px;text-align:center;color:var(--text-3);font-size:13px;}
   /* Menú lateral de secciones/imágenes ("capas", 21/10/2026) — para no tener que scrollear por todo
      el formulario largo de abajo cada vez que se busca una sección puntual; ver CT.renderCapas(). */
@@ -20776,7 +20779,7 @@ function ctNuevaConfig(){
       titulo: ctTier(30,true), subtitulo: ctTier(15,true), descripcion: ctTier(10,false),
       articulo: ctTier(12.5,false), precio: ctTier(12.5,false), subindice: ctTier(9.5,false),
     },
-    layout:{ columnas:2, margenMm:14, espacioMm:9, espacioTituloMm:8, alinPrecio:"derecha", marco: ctNuevoMarco() },
+    layout:{ columnas:2, margenMm:14, espacioMm:9, espacioTituloMm:8, espacioArticulosMm:1.5, alinPrecio:"derecha", marco: ctNuevoMarco() },
     secciones:[], imagenes:[]
   };
 }
@@ -20811,6 +20814,10 @@ function ctMigrarConfig(cfgIn){
     // Distancia entre el título/subtítulo (de la carta, o de cada sección) y el cuerpo que sigue
     // (agregado 20/10/2026, pedido de Pancho). Antes estaba fijo en 8mm sin forma de tocarlo.
     espacioTituloMm: lay.espacioTituloMm!=null ? lay.espacioTituloMm : 8,
+    // Espacio entre artículos dentro de una sección (27/10/2026, pedido de Pancho). Antes era fijo
+    // en .35em (ver nota en renderItem); 1.5mm es lo más parecido al resultado visual que daba ese
+    // .35em con el tamaño de letra por defecto, para que ninguna carta ya armada cambie de aspecto.
+    espacioArticulosMm: lay.espacioArticulosMm!=null ? lay.espacioArticulosMm : 1.5,
     alinPrecio: lay.alinPrecio || "derecha",
     marco: lay.marco && typeof lay.marco==="object" ? { activo:!!lay.marco.activo, colorHex:lay.marco.colorHex||"#020B2D", grosorMm:lay.marco.grosorMm!=null?lay.marco.grosorMm:0.6 } : ctNuevoMarco(),
   };
@@ -20891,6 +20898,12 @@ const CT = {
   // "Imágenes" — para no tener que scrollear por todo cada vez que se busca una puntual. Es estado
   // de UI nomás (no se guarda en la carta); ver CT.renderCapas().
   _ocultas: new Set(),
+  // Copiar/pegar secciones y cuadros de texto entre cartas (27/10/2026, pedido de Pancho: "poder
+  // copiar secciones enteras para pegarlas en otras cartas"). Guarda un clon de la última sección
+  // copiada — no está atado a ninguna carta en particular, así que copiar en una carta y después
+  // cambiar de carta y pegar es justamente el caso de uso. Es estado de UI (se pierde al recargar
+  // la página), no se persiste en ninguna carta.
+  _clipboardSeccion: null,
 
   async onEnterModule(){
     if(!this._loaded){
@@ -21008,15 +21021,37 @@ const CT = {
     // un contenedor resetea su scrollTop) y Pancho tenía que volver a bajar manualmente cada vez.
     const scrollTop = box.scrollTop;
     if(!this.cartas.length){ box.innerHTML = '<div class="ct-empty-mini">Todavía no hay ninguna carta creada.</div>'; return; }
-    box.innerHTML = this.cartas.map(c=>{
+    box.innerHTML = this.cartas.map((c,idx)=>{
       const nArts = (c.config.secciones||[]).reduce((n,s)=>n+(s.items||[]).length,0);
       const nSecs = (c.config.secciones||[]).length;
       return `<div class="ct-card ${c.id===this.activeId?'active':''}" onclick="CT.seleccionar('${c.id}')">
-        <div class="ctc-nombre">${this.esc(c.nombre)}</div>
+        <div class="ctc-top">
+          <div class="ctc-nombre">${this.esc(c.nombre)}</div>
+          <div class="ctc-mover">
+            <button type="button" class="ct-icon-btn" title="Subir" ${idx===0?"disabled":""} onclick="event.stopPropagation(); CT.moverCarta('${c.id}',-1)">↑</button>
+            <button type="button" class="ct-icon-btn" title="Bajar" ${idx===this.cartas.length-1?"disabled":""} onclick="event.stopPropagation(); CT.moverCarta('${c.id}',1)">↓</button>
+          </div>
+        </div>
         <div class="ctc-meta">${this.esc(c.config.formato?.preset||"A4")} · ${nSecs} sección(es) · ${nArts} artículo(s)</div>
       </div>`;
     }).join("");
     box.scrollTop = scrollTop;
+  },
+  // Reordenar cartas (27/10/2026, pedido de Pancho: "poder mover el orden de las cartas creadas en
+  // la lista"). Intercambia la carta con la vecina y reasigna "orden" secuencial a TODO el arreglo
+  // (simple y sin huecos/duplicados), persistiendo esos valores — cargarCartas() siempre ordena por
+  // esta columna, así que el orden se mantiene entre sesiones.
+  async moverCarta(id, dir){
+    const arr = this.cartas;
+    const i = arr.findIndex(c=>c.id===id);
+    const j = i+dir;
+    if(i<0||j<0||j>=arr.length) return;
+    const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    arr.forEach((c,idx)=>{ c.orden = idx; });
+    this.renderLista();
+    const resultados = await Promise.all(arr.map(c=>sb.from("lf_cartas").update({orden:c.orden}).eq("id", c.id)));
+    const fallo = resultados.find(r=>r.error);
+    if(fallo) showToast("No se pudo guardar el nuevo orden: "+fallo.error.message, "warn");
   },
 
   campoPt(label, path, val){
@@ -21047,6 +21082,14 @@ const CT = {
     // como reemplazar el innerHTML de un contenedor resetea su scrollTop a 0, sin esto el panel
     // volvía de golpe arriba de todo y había que volver a bajar manualmente cada vez.
     const scrollTop = box.scrollTop;
+    // Lo mismo, pero para cada lista INTERNA desplazable (catálogo de artículos y artículos ya
+    // elegidos, dentro de cada sección — ver .ct-pick-col, que tiene su propio overflow-y:auto):
+    // antes solo se preservaba el scroll del panel grande, así que tildar un artículo del catálogo
+    // "mandaba para arriba" esa lista puntual aunque el resto de la pantalla no se moviera
+    // (27/10/2026, pedido de Pancho: "me vuelve a mandar para arriba de la lista después de cada
+    // click"). Cualquier elemento con data-scroll-key se guarda acá y se restaura más abajo.
+    const scrollsInternos = {};
+    box.querySelectorAll("[data-scroll-key]").forEach(el=>{ scrollsInternos[el.dataset.scrollKey] = el.scrollTop; });
     const c = this.actual();
     if(!c){ box.innerHTML = '<div class="ct-empty">Elegí una carta de la lista o creá una nueva para empezar a diseñarla.</div>'; box.scrollTop = scrollTop; this.renderCapas(); return; }
     const cfg = c.config;
@@ -21100,6 +21143,7 @@ const CT = {
           </div>
           <div class="ct-field"><label>Márgenes (mm)</label><input type="number" min="0" max="60" value="${cfg.layout.margenMm}" onchange="CT.set('layout.margenMm', Number(this.value))"></div>
           <div class="ct-field"><label>Espacio entre secciones (mm)</label><input type="number" min="0" max="40" value="${cfg.layout.espacioMm}" onchange="CT.set('layout.espacioMm', Number(this.value))"></div>
+          <div class="ct-field"><label>Espacio entre artículos (mm)</label><input type="number" min="0" max="15" step="0.1" value="${cfg.layout.espacioArticulosMm}" onchange="CT.set('layout.espacioArticulosMm', Number(this.value))"></div>
           <div class="ct-field"><label>Distancia título/subtítulo → cuerpo (mm)</label><input type="number" min="0" max="40" step="0.5" value="${cfg.layout.espacioTituloMm}" onchange="CT.set('layout.espacioTituloMm', Number(this.value))"></div>
           <div class="ct-field"><label>Alineación de precios</label>
             <div class="ct-seg">
@@ -21127,6 +21171,7 @@ const CT = {
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button type="button" class="ct-btn" onclick="CT.agregarSeccion()">+ Agregar sección</button>
           <button type="button" class="ct-btn" onclick="CT.agregarCuadroTexto()">+ Agregar cuadro de texto</button>
+          <button type="button" class="ct-btn" ${this._clipboardSeccion?"":"disabled"} title="${this._clipboardSeccion?"Se agrega al final de esta carta":"Copiá una sección o cuadro de texto primero (ícono 📋 en su tarjeta)"}" onclick="CT.pegarSeccion()">📋 Pegar${this._clipboardSeccion?` "${this.esc(this._clipboardSeccion.titulo || (this._clipboardSeccion.tipo==='texto'?'Cuadro de texto':'Sección'))}"`:" sección"}</button>
         </div>
       </div>
 
@@ -21141,6 +21186,7 @@ const CT = {
     this.pintarDisenoLienzo();
     this.renderCapas();
     box.scrollTop = scrollTop;
+    box.querySelectorAll("[data-scroll-key]").forEach(el=>{ const v = scrollsInternos[el.dataset.scrollKey]; if(v!=null) el.scrollTop = v; });
   },
 
   setColumnas(n){
@@ -21337,6 +21383,7 @@ const CT = {
         <input type="text" placeholder="${esTexto?"Título (opcional)":"Nueva sección"}" value="${this.esc(s.titulo)}" oninput="CT.setSeccionCampo('${s.id}','titulo', this.value)">
         ${esTexto?'<span class="ct-chip-tipo" title="Cuadro de texto">🖊 texto</span>':''}
         <div class="ct-seccion-tools">
+          <button type="button" class="ct-icon-btn" title="Copiar — después tocá 'Pegar' en esta u otra carta" onclick="CT.copiarSeccion('${s.id}')">📋</button>
           <button type="button" class="ct-icon-btn" title="Eliminar" onclick="CT.eliminarSeccion('${s.id}')">🗑</button>
         </div>
       </div>
@@ -21392,7 +21439,7 @@ const CT = {
       </div>
 
       ${esTexto ? "" : `<div class="ct-pick">
-        <div class="ct-pick-col">
+        <div class="ct-pick-col" data-scroll-key="pick-cat-${s.id}">
           <h4>Catálogo</h4>
           <div class="ct-pick-toolbar">
             <div class="ct-pick-chips">${chips}</div>
@@ -21400,7 +21447,7 @@ const CT = {
           </div>
           <div id="ctPickRows-${s.id}">${this.renderFilasCatalogo(s, grupos, filtro)}</div>
         </div>
-        <div class="ct-pick-col">${itemsHtml || '<div class="ct-empty-mini">Sin artículos todavía — elegilos de la lista de la izquierda.</div>'}</div>
+        <div class="ct-pick-col" data-scroll-key="pick-items-${s.id}">${itemsHtml || '<div class="ct-empty-mini">Sin artículos todavía — elegilos de la lista de la izquierda.</div>'}</div>
       </div>`}
     </div>`;
   },
@@ -21495,6 +21542,36 @@ const CT = {
     const c = this.actual(); if(!c) return;
     c.config.secciones = c.config.secciones || [];
     c.config.secciones.push(ctNuevoCuadroTexto());
+    this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
+  },
+  // Copiar/pegar (27/10/2026) — ver nota en _clipboardSeccion. Se clona TODA la sección (título,
+  // artículos, posición, marco, alineación, texto libre si es un cuadro de texto) salvo el id, que
+  // se regenera al pegar para no pisar la original ni, si se pega varias veces, chocar entre copias.
+  copiarSeccion(sid){
+    const c = this.actual(); if(!c) return;
+    const s = (c.config.secciones||[]).find(x=>x.id===sid); if(!s) return;
+    this._clipboardSeccion = JSON.parse(JSON.stringify(s));
+    this.renderEditor();
+    showToast(`"${s.titulo || (s.tipo==="texto"?"Cuadro de texto":"Sección")}" copiada — elegí la carta destino y tocá "Pegar"`, "ok");
+  },
+  pegarSeccion(){
+    const c = this.actual(); if(!c) return;
+    if(!this._clipboardSeccion){ showToast("No hay ninguna sección copiada todavía", "warn"); return; }
+    const copia = JSON.parse(JSON.stringify(this._clipboardSeccion));
+    copia.id = ctId();
+    // Re-encaja en la grilla de columnas de la carta DESTINO, que puede tener menos columnas que la
+    // carta de origen (ej.: se copió de una carta a 3 columnas y se pega en una a 1 columna).
+    const cols = c.config.layout.columnas;
+    copia.columnaInicio = Math.min(Math.max(1, copia.columnaInicio||1), cols);
+    copia.columnaSpan = Math.min(Math.max(1, copia.columnaSpan||1), cols - copia.columnaInicio + 1);
+    copia.itemCols = Math.max(1, Math.min(8, copia.itemCols||1));
+    if(copia.tituloAlin){
+      if(copia.tituloAlin.modo==="carta" && !(copia.columnaInicio===1 && copia.columnaSpan===cols)) copia.tituloAlin.modo = "seccion";
+      if(copia.tituloAlin.modo==="columna") copia.tituloAlin.columna = Math.min(Math.max(1, copia.tituloAlin.columna||1), copia.itemCols);
+    }
+    (copia.items||[]).forEach(it=>{ it.col = Math.min(Math.max(1, it.col||1), copia.itemCols); });
+    c.config.secciones = c.config.secciones || [];
+    c.config.secciones.push(copia);
     this.guardarDebounced(); this.renderEditor(); this.renderLista(); this.renderImpresionSiActiva();
   },
   eliminarSeccion(sid){
@@ -21725,7 +21802,14 @@ const CT = {
     const nombre = this.esc(nombreMostrado) + (it.descExtra?`<span class="extra">${this.esc(it.descExtra)}</span>`:"");
     const tier = it.subindice ? cfg.estilos.subindice : cfg.estilos.articulo;
     const junto = cfg.layout.alinPrecio==="junto";
-    return `<div class="ct-fila ${it.subindice?'sub':''}" style="${this.textStyleCss(tier)}margin-bottom:.35em;">
+    // Espacio entre artículos (27/10/2026, pedido de Pancho: "poder modificar el espaciado entre
+    // cada artículo de una sección"). Antes era fijo en .35em (proporcional al tamaño de letra de
+    // CADA fila, así que un subíndice —letra más chica— quedaba con menos espacio que uno normal);
+    // ahora es un valor único en mm (cfg.layout.espacioArticulosMm, igual criterio que el resto de
+    // los espaciados de la carta — margenMm, espacioMm, espacioTituloMm), configurable en "Diseño de
+    // página" y aplicado igual a todos los artículos de la carta.
+    const espacioArticulos = cfg.layout.espacioArticulosMm!=null ? cfg.layout.espacioArticulosMm : 1.5;
+    return `<div class="ct-fila ${it.subindice?'sub':''}" style="${this.textStyleCss(tier)}margin-bottom:${this.mm2px(espacioArticulos)}px;">
       <div class="n">${nombre}${junto?` — <b style="${this.textStyleCss(cfg.estilos.precio)}">${pr!=null?fmtMoney(pr):"—"}</b>`:""}</div>
       ${!junto?`<div class="d"></div><div class="p" style="${this.textStyleCss(cfg.estilos.precio)}">${pr!=null?fmtMoney(pr):"—"}</div>`:""}
     </div>`;
@@ -21805,6 +21889,13 @@ const CT = {
     // o imágenes respecto de la página completa, no solo entre sí (CT.centrarSeleccionPagina /
     // CT.centrarSeleccionImgVertical, 21/10/2026).
     const probeHead = document.createElement("div");
+    // className="ct-sheet" (27/10/2026): TODO el CSS real de lo que se dibuja acá (.ct-titulo,
+    // .ct-subtitulo, tipografía Syne, etc.) está definido como ".ct-sheet .ct-titulo{...}" — sin esta
+    // clase en el propio probe, esas reglas nunca matcheaban (el probe no tenía ningún ancestro
+    // ".ct-sheet") y la medición se hacía con el CSS por defecto del navegador en vez del real. Ver
+    // la nota más abajo en el probe de cada sección, donde este mismo problema tenía un impacto
+    // mucho más grave (alturas medidas muy distintas de las reales).
+    probeHead.className = "ct-sheet";
     probeHead.style.cssText = `position:fixed; visibility:hidden; left:-9999px; top:0; width:${totalWidthPx}px; font-family:'Roboto',sans-serif;`;
     probeHead.innerHTML = this.renderEncabezado(cfg);
     document.body.appendChild(probeHead);
@@ -21821,6 +21912,22 @@ const CT = {
       const widthPx = colWidthPx*span + gapPx*(span-1);
       const marcoActivo = s.marco && s.marco.activo;
       const probe = document.createElement("div");
+      // className="ct-sheet" (27/10/2026) — BUG encontrado a raíz de "no está funcionando bien el
+      // distribuir uniformemente... queda asimétrico": el CSS real de una sección impresa (el flex
+      // de ".ct-fila" que pone nombre/guía/precio en una sola línea, el flex de ".ct-subcols" que
+      // reparte los artículos en columnas internas, la tipografía de título/descripción) está
+      // definido TODO como ".ct-sheet .ct-fila{...}", ".ct-sheet .ct-subcols{...}", etc. — un
+      // selector descendiente que exige un ancestro con clase "ct-sheet". Este probe (usado para
+      // MEDIR el alto real de cada sección) se armaba suelto, sin esa clase en ningún ancestro, así
+      // que esas reglas nunca se aplicaban durante la medición: los artículos se apilaban en varias
+      // líneas sueltas en vez de una sola fila con flex, y con itemCols>1 las columnas internas
+      // también quedaban apiladas en vertical en vez de en paralelo — dando una altura MEDIDA mucho
+      // mayor (y además distinta según cuántos artículos/columnas tenía cada sección) que la altura
+      // REAL con la que después se dibuja dentro de .ct-sheet. Como "distribuir uniformemente"
+      // calcula el espacio sobrante a partir de esas alturas medidas, esa discrepancia (distinta por
+      // sección) es justo lo que producía gaps asimétricos en el resultado final ya renderizado.
+      // Agregar la clase acá hace que el probe mida con el MISMO CSS que el render real.
+      probe.className = "ct-sheet";
       probe.style.cssText = `position:fixed; visibility:hidden; left:-9999px; top:0; width:${widthPx}px; font-family:'Roboto',sans-serif; ${marcoActivo?this.marcoCss(s.marco)+"padding:"+this.mm2px(3)+"px;":""}`;
       probe.innerHTML = this.renderSeccionImpresa(s, cfg);
       document.body.appendChild(probe);
