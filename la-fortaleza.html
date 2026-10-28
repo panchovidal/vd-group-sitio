@@ -4805,6 +4805,15 @@ function cfgNewF(){ return { text:"", sel:new Set() }; }
 function cfgEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function cfgNorm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim(); }
 function cfgCmp(a,b){ return String(a||"").localeCompare(String(b||""), "es", { sensitivity:"base", numeric:true }); }
+// Ordena categorías/rubros/proveedores/insumos (objetos de cfgData, con _ord = orden de creación)
+// por ese orden en vez de alfabético — pedido de Pancho, 27/10/2026. Si a alguno le falta _ord
+// (dato viejo en caché, o un objeto armado a mano sin pasar por cfgLoadAll), se lo manda al final
+// y se desempata alfabéticamente, para no romper nada en ese caso borde.
+function cfgCmpOrd(a,b){
+  const oa = (a && a._ord!=null) ? a._ord : Infinity, ob = (b && b._ord!=null) ? b._ord : Infinity;
+  if(oa!==ob) return oa-ob;
+  return cfgCmp((a||{}).nombre||(a||{}).nomenclatura, (b||{}).nombre||(b||{}).nomenclatura);
+}
 function cfgColor(id){ let h=0; const s=String(id); for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return CFG_PALETTE[h % CFG_PALETTE.length]; }
 /* resalta coincidencias ignorando tildes/mayúsculas */
 function cfgHi(text, q){
@@ -4873,10 +4882,10 @@ function cfgPlazoTxt(p){ const n = p ? p.plazo_pago_dias : null; if(n==null) ret
 function cfgCat(dom, id){ return cfgData[dom].cats.find(c=>c.id===id); }
 function cfgRub(dom, id){ return cfgData[dom].rubros.find(r=>r.id===id); }
 function cfgProv(id){ return cfgData.provs.find(p=>p.id===id); }
-function cfgRubrosDeProv(provId){ return cfgData.links.filter(l=>l.proveedor_id===provId).map(l=>cfgRub("proveedores", l.rubro_id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre)); }
-function cfgProvsDeRubro(rubId){ return cfgData.links.filter(l=>l.rubro_id===rubId).map(l=>cfgProv(l.proveedor_id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre)); }
+function cfgRubrosDeProv(provId){ return cfgData.links.filter(l=>l.proveedor_id===provId).map(l=>cfgRub("proveedores", l.rubro_id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b)); }
+function cfgProvsDeRubro(rubId){ return cfgData.links.filter(l=>l.rubro_id===rubId).map(l=>cfgProv(l.proveedor_id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b)); }
 function cfgIns(id){ return cfgData.items.find(i=>i.id===id); }
-function cfgInsumosDeProv(provId){ return cfgData.items.filter(i=>i.proveedor_id===provId).sort((a,b)=>cfgCmp(a.nomenclatura,b.nomenclatura)); }
+function cfgInsumosDeProv(provId){ return cfgData.items.filter(i=>i.proveedor_id===provId).sort((a,b)=>cfgCmpOrd(a,b)); }
 /* Rubro propio de cada insumo (09/10/2026): el insumo tiene su categoría/rubro (uno de los rubros de su
    proveedor). Los rubros de una factura salen de sus ítems. Insumos viejos sin rubro → rubro principal. */
 function cfgInsumosDeProvRubro(provId, rubroId){ return cfgInsumosDeProv(provId).filter(i=>cfgInsRubroId(i)===rubroId); }
@@ -4898,20 +4907,24 @@ function cfgExists(list, nombre, exceptId){ const n = cfgNorm(nombre); return li
 /* ---------- carga de datos (Supabase) ---------- */
 async function cfgLoadAll(){
   const res = await Promise.all([
-    sb.from("lf_conceptos").select("id,nombre"),
-    sb.from("lf_rubros").select("id,nombre,concepto_id"),
-    sb.from("lf_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion"),
+    sb.from("lf_conceptos").select("id,nombre").order("created_at"),
+    sb.from("lf_rubros").select("id,nombre,concepto_id").order("created_at"),
+    sb.from("lf_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion").order("created_at"),
     sb.from("lf_proveedor_rubros").select("proveedor_id,rubro_id"),
-    sb.from("lf_costeo_insumos").select("id,proveedor_id,rubro_id,nomenclatura,unidad_medida,cantidad,factor_merma,necesita_conversion,conversion_cantidad,conversion_unidad,costo_manual,usar_costo_manual")
+    sb.from("lf_costeo_insumos").select("id,proveedor_id,rubro_id,nomenclatura,unidad_medida,cantidad,factor_merma,necesita_conversion,conversion_cantidad,conversion_unidad,costo_manual,usar_costo_manual").order("created_at")
   ]);
   const err = res.find(r=>r.error);
   if(err){ console.warn("Config compras:", err.error); showToast("No se pudieron cargar los datos de Compras", "warn"); return false; }
-  cfgData.proveedores.cats   = (res[0].data||[]).map(c=>({ id:c.id, nombre:c.nombre }));
-  cfgData.proveedores.rubros = (res[1].data||[]).map(r=>({ id:r.id, nombre:r.nombre, catId:r.concepto_id }));
-  cfgData.provs  = res[2].data||[];
+  // _ord (27/10/2026): orden de creación (vía ORDER BY created_at en la consulta) — pedido de Pancho:
+  // las tablas de categorías/rubros/proveedores/insumos de Config › Compras dejan de ordenarse
+  // alfabéticamente y pasan a respetar el orden en que se fueron cargando, igual que ya se percibe
+  // en la pantalla al darlos de alta. cfgCmpOrd() es el comparador que usa este campo.
+  cfgData.proveedores.cats   = (res[0].data||[]).map((c,i)=>({ id:c.id, nombre:c.nombre, _ord:i }));
+  cfgData.proveedores.rubros = (res[1].data||[]).map((r,i)=>({ id:r.id, nombre:r.nombre, catId:r.concepto_id, _ord:i }));
+  cfgData.provs  = (res[2].data||[]).map((p,i)=>Object.assign({}, p, { _ord:i }));
   cfgData.links  = res[3].data||[];
   cfgData.insumos = cfgData.proveedores;
-  cfgData.items  = (res[4].data||[]).map(i=>Object.assign({}, i, { cantidad:Number(i.cantidad), factor_merma:Number(i.factor_merma)||0 }));
+  cfgData.items  = (res[4].data||[]).map((i,idx)=>Object.assign({}, i, { cantidad:Number(i.cantidad), factor_merma:Number(i.factor_merma)||0, _ord:idx }));
   // categorías nuevas (creadas por otro usuario) entran contraídas
   const ids = cfgData.proveedores.cats.map(c=>c.id);
   if(cfgKnownCats) ids.forEach(id=>{ if(!cfgKnownCats.has(id)){ cfgState.proveedores.collapsed.add(id); cfgState.insumos.collapsed.add(id); } });
@@ -4937,9 +4950,9 @@ async function cfgReload(){
 function cfgBuildRows(dom){
   if(dom==="insumos") return cfgBuildRowsInsumos();
   const rows = [], D = cfgData[dom];
-  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const cats = D.cats.slice().sort((a,b)=>cfgCmpOrd(a,b));
   cats.forEach(c=>{
-    const rubs = D.rubros.filter(r=>r.catId===c.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    const rubs = D.rubros.filter(r=>r.catId===c.id).sort((a,b)=>cfgCmpOrd(a,b));
     if(!rubs.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:null, rubro:null, leafId:null, leaf:null, provs:[] }); return; }
     rubs.forEach(r=>{
       const ps = cfgProvsDeRubro(r.id);
@@ -4954,9 +4967,9 @@ function cfgBuildRows(dom){
    a diferencia de Che Mono acá se agrega un nivel más de agrupación (Proveedor) antes del insumo. */
 function cfgBuildRowsInsumos(){
   const rows = [], D = cfgData.insumos;
-  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const cats = D.cats.slice().sort((a,b)=>cfgCmpOrd(a,b));
   cats.forEach(c=>{
-    const rubs = D.rubros.filter(r=>r.catId===c.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    const rubs = D.rubros.filter(r=>r.catId===c.id).sort((a,b)=>cfgCmpOrd(a,b));
     if(!rubs.length){ rows.push({ catId:c.id, cat:c.nombre, rubroId:null, rubro:null, provId:null, prov:null, leafId:null, leaf:null, provs:[] }); return; }
     rubs.forEach(r=>{
       const ps = cfgProvsDeRubro(r.id);
@@ -5182,7 +5195,7 @@ function cfgTableHtml(dom, rows){
         ${cfgActs([cfgBtn("plus","Agregar rubro en esta categoría",`cfgOpenRubroForm('${dom}',null,'${g.catId}')`), cfgBtn("edit","Editar categoría",`cfgOpenCatForm('${dom}','${g.catId}')`), cfgBtn("del","Eliminar categoría",`cfgDeleteCat('${dom}','${g.catId}')`)])}
       </div></td>`;
     if(collapsed){
-      html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('${dom}','${g.catId}')"><span class="rubs">${cfgEsc(totRub.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(r=>r.nombre).join(" · ")) || "Sin rubros"}</span><span class="open">Ver ${CFG_IC.chev}</span></div></td></tr>`;
+      html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('${dom}','${g.catId}')"><span class="rubs">${cfgEsc(totRub.slice().sort((a,b)=>cfgCmpOrd(a,b)).map(r=>r.nombre).join(" · ")) || "Sin rubros"}</span><span class="open">Ver ${CFG_IC.chev}</span></div></td></tr>`;
       return;
     }
     let firstInCat = true;
@@ -5253,7 +5266,7 @@ function cfgTableHtmlInsumos(rows){
         <div class="txt"><div class="nm">${hiQ(g.cat,"cat")}</div><div class="meta">${catMeta}</div></div>
       </div></td>`;
     if(collapsed){
-      html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('insumos','${g.catId}')"><span class="rubs">${cfgEsc(totRub.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).map(r=>r.nombre).join(" · ")) || "Sin rubros"}</span><span class="open">Ver ${CFG_IC.chev}</span></div></td></tr>`;
+      html += `<tr class="cat-end">${catCell}<td colspan="${nCols-1}" class="grp-end"><div class="cfg-collapsed-sum" onclick="cfgToggleGroup('insumos','${g.catId}')"><span class="rubs">${cfgEsc(totRub.slice().sort((a,b)=>cfgCmpOrd(a,b)).map(r=>r.nombre).join(" · ")) || "Sin rubros"}</span><span class="open">Ver ${CFG_IC.chev}</span></div></td></tr>`;
       return;
     }
     let firstInCat = true;
@@ -5345,7 +5358,7 @@ function cfgEntregasCell(p){
 function cfgRubrosListHtml(dom, rows){
   const st = cfgState[dom], q = st.search, isIns = dom==="insumos";
   const ids = [...new Set(rows.filter(r=>r.rubroId).map(r=>r.rubroId))];
-  const rubs = ids.map(id=>cfgRub(dom,id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const rubs = ids.map(id=>cfgRub(dom,id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b));
   let html = `<table class="cfg-table cfg-list"><colgroup><col style="width:34%"><col style="width:30%"><col style="width:18%"><col style="width:18%"></colgroup>
     <thead><tr><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th>
     <th><div class="cfg-th">${isIns?"Insumos":"Proveedores"}</div></th><th><div class="cfg-th">&nbsp;</div></th></tr></thead><tbody>`;
@@ -5365,13 +5378,13 @@ function cfgRubrosListHtml(dom, rows){
     if(open){
       let inner;
       if(isIns){
-        const ins = leafIds.map(id=>cfgIns(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nomenclatura,b.nomenclatura));
+        const ins = leafIds.map(id=>cfgIns(id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b));
         inner = ins.length ? ins.map(i=>{
           const prov = cfgProv(i.proveedor_id), merma = Number(i.factor_merma)||0;
           return `<div class="cfg-sub-item"><span class="nm">${cfgHi(i.nomenclatura,q)}</span><span class="cfg-sub-meta"><span class="cfg-dim">${cfgEsc(prov?prov.nombre:"—")}</span> · ${fmtNumCosteo(i.cantidad)} ${cfgEsc(i.unidad_medida||"—")} · <span class="cfg-merma-chip${merma===0?" zero":""}">${merma}%</span></span>${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${i.id}')`), cfgBtn("del","Eliminar insumo",`cfgDeleteInsumo('${i.id}')`)])}</div>`;
         }).join("") : `<div class="cfg-empty-cell">Sin insumos en este rubro todavía (se crean desde la pestaña Insumos).</div>`;
       } else {
-        const ps = leafIds.map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+        const ps = leafIds.map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b));
         inner = ps.length ? ps.map(p=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(p.nombre,q)}</span><span class="cfg-sub-meta">${cfgEntregasCell(p)}${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip" title="Plazo de pago">${CFG_IC.card.replace('<svg','<svg style="width:11px;height:11px;margin-right:4px"')}${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim" title="Sin plazo de pago">Sin plazo</span>'}${cfgTipoGastoChip(p)}</span>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`)])}</div>`).join("")
           : `<div class="cfg-empty-cell">Sin proveedores asignados · <a onclick="cfgOpenProvForm(null,'${r.id}')">Agregar proveedor</a></div>`;
       }
@@ -5386,7 +5399,7 @@ function cfgHojasListHtml(dom, rows){
   if(dom==="insumos") return cfgHojasListHtmlInsumos(rows, q);
   const byLeaf = new Map();
   rows.filter(r=>r.leafId).forEach(r=>{ if(!byLeaf.has(r.leafId)) byLeaf.set(r.leafId, []); byLeaf.get(r.leafId).push(r); });
-  const leaves = [...byLeaf.keys()].map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const leaves = [...byLeaf.keys()].map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b));
   if(!leaves.length) return `<div class="cfg-nores"><strong>No hay proveedores para mostrar</strong></div>`;
   const cr = x => { const rs = cfgRubrosDeProv(x.id); return { cats: rs.map(r=>`<div>${cfgHi((cfgCat(dom,r.catId)||{}).nombre||"",q)}</div>`).join(""), rubs: rs.map(r=>`<div>${cfgHi(r.nombre,q)}</div>`).join("") }; };
   let html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:17%"><col style="width:25%"><col style="width:10%"><col style="width:10%"></colgroup>
@@ -5400,7 +5413,7 @@ function cfgHojasListHtml(dom, rows){
 function cfgHojasListHtmlInsumos(rows, q){
   const byLeaf = new Map();
   rows.filter(r=>r.leafId && r.ins).forEach(r=>{ if(!byLeaf.has(r.leafId)) byLeaf.set(r.leafId, r.ins); });
-  const leaves = [...byLeaf.values()].sort((a,b)=>cfgCmp(a.nomenclatura,b.nomenclatura));
+  const leaves = [...byLeaf.values()].sort((a,b)=>cfgCmpOrd(a,b));
   if(!leaves.length) return `<div class="cfg-nores"><strong>No hay insumos para mostrar</strong></div>`;
   let html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:18%"><col style="width:14%"><col style="width:14%"><col style="width:16%"><col style="width:16%"></colgroup>
     <thead><tr><th><div class="cfg-th"><span class="lvl-dot l4">4</span>Insumo</div></th><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Cantidad / Unidad</div></th><th><div class="cfg-th">Factor de merma</div></th></tr></thead><tbody>`;
@@ -5421,7 +5434,7 @@ function cfgExportExcel(dom){
   if(typeof XLSX==="undefined"){ showToast("No se pudo cargar el generador de Excel. Revisá la conexión.", "warn"); return; }
   if(dom==="insumos") return cfgExportExcelInsumos();
   const D = cfgData[dom], out = [];
-  const rubs = D.rubros.slice().sort((a,b)=>cfgCmp((cfgCat(dom,a.catId)||{}).nombre,(cfgCat(dom,b.catId)||{}).nombre) || cfgCmp(a.nombre,b.nombre));
+  const rubs = D.rubros.slice().sort((a,b)=>cfgCmpOrd(cfgCat(dom,a.catId),cfgCat(dom,b.catId)) || cfgCmpOrd(a,b));
   const cols = ["Categoría","Rubro","Proveedor","Días de entrega","Días de pedido","Plazo de pago (días)","Tipo de gasto"];
   rubs.forEach(r=>{
     const cat = (cfgCat(dom,r.catId)||{}).nombre||"", ps = cfgProvsDeRubro(r.id);
@@ -5440,7 +5453,7 @@ function cfgExportExcel(dom){
 }
 function cfgExportExcelInsumos(){
   const out = [];
-  cfgData.items.slice().sort((a,b)=>cfgCmp(a.nomenclatura,b.nomenclatura)).forEach(i=>{
+  cfgData.items.slice().sort((a,b)=>cfgCmpOrd(a,b)).forEach(i=>{
     const prov = cfgProv(i.proveedor_id), rs = prov ? cfgRubrosDeProv(prov.id) : [];
     const cat = rs.map(r=>(cfgCat("proveedores",r.catId)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
     const rub = rs.map(r=>r.nombre).sort(cfgCmp).join(", ");
@@ -5723,7 +5736,7 @@ function cfgOpenRubroForm(dom, id, presetCatId){
     return;
   }
   const catSel = r ? r.catId : (presetCatId || "");
-  const cats = D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const cats = D.cats.slice().sort((a,b)=>cfgCmpOrd(a,b));
   const n = r ? cfgData.links.filter(l=>l.rubro_id===r.id).length : 0;
   const catName = catSel ? (cfgCat(dom,catSel)||{}).nombre : null;
   cfgOpenPanel({
@@ -5861,12 +5874,12 @@ function cfgMsRender(){
   if(!cfgPS || !cfgPS.msSel) return;
   const sel = cfgPS.msSel, q = cfgNorm((document.getElementById("cfgMsQ")||{}).value);
   const D = cfgData.proveedores;
-  document.getElementById("cfgMsSel").innerHTML = [...sel].map(id=>cfgRub("proveedores",id)).filter(Boolean).sort((a,b)=>cfgCmp(a.nombre,b.nombre))
+  document.getElementById("cfgMsSel").innerHTML = [...sel].map(id=>cfgRub("proveedores",id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b))
     .map(r=>`<span class="cfg-ms-tag">${cfgEsc(r.nombre)} <small>${cfgEsc((cfgCat("proveedores",r.catId)||{}).nombre||"")}</small><button onclick="cfgMsToggle('${r.id}')" title="Quitar">${CFG_IC.x}</button></span>`).join("");
   let html = "";
-  D.cats.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre)).forEach(c=>{
+  D.cats.slice().sort((a,b)=>cfgCmpOrd(a,b)).forEach(c=>{
     const catHit = q && cfgNorm(c.nombre).includes(q);
-    const rs = D.rubros.filter(r=>r.catId===c.id && (!q || catHit || cfgNorm(r.nombre).includes(q))).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+    const rs = D.rubros.filter(r=>r.catId===c.id && (!q || catHit || cfgNorm(r.nombre).includes(q))).sort((a,b)=>cfgCmpOrd(a,b));
     if(!rs.length) return;
     html += `<div class="cfg-ms-grp">${cfgHi(c.nombre, q)}</div>` + rs.map(r=>`<div class="cfg-ms-opt${sel.has(r.id)?" on":""}" onclick="cfgMsToggle('${r.id}')"><span class="ck">${CFG_IC.check}</span><span>${cfgHi(r.nombre, q)}</span></div>`).join("");
   });
@@ -5935,7 +5948,7 @@ function cfgOpenInsumoForm(id, presetProveedorId, presetRubroId){
     return;
   }
   const provSel = ins ? ins.proveedor_id : (presetProveedorId || "");
-  const provs = cfgData.provs.slice().sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const provs = cfgData.provs.slice().sort((a,b)=>cfgCmpOrd(a,b));
   const provName = provSel ? (cfgProv(provSel)||{}).nombre : null;
   const conv = ins ? !!ins.necesita_conversion : false;
   cfgOpenPanel({
@@ -6069,7 +6082,7 @@ async function cfgDel(table, match, what){
 /* ===== Eliminar categoría ===== */
 function cfgDeleteCat(dom, id){
   const c = cfgCat(dom, id); if(!c) return;
-  const rubs = cfgData[dom].rubros.filter(r=>r.catId===id).sort((a,b)=>cfgCmp(a.nombre,b.nombre));
+  const rubs = cfgData[dom].rubros.filter(r=>r.catId===id).sort((a,b)=>cfgCmpOrd(a,b));
   if(rubs.length){
     cfgModal({ icon:"info", title:"No se puede eliminar todavía",
       body:`<p>La categoría <b>“${cfgEsc(c.nombre)}”</b> tiene <b>${rubs.length}</b> ${rubs.length===1?"rubro":"rubros"}. Para eliminarla, primero eliminá sus rubros o movelos a otra categoría (editando cada rubro).</p>${cfgLi(rubs.map(r=>r.nombre))}` });
@@ -6864,7 +6877,48 @@ function missingIns(a){ return artLineas(a).filter(l=>{ const r=lineRef(l); retu
 const ST = { tab:LS.get("tab","precios"), cols:LS.get("cols",{precios:2,recetas:2,compras:3}), order:LS.get("order",{}), focus:{precios:null,recetas:null,compras:null},
   sort:{}, filt:{}, pvSearch:"", ajuste:null, recMode:"art", recSearch:"", recCardQ:{}, recOpen:null, coSearch:"", coEstado:"todas" };
 const artsActivos = ()=>D.arts.filter(a=>a.activo);
-const cats = ()=>[...new Set(artsActivos().map(a=>a.categoria))].sort((a,b)=>a.localeCompare(b,"es"));
+/* ---- Orden según el Índice de artículos (pedido de Pancho, 27/10/2026) ----
+   Las tablas de Costeo (Precios de venta, Recetas) y el buscador de catálogo de la Carta ordenaban
+   sus categorías y artículos alfabéticamente. Pancho pidió que, en cambio, respeten el orden de
+   filas del Índice de artículos (el mismo .xlsx que ya se usa para clasificarlos): si el índice
+   trae 2 o 3 categorías (Cat. 2), que las tablas se agrupen y ordenen en ese mismo orden, y que los
+   artículos dentro de cada categoría sigan el orden exacto en que aparecen en el índice.
+   indiceOrdenArticulosMap(): nombre de artículo (normalizado) → posición de su primera fila en el
+   índice vigente. indiceOrdenCategoriasMap(): igual, pero por categoría (Cat. 2) del artículo, según
+   la primera fila de esa categoría. Ambas devuelven un Map vacío si no hay índice cargado — en ese
+   caso los comparadores de abajo caen de nuevo en orden alfabético, como antes. */
+function indiceOrdenArticulosMap(){
+  const map = new Map();
+  if(typeof recIndiceArticulosDisponibles!=="function") return map;
+  recIndiceArticulosDisponibles().forEach((a,i)=>{ const k=norm(a.nombre); if(!map.has(k)) map.set(k,i); });
+  return map;
+}
+function indiceOrdenCategoriasMap(){
+  const map = new Map();
+  if(typeof recIndiceArticulosDisponibles!=="function") return map;
+  recIndiceArticulosDisponibles().forEach((a,i)=>{ const k=norm(a.concepto); if(!map.has(k)) map.set(k,i); });
+  return map;
+}
+function cmpPorIndiceArticulo(nombreA,nombreB,map){
+  const m = map || indiceOrdenArticulosMap();
+  const ra = m.has(norm(nombreA)) ? m.get(norm(nombreA)) : Infinity, rb = m.has(norm(nombreB)) ? m.get(norm(nombreB)) : Infinity;
+  if(ra!==rb) return ra-rb;
+  return String(nombreA||"").localeCompare(String(nombreB||""),"es");
+}
+function cmpPorIndiceCategoria(catA,catB,map){
+  const m = map || indiceOrdenCategoriasMap();
+  const ra = m.has(norm(catA)) ? m.get(norm(catA)) : Infinity, rb = m.has(norm(catB)) ? m.get(norm(catB)) : Infinity;
+  if(ra!==rb) return ra-rb;
+  return String(catA||"").localeCompare(String(catB||""),"es");
+}
+// Las 3 categorías "conocidas" de Costeo (COSTEO_CONCEPTOS), reordenadas según el Índice vigente —
+// para los lugares donde solo importan esas 3 (ej. el catálogo de la Carta). El array original no
+// se toca (otros lugares dependen de .includes() sobre él), solo se usa una copia para el orden.
+function conceptosEnOrdenIndice(){
+  const m = indiceOrdenCategoriasMap();
+  return COSTEO_CONCEPTOS.slice().sort((a,b)=>cmpPorIndiceCategoria(a,b,m));
+}
+const cats = ()=>{ const m=indiceOrdenCategoriasMap(); return [...new Set(artsActivos().map(a=>a.categoria))].sort((a,b)=>cmpPorIndiceCategoria(a,b,m)); };
 function orderFor(key,ids){ const saved=ST.order[key]||[]; const out=saved.filter(x=>ids.includes(x)); ids.forEach(x=>{ if(!out.includes(x)) out.push(x); }); return out; }
 function saveOrder(key,list){ ST.order[key]=list; LS.set("order",ST.order); }
 
@@ -6939,7 +6993,13 @@ function applySortFilter(rows,key,cols){
     if(fl.max!=null && (v==null || v*sc>fl.max)) return false;
     return true; }));
   const s=ST.sort[key]||{k:"nombre",d:1};
-  out.sort((x,y)=>{ const a=x[s.k],b=y[s.k]; if(a==null&&b==null) return 0; if(a==null) return 1; if(b==null) return -1; return (typeof a==="string"?a.localeCompare(b,"es"):a-b)*s.d; });
+  // Orden por defecto de "nombre" (27/10/2026): antes alfabético siempre; ahora, si no se tocó
+  // explícitamente el orden de la columna, sigue el orden del Índice de artículos (pedido de
+  // Pancho). El resto de las columnas (precio, costo, fecha, etc.) no cambian.
+  const idxMap = s.k==="nombre" ? indiceOrdenArticulosMap() : null;
+  out.sort((x,y)=>{ const a=x[s.k],b=y[s.k]; if(a==null&&b==null) return 0; if(a==null) return 1; if(b==null) return -1;
+    if(s.k==="nombre") return cmpPorIndiceArticulo(a,b,idxMap)*s.d;
+    return (typeof a==="string"?a.localeCompare(b,"es"):a-b)*s.d; });
   return out; }
 function pvCatRows(cat){ let rows=artsActivos().filter(a=>a.categoria===cat).map(pvRow); if(ST.pvSearch) rows=rows.filter(r=>norm(r.nombre).includes(norm(ST.pvSearch))); return applySortFilter(rows,"p:"+cat,PCOLS); }
 function headCell(key,c){ const s=ST.sort[key]; const f=(ST.filt[key]||{})[c.k]; const act=(f&&Object.keys(f).length)||(s&&s.k===c.k&&!(c.k==="nombre"&&s.d===1));
@@ -7029,7 +7089,7 @@ function pvElegirTipo(){ const lastG=D.ajustes.find(x=>x.tipo==="general"); let 
   const ac=$("#cxAdhChk",m); if(ac) ac.onchange=e=>adh=e.target.checked;
   $("#cxGoAj",m).onclick=()=>{ ST.ajuste={tipo,adherir:tipo==="puntual"&&adh,pend:{},round:100}; closeModal(); renderPrecios(); }; }
 function pvRevisar(){ const ids=Object.keys(ST.ajuste.pend); const byCat={}; ids.forEach(id=>{ const a=D.arts.find(x=>x.id===id); (byCat[a.categoria]=byCat[a.categoria]||[]).push(a); });
-  let rows=""; cats().filter(c=>byCat[c]).forEach(c=>{ rows+=`<tr class="cat"><td colspan="4">${esc(c)}</td></tr>`; byCat[c].sort((x,y)=>x.nombre.localeCompare(y.nombre,"es")).forEach(a=>{ const vig=a.precio_actual, nv=ST.ajuste.pend[a.id]; rows+=`<tr><td>${esc(a.nombre)}</td><td class="r">${money0(vig)}</td><td class="r"><b>${money0(nv)}</b></td><td class="r cx-neu">${pctTxt(dif(vig,nv))}</td></tr>`; }); });
+  let rows=""; cats().filter(c=>byCat[c]).forEach(c=>{ rows+=`<tr class="cat"><td colspan="4">${esc(c)}</td></tr>`; byCat[c].sort((x,y)=>cmpPorIndiceArticulo(x.nombre,y.nombre)).forEach(a=>{ const vig=a.precio_actual, nv=ST.ajuste.pend[a.id]; rows+=`<tr><td>${esc(a.nombre)}</td><td class="r">${money0(vig)}</td><td class="r"><b>${money0(nv)}</b></td><td class="r cx-neu">${pctTxt(dif(vig,nv))}</td></tr>`; }); });
   const lastG=D.ajustes.find(x=>x.tipo==="general");
   const m=modal(`<div class="cx-mh"><div><div class="cx-step">Paso 1 de 2 · Propuesta</div><h3>Revisar ajuste ${ST.ajuste.tipo}</h3><p>${ids.length} artículo${ids.length>1?'s':''}${ST.ajuste.adherir?` · se adhiere al ajuste general del ${fmtDL(lastG.fecha)}`:''}. Se guarda como <b>pendiente de confirmación</b>: los precios de la carta no cambian hasta que lo confirmes.</p></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
     <div class="cx-mb"><table class="cx-sum"><tr><td></td><td class="r" style="color:var(--text-3);font-size:11px">Vigente</td><td class="r" style="color:var(--text-3);font-size:11px">Nuevo</td><td class="r" style="color:var(--text-3);font-size:11px">Dif.</td></tr>${rows}</table></div>
@@ -7057,7 +7117,7 @@ function pvAnularPend(){ const p=D.pendAj; if(!p) return; const n=(p.detalle||[]
 function pvConfirmarPend(){ const aj=pvPendAjuste(); if(!aj) return; const p=D.pendAj; const ids=Object.keys(aj.pend);
   if(!ids.length){ toast("La propuesta no tiene artículos vigentes. Anulala o modificala.","warn"); return; }
   const byCat={}; ids.forEach(id=>{ const a=D.arts.find(x=>x.id===id); (byCat[a.categoria]=byCat[a.categoria]||[]).push(a); });
-  let cambiaron=0, rows=""; cats().filter(c=>byCat[c]).forEach(c=>{ rows+=`<tr class="cat"><td colspan="4">${esc(c)}</td></tr>`; byCat[c].sort((x,y)=>x.nombre.localeCompare(y.nombre,"es")).forEach(a=>{ const vig=a.precio_actual, nv=aj.pend[a.id];
+  let cambiaron=0, rows=""; cats().filter(c=>byCat[c]).forEach(c=>{ rows+=`<tr class="cat"><td colspan="4">${esc(c)}</td></tr>`; byCat[c].sort((x,y)=>cmpPorIndiceArticulo(x.nombre,y.nombre)).forEach(a=>{ const vig=a.precio_actual, nv=aj.pend[a.id];
     const prop=(p.detalle||[]).find(d=>d.articulo_id===a.id); const mov = prop && Number(prop.precio_previo)!==Number(vig); if(mov) cambiaron++;
     rows+=`<tr><td>${esc(a.nombre)}${mov?' <span class="cx-pill pun" title="El precio vigente cambió desde que se armó la propuesta">vigente cambió</span>':''}</td><td class="r">${money0(vig)}</td><td class="r"><b>${money0(nv)}</b></td><td class="r cx-neu">${pctTxt(dif(vig,nv))}</td></tr>`; }); });
   const m=modal(`<div class="cx-mh"><div><div class="cx-step">Paso 2 de 2 · Confirmación</div><h3>Confirmar ajuste ${esc(aj.tipo)}</h3><p>Al confirmar se actualizan las listas de precios de ${ids.length} artículo${ids.length>1?'s':''} (propuesta de ${esc(p.usuario_nombre||"—")} del ${fmtDT(p.fecha)}).${cambiaron?` <b>${cambiaron} artículo(s) cambiaron de precio vigente desde la propuesta.</b>`:''}</p></div><button type="button" class="cx-ibtn" data-close>${ICO.x}</button></div>
@@ -7191,7 +7251,9 @@ function renderRecetas(){
   if(!C.length){ grid.style.setProperty("--cols",1); grid.innerHTML=mode==="art"?`<div class="cx-bigempty"><b>Todavía no hay artículos</b>Los artículos salen del Índice de artículos: cargalo desde la solapa Precios.</div>`:`<div class="cx-bigempty"><b>Todavía no hay categorías de semi-elaborados</b>Creá la primera desde “Gestionar categorías” y después cargá los semi-elaborados.</div>`; return; }
   const okey="rec_"+mode; const list=f?[f]:orderFor(okey,C.map(c=>c.id));
   grid.innerHTML=list.map(cid=>{ const c=C.find(x=>x.id===cid); if(!c) return ""; const all=items.filter(x=>itemCat(x,mode)===cid); const cq=ST.recCardQ[mode+cid]||"";
-    const rows=all.filter(x=>recMatch(x,mode,ST.recSearch)&&recMatch(x,mode,cq)).sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+    // Artículos: orden del Índice (pedido de Pancho, 27/10/2026). Semi-elaborados: no están en el
+    // índice, siguen alfabéticos como antes.
+    const rows=all.filter(x=>recMatch(x,mode,ST.recSearch)&&recMatch(x,mode,cq)).sort((a,b)=>mode==="art"?cmpPorIndiceArticulo(a.nombre,b.nombre):a.nombre.localeCompare(b.nombre,"es"));
     if(ST.recSearch&&!rows.length&&!f) return "";
     return `<article class="cx-card ${rows.some(x=>x.id===ST.recOpen)?'expanded':''}" data-id="${esc(cid)}"><div class="cx-chead">${f?'':`<span class="cx-grip" title="Arrastrá para reordenar">${ICO.grip}</span>`}<div class="cx-grow"><span class="cx-ctitle">${esc(c.label)}</span><span class="cx-cmeta">${all.length} ${mode==="art"?"art.":"semi."}</span></div>
       <div class="cx-csearch">${ICO.srch}<input type="text" data-cq="${esc(cid)}" placeholder="Filtrar en ${esc(c.label.toLowerCase())}…" value="${esc(cq)}" autocomplete="off"></div>
@@ -7321,7 +7383,7 @@ function renderCompras(){
   $("#cxCoKpis").innerHTML=`<div class="cx-kpi"><small>Órdenes de compra</small><b>${OS.length}</b><span>${money0(tot)} en total</span></div>
    <div class="cx-kpi"><small>Detalle cargado</small><b>${tot?Math.round(totOk/tot*100):0}%</b><span>${money0(totOk)} de ${money0(tot)}</span></div>
    <div class="cx-kpi"><small>Por cargar</small><b style="color:${pend.length?'var(--cx-bad)':'var(--cx-ok)'}">${pend.length}</b><span>${pend.filter(o=>!ordItems(o).length).length} sin detalle · ${pend.filter(o=>ordItems(o).length).length} parciales</span></div>`;
-  const C=[...new Set(OS.map(o=>o.concepto))].sort((a,b)=>a.localeCompare(b,"es"));
+  const C=[...new Set(OS.map(o=>o.concepto))].sort((a,b)=>cmpPorIndiceCategoria(a,b));
   const marks={}; C.forEach(c=>{ if(OS.some(o=>o.concepto===c&&!D.estado[o.id])) marks[c]=true; });
   $("#cxCoChips").innerHTML=C.length?chipsHtml("compras",orderFor("compras",C).map(c=>({id:c,label:c,n:OS.filter(o=>o.concepto===c&&ordPass(o)).length})),marks):"";
   bindChips($("#cxCoChips"),"compras",renderCompras);
@@ -14850,7 +14912,8 @@ function costeoOrdenesFiltradas(){
 // de los 3 de COSTEO_CONCEPTOS cuando hay proveedores extra con otro concepto.
 function costeoConceptosPresentes(){
   const set = new Set(costeoProveedoresList().map(p=>p.concepto).filter(Boolean));
-  return [...COSTEO_CONCEPTOS.filter(c=>set.has(c)), ...[...set].filter(c=>!COSTEO_CONCEPTOS.includes(c)).sort((a,b)=>a.localeCompare(b,"es"))];
+  const m = indiceOrdenCategoriasMap();
+  return [...COSTEO_CONCEPTOS.filter(c=>set.has(c)).sort((a,b)=>cmpPorIndiceCategoria(a,b,m)), ...[...set].filter(c=>!COSTEO_CONCEPTOS.includes(c)).sort((a,b)=>cmpPorIndiceCategoria(a,b,m))];
 }
 async function loadCosteoProveedoresExtra(){
   const { data, error } = await sb.from("lf_costeo_proveedores_extra").select("proveedor_id");
@@ -16740,17 +16803,22 @@ function pvOnSearchInput(value){
 }
 function pvConceptosPresentes(){
   const set = new Set(pvArticulosFiltrados().map(a=>a.concepto).filter(Boolean));
-  return [...COSTEO_CONCEPTOS.filter(c=>set.has(c)), ...[...set].filter(c=>!COSTEO_CONCEPTOS.includes(c)).sort((a,b)=>a.localeCompare(b,"es"))];
+  const m = indiceOrdenCategoriasMap();
+  return [...COSTEO_CONCEPTOS.filter(c=>set.has(c)).sort((a,b)=>cmpPorIndiceCategoria(a,b,m)), ...[...set].filter(c=>!COSTEO_CONCEPTOS.includes(c)).sort((a,b)=>cmpPorIndiceCategoria(a,b,m))];
 }
 function pvOrdenEfectivo(articulo){
   const pv = preciosVentaItems[articulo.id];
   return (pv && pv.orden_manual!=null) ? pv.orden_manual : 999999;
 }
 function pvGrupoOrdenado(concepto){
+  const m = indiceOrdenArticulosMap();
   return pvArticulosFiltrados().filter(a=>a.concepto===concepto).sort((a,b)=>{
     const oa = pvOrdenEfectivo(a), ob = pvOrdenEfectivo(b);
     if(oa!==ob) return oa-ob;
-    return a.nombre.localeCompare(b.nombre,"es");
+    // Antes alfabético; ahora, si ninguno de los dos tiene un orden manual puesto a mano
+    // (función "Filas" de más arriba), el desempate sigue el orden del Índice de artículos
+    // en vez de alfabético (pedido de Pancho, 27/10/2026).
+    return cmpPorIndiceArticulo(a.nombre,b.nombre,m);
   });
 }
 function pvIncidencia(costo, precio){
@@ -19422,8 +19490,14 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     var provList = Object.keys(provs).sort(function(a,b){ return a==="Sin proveedor"?1:b==="Sin proveedor"?-1:a.localeCompare(b,"es"); });
     // Globos de filtro = rubros de los insumos (15/10/2026), en el mismo orden que las tablas
     var rk = function(r){ return (r.cat||"")+"\u0001"+(r.rubro||""); };
-    var rubs = {}; rows.forEach(function(r){ var k=rk(r); (rubs[k]=rubs[k]||{ cat:r.cat||"", rubro:r.rubro||"", g:new Set() }).g.add(r.grp); });
-    var rubDef = Object.keys(rubs).sort(function(a,b){ var A=rubs[a], B=rubs[b]; var ea=!A.cat&&!A.rubro, eb=!B.cat&&!B.rubro; if(ea!==eb) return ea?1:-1; return A.cat.localeCompare(B.cat,"es") || A.rubro.localeCompare(B.rubro,"es"); });
+    var rubs = {}; rows.forEach(function(r){ var k=rk(r); (rubs[k]=rubs[k]||{ cat:r.cat||"", rubro:r.rubro||"", catOrd:r.catOrd, rubOrd:r.rubOrd, g:new Set() }).g.add(r.grp); });
+    // Orden por defecto de las tablas (antes alfabético Categoría › Rubro; ahora el orden en que se
+    // fueron creando en Config › Compras, pedido de Pancho 27/10/2026) — el arrastre manual de abajo
+    // sigue pudiendo cambiarlo libremente, esto solo define dónde entra un rubro nuevo la primera vez.
+    var rubDef = Object.keys(rubs).sort(function(a,b){ var A=rubs[a], B=rubs[b]; var ea=!A.cat&&!A.rubro, eb=!B.cat&&!B.rubro; if(ea!==eb) return ea?1:-1;
+      var oa=A.catOrd==null?Infinity:A.catOrd, ob=B.catOrd==null?Infinity:B.catOrd; if(oa!==ob) return oa-ob;
+      var ra=A.rubOrd==null?Infinity:A.rubOrd, rb=B.rubOrd==null?Infinity:B.rubOrd; if(ra!==rb) return ra-rb;
+      return A.cat.localeCompare(B.cat,"es") || A.rubro.localeCompare(B.rubro,"es"); });
     // Orden manual (arrastrando globos o tablas, o con el número de posición): los rubros nuevos se suman al final
     var saved = lsGet("ord", []), rubOrd = saved.filter(function(k){ return rubs[k]; }); rubDef.forEach(function(k){ if(rubOrd.indexOf(k)<0) rubOrd.push(k); });
     ST.rubOrd = rubOrd;
@@ -19852,7 +19926,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       var host = document.getElementById("cfgClasif");
       if(host && !document.getElementById("cfgFCat")){
         var D = cfgData.proveedores;
-        var cats = D.cats.filter(function(c){ return D.rubros.some(function(r){ return r.catId===c.id; }); }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+        var cats = D.cats.filter(function(c){ return D.rubros.some(function(r){ return r.catId===c.id; }); }).sort(function(a,b){ return cfgCmpOrd(a,b); });
         var catSel = prevRub ? (cfgRub("proveedores", prevRub)||{}).catId : "";
         host.innerHTML = '<div class="field" id="cfgFldCat"><label>Categoría</label><select id="cfgFCat" onchange="cfgInsFillManual(\'\')">'+(catSel?"":'<option value="">Elegí…</option>')+cats.map(function(c){ return '<option value="'+c.id+'"'+(c.id===catSel?" selected":"")+'>'+cfgEsc(c.nombre)+'</option>'; }).join("")+'</select></div>'
           + '<div class="field" id="cfgFldRub"><label>Rubro</label><select id="cfgFRub" onchange="cfgInsOnRub()"></select></div>';
@@ -19903,7 +19977,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     function hermanos(ins){ return cfgData.items.filter(function(i){ return i.id!==ins.id && nrm(i.nomenclatura)===nrm(ins.nomenclatura); }); }
     window.cfgInsLfCat = function(){
       var cat = document.getElementById("cfgFInsCat").value, sel = document.getElementById("cfgFInsRubro"), cur = sel.value;
-      var rs = cfgData.proveedores.rubros.filter(function(r){ return r.catId===cat; }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+      var rs = cfgData.proveedores.rubros.filter(function(r){ return r.catId===cat; }).sort(function(a,b){ return cfgCmpOrd(a,b); });
       sel.disabled = !cat;
       sel.innerHTML = !cat ? '<option value="">Elegí la categoría primero</option>' : ((rs.some(function(r){ return r.id===cur; }) ? "" : '<option value="">Elegí…</option>') + rs.map(function(r){ return '<option value="'+r.id+'"'+(r.id===cur?" selected":"")+'>'+cfgEsc(r.nombre)+'</option>'; }).join(""));
       cfgInsLfRub();
@@ -19912,7 +19986,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       cfgHideErr(); ["cfgFldInsCat","cfgFldInsRubro"].forEach(function(i){ var e = document.getElementById(i); if(e) e.classList.remove("error"); });
       var rub = document.getElementById("cfgFInsRubro").value, ps = document.getElementById("cfgFInsProv"), cur = ps.value;
       var del = rub ? cfgProvsDeRubro(rub) : [], ids = del.map(function(p){ return p.id; });
-      var otros = cfgData.provs.filter(function(p){ return ids.indexOf(p.id)<0; }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+      var otros = cfgData.provs.filter(function(p){ return ids.indexOf(p.id)<0; }).sort(function(a,b){ return cfgCmpOrd(a,b); });
       var opt = function(p){ return '<option value="'+p.id+'"'+(p.id===cur?" selected":"")+'>'+cfgEsc(p.nombre)+'</option>'; };
       ps.innerHTML = (cur ? "" : '<option value="">Elegí un proveedor…</option>') + (del.length ? '<optgroup label="Ya trabajan en este rubro">'+del.map(opt).join("")+'</optgroup><optgroup label="Otros proveedores">'+otros.map(opt).join("")+'</optgroup>' : otros.map(opt).join(""));
       var h = document.getElementById("cfgFInsProvHint");
@@ -19930,7 +20004,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       var rubSel = ins ? cfgInsRubroId(ins) : (presetRubroId || "");
       var catSel = rubSel ? (cfgRub("proveedores", rubSel)||{}).catId : "";
       var D = cfgData.proveedores;
-      var cats = D.cats.filter(function(c){ return D.rubros.some(function(r){ return r.catId===c.id; }); }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+      var cats = D.cats.filter(function(c){ return D.rubros.some(function(r){ return r.catId===c.id; }); }).sort(function(a,b){ return cfgCmpOrd(a,b); });
       var conv = ins ? !!ins.necesita_conversion : false;
       var her = ins ? hermanos(ins) : [];
       cfgOpenPanel({
@@ -20129,9 +20203,13 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       var out = [];
       cfgData.items.slice().forEach(function(i){
         var prov = cfgProv(i.proveedor_id), r = cfgRub("proveedores", cfgInsRubroId(i)), c = r ? cfgCat("proveedores", r.catId) : null;
-        out.push([c ? c.nombre : "", r ? r.nombre : "", i.nomenclatura, prov ? prov.nombre : "", Number(i.cantidad)||null, i.unidad_medida||"", i.necesita_conversion ? Number(i.conversion_cantidad)||null : null, i.necesita_conversion ? i.conversion_unidad||"" : "", (Number(i.factor_merma)||0)/100]);
+        // Orden Categoría > Rubro > Proveedor, igual que ya quedan en Config (pedido de Pancho,
+        // 27/10/2026) — se guarda el _ord de cada uno aparte (no exportado) solo para ordenar.
+        out.push([c ? c.nombre : "", r ? r.nombre : "", i.nomenclatura, prov ? prov.nombre : "", Number(i.cantidad)||null, i.unidad_medida||"", i.necesita_conversion ? Number(i.conversion_cantidad)||null : null, i.necesita_conversion ? i.conversion_unidad||"" : "", (Number(i.factor_merma)||0)/100,
+          c&&c._ord!=null?c._ord:Infinity, r&&r._ord!=null?r._ord:Infinity, prov&&prov._ord!=null?prov._ord:Infinity]);
       });
-      out.sort(function(a,b){ return cfgCmp(a[0],b[0]) || cfgCmp(a[1],b[1]) || cfgCmp(a[2],b[2]) || cfgCmp(a[3],b[3]); });
+      out.sort(function(a,b){ return (a[9]-b[9]) || cfgCmp(a[0],b[0]) || (a[10]-b[10]) || cfgCmp(a[1],b[1]) || (a[11]-b[11]) || cfgCmp(a[3],b[3]) || cfgCmp(a[2],b[2]); });
+      out.forEach(function(r){ r.length = 9; });
       var cols = [{h:"Categoría"},{h:"Rubro"},{h:"Insumo"},{h:"Proveedor"},{h:"Cantidad",t:"num"},{h:"Unidad"},{h:"Conversión (cantidad)",t:"num"},{h:"Conversión (unidad)"},{h:"Factor de merma",t:"%"}];
       if(vdXls("Insumos " + CLUB() + " " + HOY() + ".xlsx", cols, out, "Insumos")) showToast("Excel descargado");
     };
@@ -20233,6 +20311,10 @@ window.cxListaInsumos = function(){
     const grupo = lfComprasGrupo(ins.id), vgG = lfVigente(grupo), L = grupo.slice().sort((a,b)=>a.key<b.key?1:-1);
     const M = lfManualGrupo(ins.id), merma = Number(ins.factor_merma)||0;
     rows.push({ key:ins.id, insId:ins.id, grp:G.of[ins.id], nombre:ins.nomenclatura, provId:ins.proveedor_id||null, provNombre:pv?pv.nombre:"Sin proveedor", cat:c?c.nombre:"", rubro:r?r.nombre:"",
+      // catOrd/rubOrd (27/10/2026): orden de creación de la categoría/rubro en Config › Compras,
+      // para que "Lista de insumos" agrupe sus tablas en ese orden por defecto en vez de alfabético
+      // (pedido de Pancho) — el arrastre manual de tablas/globos sigue funcionando igual arriba de esto.
+      catOrd:(c&&c._ord!=null)?c._ord:Infinity, rubOrd:(r&&r._ord!=null)?r._ord:Infinity,
       pres:(ins.cantidad!=null?(String(ins.cantidad).replace(".",",")+" "):"")+(ins.unidad_medida||"")+(conv!==1?` (1 ${ins.unidad_medida} = ${String(conv).replace(".",",")} ${ins.conversion_unidad})`:""),
       unidad:costeoInsumoUnidadEfectiva(ins), compra:vg?vg.unit/conv:null, compraFecha:vg?vg.fecha:null, manual:M.manual, usar:M.usar && M.manual!=null, merma,
       final:recInsumoPrecioUnitario(ins.id), receta:recInsumoPrecioUnitario(ins.id),
@@ -20495,7 +20577,7 @@ window.cxInsumosRefresh = async ()=>{ await loadCosteoInsumos(); };
       (cfgData.items||[]).forEach(function(i){
         if(!mios.has(i.id)) return;
         var otros = []; pres.forEach(function(p){ if(p.insumo_id===i.id && p.proveedor_id && p.proveedor_id!==S.provId){ var n = provNom(p.proveedor_id); if(n && otros.indexOf(n)<0) otros.push(n); } });
-        out.push({ id:i.id, nombre:i.nombre||"", orig:i.rubro_id||null, otros:otros });
+        out.push({ id:i.id, nombre:i.nombre||"", orig:i.rubro_id||null, otros:otros, _ord:i._ord });
       });
     } else {
       var items = cfgData.items || [];
@@ -20503,11 +20585,11 @@ window.cxInsumosRefresh = async ()=>{ await loadCosteoInsumos(); };
         if(i.proveedor_id!==S.provId) return;
         var k = nrm(i.nomenclatura), otros = [];
         items.forEach(function(x){ if(x.id!==i.id && x.proveedor_id!==S.provId && nrm(x.nomenclatura)===k){ var n = provNom(x.proveedor_id); if(n && otros.indexOf(n)<0) otros.push(n); } });
-        out.push({ id:i.id, nombre:i.nomenclatura||"", orig:i.rubro_id || (typeof cfgInsRubroId==="function" ? cfgInsRubroId(i) : null), otros:otros });
+        out.push({ id:i.id, nombre:i.nomenclatura||"", orig:i.rubro_id || (typeof cfgInsRubroId==="function" ? cfgInsRubroId(i) : null), otros:otros, _ord:i._ord });
       });
     }
     out.forEach(function(x){ x.rubro = S.moves.has(x.id) ? S.moves.get(x.id) : x.orig; });
-    return out.sort(function(a,b){ return cfgCmp(a.nombre, b.nombre); });
+    return out.sort(function(a,b){ return cfgCmpOrd(a,b); });
   }
   function porRubro(){
     var m = new Map();
@@ -20635,8 +20717,8 @@ window.cxInsumosRefresh = async ()=>{ await loadCosteoInsumos(); };
   }
   function opcionesDestino(){
     var D = cfgData.proveedores, h = '<option value="">Elegí el rubro de destino…</option>';
-    D.cats.slice().sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); }).forEach(function(c){
-      var rs = D.rubros.filter(function(r){ return r.catId===c.id; }).sort(function(a,b){ return cfgCmp(a.nombre,b.nombre); });
+    D.cats.slice().sort(function(a,b){ return cfgCmpOrd(a,b); }).forEach(function(c){
+      var rs = D.rubros.filter(function(r){ return r.catId===c.id; }).sort(function(a,b){ return cfgCmpOrd(a,b); });
       if(!rs.length) return;
       h += '<optgroup label="' + esc(c.nombre) + '">' + rs.map(function(r){ return '<option value="' + r.id + '"' + (M.dest===r.id ? " selected" : "") + '>' + esc(r.nombre) + '</option>'; }).join("") + '</optgroup>';
     });
@@ -20645,7 +20727,8 @@ window.cxInsumosRefresh = async ()=>{ await loadCosteoInsumos(); };
   function pintar(){
     var ins = insumos(), grupos = new Map();
     ins.forEach(function(x){ var k = x.rubro || ""; if(!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(x); });
-    var orden = [...grupos.keys()].sort(function(a,b){ if(a===M.foco) return -1; if(b===M.foco) return 1; return cfgCmp(catNom(a)+rubNom(a), catNom(b)+rubNom(b)); });
+    var ordK = function(id){ var r = rub(id); if(!r) return [Infinity,Infinity]; var c = cfgCat("proveedores", r.catId); return [c&&c._ord!=null?c._ord:Infinity, r._ord!=null?r._ord:Infinity]; };
+    var orden = [...grupos.keys()].sort(function(a,b){ if(a===M.foco) return -1; if(b===M.foco) return 1; var oa=ordK(a), ob=ordK(b); return (oa[0]-ob[0]) || (oa[1]-ob[1]) || cfgCmp(catNom(a)+rubNom(a), catNom(b)+rubNom(b)); });
     var movibles = ins.filter(function(x){ return M.sel.has(x.id) && x.rubro!==M.dest; });
     var listas = orden.map(function(k){
       var l = grupos.get(k), enDest = !!M.dest && k===M.dest;
@@ -20981,7 +21064,8 @@ const CT = {
       grupos[cat] = activos.filter(a=>a.concepto===cat).sort((a,b)=>{
         const oa = (typeof pvOrdenEfectivo==="function")?pvOrdenEfectivo(a):0, ob=(typeof pvOrdenEfectivo==="function")?pvOrdenEfectivo(b):0;
         if(oa!==ob) return oa-ob;
-        return a.nombre.localeCompare(b.nombre,"es");
+        // Desempate: orden del Índice de artículos en vez de alfabético (pedido de Pancho, 27/10/2026).
+        return (typeof cmpPorIndiceArticulo==="function") ? cmpPorIndiceArticulo(a.nombre,b.nombre) : a.nombre.localeCompare(b.nombre,"es");
       });
     });
     return grupos;
@@ -21305,7 +21389,7 @@ const CT = {
   renderFilasCatalogo(s, grupos, filtro){
     const itemsSel = new Set((s.items||[]).map(it=>it.articuloId));
     const q = (filtro.q||"").trim().toLowerCase();
-    const cats = (typeof COSTEO_CONCEPTOS!=="undefined"?COSTEO_CONCEPTOS:[]).filter(cat=>filtro.cats.has(cat));
+    const cats = (typeof conceptosEnOrdenIndice==="function"?conceptosEnOrdenIndice():(typeof COSTEO_CONCEPTOS!=="undefined"?COSTEO_CONCEPTOS:[])).filter(cat=>filtro.cats.has(cat));
     const bloques = cats.map(cat=>{
       const arts = (grupos[cat]||[]).filter(a=> !q || a.nombre.toLowerCase().includes(q));
       if(!arts.length) return "";
@@ -21339,7 +21423,7 @@ const CT = {
     // ni lista de artículos — en su lugar, un textarea de texto libre. Ver ctNuevoCuadroTexto().
     const esTexto = s.tipo === "texto";
     const filtro = this.filtroDe(s.id);
-    const chips = (typeof COSTEO_CONCEPTOS!=="undefined"?COSTEO_CONCEPTOS:[]).map(cat=>
+    const chips = (typeof conceptosEnOrdenIndice==="function"?conceptosEnOrdenIndice():(typeof COSTEO_CONCEPTOS!=="undefined"?COSTEO_CONCEPTOS:[])).map(cat=>
       `<button type="button" class="ct-chip ${filtro.cats.has(cat)?'on':''}" onclick="CT.toggleFiltroCat('${s.id}','${cat}')">${this.esc(cat)}</button>`
     ).join("");
 
@@ -22460,29 +22544,51 @@ const CT = {
     pageStyle.textContent = "@page{ size:"+w+"mm "+h+"mm; margin:0; }";
     const cleanup = ()=>{ const r = document.getElementById("ctPrintRoot"); if(r) r.remove(); window.removeEventListener("afterprint", cleanup); };
     window.addEventListener("afterprint", cleanup);
-    // Antes se imprimía 60ms después de armar el clon, sin importar si las imágenes de la carta
-    // (vienen de un bucket remoto, no están embebidas) ya habían terminado de cargar — si la red
-    // tardaba más que eso, el PDF podía salir sin la imagen o con ella a medio renderizar (reportado
-    // por Pancho: "la imagen queda corrida y no se llega a leer bien el texto"; reproducido de forma
-    // controlada: con la imagen todavía cargando, el PDF generado directamente no la incluye).
-    // Ahora se espera explícitamente a que decodifiquen TODAS las imágenes del clon antes de
-    // imprimir, con un máximo de 4s por si alguna fallara (imagen rota, sin conexión), para no dejar
-    // a Pancho esperando una impresión que nunca llega.
+    // v10 (21/10/2026): antes se imprimía 60ms después de armar el clon sin esperar a que las
+    // imágenes (vienen de un bucket remoto, no están embebidas) terminaran de cargar; se arregló
+    // esperando a que decodificaran, con un tope de 4s. Pancho volvió a reportar el mismo síntoma
+    // ("la imagen se ve corrida y cortada") — causa real de la RECAÍDA, confirmada reproduciendo
+    // con la config real de una carta y frenando la red artificialmente (Playwright): cloneNode(true)
+    // clona el <img>, pero el clon NO hereda los píxeles ya decodificados del original — vuelve a
+    // pedir la imagen por red de cero. Si esa segunda descarga no terminaba antes del tope de 4s
+    // (red del club, latencia del bucket, etc.), imprimir() igual continuaba: el PDF salía sin la
+    // imagen o con ella a medio pintar.
+    // Arreglo de raíz (27/10/2026): en vez de esperar a que el clon vuelva a descargar algo que la
+    // vista previa YA tiene en pantalla, se le pide a cada <img> del clon el mismo recurso con
+    // fetch(..., {cache:"force-cache"}) — si el navegador ya lo tiene en caché (lo normal: es la
+    // misma URL que la vista previa acaba de mostrar), responde al instante sin ir a la red de
+    // nuevo, y se lo pasa al clon como blob: local. Si por lo que sea eso fallara (primera carga
+    // sin caché todavía, el bucket sin CORS, etc.) se cae al mismo camino de espera de v10 como
+    // respaldo, ahora con un tope más generoso (8s en vez de 4s). Si ni así llega a tiempo, se
+    // avisa con un toast en vez de imprimir en silencio un PDF con la imagen rota.
     if(clone.querySelector("img")) showToast("Preparando PDF…", "ok");
-    this._esperarImagenesParaImprimir(clone).then(()=> window.print());
-  },
-  // Devuelve una promesa que se resuelve cuando todas las <img> dentro de `root` terminaron de
-  // decodificar (o fallaron, para no trabar la impresión con una imagen rota), con un tope de 4s.
-  _esperarImagenesParaImprimir(root){
-    const imgs = Array.from(root.querySelectorAll("img"));
-    if(!imgs.length) return new Promise(res=>setTimeout(res, 60));
-    const esperas = imgs.map(img=>{
-      if(img.complete && img.naturalWidth>0) return Promise.resolve();
-      if(img.decode) return img.decode().catch(()=>{});
-      return new Promise(res=>{ img.onload = res; img.onerror = res; });
+    this._prepararImagenesParaImprimir(clone).then(({completo})=>{
+      if(!completo) showToast("Una imagen no llegó a cargar a tiempo — revisá el PDF; si falta, probá imprimir de nuevo.", "warn");
+      window.print();
     });
-    const tope = new Promise(res=>setTimeout(res, 4000));
-    return Promise.race([Promise.all(esperas), tope]);
+  },
+  // Para cada <img> dentro de `root`, intenta reusar el recurso ya cacheado por el navegador (la
+  // misma imagen que la vista previa en pantalla acaba de mostrar) en vez de dejar que el clon la
+  // vuelva a pedir por red. Devuelve una promesa que se resuelve con {completo:boolean} — completo
+  // es false si alguna imagen no se pudo preparar (ni por caché ni por el respaldo) antes del tope.
+  _prepararImagenesParaImprimir(root){
+    const imgs = Array.from(root.querySelectorAll("img"));
+    if(!imgs.length) return new Promise(res=>setTimeout(()=>res({completo:true}), 60));
+    const tareas = imgs.map(img=>{
+      const original = img.src;
+      return fetch(original, {cache:"force-cache"})
+        .then(resp=>{ if(!resp.ok) throw new Error("http "+resp.status); return resp.blob(); })
+        .then(blob=>{ img.src = URL.createObjectURL(blob); return img.decode ? img.decode().catch(()=>{}) : null; })
+        .then(()=>true)
+        .catch(()=>{
+          // Respaldo: el camino de v10 (esperar a que el propio <img>, sin cambios, decodifique).
+          if(img.complete && img.naturalWidth>0) return true;
+          if(img.decode) return img.decode().then(()=>true).catch(()=>false);
+          return new Promise(res=>{ img.onload=()=>res(true); img.onerror=()=>res(false); });
+        });
+    });
+    const tope = new Promise(res=>setTimeout(()=>res("tope"), 8000));
+    return Promise.race([Promise.all(tareas), tope]).then(r=> r==="tope" ? {completo:false} : {completo: r.every(Boolean)});
   },
 };
 </script>
