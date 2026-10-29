@@ -6697,7 +6697,7 @@ async function cfgLoadAll(){
     sb.from("cm_rubros").select("id,nombre,concepto_id"),
     sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion,contacto_nombre,telefono,email,medio_compra_id"),
     sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
-    sb.from("cm_insumos").select("id,nombre,rubro_id,notas,factor_merma,costo_manual,usar_costo_manual"),
+    sb.from("cm_insumos").select("id,nombre,rubro_id,notas,factor_merma,costo_manual,usar_costo_manual,unidad"),
     sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden")
   ]);
   const err = res.find(r=>r.error);
@@ -7744,7 +7744,7 @@ function cfgOpenInsumoForm(id, presetRubroId){
       g.pres.push(cfgNewPres(p));
     });
   }
-  const sinProv = !!ins && !pvs.length;
+  const sinProv = !pvs.length; // 29/10/2026: el proveedor se registra al cargar la primera factura
   if(!pvs.length) pvs.push({ key:++cfgKeySeq, provId:"", pres:[cfgNewPres()] });
   const rubCat = rubroId ? cfgRub("insumos", rubroId) : null;
   cfgOpenPanel({
@@ -7754,7 +7754,7 @@ function cfgOpenInsumoForm(id, presetRubroId){
       ${cfgNameField("Nombre del insumo", ins && ins.nombre, "Ej. JAMON COCIDO", true)}
       <div class="cfg-sec-title"><span class="n">2</span>Proveedores · cantidad y unidad de pedido</div>
       <label class="cfg-sinprov" id="cfgSinProvBox"><input type="checkbox" id="cfgSinProv" onchange="cfgInsToggleSinProv(this.checked)"${sinProv?" checked":""}>
-        <span class="ck">${CFG_IC.check}</span><span><b>Sin proveedor definido</b><small>El insumo se crea igual y elegís la categoría y el rubro a mano. El proveedor se puede agregar después, editando el insumo.</small></span></label>
+        <span class="ck">${CFG_IC.check}</span><span><b>Sin proveedor por ahora</b><small>El proveedor se registra solo al cargar la primera factura de este insumo (Costeo › Carga de compras › “+ Crear / asignar insumo”). Hasta entonces no tiene precio, salvo que le cargues un costo manual en Costeo › Insumos.</small></span></label>
       <div id="cfgPvWrap">
         <div class="cfg-note">${CFG_IC.info}<div>Al elegir el <b>proveedor</b>, la categoría y el rubro del insumo se completan solos. Para cada proveedor indicá <b>la cantidad y la unidad en la que se pide</b> (<b>kg</b>, <b>lts</b>, <b>un</b> o <b>pq</b>); si lo entrega de más de una forma, agregá otra línea.<br>En <b>Costeo</b> se convierte lo comprado a costo por unidad de medida (ej. $10.000 por 3,5 kg → <b>$2.857,14/kg</b>).</div></div>
         <div id="cfgPvCards"></div>
@@ -7762,6 +7762,7 @@ function cfgOpenInsumoForm(id, presetRubroId){
       </div>
       <div class="cfg-sec-title"><span class="n">3</span>Categoría y rubro</div>
       <div class="field-row" id="cfgClasif"></div>
+      <div class="field" id="cfgFldInsUn" style="max-width:320px"><label>Unidad de medida <span class="hint">(la de recetas y costo manual)</span></label><select id="cfgFInsUn" onchange="this.closest('.field').classList.remove('error')">${(()=>{ const u0 = (ins&&ins.unidad) || ((ins&&cfgPresDeIns(ins.id)[0])||{}).unidad || ""; return (u0?"":'<option value="">Elegí…</option>') + CFG_UNIDADES.map(u=>`<option value="${u.v}"${u.v===u0?" selected":""}>${u.l} · ${u.n}</option>`).join(""); })()}</select></div>
       <div class="cfg-sec-title"><span class="n">4</span>Factor de merma <span class="opt">· opcional</span></div>
       <div class="cfg-note">${CFG_IC.info}<div>Se suma linealmente al costo por unidad de medida. Ej.: si el kg sale $1.000 y el insumo tiene <b>45%</b> de merma, el costo que ve Recetas es <b>$1.450/kg</b>. Si no tiene merma, dejalo en 0%.</div></div>
       <div class="cfg-plazo" style="margin-bottom:18px">
@@ -10604,7 +10605,7 @@ function insumoCosts(){
   _insAux={ pp, ult, hist:by };
   return _insCost=m;
 }
-function insUnidad(insId){ const p=cfgPresDeIns(insId)[0]; return p?p.unidad:"un"; }
+function insUnidad(insId){ const p=cfgPresDeIns(insId)[0]; return p?p.unidad:((cfgIns(insId)||{}).unidad||"un"); }
 function insMerma(insId){ const i=cfgIns(insId); return i?(Number(i.factor_merma)||0):0; }
 function insManual(insId){ const i=cfgIns(insId); return (i && i.usar_costo_manual && i.costo_manual!=null && i.costo_manual!=="") ? Number(i.costo_manual) : null; }
 function insCost(insId){ const man=insManual(insId); const c=insumoCosts()[insId]; const base = man!=null ? man : (c?c.unit:null); if(base==null) return null; return base*(1+insMerma(insId)/100); }
@@ -11353,7 +11354,9 @@ function ciCerrarInsumo(){ const m=$i("ciInsModal"); if(m) m.remove(); }
 function ciInsExistente(){ const n=norm(($i("ciInsNombre")||{}).value||""); return n ? cfgData.items.find(i=>norm(i.nombre)===n) : null; }
 function ciOnInsNombre(){ const ex=ciInsExistente(), note=$i("ciInsExiste"), sel=$i("ciInsRubro"); if(!note) return;
   if(ex){ const r=cfgRub("proveedores",ex.rubro_id); note.style.display=""; note.innerHTML="Ya existe: se le agrega esta presentación para el proveedor. Rubro: <b>"+esc(r?r.nombre:"—")+"</b>.";
-    if(r && ![...sel.options].some(o=>o.value===r.id)) sel.add(new Option(r.nombre, r.id)); if(r) sel.value=r.id; sel.disabled=true; }
+    if(r && ![...sel.options].some(o=>o.value===r.id)) sel.add(new Option(r.nombre, r.id)); if(r) sel.value=r.id; sel.disabled=true;
+    const un=$i("ciInsUn"), u0=ex.unidad||((cfgPresDeIns(ex.id)[0])||{}).unidad; if(un && u0) un.value=u0;
+    if(!cfgData.pres.some(p=>p.insumo_id===ex.id)) note.innerHTML="Ya existe y todavía no tiene proveedor: queda asignado a este proveedor con esta presentación. Rubro: <b>"+esc(r?r.nombre:"—")+"</b>."; }
   else { note.style.display="none"; sel.disabled=false; } }
 async function ciGuardarInsumo(){
   const o=ciOrden(); const prov=CI.provId?cfgProv(CI.provId):null; if(!o||!prov) return;
@@ -11365,10 +11368,11 @@ async function ciGuardarInsumo(){
   if(!ex && !rubroId){ toast("Elegí el rubro del insumo","warn"); return; }
   const btn=$i("ciInsGo"); btn.disabled=true; btn.textContent="Guardando…";
   let insId = ex ? ex.id : null;
-  if(!ex){ const r=await sb.from("cm_insumos").insert({ nombre, rubro_id: rubroId, notas:"", factor_merma:0 }).select("id").single();
+  if(!ex){ const r=await sb.from("cm_insumos").insert({ nombre, rubro_id: rubroId, notas:"", factor_merma:0, unidad:un }).select("id").single();
     if(r.error){ btn.disabled=false; btn.textContent="Guardar y usar"; toast(r.error.code==="23505"?"Ya existe un insumo con ese nombre":"No se pudo crear el insumo: "+r.error.message,"warn"); return; } insId=r.data.id; }
   const ordenP = cfgData.pres.filter(p=>p.insumo_id===insId).reduce((m,p)=>Math.max(m,Number(p.orden)||0),-1)+1;
   const rp=await sb.from("cm_insumo_presentaciones").insert({ insumo_id:insId, proveedor_id:prov.id, bulto:"", cantidad:cant, unidad:un, orden:ordenP });
+  if(!rp.error && ex && !ex.unidad) await sb.from("cm_insumos").update({ unidad:un }).eq("id", insId);
   if(rp.error){ btn.disabled=false; btn.textContent="Guardar y usar"; toast("No se pudo asignar la presentación: "+rp.error.message,"warn"); return; }
   try{ await sb.from("cm_historial").insert({ usuario_id:uid(), usuario_nombre:uname(), accion: ex?"Asignó un insumo a un proveedor":"Creó un insumo", detalle:`“${nombre}” · ${prov.nombre} (${cfgFmtNum(cant)} ${cfgUnLabel(un)}) · desde la factura ${o.id}`, modulo:"config" }); }catch(e){}
   await cfgLoadAll(); if(typeof cfgRenderAll==="function") try{ cfgRenderAll(); }catch(e){}
@@ -11684,7 +11688,7 @@ const SK_SITE = {
     const [conceptos, rubros, insumos, pres, semiCats, semis, arts, lineas, items, ordenes] = await Promise.all([
       fetchAll("cm_conceptos","id,nombre"),
       fetchAll("cm_rubros","id,nombre,concepto_id"),
-      fetchAll("cm_insumos","id,nombre,rubro_id,factor_merma,costo_manual,usar_costo_manual"),
+      fetchAll("cm_insumos","id,nombre,rubro_id,factor_merma,costo_manual,usar_costo_manual,unidad"),
       fetchAll("cm_insumo_presentaciones","id,insumo_id,unidad,orden"),
       fetchAll("cm_semi_categorias","id,nombre"),
       fetchAll("cm_semielaborados","id,nombre,categoria_id,rinde,rinde_unidad"),
@@ -11699,7 +11703,7 @@ const SK_SITE = {
     return {
       cats: conceptos.map(c=>({ id:c.id, nombre:c.nombre })),
       rubros: rubros.map(r=>({ id:r.id, nombre:r.nombre, cat_id:r.concepto_id })),
-      insumos: insumos.map(i=>({ id:i.id, nombre:i.nombre, rubro_id:i.rubro_id, unidad:unidadDe[i.id]||"un", merma:Number(i.factor_merma)||0, manual:(i.usar_costo_manual && i.costo_manual!=null) ? Number(i.costo_manual) : null })),
+      insumos: insumos.map(i=>({ id:i.id, nombre:i.nombre, rubro_id:i.rubro_id, unidad:unidadDe[i.id]||i.unidad||"un", merma:Number(i.factor_merma)||0, manual:(i.usar_costo_manual && i.costo_manual!=null) ? Number(i.costo_manual) : null })),
       semiCats: semiCats.map(c=>({ id:c.id, nombre:c.nombre })),
       semis: semis.map(s=>({ id:s.id, nombre:s.nombre, cat_id:s.categoria_id, rinde:Number(s.rinde)||1,
         unidad: s.rinde_unidad==="kg" ? "kg" : s.rinde_unidad==="lts" ? "lts" : "porc" })),
@@ -14187,12 +14191,12 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
         var titles = [].slice.call(panel.querySelectorAll(".cfg-sec-title"));
         var tProv = titles[1], tClas = titles[2];
         // "Categoría y rubro" pasa a ser el paso 2, antes de los proveedores
-        if(tProv && tClas){ panel.insertBefore(tClas, tProv); panel.insertBefore(body, tProv); }
+        if(tProv && tClas){ panel.insertBefore(tClas, tProv); panel.insertBefore(body, tProv); var fu = document.getElementById("cfgFldInsUn"); if(fu) panel.insertBefore(fu, tProv); }
         [].slice.call(panel.querySelectorAll(".cfg-sec-title .n")).forEach(function(n, i){ n.textContent = i+1; });
         if(tProv) tProv.lastChild.textContent = "Proveedores · cantidad y unidad de pedido";
         var note = panel.querySelector("#cfgPvWrap .cfg-note div");
         if(note) note.innerHTML = 'Elegí <b>todos los proveedores</b> que entregan este insumo, sin importar su rubro (primero aparecen los que ya trabajan en el rubro elegido). Para cada uno indicá <b>la cantidad y la unidad en la que se pide</b> (<b>kg</b>, <b>lts</b>, <b>un</b> o <b>pq</b>); si lo entrega de más de una forma, agregá otra línea. Si un proveedor no estaba en este rubro, se lo suma al guardar.';
-        var sp = panel.querySelector("#cfgSinProvBox small"); if(sp) sp.textContent = "El insumo se crea igual. El proveedor se puede agregar después, editando el insumo.";
+        var sp = panel.querySelector("#cfgSinProvBox small"); if(sp) sp.textContent = "El proveedor se registra solo al cargar la primera factura de este insumo (Costeo › Carga de compras › “+ Crear / asignar insumo”). Hasta entonces no tiene precio, salvo que le cargues un costo manual en Costeo › Insumos.";
         var lbl = panel.querySelectorAll("#cfgClasif label"); lbl.forEach(function(l){ var h = l.querySelector(".hint"); if(h) h.remove(); });
         var cat = document.getElementById("cfgFCat"); if(cat && !id && !presetRubroId) setTimeout(function(){ var n = document.getElementById("cfgFNombre"); if(n) n.focus(); }, 90);
       }catch(e){ console.warn(e); }
@@ -14204,7 +14208,15 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       var rub = (document.getElementById("cfgFRub")||{}).value;
       if(!rub){ var fc = document.getElementById("cfgFldCat"), fr = document.getElementById("cfgFldRub"); if(fc) fc.classList.toggle("error", !(document.getElementById("cfgFCat")||{}).value); if(fr) fr.classList.add("error"); cfgShowErr("Elegí la categoría y el rubro del insumo."); return false; }
       var provs = (cfgPS && !cfgPS.sinProv) ? cfgPS.pvs.map(function(g){ return g.provId; }).filter(Boolean) : [];
+      var unSel = (document.getElementById("cfgFInsUn")||{}).value || "";
+      if(!unSel && cfgPS && cfgPS.sinProv){ var fu = document.getElementById("cfgFldInsUn"); if(fu) fu.classList.add("error"); cfgShowErr("Elegí la unidad de medida del insumo (la que se usa en recetas y en el costo manual)."); return false; }
+      var nomIns = ((document.getElementById("cfgFNombre")||{}).value || "").trim();
       var ok = await _sub.apply(this, arguments);
+      if(ok){ try{
+        var me = ins ? cfgIns(ins.id) : cfgData.items.find(function(i){ return cfgNorm(i.nombre)===cfgNorm(nomIns); });
+        var unF = unSel || (me && (cfgPresDeIns(me.id)[0]||{}).unidad) || null;
+        if(me && unF && me.unidad!==unF){ var ru = await sb.from("cm_insumos").update({ unidad:unF }).eq("id", me.id); if(!ru.error) me.unidad = unF; }
+      }catch(e){ console.warn(e); } }
       if(ok && rub && provs.length){ await vincular(provs, rub); try{ cfgRenderAll(); }catch(e){} }
       return ok;
     };
