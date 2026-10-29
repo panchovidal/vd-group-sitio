@@ -2929,6 +2929,72 @@
   .prv-foot-h{flex:1;font-size:11px;font-weight:600;color:var(--text-3,#8A93A8);}
   @media (max-width:560px){ .prv-bar{flex-direction:column;align-items:stretch;} .prv-foot-h{display:none;} }
 </style>
+<style>
+  /* Conteos: globos por rubro, disposición, encabezados fijos (29/10/2026) */
+  .cv-chips{flex-wrap:wrap;overflow:visible}
+  .cv-chips .sk-chip[draggable=true]{cursor:grab}
+  .cv-chips .sk-chip.dragging{opacity:.45}
+  .cv-chips .sk-chip.drop-before{box-shadow:-3px 0 0 var(--sk-acc)}
+  .cv-chips .sk-chip.drop-after{box-shadow:3px 0 0 var(--sk-acc)}
+  .cv-vista button{display:inline-flex;align-items:center;gap:6px}
+  .cv-vista button svg{width:14px;height:14px}
+  .sk-grid2.cv-compacta{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
+  .sk-grid2.cv-lista{grid-template-columns:1fr}
+  .sk-grid2 .sk-card[data-g]{display:flex;flex-direction:column}
+  .sk-grid2 .sk-card[data-g] .sk-card-b{max-height:calc(100vh - 210px);overflow:auto;overscroll-behavior:auto;border-radius:0 0 14px 14px}
+  .sk-grid2 .sk-card[data-g] .sk-card-b.cv-panning{cursor:grabbing;user-select:none}
+  .sk-grid2 .sk-card[data-g] .sk-t td.nm,.sk-grid2 .sk-card[data-g] .sk-t th:first-child{position:sticky;left:0;background:#fff;z-index:1;box-shadow:1px 0 0 var(--sk-line)}
+  .sk-grid2 .sk-card[data-g] .sk-t th:first-child{z-index:3}
+  .sk-grid2 .sk-card[data-g] .sk-t tbody tr:hover td.nm{background:var(--sk-hover)}
+  .sk-grid2 .sk-card[data-g] .sk-t th{box-shadow:0 1px 0 var(--border)}
+  .sk-card[data-g] .sk-card-h{gap:8px}
+  .cv-grip{cursor:grab;color:var(--text-3);width:20px;height:24px;display:grid;place-items:center;border-radius:6px;flex-shrink:0}
+  .cv-grip:hover{background:var(--sk-hover);color:var(--text-1)}
+  .cv-grip svg{width:13px;height:13px}
+  .cv-pos{width:30px;height:24px;border:1px solid var(--border);border-radius:7px;text-align:center;font-family:inherit;font-size:11.5px;font-weight:800;color:var(--text-2);background:#fff;padding:0;flex-shrink:0}
+  .cv-pos:focus{outline:none;border-color:var(--sky)}
+  .sk-grid2 .sk-card[data-g]{position:relative}
+  .sk-grid2 .sk-card[data-g].cv-more-r::after{content:"";position:absolute;right:0;top:46px;bottom:0;width:22px;background:linear-gradient(to left,rgba(15,27,77,.13),rgba(15,27,77,0));pointer-events:none;border-radius:0 0 14px 0;z-index:4}
+  .sk-card[data-g].dragging{opacity:.45}
+  .sk-card[data-g].drop-before{box-shadow:0 0 0 2px var(--sk-acc)}
+  .sk-card[data-g].drop-after{box-shadow:0 0 0 2px var(--sk-acc)}
+  @media (max-width:900px){ .cv-vista button span{display:none} }
+</style>
+<style>
+  /* Proveedores · contacto y medio de compra (29/10/2026) */
+  .pvc-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  .pvc-grid .field{margin-bottom:12px}
+  .pvc-grid .field label{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .pvc-link{border:0;background:none;padding:0;font-family:inherit;font-size:10.5px;font-weight:800;letter-spacing:0;text-transform:none;color:var(--sky);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  .pvc-link svg{width:11px;height:11px}
+  .pvc-link:hover{text-decoration:underline}
+  .pvc-new{display:flex;gap:8px;align-items:center;margin:-2px 0 12px;padding:10px;border:1.5px dashed #C9D6EE;border-radius:11px;background:#F6F9FF}
+  .pvc-new[hidden],.pvc-ed[hidden]{display:none}
+  .pvc-new input,.pvc-ed input{flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-family:inherit;font-size:13px;color:var(--text-1);background:#fff;outline:none}
+  .pvc-new input:focus,.pvc-ed input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(89,119,210,.14)}
+  .pvc-btn{border:0;background:var(--navy,#0B1B4D);color:#fff;font-family:inherit;font-weight:800;font-size:12px;padding:8px 13px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .pvc-btn svg{width:12px;height:12px}
+  .pvc-btn.ghost{background:#EEF1F6;color:var(--navy,#0B1B4D)}
+  .pvc-ed{margin:0 0 12px;border:1px solid var(--border);border-radius:12px;background:#FAFBFE;padding:10px 12px 12px}
+  .pvc-ed-h{margin-bottom:8px}
+  .pvc-ed-h b{display:block;font-size:12.5px;color:var(--navy,#0B1B4D);font-weight:800}
+  .pvc-ed-h span{display:block;font-size:11.5px;color:var(--text-3);font-weight:600;margin-top:2px;line-height:1.35}
+  .pvc-ed-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .pvc-u{font-size:11px;color:var(--text-3);font-weight:700;white-space:nowrap;min-width:84px;text-align:right}
+  .pvc-x{border:1px solid var(--border);background:#fff;color:var(--text-3);border-radius:8px;height:32px;min-width:32px;padding:0 8px;display:grid;place-items:center;cursor:pointer;font-family:inherit;font-size:11px;font-weight:800;white-space:nowrap}
+  .pvc-x svg{width:13px;height:13px}
+  .pvc-x:hover{color:#B42318;border-color:#F3C1BC}
+  .pvc-x.conf{background:#FDE7E7;color:#B42318;border-color:#F3C1BC}
+  .pvc-ed-add{display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+  .pvc-cell{display:flex;flex-wrap:wrap;gap:4px 6px}
+  .pvc-chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-2);background:#F4F6FB;border-radius:7px;padding:2px 7px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none}
+  .pvc-chip svg{width:11px;height:11px;flex-shrink:0;color:var(--text-3)}
+  .pvc-chip.lnk:hover{background:#EAF0FC;color:var(--navy,#0B1B4D)}
+  .pvc-chip.med{background:#EEF6F2;color:#1F6B52}
+  .pvc-chip.med svg{color:#2E9E7E}
+  .cfg-sub-meta .pvc-cell{max-width:340px}
+  @media (max-width:640px){ .pvc-grid{grid-template-columns:1fr} }
+</style>
 </head>
 <body>
 
@@ -4909,7 +4975,7 @@ async function cfgLoadAll(){
   const res = await Promise.all([
     sb.from("lf_conceptos").select("id,nombre").order("created_at"),
     sb.from("lf_rubros").select("id,nombre,concepto_id").order("created_at"),
-    sb.from("lf_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion").order("created_at"),
+    sb.from("lf_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion,contacto_nombre,telefono,email,medio_compra_id").order("created_at"),
     sb.from("lf_proveedor_rubros").select("proveedor_id,rubro_id"),
     sb.from("lf_costeo_insumos").select("id,proveedor_id,rubro_id,nomenclatura,unidad_medida,cantidad,factor_merma,necesita_conversion,conversion_cantidad,conversion_unidad,costo_manual,usar_costo_manual").order("created_at")
   ]);
@@ -5385,7 +5451,7 @@ function cfgRubrosListHtml(dom, rows){
         }).join("") : `<div class="cfg-empty-cell">Sin insumos en este rubro todavía (se crean desde la pestaña Insumos).</div>`;
       } else {
         const ps = leafIds.map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b));
-        inner = ps.length ? ps.map(p=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(p.nombre,q)}</span><span class="cfg-sub-meta">${cfgEntregasCell(p)}${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip" title="Plazo de pago">${CFG_IC.card.replace('<svg','<svg style="width:11px;height:11px;margin-right:4px"')}${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim" title="Sin plazo de pago">Sin plazo</span>'}${cfgTipoGastoChip(p)}</span>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`)])}</div>`).join("")
+        inner = ps.length ? ps.map(p=>`<div class="cfg-sub-item"><span class="nm">${cfgHi(p.nombre,q)}</span><span class="cfg-sub-meta">${cfgEntregasCell(p)}${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip" title="Plazo de pago">${CFG_IC.card.replace('<svg','<svg style="width:11px;height:11px;margin-right:4px"')}${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim" title="Sin plazo de pago">Sin plazo</span>'}${cfgTipoGastoChip(p)}</span>${(p.contacto_nombre||p.telefono||p.email||p.medio_compra_id) && typeof cfgContactoCell==="function" ? `<span class="cfg-sub-meta">${cfgContactoCell(p)}</span>` : ""}${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`)])}</div>`).join("")
           : `<div class="cfg-empty-cell">Sin proveedores asignados · <a onclick="cfgOpenProvForm(null,'${r.id}')">Agregar proveedor</a></div>`;
       }
       html += `<tr class="cfg-lsub"><td colspan="4"><div class="cfg-sub">${inner}</div></td></tr>`;
@@ -5402,12 +5468,12 @@ function cfgHojasListHtml(dom, rows){
   const leaves = [...byLeaf.keys()].map(id=>cfgProv(id)).filter(Boolean).sort((a,b)=>cfgCmpOrd(a,b));
   if(!leaves.length) return `<div class="cfg-nores"><strong>No hay proveedores para mostrar</strong></div>`;
   const cr = x => { const rs = cfgRubrosDeProv(x.id); return { cats: rs.map(r=>`<div>${cfgHi((cfgCat(dom,r.catId)||{}).nombre||"",q)}</div>`).join(""), rubs: rs.map(r=>`<div>${cfgHi(r.nombre,q)}</div>`).join("") }; };
-  let html = `<table class="cfg-table cfg-list"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:17%"><col style="width:25%"><col style="width:10%"><col style="width:10%"></colgroup>
-    <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Días de entrega · pedido</div></th><th><div class="cfg-th">Plazo de pago</div></th><th><div class="cfg-th">Tipo de gasto</div></th></tr></thead><tbody>`;
+  let html = `<table class="cfg-table cfg-list"><colgroup><col style="width:17%"><col style="width:12%"><col style="width:13%"><col style="width:22%"><col style="width:18%"><col style="width:8%"><col style="width:10%"></colgroup>
+    <thead><tr><th><div class="cfg-th"><span class="lvl-dot l3">3</span>Proveedor</div></th><th><div class="cfg-th"><span class="lvl-dot l1">1</span>Categoría</div></th><th><div class="cfg-th"><span class="lvl-dot l2">2</span>Rubro</div></th><th><div class="cfg-th">Contacto · medio de compra</div></th><th><div class="cfg-th">Días de entrega · pedido</div></th><th><div class="cfg-th">Plazo de pago</div></th><th><div class="cfg-th">Tipo de gasto</div></th></tr></thead><tbody>`;
   leaves.forEach(p=>{ const x = cr(p);
     html += `<tr class="cfg-lrow flat"><td><div class="cfg-cell"><div class="txt"><div class="nm">${cfgHi(p.nombre,q)}</div></div>${cfgActs([cfgBtn("edit","Editar proveedor",`cfgOpenProvForm('${p.id}')`), cfgBtn("del","Eliminar proveedor",`cfgDeleteProv('${p.id}',null)`)])}</div></td>
       <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
-      <td><div class="cfg-cell">${cfgEntregasCell(p)}</div></td><td><div class="cfg-cell">${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip">${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim">—</span>'}</div></td><td><div class="cfg-cell">${cfgTipoGastoChip(p)}</div></td></tr>`; });
+      <td><div class="cfg-cell">${typeof cfgContactoCell==="function" ? cfgContactoCell(p) : ""}</div></td><td><div class="cfg-cell">${cfgEntregasCell(p)}</div></td><td><div class="cfg-cell">${cfgPlazoTxt(p)?`<span class="cfg-plazo-chip">${cfgPlazoTxt(p)}</span>`:'<span class="cfg-dim">—</span>'}</div></td><td><div class="cfg-cell">${cfgTipoGastoChip(p)}</div></td></tr>`; });
   return html + "</tbody></table>";
 }
 function cfgHojasListHtmlInsumos(rows, q){
@@ -5435,11 +5501,11 @@ function cfgExportExcel(dom){
   if(dom==="insumos") return cfgExportExcelInsumos();
   const D = cfgData[dom], out = [];
   const rubs = D.rubros.slice().sort((a,b)=>cfgCmpOrd(cfgCat(dom,a.catId),cfgCat(dom,b.catId)) || cfgCmpOrd(a,b));
-  const cols = ["Categoría","Rubro","Proveedor","Días de entrega","Días de pedido","Plazo de pago (días)","Tipo de gasto"];
+  const cols = ["Categoría","Rubro","Proveedor","Días de entrega","Días de pedido","Plazo de pago (días)","Tipo de gasto","Contacto","Teléfono","Email","Medio de compra"];
   rubs.forEach(r=>{
     const cat = (cfgCat(dom,r.catId)||{}).nombre||"", ps = cfgProvsDeRubro(r.id);
-    if(!ps.length) out.push([cat, r.nombre, "", "", "", "", ""]);
-    ps.forEach(p=>{ const es = cfgEntregas(p); out.push([cat, r.nombre, p.nombre, es.map(e=>CFG_DIAS[e.entrega]).join(", "), es.map(e=>CFG_DIAS[e.pedido]).join(", "), p.plazo_pago_dias==null?"":p.plazo_pago_dias, cfgTipoGastoLbl(p)]); });
+    if(!ps.length) out.push([cat, r.nombre, "", "", "", "", "", "", "", "", ""]);
+    ps.forEach(p=>{ const es = cfgEntregas(p); out.push([cat, r.nombre, p.nombre, es.map(e=>CFG_DIAS[e.entrega]).join(", "), es.map(e=>CFG_DIAS[e.pedido]).join(", "), p.plazo_pago_dias==null?"":p.plazo_pago_dias, cfgTipoGastoLbl(p), p.contacto_nombre||"", p.telefono||"", p.email||"", typeof cfgMedioNombre==="function" ? cfgMedioNombre(p.medio_compra_id) : ""]); });
   });
   if(!out.length){ showToast("No hay proveedores para descargar", "warn"); return; }
   const ws = XLSX.utils.aoa_to_sheet([cols].concat(out));
@@ -5821,6 +5887,7 @@ function cfgOpenProvForm(id, presetRubroId){
       <div class="cfg-tg" id="cfgTipoGasto">${Object.entries(CFG_TIPO_GASTO).map(([k,v])=>`<button type="button" class="cfg-tg-opt${cfgTipoGasto(p)===k?" on":""}" data-t="${k}" onclick="cfgTipoGastoPick('${k}')"><span class="rd"></span><span class="tx"><b>${v.lbl}</b><i>${v.desc}</i></span></button>`).join("")}</div>
       ${cfgMesImpHtml(p)}
       <div class="tgx-perhint" id="cfgPerHint"${["semestral","anual"].includes(cfgTipoGasto(p)) ? "" : " hidden"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg><div>El <b>período</b> (mes de inicio) se elige en cada orden de pago; por defecto es el mes de la factura. Ej.: anual pagado en agosto 2026 → <b>ago 2026 a jul 2027</b>.</div></div>
+      ${typeof cfgProvContactoHtml==="function" ? cfgProvContactoHtml(p) : ""}
       <div class="cfg-err-box" id="cfgErrBox"></div>`,
     saveLabel: p ? "Guardar cambios" : "Crear proveedor",
     nameList: ()=>cfgData.provs,
@@ -5831,6 +5898,7 @@ function cfgOpenProvForm(id, presetRubroId){
     submit: async ()=>{
       const nombre = cfgReadName(); if(!nombre) return false;
       const rubIds = [...cfgPS.msSel];
+      const pvcErr = typeof cfgProvContactoValidar==="function" ? cfgProvContactoValidar() : null; if(pvcErr){ cfgShowErr(pvcErr); return false; }
       document.getElementById("cfgMs").classList.toggle("err", !rubIds.length);
       if(!rubIds.length){ cfgShowErr("Asigná el proveedor a al menos un rubro."); return false; }
       const plazoTxt = document.getElementById("cfgFPlazo").value.trim();
@@ -5849,6 +5917,8 @@ function cfgOpenProvForm(id, presetRubroId){
         const rt = await sb.from("lf_proveedores").update({ tipo_gasto: tipoGasto, mes_imputacion: mesImp }).eq("id", provIdGuardado);
         if(rt.error){ cfgShowErr("El proveedor se guardó, pero no se pudo guardar el tipo de gasto: " + rt.error.message); await cfgReload(); return false; }
       }
+      const pvc = typeof cfgProvContactoGuardar==="function" ? await cfgProvContactoGuardar(provIdGuardado, p) : { cambios:[] };
+      if(pvc && pvc.error){ cfgShowErr(pvc.error); await cfgReload(); return false; }
       const rubN = ids => ids.map(i=>(cfgRub("proveedores",i)||{}).nombre).filter(Boolean).sort(cfgCmp).join(", ");
       if(p){
         const antes = cfgRubrosDeProv(p.id).map(r=>r.id);
@@ -5859,6 +5929,7 @@ function cfgOpenProvForm(id, presetRubroId){
         if(eA!==eD) ch.push(`entregas: ${eA||"—"} → ${eD||"—"}`);
         if((p.plazo_pago_dias??null)!==plazo) ch.push(`plazo de pago: ${cfgPlazoTxt(p)||"—"} → ${cfgPlazoTxt({plazo_pago_dias:plazo})||"—"}`);
         if(cfgTipoGastoLbl(p)!==cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})) ch.push(`tipo de gasto: ${cfgTipoGastoLbl(p)} → ${cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})}`);
+        if(pvc && pvc.cambios && pvc.cambios.length) ch.push(...pvc.cambios);
         if(ch.length) logHistorialConfig("Editó un proveedor", `“${nombre}” · ${ch.join(" · ")}`);
       } else logHistorialConfig("Creó un proveedor", `“${nombre}” · rubros: ${rubN(rubIds)}${entregas.length?` · entregas: ${cfgEntregasTxt({entregas}, true)}`:""}${plazo!=null?` · plazo de pago: ${cfgPlazoTxt({plazo_pago_dias:plazo})}`:""} · tipo de gasto: ${cfgTipoGastoLbl({tipo_gasto:tipoGasto, mes_imputacion:mesImp})}`);
       await cfgReload();
@@ -18122,6 +18193,84 @@ const C = { tipo:"i", cat:"all", q:"", ver:null, ed:null };
 function kpi(lbl, val, sub, cls, extra){ return `<div class="sk-kpi ${cls||""}"><small>${lbl}</small><b>${val}</b>${sub?`<span>${sub}</span>`:""}${extra||""}</div>`; }
 function segTipo(id, tipo, nI, nS){ return `<div class="sk-seg" id="${id}"><button type="button" data-v="i" class="${tipo==="i"?"on":""}">Insumos <span class="n">${nI}</span></button><button type="button" data-v="s" class="${tipo==="s"?"on":""}">Semi-elaborados <span class="n">${nS}</span></button></div>`; }
 function chipsCats(id, cats, sel, cnt){ if(cats.length<2) return ""; return `<div class="sk-chips" id="${id}"><button type="button" class="sk-chip ${sel==="all"?"on":""}" data-v="all">Todas</button>${cats.map(c=>`<button type="button" class="sk-chip ${sel===c.id?"on":""}" data-v="${esc(c.id)}">${esc(c.nombre)} <span class="n">${cnt?cnt(c):""}</span></button>`).join("")}</div>`; }
+/* ---------- Globos por rubro, orden de tablas y disposición (29/10/2026) ----------
+   Estándar de módulos: un globo por tabla (rubro de insumos / categoría de semi-elaborados),
+   multi-selección, arrastrables; su orden es el de las tablas (también con manija y número de
+   posición en cada tabla). Disposición: cuadrícula, compacta o lista a todo el ancho.
+   Preferencias por usuario en este navegador (localStorage). */
+const CV = {
+  k:(n,t)=>`${P}_skco_${n}${t?"_"+t:""}`,
+  get(n,t,d){ try{ const v=localStorage.getItem(CV.k(n,t)); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(n,t,v){ try{ localStorage.setItem(CV.k(n,t), JSON.stringify(v)); }catch(e){} }
+};
+const CV_VISTAS = [
+  { v:"grid", t:"Cuadrícula", i:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>' },
+  { v:"compacta", t:"Compacta", i:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="5.5" height="16" rx="1.2"/><rect x="9.25" y="4" width="5.5" height="16" rx="1.2"/><rect x="16" y="4" width="5.5" height="16" rx="1.2"/></svg>' },
+  { v:"lista", t:"Lista", i:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>' }
+];
+const CV_GRIP = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+function cvVista(){ const v=CV.get("vista","", "grid"); return CV_VISTAS.some(x=>x.v===v)?v:"grid"; }
+// grupos: [{gId, nombre, cN}] → orden guardado (los nuevos se suman al final, por categoría y nombre)
+function cvOrden(tipo, grupos){
+  const def = grupos.slice().sort((a,b)=>(a.cN+"\u0001"+a.nombre).localeCompare(b.cN+"\u0001"+b.nombre,"es")).map(g=>g.gId);
+  const L = CV.get("ord",tipo,[]).filter(k=>def.includes(k)); def.forEach(k=>{ if(!L.includes(k)) L.push(k); }); return L;
+}
+function cvSel(tipo, ord){ return new Set(CV.get("sel",tipo,[]).filter(k=>ord.includes(k))); }
+function cvTools(id, tipo, grupos, ord, sel, cnt){
+  const gm = {}; grupos.forEach(g=>gm[g.gId]=g);
+  const vista = cvVista();
+  const chips = ord.length<2 ? "" : `<div class="sk-chips cv-chips" id="${id}" data-tipo="${tipo}"><button type="button" class="sk-chip ${sel.size?"":"on"}" data-v="">Todos</button>${ord.map(k=>{ const g=gm[k]; if(!g) return ""; return `<button type="button" class="sk-chip ${sel.has(k)?"on":""}" data-v="${esc(k)}" draggable="true" title="${esc((tipo==="i"?g.cN+" › ":"")+g.nombre)} · podés elegir varios · arrastralo para reordenar (también ordena las tablas)">${esc(g.nombre)} <span class="n">${cnt?cnt(g):""}</span></button>`; }).join("")}</div>`;
+  return { chips, vista: `<div class="sk-seg cv-vista" title="Disposición de las tablas">${CV_VISTAS.map(x=>`<button type="button" data-vista="${x.v}" class="${vista===x.v?"on":""}" title="${x.t}">${x.i}<span>${x.t}</span></button>`).join("")}</div>` };
+}
+function cvCardHead(pos){ return `<span class="cv-grip" title="Arrastrá para reordenar">${CV_GRIP}</span><input class="cv-pos" value="${pos}" inputmode="numeric" title="Posición de la tabla: escribí el número y Enter">`; }
+function cvGridClass(){ return "sk-grid2 cv-" + cvVista(); }
+function cvBind(root, tipo, ord, rerender){
+  const mover = (key, toKey, after)=>{ const L=ord.filter(k=>k!==key); let i=L.indexOf(toKey); if(i<0) return; if(after) i++; L.splice(i,0,key); CV.set("ord",tipo,L); rerender(); };
+  const clr = sel=>$$(sel,root).forEach(x=>x.classList.remove("drop-before","drop-after","dragging"));
+  // globos: tocar = filtrar (varios), arrastrar = reordenar
+  const ch = $(".cv-chips",root);
+  if(ch){ let dragC=null;
+    $$(".sk-chip",ch).forEach(b=>{
+      b.onclick = ev=>{ ev.stopPropagation(); const v=b.dataset.v; const s=new Set(CV.get("sel",tipo,[]).filter(k=>ord.includes(k))); if(!v) s.clear(); else if(s.has(v)) s.delete(v); else s.add(v); CV.set("sel",tipo,[...s]); rerender(); };
+      if(!b.dataset.v) return;
+      b.addEventListener("dragstart", e=>{ dragC=b.dataset.v; b.classList.add("dragging"); e.dataTransfer.effectAllowed="move"; try{ e.dataTransfer.setData("text/plain",dragC); }catch(_){} });
+      b.addEventListener("dragend", ()=>{ dragC=null; clr(".cv-chips .sk-chip"); });
+      b.addEventListener("dragover", e=>{ if(!dragC||b.dataset.v===dragC) return; e.preventDefault(); const r=b.getBoundingClientRect(), af=(e.clientX-r.left)>r.width/2; b.classList.toggle("drop-after",af); b.classList.toggle("drop-before",!af); });
+      b.addEventListener("dragleave", ()=>b.classList.remove("drop-before","drop-after"));
+      b.addEventListener("drop", e=>{ e.preventDefault(); if(!dragC) return; const af=b.classList.contains("drop-after"), k=dragC; dragC=null; mover(k,b.dataset.v,af); });
+    }); }
+  // disposición
+  $$(".cv-vista button",root).forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); CV.set("vista","",b.dataset.vista); rerender(); });
+  // tablas: manija + número de posición
+  let dragT=null;
+  $$(".sk-card[data-g]",root).forEach(card=>{
+    const g=$(".cv-grip",card); if(g){ g.addEventListener("mousedown",()=>{ card.draggable=true; }); g.addEventListener("mouseup",()=>{ card.draggable=false; }); }
+    card.addEventListener("dragstart", e=>{ if(e.target!==card) return; dragT=card.dataset.g; card.classList.add("dragging"); e.dataTransfer.effectAllowed="move"; try{ e.dataTransfer.setData("text/plain",dragT); }catch(_){} });
+    card.addEventListener("dragend", ()=>{ card.draggable=false; dragT=null; clr(".sk-card[data-g]"); });
+    card.addEventListener("dragover", e=>{ if(!dragT||card.dataset.g===dragT) return; e.preventDefault(); const r=card.getBoundingClientRect(); const lista=cvVista()==="lista"; const af = lista ? (e.clientY-r.top)>r.height/2 : (e.clientX-r.left)>r.width/2; card.classList.toggle("drop-after",af); card.classList.toggle("drop-before",!af); });
+    card.addEventListener("dragleave", e=>{ if(!card.contains(e.relatedTarget)) card.classList.remove("drop-before","drop-after"); });
+    card.addEventListener("drop", e=>{ e.preventDefault(); if(!dragT) return; const af=card.classList.contains("drop-after"), k=dragT; dragT=null; mover(k,card.dataset.g,af); });
+    const inp=$(".cv-pos",card); if(inp){ const orig=inp.value;
+      const go=()=>{ const n=parseInt(inp.value,10); if(!isFinite(n)||String(n)===orig){ inp.value=orig; return; } const L=ord.filter(k=>k!==card.dataset.g); L.splice(Math.max(1,Math.min(ord.length,n))-1,0,card.dataset.g); CV.set("ord",tipo,L); rerender(); };
+      inp.onclick=ev=>ev.stopPropagation(); inp.onfocus=()=>inp.select();
+      inp.onkeydown=ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); go(); } else if(ev.key==="Escape"){ inp.value=orig; inp.blur(); } };
+      inp.onblur=go; }
+  });
+  // indicador de columnas fuera de vista (sombra al costado)
+  const sombra = body=>{ const card=body.closest(".sk-card"); if(!card) return; const mx=body.scrollWidth-body.clientWidth; card.classList.toggle("cv-more-r", mx>2 && body.scrollLeft<mx-2); card.classList.toggle("cv-more-l", body.scrollLeft>2); };
+  $$(".sk-card-b",root).forEach(body=>{ sombra(body); body.addEventListener("scroll",()=>sombra(body),{passive:true}); });
+  // desplazamiento: arrastrar la tabla con el mouse (fuera de los casilleros) la mueve en cualquier dirección
+  $$(".sk-card-b",root).forEach(body=>{
+    body.addEventListener("mousedown", e=>{
+      if(e.button!==0 || e.target.closest("input,button,select,a,textarea")) return;
+      if(body.scrollWidth<=body.clientWidth+1 && body.scrollHeight<=body.clientHeight+1) return;
+      const x0=e.clientX, y0=e.clientY, l0=body.scrollLeft, t0=body.scrollTop; let moved=false;
+      const mm=ev=>{ const dx=ev.clientX-x0, dy=ev.clientY-y0; if(!moved && Math.abs(dx)+Math.abs(dy)<4) return; moved=true; body.classList.add("cv-panning"); body.scrollLeft=l0-dx; body.scrollTop=t0-dy; ev.preventDefault(); };
+      const mu=()=>{ document.removeEventListener("mousemove",mm); document.removeEventListener("mouseup",mu); body.classList.remove("cv-panning"); };
+      document.addEventListener("mousemove",mm); document.addEventListener("mouseup",mu);
+    });
+  });
+}
 async function conteosRender(){
   const P0 = $("#skPaneConteos"); if(!P0) return;
   if(C.ed) return editorRender();
@@ -18166,18 +18315,20 @@ async function conteosRender(){
     ${co.archivo||co.nota?note("",`${co.archivo?`Planilla: <b>${esc(co.archivo)}</b>. `:""}${co.nota?esc(co.nota):""}`):""}`;
   const items = rows.map(r=>({ r, it:S.items[r.item_tipo+":"+r.item_id] })).filter(x=>x.it && x.it.t===C.tipo);
   const q = norm(C.q);
-  const filt = items.filter(x=>(C.cat==="all"||x.it.cId===C.cat) && (!q||norm(x.it.nombre).includes(q)||norm(x.it.gN).includes(q)));
-  const cats = {}; items.forEach(x=>{ (cats[x.it.cId]=cats[x.it.cId]||{id:x.it.cId,nombre:x.it.cN,n:0}).n++; });
-  h += `<div class="sk-tools">${segTipo("skCoTipo",C.tipo,nI,nS)}<div class="sk-search">${ICO.srch}<input type="text" id="skCoQ" placeholder="Buscar en el conteo…" value="${esc(C.q)}"></div></div>
-    ${chipsCats("skCoCats", Object.values(cats).sort(byName), C.cat, c=>c.n)}`;
+  const gAll = {}; items.forEach(x=>{ (gAll[x.it.gId]=gAll[x.it.gId]||{gId:x.it.gId,nombre:x.it.gN,cN:x.it.cN,n:0}).n++; });
+  const ORD = cvOrden(C.tipo, Object.values(gAll)), SEL = cvSel(C.tipo, ORD); C._ord = ORD;
+  const filt = items.filter(x=>(!SEL.size||SEL.has(x.it.gId)) && (!q||norm(x.it.nombre).includes(q)||norm(x.it.gN).includes(q)));
+  const CVT = cvTools("skCoCats", C.tipo, Object.values(gAll), ORD, SEL, g=>g.n);
+  h += `<div class="sk-tools">${segTipo("skCoTipo",C.tipo,nI,nS)}<div class="sk-search">${ICO.srch}<input type="text" id="skCoQ" placeholder="Buscar en el conteo…" value="${esc(C.q)}"></div><span class="sk-grow"></span>${CVT.vista}</div>
+    ${CVT.chips}`;
   if(!filt.length) h += `<div class="sk-big"><b class="t">${items.length?"Sin resultados":"Este conteo no tiene "+(C.tipo==="i"?"insumos":"semi-elaborados")}</b></div>`;
   else {
-    const grp = {}; filt.forEach(x=>{ const g=grp[x.it.gId]||(grp[x.it.gId]={nombre:x.it.gN, cN:x.it.cN, list:[]}); g.list.push(x); });
-    h += `<div class="sk-grid2">` + Object.values(grp).sort((a,b)=>(a.cN+a.nombre).localeCompare(b.cN+b.nombre,"es")).map(g=>{
+    const grp = {}; filt.forEach(x=>{ const g=grp[x.it.gId]||(grp[x.it.gId]={gId:x.it.gId, nombre:x.it.gN, cN:x.it.cN, list:[]}); g.list.push(x); });
+    h += `<div class="${cvGridClass()}">` + Object.values(grp).sort((a,b)=>ORD.indexOf(a.gId)-ORD.indexOf(b.gId)).map(g=>{
       const est = []; g.list.forEach(x=>Object.keys(x.r.valores||{}).forEach(e=>{ if(!est.includes(e)) est.push(e); }));
       const ordenCfg = g.list[0] ? estNombres(g.list[0].it) : []; est.sort((a,b)=>{ const ia=ordenCfg.indexOf(a), ib=ordenCfg.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
       const tv = sum(g.list,x=>x.r._v||0);
-      return `<div class="sk-card"><div class="sk-card-h"><span class="sk-card-t">${esc(g.nombre)}</span>${C.tipo==="i"?`<span class="sk-card-m">${esc(g.cN)}</span>`:""}<span class="sk-grow"></span><span class="sk-card-m">${g.list.length} ítem${g.list.length===1?"":"s"} · ${money(tv)}</span></div>
+      return `<div class="sk-card" data-g="${esc(g.gId)}"><div class="sk-card-h">${cvCardHead(ORD.indexOf(g.gId)+1)}<span class="sk-card-t">${esc(g.nombre)}</span>${C.tipo==="i"?`<span class="sk-card-m">${esc(g.cN)}</span>`:""}<span class="sk-grow"></span><span class="sk-card-m">${g.list.length} ítem${g.list.length===1?"":"s"} · ${money(tv)}</span></div>
         <div class="sk-card-b"><table class="sk-t"><thead><tr><th class="l">Ítem</th>${est.map(e=>`<th>${esc(e)}</th>`).join("")}<th class="gs">Total</th><th class="l">Un.</th><th>Valor</th></tr></thead><tbody>
         ${g.list.sort((a,b)=>byName(a.it,b.it)).map(x=>`<tr><td class="nm">${esc(x.it.nombre)}${modo(x.it.k)!=="real"?`<small>Hoy está en teórico</small>`:""}</td>${est.map(e=>{ const v=(x.r.valores||{})[e]; return `<td class="${v==null?"mut":""}">${v==null?"—":fmtQ(v)}</td>`; }).join("")}<td class="gs strong">${fmtQ(x.r.total)}</td><td class="l mut">${esc(x.it.u)}</td><td>${x.r._v==null?(x.r.total?`<span class="sk-tag warn" title="No hay compras/producción para valorizar">sin precio</span>`:"—"):money(x.r._v)}</td></tr>`).join("")}
         </tbody></table></div></div>`; }).join("") + `</div>`;
@@ -18199,7 +18350,7 @@ function conteosBind(){
     if(a==="prev"||a==="next"){ const cur=C.ver&&S.conteos.some(c=>c.id===C.ver)?C.ver:S.conteos[0].id; const i=S.conteos.findIndex(c=>c.id===cur)+(a==="prev"?1:-1); if(S.conteos[i]){ C.ver=S.conteos[i].id; conteosRender(); } return; }
   };
   const seg=$("#skCoTipo"); if(seg) $$("button",seg).forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); C.tipo=b.dataset.v; C.cat="all"; conteosRender(); });
-  const ch=$("#skCoCats"); if(ch) $$("button",ch).forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); C.cat=b.dataset.v; conteosRender(); });
+  cvBind(P0, C.tipo, C._ord||[], ()=>{ const sc=$(".sk-scroll",P0); const top=sc?sc.scrollTop:0; conteosRender().then(()=>{ const s2=$(".sk-scroll",$("#skPaneConteos")); if(s2) s2.scrollTop=top; }); });
   const qi=$("#skCoQ"); if(qi){ let t; qi.oninput=()=>{ clearTimeout(t); t=setTimeout(()=>{ C.q=qi.value; const p=qi.selectionStart; conteosRender().then(()=>{ const n=$("#skCoQ"); if(n){ n.focus(); n.setSelectionRange(p,p); } }); },200); }; }
 }
 function conteosHist(){
@@ -18246,8 +18397,10 @@ function editorRender(){
   const P0=$("#skPaneConteos"); const E=C.ed;
   const its = edItems(); const nI=its.filter(x=>x.t==="i").length, nS=its.filter(x=>x.t==="s").length;
   const deTipo = its.filter(x=>x.t===E.tipo);
-  const cats={}; deTipo.forEach(x=>{ (cats[x.cId]=cats[x.cId]||{id:x.cId,nombre:x.cN,n:0,d:0}).n++; if(edTotal(x.k).any) cats[x.cId].d++; });
-  const q=norm(E.q); const filt = deTipo.filter(x=>(E.cat==="all"||x.cId===E.cat)&&(!q||norm(x.nombre).includes(q)||norm(x.gN).includes(q)));
+  const gAll={}; deTipo.forEach(x=>{ (gAll[x.gId]=gAll[x.gId]||{gId:x.gId,nombre:x.gN,cN:x.cN,n:0,d:0}).n++; if(edTotal(x.k).any) gAll[x.gId].d++; });
+  const ORD = cvOrden(E.tipo, Object.values(gAll)), SEL = cvSel(E.tipo, ORD); E._ord = ORD;
+  const q=norm(E.q); const filt = deTipo.filter(x=>(!SEL.size||SEL.has(x.gId))&&(!q||norm(x.nombre).includes(q)||norm(x.gN).includes(q)));
+  const CVT = cvTools("skEdCats", E.tipo, Object.values(gAll), ORD, SEL, g=>`${g.d}/${g.n}`);
   const grp={}; filt.forEach(x=>{ (grp[x.gId]=grp[x.gId]||{gId:x.gId,nombre:x.gN,cN:x.cN,list:[]}).list.push(x); });
   const pr = edProgress();
   let tab = 0;
@@ -18257,14 +18410,14 @@ function editorRender(){
     <div class="sk-scroll">`;
   if(E.ultima) h += note("", `Último conteo guardado: <b>inicio del ${fD(E.ultima.fecha)}</b>. Este conteo cierra el período desde esa fecha hasta el día anterior a la fecha que elijas.`);
   if(E.importInfo) h += E.importInfo;
-  h += `<div class="sk-tools">${segTipo("skEdTipo",E.tipo,nI,nS)}<div class="sk-search">${ICO.srch}<input type="text" id="skEdQ" placeholder="Buscar ítem o rubro…" value="${esc(E.q)}"></div><span class="sk-grow"></span><button type="button" class="sk-btn ghost sm" data-act="vaciar">Vaciar ${E.tipo==="i"?"insumos":"semi-elaborados"}</button></div>
-    ${chipsCats("skEdCats", Object.values(cats).sort(byName), E.cat, c=>`${c.d}/${c.n}`)}`;
+  h += `<div class="sk-tools">${segTipo("skEdTipo",E.tipo,nI,nS)}<div class="sk-search">${ICO.srch}<input type="text" id="skEdQ" placeholder="Buscar ítem o rubro…" value="${esc(E.q)}"></div><span class="sk-grow"></span>${CVT.vista}<button type="button" class="sk-btn ghost sm" data-act="vaciar">Vaciar ${E.tipo==="i"?"insumos":"semi-elaborados"}</button></div>
+    ${CVT.chips}`;
   if(!filt.length) h += `<div class="sk-big"><b class="t">${deTipo.length?"Sin resultados":"No hay "+(E.tipo==="i"?"insumos":"semi-elaborados")+" en stock real"}</b></div>`;
-  h += `<div class="sk-grid2">` + Object.values(grp).sort((a,b)=>(a.cN+a.nombre).localeCompare(b.cN+b.nombre,"es")).map(g=>{
+  h += `<div class="${cvGridClass()}">` + Object.values(grp).sort((a,b)=>ORD.indexOf(a.gId)-ORD.indexOf(b.gId)).map(g=>{
     const est = edEstaciones(g.list[0]);
     g.list.forEach(it=>edEstaciones(it).forEach(e=>{ if(!est.includes(e)) est.push(e); }));
     const sinCfg = !estDe(g.list[0].gT,g.list[0].gId).length;
-    return `<div class="sk-card"><div class="sk-card-h"><span class="sk-card-t">${esc(g.nombre)}</span>${E.tipo==="i"?`<span class="sk-card-m">${esc(g.cN)}</span>`:""}<span class="sk-grow"></span>${sinCfg?`<span class="sk-tag warn" title="Definí estaciones en Configuración › Stock">sin estaciones</span>`:""}<span class="sk-card-m" data-gp="${esc(g.gId)}">${g.list.filter(it=>edTotal(it.k).any).length}/${g.list.length}</span></div>
+    return `<div class="sk-card" data-g="${esc(g.gId)}"><div class="sk-card-h">${cvCardHead(ORD.indexOf(g.gId)+1)}<span class="sk-card-t">${esc(g.nombre)}</span>${E.tipo==="i"?`<span class="sk-card-m">${esc(g.cN)}</span>`:""}<span class="sk-grow"></span>${sinCfg?`<span class="sk-tag warn" title="Definí estaciones en Configuración › Stock">sin estaciones</span>`:""}<span class="sk-card-m" data-gp="${esc(g.gId)}">${g.list.filter(it=>edTotal(it.k).any).length}/${g.list.length}</span></div>
       <div class="sk-card-b"><table class="sk-t"><thead><tr><th class="l">Ítem</th>${est.map(e=>`<th>${esc(e)}</th>`).join("")}<th class="gs">Total</th><th class="l">Un.</th></tr></thead><tbody>
       ${g.list.sort(byName).map(it=>{ const v=E.vals[it.k]||{}; const tt=edTotal(it.k);
         return `<tr data-k="${it.k}"><td class="nm">${esc(it.nombre)}</td>${est.map(e=>{ const s=v[e]==null?"":v[e]; const n=parseNum(s); return `<td><input class="sk-in ${s!==""?"set":""} ${n!=null&&(isNaN(n)||n<0)?"bad":""} ${E.imp[it.k]&&E.imp[it.k][e]?"imp":""}" data-k="${it.k}" data-e="${esc(e)}" data-tab="${tab++}" value="${esc(s)}" inputmode="decimal" autocomplete="off"></td>`; }).join("")}
@@ -18285,7 +18438,7 @@ function editorBind(){
   };
   const fe=$("#skEdFecha"); fe.onchange=()=>{ E.fecha=fe.value||hoy(); };
   const seg=$("#skEdTipo"); $$("button",seg).forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); E.tipo=b.dataset.v; E.cat="all"; editorRender(); });
-  const ch=$("#skEdCats"); if(ch) $$("button",ch).forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); E.cat=b.dataset.v; editorRender(); });
+  cvBind(P0, E.tipo, E._ord||[], ()=>{ const sc=$(".sk-scroll",P0); const top=sc?sc.scrollTop:0; editorRender(); const s2=$(".sk-scroll",$("#skPaneConteos")); if(s2) s2.scrollTop=top; });
   const qi=$("#skEdQ"); let t; qi.oninput=()=>{ clearTimeout(t); t=setTimeout(()=>{ E.q=qi.value; const p=qi.selectionStart; editorRender(); const n=$("#skEdQ"); n.focus(); n.setSelectionRange(p,p); },200); };
   $$(".sk-in",P0).forEach(inp=>{
     inp.oninput=()=>{ const k=inp.dataset.k, es=inp.dataset.e; const v=E.vals[k]||(E.vals[k]={}); if(inp.value.trim()==="") delete v[es]; else v[es]=inp.value; if(E.imp[k]) delete E.imp[k][es];
@@ -18307,7 +18460,7 @@ async function editorGuardar(){
   if(E.fecha>addDays(hoy(),1)){ toast("La fecha no puede ser posterior a mañana","warn"); return; }
   const dup = S.conteos.find(c=>c.fecha===E.fecha && c.id!==E.id); if(dup){ toast(`Ya hay un conteo del ${fD(E.fecha)}: editá ese en lugar de crear otro`,"warn"); return; }
   const its = edItems(); const malos = its.filter(it=>edTotal(it.k).bad);
-  if(malos.length){ toast(`Hay ${malos.length} ítem${malos.length===1?"":"s"} con valores inválidos (marcados en rojo)`,"warn"); const m=malos[0]; E.tipo=m.t; E.cat="all"; E.q=""; editorRender(); const el=$(`.sk-in.bad`); if(el) el.focus(); return; }
+  if(malos.length){ toast(`Hay ${malos.length} ítem${malos.length===1?"":"s"} con valores inválidos (marcados en rojo)`,"warn"); const m=malos[0]; E.tipo=m.t; E.cat="all"; E.q=""; CV.set("sel",m.t,[]); editorRender(); const el=$(`.sk-in.bad`); if(el) el.focus(); return; }
   const vacios = its.filter(it=>!edTotal(it.k).any);
   const usado = E.id ? S.computos.filter(k=>k.conteo_ini_id===E.id||k.conteo_fin_id===E.id).length : 0;
   const msgs = [];
@@ -22593,6 +22746,153 @@ const CT = {
 };
 </script>
 
+<script>
+/* =====================================================================
+   PROVEEDORES · CONTACTO Y MEDIO DE COMPRA (pedido de Pancho, 29/10/2026) — mismo código en ambos sitios.
+   Cada proveedor guarda: nombre de contacto, teléfono, email y medio de compra (aplicación, teléfono,
+   mensaje…). Los medios son una lista propia ({pre}_medios_compra) que se crea, renombra y borra desde
+   el mismo formulario del proveedor.
+   ===================================================================== */
+(function(){
+  var PRE = typeof tieneSeccionChemono==="function" ? "cm" : "lf";
+  var T = PRE + "_medios_compra";
+  var MED = [];
+  var IC = {
+    user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>',
+    tel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.8 2z"/></svg>',
+    mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>',
+    cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"/></svg>',
+    pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+    del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+    plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+  };
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function nrm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim(); }
+  function medio(id){ return MED.find(function(m){ return m.id===id; }) || null; }
+  async function cargar(){
+    var r = await sb.from(T).select("id,nombre,orden").order("orden").order("nombre");
+    if(!r.error) MED = r.data || [];
+    return MED;
+  }
+  window.cfgMediosCompra = function(){ return MED.slice(); };
+  window.cfgMedioNombre = function(id){ var m = medio(id); return m ? m.nombre : ""; };
+  if(typeof cfgReload==="function"){
+    var _r = cfgReload;
+    window.cfgReload = async function(){ var res = await _r.apply(this, arguments); try{ await cargar(); }catch(e){} return res; };
+  }
+  cargar().catch(function(){});
+
+  /* ---------- en las listas de proveedores ---------- */
+  window.cfgContactoCell = function(p){
+    if(!p) return "";
+    var h = [];
+    if(p.contacto_nombre) h.push('<span class="pvc-chip" title="Contacto">'+IC.user+esc(p.contacto_nombre)+'</span>');
+    if(p.telefono) h.push('<a class="pvc-chip lnk" href="tel:'+esc(String(p.telefono).replace(/[^\d+]/g,""))+'" title="Llamar · '+esc(p.telefono)+'" onclick="event.stopPropagation()">'+IC.tel+esc(p.telefono)+'</a>');
+    if(p.email) h.push('<a class="pvc-chip lnk" href="mailto:'+esc(p.email)+'" title="Escribir a '+esc(p.email)+'" onclick="event.stopPropagation()">'+IC.mail+esc(p.email)+'</a>');
+    var m = medio(p.medio_compra_id); if(m) h.push('<span class="pvc-chip med" title="Medio de compra">'+IC.cart+esc(m.nombre)+'</span>');
+    return h.length ? '<div class="pvc-cell">'+h.join("")+'</div>' : '<span class="cfg-dim">—</span>';
+  };
+
+  /* ---------- formulario del proveedor ---------- */
+  function opciones(sel){
+    return '<option value="">— Sin definir —</option>' + MED.map(function(m){ return '<option value="'+m.id+'"'+(m.id===sel?" selected":"")+'>'+esc(m.nombre)+'</option>'; }).join("")
+      + '<option value="__nuevo">＋ Nuevo medio de compra…</option>';
+  }
+  window.cfgProvContactoHtml = function(p){
+    p = p || {};
+    return '<div class="cfg-sec-title"><span class="n">6</span>Contacto <span class="opt">· opcional</span></div>'
+      + '<div class="pvc-grid">'
+      +   '<div class="field"><label>Nombre de contacto</label><input type="text" id="pvcNom" maxlength="80" autocomplete="off" placeholder="Con quién hablamos" value="'+esc(p.contacto_nombre||"")+'"></div>'
+      +   '<div class="field"><label>Teléfono</label><input type="tel" id="pvcTel" maxlength="40" autocomplete="off" inputmode="tel" placeholder="Ej.: 11 5555-1234" value="'+esc(p.telefono||"")+'"></div>'
+      +   '<div class="field"><label>Email</label><input type="email" id="pvcMail" maxlength="120" autocomplete="off" placeholder="nombre@empresa.com" value="'+esc(p.email||"")+'"></div>'
+      +   '<div class="field"><label>Medio de compra <button type="button" class="pvc-link" onclick="pvcEditar()">'+IC.pen+'Editar opciones</button></label>'
+      +     '<select id="pvcMed" onchange="pvcMedChange()">'+opciones(p.medio_compra_id||"")+'</select></div>'
+      + '</div>'
+      + '<div class="pvc-new" id="pvcNew" hidden><input type="text" id="pvcNewIn" maxlength="40" placeholder="Nombre del medio (ej.: Aplicación del proveedor)" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pvcCrear();}else if(event.key===\'Escape\'){pvcNuevoCancelar();}"><button type="button" class="pvc-btn" onclick="pvcCrear()">Agregar</button><button type="button" class="pvc-btn ghost" onclick="pvcNuevoCancelar()">Cancelar</button></div>'
+      + '<div class="pvc-ed" id="pvcEd" hidden></div>';
+  };
+  var prevSel = "";
+  window.pvcMedChange = function(){
+    var s = document.getElementById("pvcMed"); if(!s) return;
+    if(s.value==="__nuevo"){ s.value = prevSel; var n = document.getElementById("pvcNew"); n.hidden = false; var i = document.getElementById("pvcNewIn"); i.value = ""; i.focus(); return; }
+    prevSel = s.value;
+  };
+  window.pvcNuevoCancelar = function(){ var n = document.getElementById("pvcNew"); if(n) n.hidden = true; };
+  function refrescarSelect(sel){ var s = document.getElementById("pvcMed"); if(!s) return; var v = sel!==undefined ? sel : s.value; s.innerHTML = opciones(v); s.value = MED.some(function(m){ return m.id===v; }) ? v : ""; prevSel = s.value; }
+  async function crear(nom, elegir){
+    nom = (nom||"").trim().replace(/\s+/g," "); if(!nom) return null;
+    var ya = MED.find(function(m){ return nrm(m.nombre)===nrm(nom); });
+    if(ya){ if(elegir) refrescarSelect(ya.id); showToast(elegir ? "Ese medio ya existía: quedó elegido" : "Ese medio ya existe"); return ya; }
+    var orden = MED.reduce(function(a,m){ return Math.max(a, m.orden||0); }, 0) + 1;
+    var r = await sb.from(T).insert({ nombre:nom, orden:orden }).select("id,nombre,orden").single();
+    if(r.error){ showToast("No se pudo crear el medio: " + r.error.message, "warn"); return null; }
+    MED.push(r.data); refrescarSelect(elegir ? r.data.id : undefined); pintarEd();
+    try{ logHistorialConfig("Creó un medio de compra", "“"+nom+"”"); }catch(e){}
+    showToast("Medio de compra creado"); return r.data;
+  }
+  window.pvcCrear = async function(){
+    var i = document.getElementById("pvcNewIn"); if(!(i.value||"").trim()){ i.focus(); return; }
+    if(await crear(i.value, true)) pvcNuevoCancelar();
+  };
+  /* editor de opciones: renombrar / eliminar / agregar */
+  window.pvcEditar = function(){ var ed = document.getElementById("pvcEd"); if(!ed) return; ed.hidden = !ed.hidden; if(!ed.hidden) pintarEd(); };
+  function pintarEd(){
+    var ed = document.getElementById("pvcEd"); if(!ed || ed.hidden) return;
+    var usos = {}; (cfgData.provs||[]).forEach(function(p){ if(p.medio_compra_id) usos[p.medio_compra_id] = (usos[p.medio_compra_id]||0) + 1; });
+    ed.innerHTML = '<div class="pvc-ed-h"><b>Medios de compra</b><span>Se usan en todos los proveedores. Si eliminás uno, los proveedores que lo tenían quedan “sin definir”.</span></div>'
+      + (MED.length ? MED.map(function(m){ var u = usos[m.id]||0;
+          return '<div class="pvc-ed-row" data-id="'+m.id+'"><input type="text" value="'+esc(m.nombre)+'" maxlength="40" data-orig="'+esc(m.nombre)+'" onkeydown="if(event.key===\'Enter\'){event.preventDefault();this.blur();}" onblur="pvcRenombrar(this)"><span class="pvc-u">'+(u ? u+" proveedor"+(u===1?"":"es") : "sin uso")+'</span><button type="button" class="pvc-x" title="Eliminar" onclick="pvcBorrar(\''+m.id+'\', this)">'+IC.del+'</button></div>'; }).join("") : '<div class="pvc-u" style="padding:6px 2px">Todavía no hay medios cargados.</div>')
+      + '<div class="pvc-ed-add"><input type="text" id="pvcEdAdd" maxlength="40" placeholder="Nuevo medio…" onkeydown="if(event.key===\'Enter\'){event.preventDefault();pvcEdAgregar();}"><button type="button" class="pvc-btn" onclick="pvcEdAgregar()">'+IC.plus+'Agregar</button></div>';
+  }
+  window.pvcEdAgregar = async function(){ var a = document.getElementById("pvcEdAdd"); if(!a) return; if(!(a.value||"").trim()){ a.focus(); return; } if(await crear(a.value, false)){ var n = document.getElementById("pvcEdAdd"); if(n){ n.value = ""; n.focus(); } } };
+  window.pvcRenombrar = async function(inp){
+    var row = inp.closest(".pvc-ed-row"), id = row.dataset.id, orig = inp.dataset.orig, nom = (inp.value||"").trim().replace(/\s+/g," ");
+    if(!nom){ inp.value = orig; return; }
+    if(nom===orig) return;
+    if(MED.some(function(m){ return m.id!==id && nrm(m.nombre)===nrm(nom); })){ showToast("Ya existe un medio con ese nombre", "warn"); inp.value = orig; return; }
+    var r = await sb.from(T).update({ nombre:nom }).eq("id", id).select("id");
+    if(r.error || !r.data || !r.data.length){ showToast("No se pudo renombrar", "warn"); inp.value = orig; return; }
+    var m = medio(id); if(m) m.nombre = nom; inp.dataset.orig = nom; refrescarSelect();
+    try{ logHistorialConfig("Renombró un medio de compra", "“"+orig+"” → “"+nom+"”"); }catch(e){}
+  };
+  window.pvcBorrar = async function(id, btn){
+    if(!btn.classList.contains("conf")){ btn.classList.add("conf"); btn.innerHTML = "¿Eliminar?"; setTimeout(function(){ if(btn.isConnected){ btn.classList.remove("conf"); btn.innerHTML = IC.del; } }, 3500); return; }
+    var m = medio(id); var r = await sb.from(T).delete().eq("id", id);
+    if(r.error){ showToast("No se pudo eliminar: " + r.error.message, "warn"); return; }
+    MED = MED.filter(function(x){ return x.id!==id; });
+    (cfgData.provs||[]).forEach(function(p){ if(p.medio_compra_id===id) p.medio_compra_id = null; });
+    refrescarSelect(); pintarEd();
+    try{ logHistorialConfig("Eliminó un medio de compra", "“"+(m?m.nombre:"")+"”"); }catch(e){}
+    showToast("Medio de compra eliminado");
+  };
+  function leer(){
+    var g = function(id){ var e = document.getElementById(id); return e ? e.value.trim().replace(/\s+/g," ") : ""; };
+    var med = g("pvcMed"); if(med==="__nuevo") med = "";
+    return { contacto_nombre:g("pvcNom")||null, telefono:g("pvcTel")||null, email:(g("pvcMail")||"").toLowerCase()||null, medio_compra_id:med||null };
+  }
+  window.cfgProvContactoValidar = function(){
+    if(!document.getElementById("pvcNom")) return null;
+    var v = leer();
+    if(v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)){ var e = document.getElementById("pvcMail"); if(e) e.focus(); return "El email del contacto no parece válido."; }
+    if(v.telefono && !/\d{6,}/.test(v.telefono.replace(/\D/g,""))){ var t = document.getElementById("pvcTel"); if(t) t.focus(); return "El teléfono tiene que tener al menos 6 números."; }
+    return null;
+  };
+  window.cfgProvContactoGuardar = async function(provId, p){
+    if(!provId || !document.getElementById("pvcNom")) return { cambios:[] };
+    var v = leer(), a = p || {}, cambios = [];
+    var lbl = { contacto_nombre:"contacto", telefono:"teléfono", email:"email", medio_compra_id:"medio de compra" };
+    Object.keys(v).forEach(function(k){
+      var antes = a[k]||null, desp = v[k]||null; if(antes===desp) return;
+      var f = function(x){ return k==="medio_compra_id" ? (cfgMedioNombre(x)||"—") : (x||"—"); };
+      cambios.push(lbl[k]+": "+f(antes)+" → "+f(desp));
+    });
+    if(!cambios.length) return { cambios:[] };
+    var r = await sb.from(PRE+"_proveedores").update(v).eq("id", provId);
+    if(r.error) return { error:"El proveedor se guardó, pero no se pudieron guardar los datos de contacto: " + r.error.message, cambios:[] };
+    return { cambios: p ? cambios : [] };
+  };
+})();
+</script>
 </body>
 </html>
 
