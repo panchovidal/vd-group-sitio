@@ -2995,6 +2995,32 @@
   .cfg-sub-meta .pvc-cell{max-width:340px}
   @media (max-width:640px){ .pvc-grid{grid-template-columns:1fr} }
 </style>
+<style>
+  /* Caja Mayor · cierres: período de imputación y selección (30/10/2026) */
+  .cm-periodo{color:var(--text-2);font-weight:600}
+  .cm-periodo b{color:var(--navy,#0B1B4D)}
+  .cm-selbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border);background:#FAFBFE;font-size:12.5px;color:var(--text-2);font-weight:600}
+  .cm-selbar-lbl{font-weight:800;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+  .cm-selbar-rng{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:9px;padding:4px 4px 4px 10px}
+  .cm-selbar-rng input{width:56px;padding:5px 6px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12.5px;font-weight:700;text-align:center;outline:none}
+  .cm-selbar-rng input:focus{border-color:var(--sky)}
+  .cm-selbar-btn{border:1px solid var(--border);background:#fff;color:var(--navy,#0B1B4D);font-family:inherit;font-weight:800;font-size:11.5px;padding:6px 11px;border-radius:8px;cursor:pointer}
+  .cm-selbar-btn:hover:not(:disabled){background:#F3F8FF;border-color:#C9D6EE}
+  .cm-selbar-btn:disabled{opacity:.45;cursor:default}
+  .cm-selbar-btn.pri{background:var(--navy,#0B1B4D);color:#fff;border-color:var(--navy,#0B1B4D)}
+  .cm-selbar-btn.pri:hover{background:#1B2C66 !important;color:#fff;border-color:#1B2C66}
+  .cm-selbar-cnt{margin-left:auto;font-weight:700;color:var(--text-3)}
+</style>
+<style>
+  /* Proveedor al que ya no se le compra el insumo (30/10/2026) */
+  .li-baja{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#8A93A8;background:#EEF1F6;border-radius:6px;padding:1px 6px;vertical-align:1px}
+  tr.li-baja-row td.li-pv{color:var(--text-3)}
+  .pvq-box{margin:14px 0 6px;padding:12px 14px;border:1px dashed #E5B3AE;border-radius:12px;background:#FFF8F7;display:flex;gap:12px;align-items:center}
+  .pvq-box div{flex:1;font-size:12px;color:#7A3A33;font-weight:600;line-height:1.4}
+  .pvq-box b{color:#5F1F18}
+  .pvq-btn{border:1px solid #E5B3AE;background:#fff;color:#B42318;font-family:inherit;font-weight:800;font-size:12px;padding:8px 12px;border-radius:9px;cursor:pointer;white-space:nowrap}
+  .pvq-btn:hover{background:#FDE7E7}
+</style>
 </head>
 <body>
 
@@ -3677,6 +3703,13 @@
             <div class="screen-scroll">
               <div class="cm-panel">
                 <div class="cm-panel-head"><h3>Todos los cierres</h3><span class="cnt" id="cmCntHistorial">0</span></div>
+                <div class="cm-selbar">
+                  <span class="cm-selbar-lbl">Seleccionar para el Excel:</span>
+                  <span class="cm-selbar-rng">del cierre #<input type="number" id="cmSelDesde" min="1" inputmode="numeric" onkeydown="if(event.key==='Enter')cmSelRango()"> al #<input type="number" id="cmSelHasta" min="1" inputmode="numeric" onkeydown="if(event.key==='Enter')cmSelRango()"><button type="button" class="cm-selbar-btn pri" onclick="cmSelRango()">Seleccionar</button></span>
+                  <button type="button" class="cm-selbar-btn" onclick="cmSelTodos()">Todos</button>
+                  <button type="button" class="cm-selbar-btn" id="cmSelNinguno" onclick="cmSelNinguno()" disabled>Deseleccionar todos</button>
+                  <span class="cm-selbar-cnt" id="cmSelCount">Ninguno seleccionado</span>
+                </div>
                 <div class="cm-panel-body"><table class="cm-table" id="cmTablaHistorial"></table></div>
               </div>
               <div class="cm-panel" id="cmPanelHistorialDetalle" style="margin-top:18px;display:none;">
@@ -4977,7 +5010,7 @@ async function cfgLoadAll(){
     sb.from("lf_rubros").select("id,nombre,concepto_id").order("created_at"),
     sb.from("lf_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion,contacto_nombre,telefono,email,medio_compra_id").order("created_at"),
     sb.from("lf_proveedor_rubros").select("proveedor_id,rubro_id"),
-    sb.from("lf_costeo_insumos").select("id,proveedor_id,rubro_id,nomenclatura,unidad_medida,cantidad,factor_merma,necesita_conversion,conversion_cantidad,conversion_unidad,costo_manual,usar_costo_manual").order("created_at")
+    sb.from("lf_costeo_insumos").select("id,proveedor_baja,proveedor_id,rubro_id,nomenclatura,unidad_medida,cantidad,factor_merma,necesita_conversion,conversion_cantidad,conversion_unidad,costo_manual,usar_costo_manual").order("created_at")
   ]);
   const err = res.find(r=>r.error);
   if(err){ console.warn("Config compras:", err.error); showToast("No se pudieron cargar los datos de Compras", "warn"); return false; }
@@ -4990,7 +5023,7 @@ async function cfgLoadAll(){
   cfgData.provs  = (res[2].data||[]).map((p,i)=>Object.assign({}, p, { _ord:i }));
   cfgData.links  = res[3].data||[];
   cfgData.insumos = cfgData.proveedores;
-  cfgData.items  = (res[4].data||[]).map((i,idx)=>Object.assign({}, i, { cantidad:Number(i.cantidad), factor_merma:Number(i.factor_merma)||0, _ord:idx }));
+  cfgData.items  = (res[4].data||[]).filter(i=>!i.proveedor_baja).map((i,idx)=>Object.assign({}, i, { cantidad:Number(i.cantidad), factor_merma:Number(i.factor_merma)||0, _ord:idx }));
   // categorías nuevas (creadas por otro usuario) entran contraídas
   const ids = cfgData.proveedores.cats.map(c=>c.id);
   if(cfgKnownCats) ids.forEach(id=>{ if(!cfgKnownCats.has(id)){ cfgState.proveedores.collapsed.add(id); cfgState.insumos.collapsed.add(id); } });
@@ -14589,16 +14622,29 @@ function cmRenderUltimoCierre(){
 }
 
 /* ---------- resumen (libro de cuenta doble) + historial de cierres ---------- */
+/* Cada línea lleva la fecha de imputación (cuándo se cargó en Caja Mayor) y la fecha del movimiento
+   (día real del retiro / salida / ajuste), que es la que sirve para los reportes mensuales (30/10/2026). */
 function cmBuildResumenFilas(cierre){
   const filas = [];
-  (cierre.retirosImputados||[]).forEach(r=> filas.push({fecha:r.fechaImputacionISO, detalle:"Retiro "+r.turnoLabel+" · "+r.usuario, debe:0, haber:r.monto}));
-  (cierre.ajustes||[]).filter(a=>a.tipo==="ingreso").forEach(a=> filas.push({fecha:a.fechaAjusteISO, detalle:"Ajuste (ingreso) · "+a.observaciones, debe:0, haber:a.monto}));
-  (cierre.salidas||[]).forEach(s=> filas.push({fecha:s.fechaSalidaISO, detalle:"Salida · "+s.proveedor+(s.ordenId?" (paga "+s.ordenId+")":"")+(s.obs?" ("+s.obs+")":""), debe:s.monto, haber:0}));
-  (cierre.ajustes||[]).filter(a=>a.tipo==="diferencia").forEach(a=> filas.push({fecha:a.fechaAjusteISO, detalle:"Ajuste (diferencia) · "+a.observaciones, debe:a.monto, haber:0}));
-  (cierre.retirosOficina||[]).forEach(r=> filas.push({fecha:r.fechaMovISO, detalle:"Retiro a oficina"+(r.obs?" ("+r.obs+")":""), debe:r.monto, haber:0}));
-  filas.sort((x,y)=> (x.fecha||"").localeCompare(y.fecha||""));
+  (cierre.retirosImputados||[]).forEach(r=> filas.push({fecha:r.fechaImputacionISO||cierre.fecha, fechaMov:r.fechaMovISO, detalle:cmDetalleRetiro(r), debe:0, haber:r.monto, retiro:true}));
+  (cierre.ajustes||[]).filter(a=>a.tipo==="ingreso").forEach(a=> filas.push({fecha:a.fechaImpISO||cierre.fecha, fechaMov:a.fechaAjusteISO, detalle:"Ajuste (ingreso) · "+a.observaciones, debe:0, haber:a.monto}));
+  (cierre.salidas||[]).forEach(s=> filas.push({fecha:s.fechaImpISO||cierre.fecha, fechaMov:s.fechaSalidaISO, detalle:"Salida · "+s.proveedor+(s.ordenId?" (paga "+s.ordenId+")":"")+(s.obs?" ("+s.obs+")":""), debe:s.monto, haber:0}));
+  (cierre.ajustes||[]).filter(a=>a.tipo==="diferencia").forEach(a=> filas.push({fecha:a.fechaImpISO||cierre.fecha, fechaMov:a.fechaAjusteISO, detalle:"Ajuste (diferencia) · "+a.observaciones, debe:a.monto, haber:0}));
+  (cierre.retirosOficina||[]).forEach(r=> filas.push({fecha:r.fechaImpISO||cierre.fecha, fechaMov:r.fechaMovISO, detalle:"Retiro a oficina"+(r.obs?" ("+r.obs+")":""), debe:r.monto, haber:0}));
+  filas.sort((x,y)=> (x.fechaMov||"").localeCompare(y.fechaMov||"") || (x.fecha||"").localeCompare(y.fecha||""));
   return filas;
 }
+function cmDetalleRetiro(r){ return r.detalle!==undefined ? "Retiro"+(r.turnoLabel?" "+r.turnoLabel:"")+" · "+r.detalle : "Retiro "+r.turnoLabel+" · "+r.usuario; }
+function cmFmtCorta(iso){ if(!iso) return ""; const p = iso.split("-"); return p[2]+"/"+p[1]+"/"+p[0].slice(2); }
+// Período de imputación de un cierre: desde el retiro más viejo hasta el más nuevo que se imputaron
+// (si el cierre no tiene retiros, el de todos sus movimientos).
+function cmPeriodoImputacion(cierre){
+  let fs = (cierre.retirosImputados||[]).map(r=>r.fechaMovISO).filter(Boolean);
+  if(!fs.length) fs = cmBuildResumenFilas(cierre).map(f=>f.fechaMov).filter(Boolean);
+  if(!fs.length) return null;
+  fs.sort(); return { desde:fs[0], hasta:fs[fs.length-1] };
+}
+function cmPeriodoTxt(cierre){ const p = cmPeriodoImputacion(cierre); return p ? cmFmtCorta(p.desde)+" al "+cmFmtCorta(p.hasta) : "—"; }
 // Igual que cmBuildResumenFilas pero con el saldo acumulado (Debe/Haber corrido)
 // después de cada movimiento, arrancando del saldo del cierre anterior si lo tiene.
 function cmBuildResumenFilasConSaldo(cierre){
@@ -14629,25 +14675,25 @@ function cmRenderResumenTable(cierre){
   let acumHaber = saldoInicial>0 ? saldoInicial : 0;
   let rowsHTML = "";
   if(tieneSaldoInicial){
-    rowsHTML += `<tr><td class="c-fecha">—</td><td>Saldo anterior (cierre previo)</td><td class="c-monto">${saldoInicial<0?fmtMoney(Math.abs(saldoInicial)):"—"}</td><td class="c-monto">${saldoInicial>0?fmtMoney(saldoInicial):"—"}</td></tr>`;
+    rowsHTML += `<tr><td class="c-fecha">—</td><td class="c-fecha">—</td><td>Saldo anterior (cierre previo)</td><td class="c-monto">${saldoInicial<0?fmtMoney(Math.abs(saldoInicial)):"—"}</td><td class="c-monto">${saldoInicial>0?fmtMoney(saldoInicial):"—"}</td></tr>`;
   }
   if(filas.length){
     rowsHTML += filas.map(f=>{
       acumDebe+=f.debe; acumHaber+=f.haber;
-      return `<tr><td class="c-fecha">${isoToDMY(f.fecha)}</td><td>${f.detalle}</td><td class="c-monto">${f.debe?fmtMoney(f.debe):"—"}</td><td class="c-monto">${f.haber?fmtMoney(f.haber):"—"}</td></tr>`;
+      return `<tr><td class="c-fecha">${isoToDMY(f.fecha)}</td><td class="c-fecha"${f.retiro?' style="font-weight:700"':''}>${f.fechaMov?isoToDMY(f.fechaMov):"—"}</td><td>${f.detalle}</td><td class="c-monto">${f.debe?fmtMoney(f.debe):"—"}</td><td class="c-monto">${f.haber?fmtMoney(f.haber):"—"}</td></tr>`;
     }).join("");
   } else if(!tieneSaldoInicial){
-    rowsHTML = `<tr><td colspan="4"><div class="cm-empty-mini">Este cierre no tiene movimientos.</div></td></tr>`;
+    rowsHTML = `<tr><td colspan="5"><div class="cm-empty-mini">Este cierre no tiene movimientos.</div></td></tr>`;
   }
   const saldo = acumHaber - acumDebe;
   const totalOficina = (cierre.retirosOficina||[]).reduce((s,r)=>s+r.monto,0);
-  return `<div class="cm-resumen-head">Cierre #${cierre.numero} · ${isoToDMY(cierre.fecha)}${totalOficina>0 ? " · Retiro a oficina: "+fmtMoney(totalOficina) : ""}</div>
+  return `<div class="cm-resumen-head">Cierre #${cierre.numero} · ${isoToDMY(cierre.fecha)} · <span class="cm-periodo" title="Desde el retiro más viejo hasta el más nuevo imputados en este cierre">Período de imputación: <b>${cmPeriodoTxt(cierre)}</b></span>${totalOficina>0 ? " · Retiro a oficina: "+fmtMoney(totalOficina) : ""}</div>
     <table class="cm-table cm-resumen-table">
-      <thead><tr><th>Fecha</th><th>Detalle</th><th>Debe</th><th>Haber</th></tr></thead>
+      <thead><tr><th>Fecha imp.</th><th title="Día real del retiro o movimiento">Fecha mov.</th><th>Detalle</th><th>Debe</th><th>Haber</th></tr></thead>
       <tbody>${rowsHTML}</tbody>
       <tfoot>
-        <tr><td colspan="2">Totales</td><td class="c-monto">${fmtMoney(acumDebe)}</td><td class="c-monto">${fmtMoney(acumHaber)}</td></tr>
-        <tr><td colspan="2">Saldo del cierre</td><td colspan="2" class="c-monto">${fmtMoney(saldo)}</td></tr>
+        <tr><td colspan="3">Totales</td><td class="c-monto">${fmtMoney(acumDebe)}</td><td class="c-monto">${fmtMoney(acumHaber)}</td></tr>
+        <tr><td colspan="3">Saldo del cierre</td><td colspan="2" class="c-monto">${fmtMoney(saldo)}</td></tr>
       </tfoot>
     </table>`;
 }
@@ -14667,10 +14713,10 @@ function cmGoTab(tab){
 }
 function cmRenderHistorialTabla(){
   const tbl = document.getElementById("cmTablaHistorial");
-  const thead = "<thead><tr><th></th><th>Cierre</th><th>Fecha</th><th>Retiros</th><th>Salidas</th><th>Ajustes (neto)</th><th>Retiro a oficina</th><th>Saldo</th><th></th></tr></thead>";
+  const thead = "<thead><tr><th></th><th>Cierre</th><th>Fecha</th><th>Período de imputación</th><th>Retiros</th><th>Salidas</th><th>Ajustes (neto)</th><th>Retiro a oficina</th><th>Saldo</th><th></th></tr></thead>";
   let body;
   if(!cmState.historialCierres.length){
-    body = "<tbody><tr><td colspan=\"9\"><div class=\"cm-empty-mini\">Todavía no se registró ningún cierre.</div></td></tr></tbody>";
+    body = "<tbody><tr><td colspan=\"10\"><div class=\"cm-empty-mini\">Todavía no se registró ningún cierre.</div></td></tr></tbody>";
   } else {
     body = "<tbody>"+cmState.historialCierres.map(c=>{
       const neto = (c.totalAjusteIngreso||0) - (c.totalAjusteDiferencia||0);
@@ -14679,6 +14725,7 @@ function cmRenderHistorialTabla(){
         <td><input type="checkbox" ${checked} onchange="cmToggleHistorialCheck(${c.numero}, this.checked)"></td>
         <td>#${c.numero}</td>
         <td class="c-fecha">${isoToDMY(c.fecha)}</td>
+        <td class="c-fecha">${cmPeriodoTxt(c)}</td>
         <td class="c-monto">${fmtMoney(c.totalRetiros)}</td>
         <td class="c-monto">${fmtMoney(c.totalSalidas)}</td>
         <td class="c-monto">${(neto>=0?"+":"−")+fmtMoney(Math.abs(neto))}</td>
@@ -14693,11 +14740,32 @@ function cmRenderHistorialTabla(){
   }
   tbl.innerHTML = thead+body;
   document.getElementById("cmCntHistorial").textContent = cmState.historialCierres.length;
-  document.getElementById("cmBtnDescargarHistorial").disabled = cmHistorialSeleccion.size===0;
+  cmSelRefrescar();
 }
 function cmToggleHistorialCheck(numero, checked){
   if(checked) cmHistorialSeleccion.add(numero); else cmHistorialSeleccion.delete(numero);
-  document.getElementById("cmBtnDescargarHistorial").disabled = cmHistorialSeleccion.size===0;
+  cmSelRefrescar();
+}
+/* Selección para el Excel (30/10/2026): todos / ninguno / del cierre # al # */
+function cmSelRefrescar(){
+  const n = cmHistorialSeleccion.size;
+  document.getElementById("cmBtnDescargarHistorial").disabled = n===0;
+  const lbl = document.getElementById("cmSelCount"); if(lbl) lbl.textContent = n ? n+" seleccionado"+(n===1?"":"s") : "Ninguno seleccionado";
+  const nada = document.getElementById("cmSelNinguno"); if(nada) nada.disabled = n===0;
+  const nums = cmState.historialCierres.map(c=>c.numero);
+  ["cmSelDesde","cmSelHasta"].forEach(id=>{ const el = document.getElementById(id); if(el && nums.length){ el.min = Math.min(...nums); el.max = Math.max(...nums); } });
+}
+function cmSelTodos(){ cmState.historialCierres.forEach(c=>cmHistorialSeleccion.add(c.numero)); cmRenderHistorialTabla(); }
+function cmSelNinguno(){ cmHistorialSeleccion.clear(); cmRenderHistorialTabla(); }
+function cmSelRango(){
+  const d = parseInt(document.getElementById("cmSelDesde").value,10), h = parseInt(document.getElementById("cmSelHasta").value,10);
+  if(!isFinite(d) || !isFinite(h)){ showToast("Completá desde qué cierre y hasta qué cierre", "warn"); return; }
+  const a = Math.min(d,h), b = Math.max(d,h);
+  const enRango = cmState.historialCierres.filter(c=>c.numero>=a && c.numero<=b);
+  if(!enRango.length){ showToast("No hay cierres entre el #"+a+" y el #"+b, "warn"); return; }
+  cmHistorialSeleccion.clear(); enRango.forEach(c=>cmHistorialSeleccion.add(c.numero));
+  cmRenderHistorialTabla();
+  showToast("Seleccionados "+enRango.length+" cierre"+(enRango.length===1?"":"s")+" (#"+a+" al #"+b+")");
 }
 function cmVerDetalleCierre(numero){
   const c = cmState.historialCierres.find(x=>x.numero===numero);
@@ -15311,11 +15379,21 @@ function costeoRequestDeleteInsumo(id){
 }
 
 /* ---- Carga de compras (Costeo) ---- */
+function costeoInsumosDelProv(provId){ return costeoInsumos.filter(i=>i.proveedor_id===provId && !i.proveedor_baja); }
+// Insumos que este proveedor todavía no tiene (30/10/2026): aparecen en el buscador aclarándolo y, al
+// elegirlos, se pide confirmar la asignación (evita duplicar un insumo por escribirlo distinto).
+function costeoOtrosInsumos(provId){
+  const mios = new Set(costeoInsumosDelProv(provId).map(i=>lfNrm(i.nomenclatura))), by = new Map();
+  costeoInsumos.forEach(i=>{ const k = lfNrm(i.nomenclatura); if(mios.has(k)) return; if(!by.has(k)) by.set(k, { nombre:i.nomenclatura, provs:new Set() });
+    if(i.proveedor_id && !i.proveedor_baja){ const pv = proveedoresConfig.find(p=>p.id===i.proveedor_id); if(pv) by.get(k).provs.add(pv.nombre); } });
+  return [...by.values()].sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+}
 function costeoRefreshInsumosDatalist(proveedorNombre){
   const prov = proveedoresConfig.find(p=>p.nombre===proveedorNombre);
   const dl = document.getElementById("dlInsumosProveedor");
-  const opciones = prov ? costeoInsumos.filter(i=>i.proveedor_id===prov.id) : [];
-  dl.innerHTML = opciones.map(i=>`<option value="${costeoEsc(i.nomenclatura)}">`).join("");
+  const opciones = prov ? costeoInsumosDelProv(prov.id) : [];
+  dl.innerHTML = opciones.map(i=>`<option value="${costeoEsc(i.nomenclatura)}">`).join("")
+    + (prov ? costeoOtrosInsumos(prov.id).map(x=>`<option value="${costeoEsc(x.nombre)}">No asignado a este proveedor · ${x.provs.size?"lo vende "+costeoEsc([...x.provs].join(", ")):"todavía sin proveedor"}</option>`).join("") : "");
   return prov;
 }
 // ---- Buscador de facturas por proveedor o artículo (Feature 3/4, pedido de Pancho) ----
@@ -15505,12 +15583,20 @@ async function pgCerrarItems(){
    Si no existe, se crea con este proveedor. */
 function ciInsLfExistente(){ const n = lfNrm((document.getElementById("ciInsNombre")||{}).value||""); if(!n) return null;
   const L = costeoInsumos.filter(i=>lfNrm(i.nomenclatura)===n); if(!L.length) return null;
-  return { sinProv: L.find(i=>!i.proveedor_id) || null, ref: L.find(i=>!i.proveedor_id) || L[0], todas: L }; }
+  const o = ordenes.find(x=>x.id===costeoOpenOrdenId), prov = o ? proveedoresConfig.find(p=>p.nombre===o.proveedor) : null;
+  const activas = L.filter(i=>!i.proveedor_baja);
+  return { sinProv: activas.find(i=>!i.proveedor_id) || null, ref: activas.find(i=>!i.proveedor_id) || activas[0] || L[0],
+    baja: prov ? L.find(i=>i.proveedor_id===prov.id && i.proveedor_baja) || null : null, todas: activas }; }
 function ciInsLfNombre(){
   const ex = ciInsLfExistente(), note = document.getElementById("ciInsExiste"), sel = document.getElementById("ciInsRubro"); if(!note) return;
-  if(!ex){ note.style.display = "none"; sel.disabled = false; return; }
+  if(!ex){ note.style.display = "none"; sel.disabled = false; const h3 = document.querySelector("#ciInsModal .ar-modal-h h3"), o0 = ordenes.find(x=>x.id===costeoOpenOrdenId); if(h3 && o0) h3.textContent = "Insumo para "+o0.proveedor; const gb = document.getElementById("ciInsGo"); if(gb) gb.textContent = "Guardar y usar"; return; }
   const r = cfgRub("proveedores", ex.ref.rubro_id);
-  note.style.display = ""; note.innerHTML = ex.sinProv
+  const h3 = document.querySelector("#ciInsModal .ar-modal-h h3"), o0 = ordenes.find(x=>x.id===costeoOpenOrdenId);
+  if(h3) h3.textContent = "¿Asignar “"+ex.ref.nomenclatura+"” a "+((o0&&o0.proveedor)||"este proveedor")+"?";
+  const gb = document.getElementById("ciInsGo"); if(gb) gb.textContent = "Asignar y usar";
+  note.style.display = ""; note.innerHTML = ex.baja
+    ? "Este insumo se le compraba a este proveedor y se había quitado: se vuelve a asignar (sus facturas anteriores siguen vinculadas). Rubro: <b>"+costeoEsc(r?r.nombre:"—")+"</b>."
+    : ex.sinProv
     ? "Ya existe y todavía no tiene proveedor: queda asignado a este proveedor. Rubro: <b>"+costeoEsc(r?r.nombre:"—")+"</b>."
     : "Ya existe (lo vende "+costeoEsc(ex.todas.map(i=>(proveedoresConfig.find(p=>p.id===i.proveedor_id)||{}).nombre||"").filter(Boolean).join(", "))+"): se agrega este proveedor al mismo insumo. Rubro: <b>"+costeoEsc(r?r.nombre:"—")+"</b>.";
   if(r){ if(![...sel.options].some(o=>o.value===r.id)) sel.add(new Option(r.nombre, r.id)); sel.value = r.id; } sel.disabled = true;
@@ -15573,11 +15659,14 @@ async function ciCrearInsumoGuardar(){
   if(!nombre){ showToast("Escribí el nombre del insumo", "warn"); return; }
   if(!cantidad){ showToast("Cargá la cantidad por unidad de compra", "warn"); return; }
   if(conv && (!convCant || !convUM)){ showToast("Completá la conversión o marcá 'No'", "warn"); return; }
-  if(costeoInsumos.some(i=>i.proveedor_id===prov.id && lfNrm(i.nomenclatura)===lfNrm(nombre))){ showToast("Ese insumo ya está cargado para este proveedor", "warn"); return; }
+  if(costeoInsumos.some(i=>i.proveedor_id===prov.id && !i.proveedor_baja && lfNrm(i.nomenclatura)===lfNrm(nombre))){ showToast("Ese insumo ya está cargado para este proveedor", "warn"); return; }
   const btn = document.getElementById("ciInsGo"); btn.disabled = true; btn.textContent = "Guardando…";
   const datos = { cantidad, unidad_medida: um||null, necesita_conversion: conv, conversion_cantidad: convCant, conversion_unidad: convUM||null };
   let res, accion;
-  if(ex && ex.sinProv){
+  if(ex && ex.baja){
+    res = await sb.from("lf_costeo_insumos").update(Object.assign({ proveedor_baja: false, proveedor_baja_fecha: null }, datos)).eq("id", ex.baja.id);
+    accion = "Volvió a asignar un proveedor a un insumo";
+  } else if(ex && ex.sinProv){
     res = await sb.from("lf_costeo_insumos").update(Object.assign({ proveedor_id: prov.id }, datos)).eq("id", ex.sinProv.id);
     accion = "Asignó un proveedor a un insumo";
   } else {
@@ -15933,7 +16022,7 @@ async function costeoQuitarJustificativo(){
 function costeoNewItemMatch(){
   const nombre = document.getElementById("ciNewNomenclatura").value.trim();
   if(!nombre || !costeoOpenOrdenProveedorId) return null;
-  return costeoInsumos.find(i=>i.proveedor_id===costeoOpenOrdenProveedorId && i.nomenclatura.toLowerCase()===nombre.toLowerCase()) || null;
+  return costeoInsumos.find(i=>i.proveedor_id===costeoOpenOrdenProveedorId && !i.proveedor_baja && i.nomenclatura.toLowerCase()===nombre.toLowerCase()) || null;
 }
 function costeoInitAddRowUI(){
   const wrap = document.getElementById("ciTaxCellWrap_new");
@@ -15949,6 +16038,11 @@ function costeoOnNewNomenclaturaInput(){
   document.getElementById("ciNewUMAuto").textContent = match ? (match.unidad_medida||"—") : "—";
   document.getElementById("ciNewUMAuto2").textContent = match ? (match.unidad_medida||"—") : "—";
   document.getElementById("ciNewNomenclaturaWarn").style.display = (nombre && !match) ? "" : "none";
+  if(!match && nombre && costeoOpenOrdenProveedorId){
+    const ot = costeoOtrosInsumos(costeoOpenOrdenProveedorId).find(x=>lfNrm(x.nombre)===lfNrm(nombre));
+    if(ot && window._ciAsig!==lfNrm(nombre)){ window._ciAsig = lfNrm(nombre); setTimeout(ciCrearInsumoAbrir, 0); }
+    else if(!ot) window._ciAsig = null;
+  }
   costeoRecalcNewRow();
 }
 function costeoRecalcNewRow(){
@@ -19739,7 +19833,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
               var esVig = multi && !r.usar && (r.vigInsId ? r.vigInsId===r.insId : (r.vigProv && nrm(r.vigProv)===nrm(r.provNombre)));
               var tr = '<tr data-k="'+esc(r.key)+'" data-g="'+esc(bl.grp)+'" class="li-row'+(r.usar?" man":"")+(i===0?" li-g0":" li-gn")+(n>1?" li-multi":"")+'">';
               if(i===0) tr += '<td class="l nm"'+rs+'>'+esc(r.nombre)+(multi?'<span class="li-np" title="Insumo con más de un proveedor">'+(nProvGrp[bl.grp])+' prov.</span>':'')+'</td>';
-              tr += '<td class="l li-pv">'+esc(r.provNombre)+'</td><td class="mut">'+esc(r.pres)+'</td>'
+              tr += '<td class="l li-pv">'+esc(r.provNombre)+(r.baja?'<span class="li-baja" title="Ya no se le compra este insumo: sus facturas quedan como compra histórica">ya no se le compra</span>':'')+'</td><td class="mut">'+esc(r.pres)+'</td>'
                 + '<td class="gs'+(r.usar?" li-off":"")+(esVig?" li-isvig":"")+'" title="'+(r.compraFecha?"Costo de este proveedor: compra del "+fD(r.compraFecha):"Sin compras cargadas de este proveedor")+'">'+(esVig?'<span class="li-vig" title="Este proveedor define el costo del insumo">vigente</span>':'')+(isN(r.compra)?m2(r.compra):'<span class="li-na">—</span>')+'<span class="li-un">/'+esc(r.unidad)+'</span></td>';
               if(i===0) tr += '<td'+rs+' class="li-sh"><input class="li-in" data-f="manual" data-id="'+esc(r.insId)+'" value="'+pIn(r.manual)+'" placeholder="$" inputmode="decimal"'+(multi?' title="Vale para todos los proveedores de este insumo"':'')+'></td>'
                 + '<td class="c li-sh"'+rs+'><input type="checkbox" class="li-cb" data-f="usar" data-id="'+esc(r.insId)+'" '+(r.usar?"checked":"")+' title="Usar el costo manual en vez del de compra"></td>'
@@ -19837,7 +19931,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
       + '<label>Factor de merma (%)<input type="text" id="liMMer" value="'+pIn(r.merma)+'" inputmode="decimal"></label>'
       + '<label class="li-chk2"><input type="checkbox" id="liMUsar" '+(r.usar?"checked":"")+'> Usar el costo manual (en vez del de compra) en recetas'+(multi?' — vale para sus '+otros.length+' proveedores':'')+'</label></div>'
       + '<div class="li-sec"><h5>Proveedores</h5><table class="li-mt"><thead><tr><th class="l">Proveedor</th><th class="l">Presentación</th><th>Compra vigente</th><th>Costo de compra</th></tr></thead><tbody>'
-      + otros.map(function(x){ var v = multi && !x.usar && (x.vigInsId ? x.vigInsId===x.insId : (x.vigProv && nrm(x.vigProv)===nrm(x.provNombre))); return '<tr><td class="l">'+esc(x.provNombre)+(v?' <span class="li-vig">vigente</span>':'')+'</td><td class="l">'+esc(x.pres)+'</td><td>'+(x.compraFecha?fD(x.compraFecha):'—')+'</td><td><b>'+m2(x.compra)+'</b></td></tr>'; }).join("") + '</tbody></table></div>'
+      + otros.map(function(x){ var v = multi && !x.usar && (x.vigInsId ? x.vigInsId===x.insId : (x.vigProv && nrm(x.vigProv)===nrm(x.provNombre))); return '<tr><td class="l">'+esc(x.provNombre)+(v?' <span class="li-vig">vigente</span>':'')+(x.baja?'<span class="li-baja">ya no se le compra</span>':'')+'</td><td class="l">'+esc(x.pres)+'</td><td>'+(x.compraFecha?fD(x.compraFecha):'—')+'</td><td><b>'+m2(x.compra)+'</b></td></tr>'; }).join("") + '</tbody></table></div>'
       + '<div class="li-sec"><h5>Últimas compras</h5>'+(hist?'<table class="li-mt"><thead><tr><th class="l">Fecha factura</th><th class="l">Proveedor</th><th>$ por '+esc(r.unidad)+'</th></tr></thead><tbody>'+hist+'</tbody></table>':'<div class="ar-note">Sin compras cargadas.</div>')+'</div>'
       + '</div><div class="ar-modal-f"><button type="button" class="btn-ghost" id="liMFicha" title="Nombre, rubro, proveedores y presentaciones">Editar ficha del insumo</button><span class="hint"></span><button type="button" class="btn-ghost" data-x>Cancelar</button><button type="button" class="btn-primary" id="liMOk">Guardar</button></div></div>';
     var onEsc = function(e){ if(e.key==="Escape") cerrar(); };
@@ -20218,6 +20312,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
           + (her.length ? '<div class="cfg-note">'+CFG_IC.info+'<div>Este insumo también se compra a <b>'+her.map(function(h){ return cfgEsc((cfgProv(h.proveedor_id)||{}).nombre||"—"); }).join(", ")+'</b>. Si cambiás la categoría o el rubro, se cambia para todos sus proveedores.</div></div>' : '')
           + '<div class="cfg-sec-title"><span class="n">3</span>Proveedor</div>'
           + '<div class="field" id="cfgFldInsProv"><label>¿A qué proveedor se le compra?</label><select id="cfgFInsProv" onchange="cfgHideErr();cfgCheckName();cfgInsLfRub()"><option value="'+(provSel||"")+'" selected></option></select>'
+          + (ins && ins.proveedor_id ? '<div class="pvq-box"><div>¿Ya no se le compra este insumo a <b>'+cfgEsc((cfgProv(ins.proveedor_id)||{}).nombre||"")+'</b>? Podés quitar el proveedor sin borrar el insumo: si tiene facturas, quedan como compra histórica.</div><button type="button" class="pvq-btn" onclick="lfQuitarProveedorIns(\''+ins.id+'\')">Quitar proveedor</button></div>' : '')
           + '<div class="config-conv-hint" id="cfgFInsProvHint" style="margin-top:5px"></div><div class="config-conv-hint" style="margin-top:3px">Podés dejarlo <b>sin proveedor</b>: se asigna solo al cargar la primera factura de este insumo (Costeo › Carga de compras › “+ Crear / asignar insumo”), y hasta entonces no tiene precio salvo un costo manual. Si después se compra a otro proveedor, se le agrega su ficha desde la factura y el costo sale de la regla del mes entre todos.</div></div>'
           + '<div class="cfg-sec-title"><span class="n">4</span>Cantidad y unidad de compra</div>'
           + '<div class="field-row"><div class="field"><label>Cantidad por unidad de compra</label><input type="text" id="cfgFInsCantidad" inputmode="decimal" value="'+(ins && ins.cantidad!=null ? ins.cantidad : "")+'" placeholder="Ej. 1"></div>'
@@ -20392,9 +20487,12 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar,
     window.cmDescargarExcelCierres = function(){
       var sel = cmState.historialCierres.filter(function(c){ return cmHistorialSeleccion.has(c.numero); }).sort(function(a,b){ return a.numero-b.numero; });
       if(!sel.length){ showToast("Elegí al menos un cierre para descargar", "warn"); return; }
-      var cols = [{h:"Cierre",t:"int"},{h:"Fecha del cierre",t:"fecha"},{h:"Fecha del movimiento",t:"fecha"},{h:"Detalle",w:44},{h:"Debe",t:"$"},{h:"Haber",t:"$"},{h:"Saldo",t:"$"}];
+      var cols = [{h:"Cierre",t:"int"},{h:"Fecha del cierre",t:"fecha"},{h:"Período de imputación",w:22},{h:"Fecha de imputación",t:"fecha"},{h:"Fecha del movimiento",t:"fecha"},{h:"Tipo"},{h:"Detalle",w:44},{h:"Debe",t:"$"},{h:"Haber",t:"$"},{h:"Saldo",t:"$"}];
       var out = [];
-      sel.forEach(function(c){ cmBuildResumenFilasConSaldo(c).forEach(function(f){ out.push([c.numero, c.fecha, f.fecha||c.fecha, f.detalle, f.debe||0, f.haber||0, f.saldo]); }); });
+      sel.forEach(function(c){ var per = typeof cmPeriodoTxt==="function" ? cmPeriodoTxt(c) : "";
+        cmBuildResumenFilasConSaldo(c).forEach(function(f){
+          var tipo = !f.fecha && !f.fechaMov ? "Saldo anterior" : f.retiro ? "Retiro" : /^Salida/.test(f.detalle) ? "Salida" : /^Ajuste \(ingreso/.test(f.detalle) ? "Ajuste (ingreso)" : /^Ajuste/.test(f.detalle) ? "Ajuste (diferencia)" : /^Retiro a oficina/.test(f.detalle) ? "Retiro a oficina" : "";
+          out.push([c.numero, c.fecha, per, f.fecha||null, f.fechaMov||null, tipo, f.detalle, f.debe||0, f.haber||0, f.saldo]); }); });
       if(vdXls("Cierres de Caja Mayor " + CLUB() + " " + HOY() + ".xlsx", cols, out, "Cierres")) showToast("Excel descargado correctamente");
     };
   }
@@ -20512,7 +20610,7 @@ window.cxListaInsumos = function(){
     const conv = lfConvIns(ins), vg = lfVigente(A.by[ins.id]);
     const grupo = lfComprasGrupo(ins.id), vgG = lfVigente(grupo), L = grupo.slice().sort((a,b)=>a.key<b.key?1:-1);
     const M = lfManualGrupo(ins.id), merma = Number(ins.factor_merma)||0;
-    rows.push({ key:ins.id, insId:ins.id, grp:G.of[ins.id], nombre:ins.nomenclatura, provId:ins.proveedor_id||null, provNombre:pv?pv.nombre:"Sin proveedor", cat:c?c.nombre:"", rubro:r?r.nombre:"",
+    rows.push({ key:ins.id, insId:ins.id, grp:G.of[ins.id], nombre:ins.nomenclatura, provId:ins.proveedor_id||null, provNombre:pv?pv.nombre:"Sin proveedor", baja:!!ins.proveedor_baja, cat:c?c.nombre:"", rubro:r?r.nombre:"",
       // catOrd/rubOrd (27/10/2026): orden de creación de la categoría/rubro en Config › Compras,
       // para que "Lista de insumos" agrupe sus tablas en ese orden por defecto en vez de alfabético
       // (pedido de Pancho) — el arrastre manual de tablas/globos sigue funcionando igual arriba de esto.
@@ -22941,6 +23039,77 @@ const CT = {
     return { cambios: p ? cambios : [] };
   };
 })();
+</script>
+<script>
+/* Montos con máscara de caja ($1.234,56.-) — 30/10/2026, ambos sitios.
+   La máscara reformatea con los dígitos que quedan; como el texto termina en ".-", la tecla Borrar
+   quitaba el "-" y el número volvía igual: no se podía corregir un monto. Ahora Borrar/Suprimir
+   quitan el último dígito (o todo, si estaba seleccionado). */
+(function(){
+  var RX = /^\$[\d.]*,\d{2}\.-$/;
+  document.addEventListener("keydown", function(e){
+    var t = e.target;
+    if(!(t instanceof HTMLInputElement) || t.readOnly || t.disabled) return;
+    if(e.key!=="Backspace" && e.key!=="Delete") return;
+    if(!RX.test(t.value)) return;
+    e.preventDefault();
+    var todo = t.selectionStart===0 && t.selectionEnd===t.value.length;
+    var d = todo ? "" : t.value.replace(/\D/g,"").replace(/^0+/,"").slice(0,-1);
+    t.value = d ? fmtMoneyFromDigits(d) : "";
+    t.dispatchEvent(new Event("input", { bubbles:true }));
+    try{ t.setSelectionRange(t.value.length, t.value.length); }catch(_){}
+  }, true);
+  // al entrar al campo, el cursor va al final (ahí se tipean y se borran los dígitos)
+  document.addEventListener("focusin", function(e){ var t = e.target; if(t instanceof HTMLInputElement && RX.test(t.value)) setTimeout(function(){ try{ if(t.selectionStart===t.selectionEnd) t.setSelectionRange(t.value.length, t.value.length); }catch(_){} }, 0); });
+})();
+</script>
+<script>
+/* Quitar el proveedor de un insumo (La Fortaleza, 30/10/2026). Cada proveedor de un insumo es una ficha.
+   - Si la ficha tiene facturas: se marca "ya no se le compra" (proveedor_baja) y sus facturas siguen
+     vinculadas como compra histórica; no se borra.
+   - Si no tiene facturas: se borra la ficha.
+   - Si era la única ficha del insumo, el insumo queda "sin proveedor" (se reutiliza la ficha o se crea
+     una nueva sin proveedor) para no perderlo; las recetas pasan a la ficha que queda activa. */
+async function lfQuitarProveedorIns(id){
+  const f = (typeof costeoInsumos!=="undefined" ? costeoInsumos : []).find(i=>i.id===id) || cfgIns(id); if(!f) return;
+  const pv = cfgProv(f.proveedor_id), nm = lfNrm(f.nomenclatura);
+  let compras = [], recetas = 0, fs = [];
+  try{
+    const rc = await sb.from("lf_costeo_compra_items").select("id,orden_id").eq("insumo_id", id); compras = rc.data||[];
+    const rr = await sb.from("lf_receta_lineas").select("id", { count:"exact", head:true }).eq("insumo_compra_id", id); recetas = rr.count||0;
+    const ords = [...new Set(compras.map(c=>c.orden_id))]; fs = ords.map(oid=>{ const o = ordenes.find(x=>x.id===oid); return o ? (o.fechaComprobante||o.fechaOrden) : null; }).filter(Boolean).sort();
+  }catch(e){}
+  const otras = costeoInsumos.filter(i=>i.id!==id && lfNrm(i.nomenclatura)===nm && !i.proveedor_baja);
+  const nFact = new Set(compras.map(c=>c.orden_id)).size;
+  cfgModal({ icon: nFact ? "warn" : "info", title: nFact ? "¿Seguro que querés quitar el emparejamiento?" : "Quitar proveedor del insumo",
+    body: (nFact ? `<p><b>${cfgEsc(f.nomenclatura)}</b> fue cargado en <b>${nFact} factura${nFact===1?"":"s"}</b> ${nFact===1?"anterior":"anteriores"} de <b>${cfgEsc(pv?pv.nombre:"")}</b>${fs.length?(fs[0]===fs[fs.length-1]?` (del ${isoToDMY(fs[0])})`:` (del ${isoToDMY(fs[0])} al ${isoToDMY(fs[fs.length-1])})`):""}.</p><p>Las facturas no se modifican: quedan como <b>compra histórica</b> (en Costeo › Insumos el proveedor aparece como “ya no se le compra”).</p>` : `<p>Se quita a <b>${cfgEsc(pv?pv.nombre:"")}</b> de <b>${cfgEsc(f.nomenclatura)}</b>. No tiene facturas cargadas.</p>`)
+      + (otras.length ? `<p>El insumo sigue con ${otras.length===1?"su otro proveedor":"sus otros proveedores"}${otras.some(o=>o.proveedor_id)?": <b>"+cfgEsc(otras.filter(o=>o.proveedor_id).map(o=>(cfgProv(o.proveedor_id)||{}).nombre||"").join(", "))+"</b>":""}.</p>` : `<p>Era su único proveedor: el insumo queda <b>sin proveedor</b> hasta que lo cargues en la factura de otro.</p>`)
+      + (recetas && (nFact || otras.length) ? `<p>Las ${recetas} línea${recetas===1?"":"s"} de receta que lo usan siguen igual (pasan a la ficha activa del insumo).</p>` : ""),
+    actions:[{label:"Cancelar", cls:"confirm-cancel"}, {label:"Quitar proveedor", cls:"confirm-delete", fn: async ()=>{
+      const ahora = new Date().toISOString();
+      let destino = otras.find(o=>o.proveedor_id) || otras[0] || null, err = null;
+      if(!nFact && !otras.length){ // única ficha y sin facturas: queda sin proveedor
+        const r = await sb.from("lf_costeo_insumos").update({ proveedor_id:null }).eq("id", id); err = r.error;
+      } else {
+        if(!destino){ // única ficha con facturas: se crea la ficha sin proveedor que la reemplaza
+          const nueva = { proveedor_id:null, rubro_id:f.rubro_id, nomenclatura:f.nomenclatura, cantidad:f.cantidad, unidad_medida:f.unidad_medida, necesita_conversion:!!f.necesita_conversion,
+            conversion_cantidad:f.conversion_cantidad, conversion_unidad:f.conversion_unidad, factor_merma:Number(f.factor_merma)||0, costo_manual:f.costo_manual, usar_costo_manual:!!f.usar_costo_manual, mercaderia:f.mercaderia,
+            creado_por:(typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null };
+          const r = await sb.from("lf_costeo_insumos").insert(nueva).select("id").single(); if(r.error) err = r.error; else destino = { id:r.data.id };
+        }
+        if(!err && recetas){ const r = await sb.from("lf_receta_lineas").update({ insumo_compra_id:destino.id }).eq("insumo_compra_id", id); err = r.error; }
+        if(!err){ const r = nFact ? await sb.from("lf_costeo_insumos").update({ proveedor_baja:true, proveedor_baja_fecha:ahora }).eq("id", id)
+                                  : await sb.from("lf_costeo_insumos").delete().eq("id", id); err = r.error; }
+      }
+      if(err){ showToast("No se pudo quitar el proveedor: "+err.message, "warn"); return false; }
+      try{ logHistorialConfig("Quitó un proveedor de un insumo", "“"+f.nomenclatura+"” · "+(pv?pv.nombre:"")+(nFact?" · "+nFact+" factura(s) quedan como compra histórica":"")); }catch(e){}
+      try{ cfgClosePanel(); }catch(e){}
+      await cfgReload(); if(typeof loadCosteoInsumos==="function") await loadCosteoInsumos();
+      try{ cfgRenderDom("insumos"); }catch(e){}
+      try{ if(window.LI) LI.render(); }catch(e){}
+      showToast("Proveedor quitado de "+f.nomenclatura);
+    }}] });
+}
 </script>
 </body>
 </html>
