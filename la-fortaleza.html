@@ -3021,6 +3021,58 @@
   .pvq-btn{border:1px solid #E5B3AE;background:#fff;color:#B42318;font-family:inherit;font-weight:800;font-size:12px;padding:8px 12px;border-radius:9px;cursor:pointer;white-space:nowrap}
   .pvq-btn:hover{background:#FDE7E7}
 </style>
+<style>
+  /* Análisis de resultados — mercadería por consumo y gastos prorrateados (03/11/2026) */
+  .ar-er-total .nm small{display:block;font-size:10.5px;font-weight:600;color:var(--text-3);margin-top:1px;text-transform:none;letter-spacing:0}
+  .arx-box{margin-top:12px;border:1px solid var(--border);border-radius:12px;background:#fff;overflow:hidden}
+  .arx-h{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;flex-wrap:wrap}
+  .arx-h:hover{background:#F6F7FC}
+  .arx-h .chev{width:16px;height:16px;color:var(--text-3);transition:transform .15s;flex:none}
+  .arx-h .chev svg{width:16px;height:16px;display:block}
+  .arx-box.open .arx-h .chev{transform:rotate(90deg);color:var(--blue)}
+  .arx-h .nm{font-weight:800;font-size:13px;flex:1;min-width:160px}
+  .arx-h .nm small{font-weight:600;font-size:11px;color:var(--text-3);margin-left:6px}
+  .arx-res{font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .arx-sw{display:inline-flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:#F6F7FC}
+  .arx-sw button{border:0;background:transparent;font:inherit;font-size:11.5px;font-weight:700;color:var(--text-2);padding:6px 10px;cursor:pointer}
+  .arx-sw button.on{background:var(--navy,#1B2C66);color:#fff;cursor:default}
+  .arx-b{display:none;padding:2px 14px 14px}
+  .arx-box.open .arx-b{display:block}
+  .arx-kv{display:flex;justify-content:space-between;gap:12px;padding:8px 2px;border-bottom:1px dashed var(--border);font-size:12.5px}
+  .arx-kv small{display:block;font-size:10.5px;color:var(--text-3);font-weight:600}
+  .arx-kv b{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .arx-kv.tot{border-bottom:0;font-weight:700}
+  .arx-avs{margin-top:10px;display:grid;gap:6px}
+  .arx-av{font-size:12px;line-height:1.5;color:#8A4B00;background:#FFF6E6;border:1px solid #F5DDB0;border-radius:9px;padding:8px 10px}
+  .arx-av span{color:#A86A1E;font-size:11px}
+  .arx-ok{margin-top:10px;font-size:12px;color:#1F7A4D;background:#E9F6EF;border-radius:9px;padding:8px 10px}
+  .arx-nota{font-size:11px;color:var(--text-3);margin-top:10px;line-height:1.5}
+  .arx-tw{overflow-x:auto}
+  .arx-t{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;min-width:680px}
+  .arx-t th{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);text-align:right;padding:8px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .arx-t td{text-align:right;padding:7px 8px;border-bottom:1px solid #F0F2F8;font-variant-numeric:tabular-nums;vertical-align:top}
+  .arx-t .l{text-align:left}
+  .arx-t td small{display:block;font-size:10.5px;color:var(--text-3)}
+  .arx-t tfoot td{font-weight:700;border-bottom:0;border-top:1px solid var(--border)}
+  @media print{ .arx-sw{display:none} .arx-box{break-inside:avoid} }
+</style>
+<style>
+  /* Configuración › Stock y Cómputo con globos y tablas (03/11/2026): nombres completos */
+  .skv-grid .sk-card[data-g] .skc-est{margin:0;border-radius:0;border-left:0;border-right:0;border-top:0;padding:8px 12px}
+  .skv-grid .sk-card[data-g] .sk-card-h{flex-wrap:wrap;row-gap:6px}
+  .skv-t td.nm{min-width:200px;word-break:normal;overflow-wrap:anywhere}
+  .skv-t td.skv-cambio small{display:block;font-size:10.5px;color:var(--text-3)}
+  .skv-t tr.skv-real td.nm{color:var(--text-1)}
+  .skv-t tr.skv-real td.nm::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--sk-ok);margin-right:7px;vertical-align:2px}
+  .sk-grid2.cv-compacta .skv-t .skv-cambio{display:none}
+  .skv-bulk{display:inline-flex;align-items:center;gap:6px}
+  .skv-bulk .meta{font-size:11.5px;color:var(--text-3);font-weight:600;margin-right:2px}
+  .skv-grid .sk-card[data-g] .sk-card-b{max-height:calc(100vh - 250px)}
+  .skr-grid .sk-t td.nm{min-width:220px}
+  .skv-thb{font-size:9.5px;font-weight:700;letter-spacing:.02em;text-transform:none;color:var(--text-3);margin-top:2px;white-space:nowrap}
+  .skv-thb button{border:0;background:none;padding:0;font:inherit;font-weight:800;color:var(--sky,#3B5BDB);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .skv-grid .skc-est .skc-st-add input{width:140px}
+</style>
 </head>
 <body>
 
@@ -9985,7 +10037,7 @@ function computeVentasResumen(){
     const diasActivos = diasConActividad.size || 1;
     const promedioDiario = totalVentas / diasActivos;
     let efectivo=0, facturado=0;
-    Object.entries(porMetodo).forEach(([m,v]) => { if (m==="Efectivo") efectivo+=v; else facturado+=v; });
+    Object.entries(porMetodo).forEach(([m,v]) => { if (vEsVentaB(m)) efectivo+=v; else facturado+=v; });
 
     // ---- Compras-Ventas + índice: distribución por 2da categorización
     const vH = ventasFiles.ventas.header;
@@ -9999,7 +10051,7 @@ function computeVentasResumen(){
 
     const porConcepto = new Map(); // bucket -> {total, count}
     const sinClasificarSet = new Set();
-    const porCancha = new Map(); // nombre de cancha (o "Mostrador/Salón") -> {total, count}
+    const porCancha = new Map(); // nombre de cancha (o "Salón / Buffet") -> {total, count}
     ventasFiles.ventas.rows.forEach(r => {
       const fecha = vJornadaFecha(r[vFecha], r[vHora]);
       if (!vInRange(fecha, from, to)) return;
@@ -10017,11 +10069,12 @@ function computeVentasResumen(){
       const e = porConcepto.get(key);
       e.total += monto; e.count += 1;
       // Ventas por cancha: todo lo vendido bajo una cancha (sin importar la categoría del
-      // producto/servicio) va a esa cancha. Lo que no está atado a ninguna cancha real —
-      // sin cancha ("-") o mesas de living/juegos de mesa ("Mesa 1", "Mesa 2", etc.) — se
-      // agrupa en "Mostrador/Salón".
+      // producto/servicio) va a esa cancha. Lo que no está atado a ninguna cancha de pádel va a
+      // "Salón / Buffet": el mostrador, las mesas del módulo de buffet de ATC (sus pedidos llegan
+      // sin cancha; el cobro figura en caja como "Pago buffet - Mesa N") y, en el historial, las
+      // mesas que antes se cargaban como canchas en la grilla ("Mesa 1", "Mesa 2") — 03/11/2026.
       const canchaRaw = vCancha===-1 ? "" : (r[vCancha]||"").toString().trim();
-      const canchaKey = (!canchaRaw || canchaRaw==="-" || /mesa/i.test(canchaRaw)) ? "Mostrador/Salón" : canchaRaw;
+      const canchaKey = (!canchaRaw || canchaRaw==="-" || !/^cancha/i.test(canchaRaw)) ? "Salón / Buffet" : canchaRaw;
       if(!porCancha.has(canchaKey)) porCancha.set(canchaKey, {total:0, count:0});
       const ec = porCancha.get(canchaKey);
       ec.total += monto; ec.count += 1;
@@ -10096,11 +10149,11 @@ function renderVentasPorCancha(porCancha, totalVentas){
   renderCanchasTabla();
 }
 /* Tabla única de canchas: ocupación (Tarde primero, después Mañana y Sábado), ventas, % del total y
-   turnos cancelados; al final, Mostrador/Salón (solo ventas) y el total. */
+   turnos cancelados; al final, Salón / Buffet (solo ventas) y el total. */
 function renderCanchasTabla(){
   const el = document.getElementById("ventasCanchas"); if(!el) return;
   const pc = vrState.porCancha || new Map(), oc = vrState.ocup, total = vrState.totalCV;
-  const nombres = new Set([...pc.keys()].filter(k=>k!=="Mostrador/Salón"));
+  const nombres = new Set([...pc.keys()].filter(k=>k!=="Salón / Buffet"));
   if(oc){ oc.canchas.forEach(c=>nombres.add(c)); }
   const num = c=>{ const m=String(c).match(/(\d+)/); return m?Number(m[1]):999; };
   const canchas = Array.from(nombres).sort((a,b)=>num(a)-num(b) || a.localeCompare(b,"es"));
@@ -10122,8 +10175,8 @@ function renderCanchasTabla(){
       <td>${fmtMoney(v.total)}</td><td class="mut">${vrPct(v.total,total)}</td>
       <td>${canc==null?'<span class="mut">—</span>':`<span class="vr-canc${canc?"":" zero"}">${canc}</span>`}</td></tr>`;
   }).join("");
-  const ms = pc.get("Mostrador/Salón");
-  if(ms) bodyRows += `<tr class="sep"><td class="l nm">Mostrador / Salón</td><td class="bar"></td><td class="bar"></td><td class="bar"></td><td>${fmtMoney(ms.total)}</td><td class="mut">${vrPct(ms.total,total)}</td><td></td></tr>`;
+  const ms = pc.get("Salón / Buffet");
+  if(ms) bodyRows += `<tr class="sep"><td class="l nm">Salón / Buffet</td><td class="bar"></td><td class="bar"></td><td class="bar"></td><td>${fmtMoney(ms.total)}</td><td class="mut">${vrPct(ms.total,total)}</td><td></td></tr>`;
   const totCanc = oc ? Array.from(oc.cancelados.values()).reduce((s,n)=>s+n,0) : null;
   bodyRows += `<tr class="tot"><td class="l">Total</td><td class="bar"></td><td class="bar"></td><td class="bar"></td><td>${fmtMoney(total)}</td><td class="mut">${total?"100,0%":"—"}</td><td>${totCanc==null?"":totCanc}</td></tr>`;
   const nota = oc ? `<div class="vr-note">Ocupación: la tarde (L a V) toma las reservas de particulares y la mañana las clases de profesores, sin importar el horario real del turno. Base por día hábil: tarde ${BASE_HORAS_TARDE_LV}h y mañana ${BASE_HORAS_MANANA_LV}h (${oc.dias} día(s) hábiles); sábado ${BASE_HORAS_SABADO}h (${oc.sabados} sábado(s)). Domingos excluidos.</div>`
@@ -10273,20 +10326,22 @@ function svgDonutAB(facturado, efectivo, size, thickness){
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${out}</svg>`;
 }
 // ATC exporta los cobros por QR con el método "Cheque" (es el que tiene disponible): se muestran como QR.
-function vMetodoLabel(m){ return /^cheque$/i.test(String(m||"").trim()) ? "QR" : m; }
+// Posnet (03/11/2026): ATC lo registra como "Crédito"; se muestra como Posnet y es Venta B, igual que el efectivo.
+function vMetodoLabel(m){ const t = String(m||"").trim(); return /^cheque$/i.test(t) ? "QR" : /^cr[eé]dito$/i.test(t) ? "Posnet" : m; }
+function vEsVentaB(m){ return /^(efectivo|cr[eé]dito|posnet)$/i.test(String(m||"").trim()); }
 
 function renderVentasAB(facturado, efectivo, porMetodo, targetId){
   const el = document.getElementById(targetId || "ventasAB");
   const total = facturado+efectivo;
-  const metodos = Object.entries(porMetodo||{}).filter(([m,v])=>v).map(([m,v])=>({m, v, b:m==="Efectivo"})).sort((x,y)=>(x.b-y.b)||(y.v-x.v));
-  const filas = metodos.map(x=>`<tr${x.b?' class="sep"':""}><td class="l">${x.b?"Efectivo (Venta B)":vMetodoLabel(x.m)}</td><td>${fmtMoney(x.v)}</td><td class="mut">${vrPct(x.v,total)}</td></tr>`).join("");
+  const metodos = Object.entries(porMetodo||{}).filter(([m,v])=>v).map(([m,v])=>({m, v, b:vEsVentaB(m)})).sort((x,y)=>(x.b-y.b)||(y.v-x.v));
+  const filas = metodos.map(x=>`<tr${x.b?' class="sep"':""}><td class="l">${x.b?vMetodoLabel(x.m)+" (Venta B)":vMetodoLabel(x.m)}</td><td>${fmtMoney(x.v)}</td><td class="mut">${vrPct(x.v,total)}</td></tr>`).join("");
   el.innerHTML = `
     <div class="vr-ab">
       <div class="ab-donut-svg-wrap">${svgDonutAB(facturado, efectivo, 140, 24)}
         <div class="ab-donut-center"><div class="val" style="font-size:13px">${fmtMoney(total)}</div><div class="lbl">Total</div></div></div>
       <div class="vr-ab-legend">
         <div class="it"><span class="dot" style="background:#5977D2"></span><div><div class="lbl">Venta A · Facturado</div><div class="pc">${vrPct(facturado,total)}</div></div><span class="vr-num">${fmtMoney(facturado)}</span></div>
-        <div class="it"><span class="dot" style="background:#D5F26A"></span><div><div class="lbl">Venta B · Efectivo</div><div class="pc">${vrPct(efectivo,total)}</div></div><span class="vr-num">${fmtMoney(efectivo)}</span></div>
+        <div class="it"><span class="dot" style="background:#D5F26A"></span><div><div class="lbl">Venta B · Efectivo y Posnet</div><div class="pc">${vrPct(efectivo,total)}</div></div><span class="vr-num">${fmtMoney(efectivo)}</span></div>
       </div>
     </div>
     <table class="vr-tbl"><thead><tr><th class="l">Método de pago</th><th>Monto</th><th>% del total</th></tr></thead><tbody>${filas||'<tr><td class="l mut" colspan="3">Sin movimientos en este rango.</td></tr>'}</tbody></table>`;
@@ -10325,8 +10380,20 @@ async function arVentasProviderLF(force){
   const vH = cv.header;
   const vConcepto = vFindColIndex(vH, ["Concepto"]), vFecha = vFindColIndex(vH, ["Fecha de movimiento"]), vHora = vFindColIndex(vH, ["Hora de movimiento"]);
   const vVentas = vFindColIndex(vH, ["Ventas"]), vPer = vFindColIndex(vH, ["Periodicidad"]);
+  const vCant = vFindColIndex(vH, ["Cantidad"]), vCompras = vFindColIndex(vH, ["Compras"]);
   if([vConcepto,vFecha,vHora,vVentas,vPer].includes(-1)) throw new Error("Compras-Ventas no tiene las columnas esperadas");
   cv.rows.forEach(r=>{
+    // Unidades vendidas por día y concepto (03/11/2026, costo de mercadería): sólo ventas (columna Ventas) y sus
+    // reversiones (cantidad negativa con Compras negativa). Las filas sin importe son ajustes de stock de ATC.
+    if(vCant!==-1){
+      const q = Number(r[vCant]), rv = r[vVentas], rc = vCompras===-1 ? null : r[vCompras];
+      const esV = !(rv==="-" || rv==null || rv===""), esRev = q<0 && !(rc==="-" || rc==null || rc==="") && Number(rc)<0;
+      const nm = (r[vConcepto]||"").toString().trim();
+      if(q && isFinite(q) && nm && (esV || esRev)){
+        const fU = vJornadaFecha(r[vFecha], r[vHora]);
+        if(fU){ const DU = dia(vToISODate(fU)); DU.uds = DU.uds || new Map(); const u = DU.uds.get(nm) || { u:0, imp:0 }; u.u += q; u.imp += esV ? (Number(rv)||0) : 0; DU.uds.set(nm, u); }
+      }
+    }
     const raw = r[vVentas]; if(raw==="-" || raw==null || raw==="") return;
     const monto = Number(raw); if(!monto) return;
     const f = vJornadaFecha(r[vFecha], r[vHora]); if(!f) return;
@@ -10344,7 +10411,8 @@ const AR_SITE = {
   tieneSeccion: m => tieneSeccionFortaleza(m),
   logoSel: ".module-sidebar .brand img",
   ventas: arVentasProviderLF,
-  renderAB: (facturado, efectivo, porMetodo, elId) => renderVentasAB(facturado, efectivo, porMetodo, elId)
+  renderAB: (facturado, efectivo, porMetodo, elId) => renderVentasAB(facturado, efectivo, porMetodo, elId),
+  esVentaB: m => vEsVentaB(m)
 };
 
 /* =====================================================================
@@ -10831,7 +10899,7 @@ function arRenderER(el, c, expandAll){
   };
   const ventasRows = vGrupos.map(g=>row("v:"+g.name, g.name, g.total, { subs:[...g.subs.entries()].sort((a,b)=>b[1]-a[1]) })).join("")
     + (AR_SITE.ventas ? row("v:__dif", "Diferencia de conciliación", dif, { hint:"Mismo ingreso, visto con dos recortes de fecha distintos (se empareja solo)" }) : "");
-  const gastosRows = gCats.map(g=>row("g:"+g.name, g.name, g.total, { gasto:true, subs:[...g.subs.entries()].sort((a,b)=>b[1]-a[1]) })).join("")
+  const gastosRows = gCats.map(g=>row("g:"+g.name, g.name, g.total, { gasto:true, hint:(typeof arHintGasto==="function"?arHintGasto(g):""), subs:[...g.subs.entries()].sort((a,b)=>b[1]-a[1]) })).join("")
     || `<div class="ar-er-empty">${arState.gastosErr ? arEsc(arState.gastosErr) : "Sin órdenes de pago imputadas al período."}</div>`;
   const sinLiq = arMesesSinLiquidar(c.desde, c.hasta);
   const avisoLiq = sinLiq.length ? `<div class="ar-warn">Sueldos sin liquidar: <b>${sinLiq.map(arMesNombre).join(", ")}</b>. Para ${sinLiq.length>1?"esos meses":"ese mes"} los gastos de personal solo incluyen adelantos y pagos sueltos; el sueldo se suma cuando se liquide (se imputa al mes liquidado).</div>` : "";
@@ -10842,10 +10910,11 @@ function arRenderER(el, c, expandAll){
       ${vGrupos.length || AR_SITE.ventas ? ventasRows : `<div class="ar-er-empty">${arEsc(AR_SITE.ventasPendienteTxt || "Sin ventas en el período.")}</div>`}
     </div>
     <div class="ar-er-sec gastos">
-      <div class="ar-er-total"><span class="bar" style="background:${AR_COLORS.gastos}"></span><span class="nm">Gastos totales</span><span class="pc">${arPct(G.total, base)}</span><span class="mt">${arParen(G.total)}</span></div>
+      <div class="ar-er-total"><span class="bar" style="background:${AR_COLORS.gastos}"></span><span class="nm">Gastos totales${typeof arHintTotalGastos==="function"?arHintTotalGastos(G):""}</span><span class="pc">${arPct(G.total, base)}</span><span class="mt">${arParen(G.total)}</span></div>
       ${gastosRows}
     </div>
     <div class="ar-er-util ${c.util<0?"neg":""}"><span class="bar" style="background:${AR_COLORS.util}"></span><span class="nm">Utilidad del período</span><span class="pc">${base?arPct(c.util, base):"—"}</span><span class="mt">${arMoney(c.util)}</span></div>
+    ${typeof arBloquesER==="function"?arBloquesER(c, expandAll):""}
     ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros (el % de cada sub-rubro es sobre el total de su categoría, no sobre el total general). Las ventas se miran por dos caminos que casi siempre coinciden: lo que entró a la caja, y el detalle de qué se vendió. Cuando no coinciden exactamente el mismo día (por ejemplo, alguien seña hoy una cancha que va a usar en otra fecha, o un cobro se carga como un solo movimiento de caja mientras el detalle de ventas lo abre en varios ítems), esa pequeña distancia en el tiempo aparece como “Diferencia de conciliación”: no es plata que falta ni un error, se empareja sola. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes del servicio (el de la factura, o el anterior si son a mes vencido, como ocurre con Sueldos) y los semestrales / anuales, por día en el período de cada orden — por eso una semana corta de fin de mes puede concentrar parte de un gasto mensual y verse más alta que las demás, sin que sea un error.</div>`}`;
 }
 function arToggleER(row){
@@ -10857,7 +10926,7 @@ function arRenderComp(el, c){
   if(!el) return;
   if(!AR_SITE.renderAB){ el.innerHTML = `<div class="ar-empty">${arEsc(AR_SITE.ventasPendienteTxt || "Sin ventas integradas para este club.")}</div>`; return; }
   const m = c.v.metodos; let efectivo = 0, facturado = 0;
-  Object.entries(m).forEach(([k,v])=>{ if(k==="Efectivo") efectivo += v; else facturado += v; });
+  Object.entries(m).forEach(([k,v])=>{ if(AR_SITE.esVentaB ? AR_SITE.esVentaB(k) : k==="Efectivo") efectivo += v; else facturado += v; });
   // Ocupación de canchas debajo de Venta A vs B (pedido de Pancho, 19/10/2026): mismo espacio de la
   // tarjeta, usado de forma proporcional — no agrega una tarjeta nueva, sigue a continuación.
   el.innerHTML = `<div id="${el.id}_ab"></div>
@@ -11195,7 +11264,7 @@ function arGenerarPdf(){
       <div class="hero ${c.util<0?"neg":""}"><div class="lbl">Utilidad del período</div><div class="val">${arMoney(c.util)}</div><div class="note">Margen ${margen}</div></div>
     </div>
     ${sec("er","Estado de resultados","Importes en pesos · % sobre ventas totales", erHtml)}
-    ${sec("comp","Composición de ventas","Venta A (facturado) vs. Venta B (efectivo)", compHtml)}
+    ${sec("comp","Composición de ventas","Venta A (facturado) vs. Venta B (efectivo y posnet)", compHtml)}
     ${sec("evo","Evolución de rendimientos","", evoHtml)}
     ${sec("div","Dividendos entre socios","", divHtml)}
     <footer class="arp-foot">Ventas: Movimientos de caja y Compras-Ventas de ATC (corte de jornada 05:00). Gastos: órdenes de pago no anuladas, por monto a pagar, imputadas por fecha de factura; proveedores mensuales repartidos en el mes del servicio (el de la factura o, a mes vencido, el anterior); semestrales y anuales, por día en el período de cada orden. Documento generado desde el panel de administración de ${arEsc(AR_SITE.club)}.</footer>`;
@@ -17695,7 +17764,7 @@ const SK_SITE = {
       if(!ing) return { rows:[], fuente:"ATC", nota:"Todavía no hay datos de Compras-Ventas de ATC." };
       const iC = vFindColIndex(ing.header,["Concepto"]), iF = vFindColIndex(ing.header,["Fecha de movimiento"]),
             iH = vFindColIndex(ing.header,["Hora de movimiento"]), iQ = vFindColIndex(ing.header,["Cantidad"]),
-            iV = vFindColIndex(ing.header,["Ventas"]);
+            iV = vFindColIndex(ing.header,["Ventas"]), iCo = vFindColIndex(ing.header,["Compras"]);
       if([iC,iF,iQ].includes(-1)) return { rows:[], fuente:"ATC", nota:"El reporte de ATC no tiene las columnas esperadas." };
       const agg = {}; let minF=null, maxF=null;
       (ing.rows||[]).forEach(r=>{
@@ -17704,6 +17773,9 @@ const SK_SITE = {
         const nom = String(r[iC]||"").trim(); if(!nom) return;
         const q = (r[iQ]==="-"||r[iQ]==null||r[iQ]==="") ? 0 : (Number(r[iQ])||0);
         const v = iV===-1 || r[iV]==="-" || r[iV]==null ? 0 : (Number(r[iV])||0);
+        // 03/11/2026: sólo ventas y sus reversiones; las filas sin importe (cargas/ajustes de stock en ATC) no son ventas.
+        const esV = iV===-1 || !(r[iV]==="-" || r[iV]==null || r[iV]===""), co = iCo===-1 || r[iCo]==="-" || r[iCo]==null || r[iCo]==="" ? 0 : (Number(r[iCo])||0);
+        if(!esV && !(q<0 && co<0)) return;
         const a = agg[nom] || (agg[nom] = { nombre:nom, unidades:0, importe:0 }); a.unidades += q; a.importe += v;
         if(!minF||f<minF) minF=f; if(!maxF||f>maxF) maxF=f;
       });
@@ -18214,12 +18286,21 @@ async function cfgOpen(){
 }
 function cfgCounts(t){ const all=itemsDe(t); return { n:all.length, r:all.filter(x=>modo(x.k)==="real").length }; }
 function cfgRender(){
+  /* Configuración › Stock con el estándar de módulos (03/11/2026): un globo por rubro (insumos) o categoría
+     (semi-elaborados), multi-selección y arrastrables (ordenan las tablas); cada tabla con manija y número de
+     posición; disposición cuadrícula / compacta / lista; nombres completos, sin cortar. */
   const w = $("#skCfgWrap"); if(!w) return;
   const ci = cfgCounts("i"), cs = cfgCounts("s");
-  const q = norm(G.q);
-  const pred = x=>(G.filtro==="todos" || (G.filtro==="real")===(modo(x.k)==="real")) && (!q || norm(x.nombre).includes(q) || norm(x.gN).includes(q) || norm(x.cN).includes(q));
-  const cats = tree(G.tipo, pred);
+  const q = norm(G.q), tipoCV = "cfg"+G.tipo;
+  const pasaFiltro = x=>(G.filtro==="todos" || (G.filtro==="real")===(modo(x.k)==="real")) && (!q || norm(x.nombre).includes(q) || norm(x.gN).includes(q) || norm(x.cN).includes(q));
+  const gAll = {}; itemsDe(G.tipo).forEach(x=>{ const g = gAll[x.gId] || (gAll[x.gId] = { gId:x.gId, gT:x.gT, nombre:x.gN, cN:x.cN, cId:x.cId, n:0, r:0, items:[] }); g.n++; if(modo(x.k)==="real") g.r++; g.items.push(x); });
+  const ORD = cvOrden(tipoCV, Object.values(gAll)), SEL = cvSel(tipoCV, ORD); G._ord = ORD; G._tipoCV = tipoCV;
+  const CVT = cvTools("skCfgCats", tipoCV, Object.values(gAll), ORD, SEL, g=>`${g.r}/${g.n}`);
+  const grupos = ORD.map(k=>gAll[k]).filter(g=>g && (!SEL.size || SEL.has(g.gId)))
+    .map(g=>({ ...g, vis:g.items.filter(pasaFiltro).sort(byName) })).filter(g=>g.vis.length || (!q && G.filtro==="todos"));
+  G._vis = grupos.reduce((a,g)=>a.concat(g.vis.map(x=>x.k)),[]);
   const puede = SK_SITE.tiene("config");
+  const nVis = G._vis.length, nVisR = G._vis.filter(k=>modo(k)==="real").length;
   let h = `<div class="skc-head"><div class="sk-grow"><h1>Stock</h1>
       <div class="sk-sub">Elegí qué ${G.tipo==="i"?"insumos":"semi-elaborados"} trabajan con <b>stock real</b> (se cuentan en Stock › Conteos y se les mide la fuga) y cuáles siguen con <b>stock teórico</b> (su consumo sale de ventas × receta). Para cada ${G.tipo==="i"?"rubro":"categoría"} definí las <b>estaciones de stock</b> donde se guarda la mercadería: son las columnas de la planilla de conteo.</div></div>
       <div class="sk-kpis" style="grid-template-columns:repeat(2,minmax(150px,1fr));margin:0;min-width:320px">
@@ -18228,43 +18309,36 @@ function cfgRender(){
       </div></div>
     <div class="sk-tools">
       <div class="sk-seg" data-cfg="tipo"><button type="button" data-v="i" class="${G.tipo==="i"?"on":""}">Insumos <span class="n">${ci.n}</span></button><button type="button" data-v="s" class="${G.tipo==="s"?"on":""}">Semi-elaborados <span class="n">${cs.n}</span></button></div>
-      <div class="sk-search">${ICO.srch}<input type="text" id="skCfgQ" placeholder="Buscar ${G.tipo==="i"?"insumo, rubro o categoría":"semi-elaborado o categoría"}…" value="${esc(G.q)}"></div>
+      <div class="sk-search">${ICO.srch}<input type="text" id="skCfgQ" placeholder="Buscar ${G.tipo==="i"?"insumo o rubro":"semi-elaborado"}…" value="${esc(G.q)}"></div>
       <div class="sk-seg" data-cfg="filtro"><button type="button" data-v="todos" class="${G.filtro==="todos"?"on":""}">Todos</button><button type="button" data-v="real" class="${G.filtro==="real"?"on":""}">Stock real</button><button type="button" data-v="teo" class="${G.filtro==="teo"?"on":""}">Teórico</button></div>
       <div class="sk-grow"></div>
-      <button type="button" class="sk-btn ghost sm" data-act="expand">Expandir todo</button><button type="button" class="sk-btn ghost sm" data-act="collapse">Contraer todo</button>
-    </div>`;
+      ${puede && nVis ? `<span class="skc-bulk skv-bulk"><span class="meta">${nVisR} de ${nVis} a la vista en real</span><button type="button" class="sk-btn xs" data-act="bulk" data-m="real" data-scope="vis">Todo real</button><button type="button" class="sk-btn xs" data-act="bulk" data-m="teorico" data-scope="vis">Todo teórico</button></span>` : ""}
+      ${CVT.vista}
+    </div>
+    ${CVT.chips}`;
   if(!puede) h += note("warn","Tu usuario puede ver esta configuración pero no modificarla.");
-  if(!cats.length) h += `<div class="sk-big"><div class="ic">${ICO.box}</div><b class="t">${q||G.filtro!=="todos"?"No hay resultados":"Todavía no hay "+(G.tipo==="i"?"insumos":"semi-elaborados")}</b>${q||G.filtro!=="todos"?"Probá con otra búsqueda o filtro.":G.tipo==="i"?"Los insumos se crean en Configuración › Compras › Insumos.":"Los semi-elaborados se crean en Costeo › Recetas."}</div>`;
-  cats.forEach(c=>{
-    const all = c.groups.reduce((a,g)=>a.concat(g.items),[]); const nr = all.filter(x=>modo(x.k)==="real").length;
-    const open = q || G.filtro!=="todos" || G.open[G.tipo+c.id];
-    h += `<div class="skc-cat ${open?"open":""}" data-cat="${esc(c.id)}">
-      <div class="skc-cat-h" data-act="toggle" data-id="${esc(c.id)}">${ICO.chev}<span class="nm">${esc(c.nombre)}</span>
-        <span class="meta">${G.tipo==="i"?`${c.groups.length} rubro${c.groups.length===1?"":"s"} · `:""}${all.length} ítem${all.length===1?"":"s"}</span>
-        <span class="sk-grow"></span><span class="meta"><b style="color:${nr?"var(--sk-ok)":"var(--text-3)"}">${nr}</b> en real</span>
-        <span class="skc-meter"><i style="width:${all.length?nr/all.length*100:0}%"></i></span>
-        ${puede?`<span class="skc-bulk"><button type="button" class="sk-btn xs" data-act="bulk" data-m="real" data-scope="cat" data-id="${esc(c.id)}">Todo real</button><button type="button" class="sk-btn xs" data-act="bulk" data-m="teorico" data-scope="cat" data-id="${esc(c.id)}">Todo teórico</button></span>`:""}
-      </div><div class="skc-cat-b">`;
-    c.groups.forEach(g=>{
-      const ests = estDe(g.gT, g.gId); const gr = g.items.filter(x=>modo(x.k)==="real").length;
-      const falta = !ests.length && (gr>0);
-      h += `<div class="skc-rub" data-g="${esc(g.gId)}">
-        ${G.tipo==="i"?`<div class="skc-rub-h"><span class="nm">${esc(g.nombre)}</span><span class="meta">${g.items.length} ítem${g.items.length===1?"":"s"} · ${gr} en real</span>
-          ${puede?`<span class="skc-bulk"><button type="button" class="sk-btn xs ghost" data-act="bulk" data-m="real" data-scope="grp" data-id="${esc(g.gId)}">Todo real</button><button type="button" class="sk-btn xs ghost" data-act="bulk" data-m="teorico" data-scope="grp" data-id="${esc(g.gId)}">Todo teórico</button></span>`:""}</div>`:""}
-        <div class="skc-est ${falta?"none":""}"><span class="sk-lbl">${ICO.pin} Estaciones de stock</span>
-          ${ests.map((e,ix)=>`<span class="skc-st">${puede&&ix>0?`<button type="button" class="mv" data-act="est-mv" data-id="${e.id}" data-d="-1" title="Mover a la izquierda">${ICO.left}</button>`:""}${esc(e.nombre)}${puede&&ix<ests.length-1?`<button type="button" class="mv" data-act="est-mv" data-id="${e.id}" data-d="1" title="Mover a la derecha">${ICO.right}</button>`:""}${puede?`<button type="button" data-act="est-del" data-id="${e.id}" title="Quitar estación">${ICO.x}</button>`:""}</span>`).join("")}
-          ${!ests.length?`<span style="font-size:12px;color:${falta?"#7A5200":"var(--text-3)"};font-weight:600">${falta?"Definí al menos una estación para poder contar estos ítems":"Sin estaciones todavía"}</span>`:""}
-          ${puede?`<span class="skc-st-add"><input type="text" placeholder="+ Agregar estación" data-est-add data-gt="${g.gT}" data-gid="${esc(g.gId)}" maxlength="40"></span>`:""}
-          ${puede&&G.tipo==="i"&&ests.length&&c.groups.length>1?`<button type="button" class="sk-btn xs ghost" data-act="est-copy" data-gid="${esc(g.gId)}" data-cat="${esc(c.id)}" title="Agrega estas estaciones a los demás rubros de ${esc(c.nombre)}">Copiar a toda la categoría</button>`:""}
-        </div>
-        <div class="skc-items">${g.items.map(x=>{ const m=modo(x.k); return `<div class="skc-it" title="${esc(x.nombre)}${S.modoMeta[x.k]&&S.modoMeta[x.k].modificado_nombre?` · último cambio: ${esc(S.modoMeta[x.k].modificado_nombre)} ${esc(fDT(S.modoMeta[x.k].modificado_fecha))}`:""}"><span class="nm">${esc(x.nombre)}</span><span class="u">${esc(x.u)}</span>
-          <span class="skc-sw ${G.busy.has(x.k)?"busy":""}"><button type="button" class="r ${m==="real"?"on":""}" data-act="modo" data-k="${x.k}" data-m="real" ${puede?"":"disabled"}>Real</button><button type="button" class="t ${m!=="real"?"on":""}" data-act="modo" data-k="${x.k}" data-m="teorico" ${puede?"":"disabled"}>Teórico</button></span></div>`; }).join("")}</div>
-      </div>`;
-    });
-    h += `</div></div>`;
-  });
+  if(!grupos.length) h += `<div class="sk-big"><div class="ic">${ICO.box}</div><b class="t">${q||G.filtro!=="todos"||SEL.size?"No hay resultados":"Todavía no hay "+(G.tipo==="i"?"insumos":"semi-elaborados")}</b>${q||G.filtro!=="todos"||SEL.size?"Probá con otra búsqueda, filtro o globo.":G.tipo==="i"?"Los insumos se crean en Configuración › Compras › Insumos.":"Los semi-elaborados se crean en Costeo › Recetas."}</div>`;
+  else h += `<div class="${cvGridClass()} skv-grid">` + grupos.map(g=>{
+    const ests = estDe(g.gT, g.gId); const falta = !ests.length && g.r>0;
+    const pos = ORD.indexOf(g.gId)+1;
+    return `<div class="sk-card" data-g="${esc(g.gId)}"><div class="sk-card-h">${cvCardHead(pos)}<span class="sk-card-t">${esc(g.nombre)}</span>${G.tipo==="i"?`<span class="sk-card-m">${esc(g.cN)}</span>`:""}
+        <span class="sk-grow"></span><span class="sk-card-m"><b style="color:${g.r?"var(--sk-ok)":"var(--text-3)"}">${g.r}</b> de ${g.n} en real</span></div>
+      <div class="skc-est ${falta?"none":""}"><span class="sk-lbl">${ICO.pin} Estaciones</span>
+        ${ests.map((e,ix)=>`<span class="skc-st">${puede&&ix>0?`<button type="button" class="mv" data-act="est-mv" data-id="${e.id}" data-d="-1" title="Mover a la izquierda">${ICO.left}</button>`:""}${esc(e.nombre)}${puede&&ix<ests.length-1?`<button type="button" class="mv" data-act="est-mv" data-id="${e.id}" data-d="1" title="Mover a la derecha">${ICO.right}</button>`:""}${puede?`<button type="button" data-act="est-del" data-id="${e.id}" title="Quitar estación">${ICO.x}</button>`:""}</span>`).join("")}
+        ${!ests.length?`<span style="font-size:12px;color:${falta?"#7A5200":"var(--text-3)"};font-weight:600">${falta?"Definí al menos una estación para poder contar estos ítems":"Sin estaciones todavía"}</span>`:""}
+        ${puede?`<span class="skc-st-add"><input type="text" placeholder="+ Agregar estación" data-est-add data-gt="${g.gT}" data-gid="${esc(g.gId)}" maxlength="40"></span>`:""}
+        ${puede&&G.tipo==="i"&&ests.length&&Object.values(gAll).filter(x=>x.cId===g.cId).length>1?`<button type="button" class="sk-btn xs ghost" data-act="est-copy" data-gid="${esc(g.gId)}" data-cat="${esc(g.cId)}" title="Agrega estas estaciones a los demás rubros de ${esc(g.cN)}">Copiar a toda la categoría</button>`:""}
+      </div>
+      <div class="sk-card-b">${g.vis.length?`<table class="sk-t skv-t"><thead><tr><th class="l">${G.tipo==="i"?"Insumo":"Semi-elaborado"}</th><th class="c">Unidad</th><th class="c">Stock${puede?`<div class="skv-thb">Todos: <button type="button" data-act="bulk" data-m="real" data-scope="grp" data-id="${esc(g.gId)}" title="Pasar todo el ${G.tipo==="i"?"rubro":"grupo"} a stock real">real</button> · <button type="button" data-act="bulk" data-m="teorico" data-scope="grp" data-id="${esc(g.gId)}" title="Pasar todo el ${G.tipo==="i"?"rubro":"grupo"} a stock teórico">teórico</button></div>`:""}</th><th class="l skv-cambio">Último cambio</th></tr></thead><tbody>
+        ${g.vis.map(x=>{ const m=modo(x.k), mm=S.modoMeta[x.k];
+          return `<tr${m==="real"?' class="skv-real"':""}><td class="nm">${esc(x.nombre)}</td><td class="c mut">${esc(x.u)}</td>
+            <td class="c"><span class="skc-sw ${G.busy.has(x.k)?"busy":""}"><button type="button" class="r ${m==="real"?"on":""}" data-act="modo" data-k="${x.k}" data-m="real" ${puede?"":"disabled"}>Real</button><button type="button" class="t ${m!=="real"?"on":""}" data-act="modo" data-k="${x.k}" data-m="teorico" ${puede?"":"disabled"}>Teórico</button></span></td>
+            <td class="l mut skv-cambio">${mm&&mm.modificado_nombre?`${esc(mm.modificado_nombre)}<small>${esc(fDT(mm.modificado_fecha))}</small>`:"—"}</td></tr>`; }).join("")}
+      </tbody></table>`:`<div class="sk-empty" style="padding:18px">Ningún ítem coincide con el filtro.</div>`}</div></div>`;
+  }).join("") + `</div>`;
   w.innerHTML = h;
   cfgBind();
+  cvBind(w, tipoCV, ORD, ()=>{ const sc = document.scrollingElement, y = sc ? sc.scrollTop : 0; cfgRender(); if(sc) sc.scrollTop = y; });
 }
 function cfgBind(){
   const w = $("#skCfgWrap");
@@ -18278,7 +18352,7 @@ function cfgBind(){
     if(act==="expand"||act==="collapse"){ tree(G.tipo).forEach(c=>G.open[G.tipo+c.id]=act==="expand"); LS.set("cfg_open",G.open); cfgRender(); return; }
     if(act==="modo"){ e.stopPropagation(); await setModo([b.dataset.k], b.dataset.m); return; }
     if(act==="bulk"){ e.stopPropagation();
-      const keys = itemsDe(G.tipo).filter(x=>(b.dataset.scope==="cat"?x.cId:x.gId)===b.dataset.id && modo(x.k)!==b.dataset.m).map(x=>x.k);
+      const keys = (b.dataset.scope==="vis" ? (G._vis||[]).map(k=>S.items[k]).filter(Boolean) : itemsDe(G.tipo).filter(x=>(b.dataset.scope==="cat"?x.cId:x.gId)===b.dataset.id)).filter(x=>modo(x.k)!==b.dataset.m).map(x=>x.k);
       if(!keys.length){ toast("Ya están todos así"); return; }
       if(keys.length>3 && !(await confirmar(`¿Pasar ${keys.length} ítems a stock ${b.dataset.m==="real"?"real":"teórico"}?`, b.dataset.m==="real"?"Van a aparecer en Stock › Conteos y se van a medir contra el teórico desde el próximo par de conteos.":"Dejan de contarse: su consumo pasa a calcularse con ventas × receta.", "Sí, cambiar"))) return;
       await setModo(keys, b.dataset.m); return; }
@@ -19056,19 +19130,24 @@ function resRender(){
   if(t.comprasSinTeo>0.5) avisos.push(`Hay ${money(t.comprasSinTeo)} de compras de insumos en teórico que ninguna receta vendida consume (no entran al costo hasta que se cuenten o tengan receta).`);
   if(avisos.length) h += note("warn", avisos.join("<br>"));
   const deTipo = (R.items||[]).filter(r=>r.t===K.tipo);
-  const cats = {}; deTipo.forEach(r=>{ (cats[r.c]=cats[r.c]||{id:r.c,nombre:r.c,n:0}).n++; });
+  // Globos por rubro (insumos) / categoría (semi-elaborados) — estándar de módulos (03/11/2026)
+  const gKey = r=>r.c+"\u0001"+r.g, tipoCV = "rs"+K.tipo;
+  const gAll = {}; deTipo.forEach(r=>{ const k=gKey(r); (gAll[k]=gAll[k]||{gId:k,nombre:K.tipo==="i"?r.g:r.c,cN:r.c,n:0}).n++; });
+  const ORD = cvOrden(tipoCV, Object.values(gAll)), SEL = cvSel(tipoCV, ORD); K._ord = ORD; K._tipoCV = tipoCV;
+  const CVT = cvTools("skRsCats", tipoCV, Object.values(gAll), ORD, SEL, g=>g.n);
   h += `<div class="sk-tools">${segTipo("skRsTipo",K.tipo,iI,iS)}
     <div class="sk-seg" id="skRsVer"><button type="button" data-v="todos" class="${K.ver==="todos"?"on":""}">Todos</button><button type="button" data-v="real" class="${K.ver==="real"?"on":""}">Stock real</button><button type="button" data-v="teo" class="${K.ver==="teo"?"on":""}">Teórico</button></div>
-    <div class="sk-search">${ICO.srch}<input type="text" id="skRsQ" placeholder="Buscar ítem o rubro…" value="${esc(K.q)}"></div></div>
-    ${chipsCats("skRsCats", Object.values(cats).sort(byName), K.cat, c=>c.n)}`;
-  const filas = resFilas(R);
+    <div class="sk-search">${ICO.srch}<input type="text" id="skRsQ" placeholder="Buscar ítem o rubro…" value="${esc(K.q)}"></div><span class="sk-grow"></span>${CVT.vista}</div>
+    ${CVT.chips}`;
+  const filas = resFilas(R).filter(r=>!SEL.size || SEL.has(gKey(r)));
   if(!filas.length) h += `<div class="sk-big"><b class="t">Sin ítems para mostrar</b>Probá con otro filtro.</div>`;
-  const porCat = {}; filas.forEach(r=>(porCat[r.c]=porCat[r.c]||[]).push(r));
+  const porCat = {}; filas.forEach(r=>(porCat[gKey(r)]=porCat[gKey(r)]||[]).push(r));
   const ent = K.tipo==="i" ? "Compras" : "Producción";
-  Object.keys(porCat).sort((a,b)=>a.localeCompare(b,"es")).forEach(cn=>{
-    const L = porCat[cn]; const grupos = {}; L.forEach(r=>(grupos[r.g]=grupos[r.g]||[]).push(r));
+  if(filas.length) h += `<div class="${cvGridClass()} skr-grid">`;
+  Object.keys(porCat).sort((a,b)=>ORD.indexOf(a)-ORD.indexOf(b)).forEach(gk=>{
+    const L = porCat[gk], G0 = gAll[gk] || { nombre:gk, cN:"" }, cn = G0.nombre; const grupos = {}; L.forEach(r=>(grupos[r.g]=grupos[r.g]||[]).push(r));
     const tc = sum(L,r=>r.c$||0), tf = sum(L.filter(r=>r.m==="real"||r.m==="mixto"),r=>r.f$||0), tcm = sum(L,r=>r.cmv||0);
-    h += `<div class="sk-card"><div class="sk-card-h"><span class="sk-card-t">${esc(cn)}</span><span class="sk-card-m">${L.length} ítem${L.length===1?"":"s"}</span><span class="sk-grow"></span><span class="sk-card-m">Costo ${money(tcm)} · fuga <b style="color:${tf>0.5?"var(--sk-bad)":"inherit"}">${moneyS(tf)}</b></span></div>
+    h += `<div class="sk-card" data-g="${esc(gk)}"><div class="sk-card-h">${cvCardHead(ORD.indexOf(gk)+1)}<span class="sk-card-t">${esc(cn)}</span>${K.tipo==="i"?`<span class="sk-card-m">${esc(G0.cN)}</span>`:""}<span class="sk-card-m">${L.length} ítem${L.length===1?"":"s"}</span><span class="sk-grow"></span><span class="sk-card-m">Costo ${money(tcm)} · fuga <b style="color:${tf>0.5?"var(--sk-bad)":"inherit"}">${moneyS(tf)}</b></span></div>
       <div class="sk-card-b"><table class="sk-t"><thead>
         <tr><th class="l" rowspan="2" style="vertical-align:bottom">Ítem</th><th rowspan="2" class="c" style="vertical-align:bottom">Modo</th><th class="grp gs" colspan="4">Unidades · consumo real</th><th class="grp gs" colspan="3">Contraste con ventas</th><th class="grp gs" colspan="3">Valorización</th></tr>
         <tr><th class="gs">Inicial</th><th>${ent}</th><th>Final</th><th>Real</th><th class="gs">Teórico</th><th>Fuga</th><th>Fuga %</th><th class="gs">$/un.</th><th>Consumo $</th><th>Fuga $</th></tr></thead><tbody>
@@ -19081,6 +19160,7 @@ function resRender(){
           <td class="gs mut">${isNum(r.cu)?money2(r.cu):"—"}</td><td class="strong">${isNum(r.c$)?money(r.c$):`<span class="sk-tag warn">sin precio</span>`}</td><td>${real&&isNum(r.f$)?`<span style="font-weight:800;color:${r.f$>0.5?"var(--sk-bad)":r.f$<-0.5?"var(--sk-warn)":"var(--sk-ok)"}">${moneyS(r.f$)}</span>`:`<span class="mut">—</span>`}</td></tr>`; }).join("")).join("")}
       </tbody><tfoot><tr><td class="l" colspan="9">Total ${esc(cn)}</td><td class="gs"></td><td>${money(tc)}</td><td>${moneyS(tf)}</td></tr></tfoot></table></div></div>`;
   });
+  if(filas.length) h += `</div>`;
   h += `</div>`;
   P0.innerHTML = h;
   P0.onclick = async e=>{
@@ -19098,7 +19178,7 @@ function resRender(){
   };
   const seg=$("#skRsTipo"); $$("button",seg).forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); K.tipo=b.dataset.v; K.cat="all"; resRender(); });
   $$("#skRsVer button").forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); K.ver=b.dataset.v; resRender(); });
-  const ch=$("#skRsCats"); if(ch) $$("button",ch).forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); K.cat=b.dataset.v; resRender(); });
+  cvBind(P0, K._tipoCV, K._ord||[], ()=>{ const sc=$(".sk-scroll",P0); const top=sc?sc.scrollTop:0; resRender(); const s2=$(".sk-scroll",$("#skPaneComputo")); if(s2) s2.scrollTop=top; });
   const qi=$("#skRsQ"); let tm; qi.oninput=()=>{ clearTimeout(tm); tm=setTimeout(()=>{ K.q=qi.value; const p=qi.selectionStart; resRender(); const n=$("#skRsQ"); n.focus(); n.setSelectionRange(p,p); },200); };
 }
 function detalleItem(R, k){
@@ -19159,7 +19239,7 @@ async function onEnterStock(){
   const ok = await loadAll(!editando && !!S.base); if(!ok){ const p=$("#skPane"+curTab.charAt(0).toUpperCase()+curTab.slice(1)); if(p) p.innerHTML=`<div class="sk-big" style="margin:40px auto"><b class="t">No se pudieron cargar los datos de Stock</b>Revisá la conexión y volvé a entrar al módulo.</div>`; return; }
   renderTab();
 }
-window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ computar, valuar, explode, resolverVentas, parseVentasAoa, consolidar, parseNum, costoRef } };
+window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ loadAll, computar, valuar, explode, resolverVentas, parseVentasAoa, consolidar, parseNum, costoRef } };
 })();
 </script>
 <script>
@@ -23110,6 +23190,231 @@ async function lfQuitarProveedorIns(id){
       showToast("Proveedor quitado de "+f.nomenclatura);
     }}] });
 }
+</script>
+<script>
+/* =====================================================================
+   ANÁLISIS DE RESULTADOS — STOCK Y PRORRATEO (pedido de Pancho, 03/11/2026) · mismo código en ambos sitios
+   1) Costo de mercadería por stock (clubes con ventas integradas: hoy La Fortaleza)
+      · La parte "mercadería" de cada factura (ítems cuyo insumo está marcado como mercadería) deja de ser
+        gasto del día de la compra: queda en stock.
+      · En su lugar entra "Costo de mercadería vendida (CMV)": unidades vendidas de cada artículo (Compras-
+        Ventas, netas de reversiones; sin los ajustes de stock de ATC) × receta (explosión completa hasta los
+        insumos, con merma) × costo de la última compra del insumo a ese día (si no hay anterior, la primera).
+        Mientras no haya conteos de stock, el CMV es teórico (regla acordada: sin cómputo → ventas × receta).
+      · Sólo cuentan los insumos marcados como mercadería; los no-mercadería siguen como gasto al comprarse.
+      · Se puede volver a ver "como antes" (compras como gasto) con el selector del Estado de resultados.
+   2) Prorrateo: cada categoría muestra lo facturado en el período contra lo imputado, y un detalle de las
+      órdenes mensuales / semestrales / anuales que tocan el período (qué cubren y cuánto se imputó).
+   ===================================================================== */
+(function(){
+  if(typeof arGastosRango!=="function" || typeof arState==="undefined") return;
+  const AR_CMV_CAT = "Costo de mercadería vendida (CMV)";
+  arState.cmvOn = true;
+
+  /* ---------- datos de stock: % mercadería de cada factura y CMV por día ---------- */
+  if(AR_SITE.ventas && window.SK && SK._engine && SK._engine.loadAll){
+    AR_SITE.cmv = {
+      async load(force){
+        const E = SK._engine, S = SK._S;
+        const ok = await E.loadAll(!!force); if(!ok || !S.base) throw new Error("no se pudieron leer recetas y compras (Stock)");
+        const P = AR_SITE.pre, insTabla = P==="lf" ? "lf_costeo_insumos" : "cm_insumos";
+        const { data:mrows, error:merr } = await sb.from(insTabla).select("*");
+        if(merr) throw new Error(merr.message);
+        const merc = new Set((mrows||[]).filter(r=>r.mercaderia===true).map(r=>r.id));
+        const itemDe = id=>S.items["i:"+id] || null;
+        // % mercadería de cada factura (por costo de sus ítems) y reparto del resto por concepto / rubro del insumo
+        const porOrden = new Map();
+        (S.base.compras||[]).forEach(c=>{ const v = (Number(c.qty)||0)*(Number(c.unit)||0); if(!(v>0) || !c.orden_id) return;
+          const o = porOrden.get(c.orden_id) || { tot:0, merc:0, partes:new Map() }; o.tot += v;
+          if(merc.has(c.insumo_id)) o.merc += v;
+          else { const it = itemDe(c.insumo_id), k = (it?it.cN:"Sin categoría")+"\u0001"+(it?it.gN:"Sin rubro"); o.partes.set(k, (o.partes.get(k)||0)+v); }
+          porOrden.set(c.orden_id, o); });
+        const ordMerc = new Map();
+        porOrden.forEach((o, id)=>{ if(!(o.merc>0) || !(o.tot>0)) return;
+          ordMerc.set(id, { fm:o.merc/o.tot, partes:[...o.partes.entries()].map(([k,v])=>{ const [c,r] = k.split("\u0001"); return { concepto:c, rubro:r, f:v/o.tot }; }) }); });
+        // costo unitario de un insumo a una fecha (sin merma: la merma ya está en las cantidades de la receta)
+        // Mismo criterio que Costeo: el precio es del insumo (mismo nombre y unidad), lo compre a quien lo compre;
+        // si el insumo usa "costo manual", vale ese; si no tiene compras, el manual si lo hay.
+        const nrmI = x=>String(x||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+        const grupoDe = {}, manual = {};
+        (mrows||[]).forEach(r=>{ const un = (r.necesita_conversion && r.conversion_unidad) ? r.conversion_unidad : (r.unidad_medida||r.unidad||"");
+          const k = nrmI(r.nomenclatura||r.nombre)+"|"+nrmI(un); grupoDe[r.id] = k;
+          const m = r.costo_manual==null || r.costo_manual==="" ? null : Number(r.costo_manual);
+          if(m!=null && isFinite(m)){ const prev = manual[k]; if(!prev || (r.usar_costo_manual && !prev.usar)) manual[k] = { v:m, usar:!!r.usar_costo_manual }; } });
+        const gk = id=>grupoDe[id] || ("id:"+id);
+        const layers = {}; (S.base.compras||[]).forEach(c=>{ const u = Number(c.unit); if(!isFinite(u) || !(Number(c.qty)>0)) return; const k = gk(c.insumo_id); (layers[k]=layers[k]||[]).push({ f:c.fecha, u }); });
+        Object.values(layers).forEach(L=>L.sort((a,b)=>a.f<b.f?-1:a.f>b.f?1:0));
+        const costo = (id, iso)=>{ const k = gk(id), M = manual[k]; if(M && M.usar) return M.v;
+          const L = layers[k]; if(!L || !L.length) return M ? M.v : null; let c = null; for(const l of L){ if(l.f<=iso) c = l; else break; } return (c||L[0]).u; };
+        // vínculo de cada concepto vendido con su artículo (mismo criterio que Stock: vínculo manual, nombre, prefijo)
+        const resCache = new Map();
+        const resolver = nm=>{ if(resCache.has(nm)) return resCache.get(nm);
+          const r = (E.resolverVentas([{ nombre:nm, unidades:1, importe:0 }]).list||[])[0] || { status:"sin_vincular" };
+          resCache.set(nm, r); return r; };
+        const catsConReceta = new Set((S.base.arts||[]).filter(a=>S.lin["a:"+a.id] && S.lin["a:"+a.id].length).map(a=>a.categoria));
+        const expCache = new Map();
+        const explosion = artId=>{ if(!expCache.has(artId)){ const acc = {}; E.explode("a", artId, 1, acc, null, true); expCache.set(artId, acc); } return expCache.get(artId); };
+        const dias = new Map();
+        (arState.ventas && arState.ventas.dias ? arState.ventas.dias : new Map()).forEach((d, iso)=>{
+          if(!d.uds || !d.uds.size) return;
+          const R = { total:0, rubros:new Map(), sinCosto:new Map(), sinPrecio:new Map() };
+          d.uds.forEach((x, nm)=>{
+            if(!x.u) return;
+            const r = resolver(nm);
+            if(r.status==="ignorada") return;
+            if(r.status!=="ok"){
+              const art = r.art ? S.artById[r.art] : null;
+              // sin receta: sólo se avisa si el artículo es de una categoría que se costea (bebidas, cocina, accesorios…)
+              if(r.status==="sin_vincular" || (art && catsConReceta.has(art.categoria))){ const g = R.sinCosto.get(nm) || { u:0, imp:0, st:r.status }; g.u += x.u; g.imp += x.imp; R.sinCosto.set(nm, g); }
+              return;
+            }
+            const acc = explosion(r.art);
+            Object.keys(acc).forEach(k=>{ if(k.slice(0,2)!=="i:") return; const id = k.slice(2); if(!merc.has(id)) return;
+              const q = acc[k].q * x.u, u = costo(id, iso), it = itemDe(id);
+              if(u==null){ const n = it?it.nombre:id; R.sinPrecio.set(n, (R.sinPrecio.get(n)||0) + q); return; }
+              const v = q*u, rb = it ? it.gN : "Sin rubro"; R.total += v; R.rubros.set(rb, (R.rubros.get(rb)||0)+v); });
+          });
+          dias.set(iso, R);
+        });
+        // facturas de mercadería sin ítems cargados: no se puede separar la mercadería → siguen enteras como gasto
+        const conceptosMerc = new Set(); (S.base.compras||[]).forEach(c=>{ if(merc.has(c.insumo_id)){ const it = itemDe(c.insumo_id); if(it) conceptosMerc.add(it.cN); } });
+        return { ordMerc, dias, conceptosMerc, conItems:new Set(porOrden.keys()) };
+      }
+    };
+    const _load = arLoadAll;
+    window.arLoadAll = async function(force){
+      await _load(force);
+      if(!AR_SITE.cmv || (arState.cmvData && !force)) return;
+      try{ arState.cmvData = await AR_SITE.cmv.load(force); arState.cmvErr = null; }
+      catch(e){ arState.cmvData = null; arState.cmvErr = e.message || String(e); }
+    };
+    const _status = arRenderStatus;
+    window.arRenderStatus = function(){ _status();
+      const st = document.getElementById("arStatus"); if(st && arState.cmvErr) st.innerHTML += ` · <b>Costo de mercadería:</b> ${arEsc(arState.cmvErr)} (se muestran las compras como gasto)`; };
+  }
+
+  function arCmvRango(desde, hasta){
+    const D = arState.cmvData, out = { total:0, rubros:new Map(), sinCosto:new Map(), sinPrecio:new Map() };
+    if(!D) return out;
+    D.dias.forEach((R, iso)=>{ if(iso<desde || iso>hasta) return;
+      out.total += R.total;
+      R.rubros.forEach((v,k)=>out.rubros.set(k,(out.rubros.get(k)||0)+v));
+      R.sinCosto.forEach((g,k)=>{ const x = out.sinCosto.get(k) || { u:0, imp:0, st:g.st }; x.u += g.u; x.imp += g.imp; out.sinCosto.set(k, x); });
+      R.sinPrecio.forEach((q,k)=>out.sinPrecio.set(k,(out.sinPrecio.get(k)||0)+q)); });
+    return out;
+  }
+  // Período que cubre una orden (para el detalle del prorrateo)
+  function arCubre(o){
+    const f = o.fecha_comprobante, tg = arTipoGasto(o);
+    if(tg==="semestral" || tg==="anual"){
+      const ms = o.periodo_desde ? String(o.periodo_desde).slice(0,7)+"-01" : arMonthStart(f);
+      const e = arDate(ms); e.setMonth(e.getMonth() + (tg==="anual" ? 12 : 6)); e.setDate(e.getDate()-1);
+      return [ms, arISO(e)];
+    }
+    if(tg==="mensual"){ const fm = arMesServicio(o, f); return [arMonthStart(fm), arMonthEnd(fm)]; }
+    return [f, f];
+  }
+  window.arCubre = arCubre;
+
+  /* ---------- gastos del rango: imputado, facturado, mercadería y CMV ---------- */
+  window.arGastosRango = function(desde, hasta){
+    const cats = new Map(); let total = 0, fact = 0, mercCompras = 0, mercSinItems = [];
+    const CM = arState.cmvOn!==false ? arState.cmvData : null;
+    const prorr = [];
+    const cat = c=>{ if(!cats.has(c)) cats.set(c, { name:c, total:0, fact:0, subs:new Map(), subsFact:new Map(), n:0 }); return cats.get(c); };
+    arState.ordenes.forEach(o=>{
+      const v = arGastoEnRango(o, desde, hasta), f = o.fecha_comprobante;
+      const fa = (f>=desde && f<=hasta) ? arImporteOrden(o) : 0;
+      if(!v && !fa) return;
+      let partes = arPartesOrden(o), fm = 0;
+      const om = CM && CM.ordMerc.get(o.id);
+      if(om){ fm = om.fm; partes = om.partes; }
+      else if(CM && fa && !CM.conItems.has(o.id) && CM.conceptosMerc.has((o.concepto||"").trim())) mercSinItems.push(o);
+      mercCompras += v*fm;
+      const vistas = new Set();
+      partes.forEach(pt=>{
+        const c = (pt.concepto||"").trim() || "Sin categoría", rb = (pt.rubro||"").trim() || "Sin rubro";
+        const C = cat(c), vv = v*pt.f, ff = fa*pt.f;
+        C.total += vv; C.fact += ff; if(vv && !vistas.has(c)){ C.n++; vistas.add(c); }
+        if(vv) C.subs.set(rb, (C.subs.get(rb)||0)+vv);
+        if(ff) C.subsFact.set(rb, (C.subsFact.get(rb)||0)+ff);
+      });
+      total += v*(1-fm); fact += fa*(1-fm);
+      const tg = arTipoGasto(o);
+      if(tg!=="puntual") prorr.push({ o, tg, imp:v*(1-fm), fact:fa*(1-fm), monto:arImporteOrden(o)*(1-fm), cubre:arCubre(o) });
+    });
+    // categorías que sólo tienen facturado (todo imputado a otro período) quedan con total 0: se muestran igual en el detalle
+    let cmv = null;
+    if(CM){
+      cmv = arCmvRango(desde, hasta);
+      if(cmv.total){ const C = cat(AR_CMV_CAT); C.cmv = true; C.total += cmv.total; C.fact += cmv.total; cmv.rubros.forEach((v,k)=>{ C.subs.set(k,v); C.subsFact.set(k,v); }); total += cmv.total; fact += cmv.total; }
+      cmv.mercCompras = mercCompras; cmv.mercSinItems = mercSinItems;
+    }
+    [...cats.keys()].forEach(k=>{ const C = cats.get(k); if(Math.abs(C.total)<0.005 && !C.cmv) cats.delete(k); });
+    return { total, cats, fact, prorr, cmv, cmvActivo:!!CM, cmvDisponible:!!arState.cmvData };
+  };
+
+  /* ---------- Estado de resultados: textos y bloques nuevos ---------- */
+  window.arHintGasto = function(g){
+    if(g.cmv) return "Ventas × receta × costo de compra (stock teórico)";
+    const d = g.total - (g.fact||0);
+    if(Math.abs(d) < 1) return "";
+    return `Facturado ${arMoney(g.fact||0)} · ${d>0?"+":"−"}${arMoney(Math.abs(d)).replace(/^−/,"")} por prorrateo`;
+  };
+  window.arHintTotalGastos = function(G){
+    if(G.fact==null || Math.abs(G.total-G.fact) < 1) return "";
+    const d = G.total - G.fact;
+    return `<small>Facturado en el período ${arMoney(G.fact)} · ${d>0?"+":"−"}${arMoney(Math.abs(d))} por prorrateo</small>`;
+  };
+  const TG_LBL = { mensual:"Mensual", semestral:"Semestral", anual:"Anual" };
+  window.arToggleBox = function(el){ el.closest(".arx-box").classList.toggle("open"); };
+  window.arCmvSwitch = function(on){ arState.cmvOn = !!on; arRefresh(false); };
+  window.arBloquesER = function(c, expandAll){
+    const G = c.g; let html = "";
+    const chev = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+    // --- mercadería / CMV ---
+    if(G.cmvDisponible || G.cmv){
+      if(G.cmvActivo && G.cmv){
+        const M = G.cmv, dif = M.mercCompras - M.total;
+        const sinC = [...M.sinCosto.entries()].filter(([,x])=>x.imp>0).sort((a,b)=>b[1].imp-a[1].imp);
+        const sinP = [...M.sinPrecio.entries()].sort((a,b)=>b[1]-a[1]);
+        const sinI = M.mercSinItems || [];
+        const avisos = [];
+        if(sinC.length) avisos.push(`<div class="arx-av"><b>${sinC.length} artículo${sinC.length===1?"":"s"} vendido${sinC.length===1?"":"s"} sin costo</b> (${arMoney(sinC.reduce((a,[,x])=>a+x.imp,0))} de ventas): ${sinC.slice(0,8).map(([n,x])=>`${arEsc(n)} <span>${x.st==="sin_vincular"?"no está en Recetas":"sin receta"} · ${arMoney(x.imp)}</span>`).join(" · ")}${sinC.length>8?" · …":""}</div>`);
+        if(sinP.length) avisos.push(`<div class="arx-av"><b>${sinP.length} insumo${sinP.length===1?"":"s"} sin precio de compra</b> (su consumo no se valoriza): ${sinP.slice(0,8).map(([n])=>arEsc(n)).join(" · ")}${sinP.length>8?" · …":""}</div>`);
+        if(sinI.length) avisos.push(`<div class="arx-av"><b>${sinI.length} factura${sinI.length===1?"":"s"} de mercadería sin ítems cargados</b> (siguen enteras como gasto): ${sinI.slice(0,6).map(o=>`${arEsc(o.proveedor)} ${arDMY(o.fecha_comprobante)} <span>${arMoney(arImporteOrden(o))}</span>`).join(" · ")}${sinI.length>6?" · …":""}</div>`);
+        html += `<div class="arx-box${expandAll?" open":""}">
+          <div class="arx-h" onclick="arToggleBox(this)"><span class="chev">${chev}</span><span class="nm">Mercadería: compras vs. consumo</span>
+            <span class="arx-sw" onclick="event.stopPropagation()"><button class="on" type="button">Por consumo (CMV)</button><button type="button" onclick="arCmvSwitch(false)">Como antes (compras)</button></span></div>
+          <div class="arx-b">
+            <div class="arx-kv"><span>Compras de mercadería del período <small>parte mercadería de las facturas, sale de gastos</small></span><b>${arMoney(M.mercCompras)}</b></div>
+            <div class="arx-kv"><span>Costo de mercadería vendida (CMV) <small>entra a gastos</small></span><b>${arMoney(M.total)}</b></div>
+            <div class="arx-kv tot"><span>${dif>=0?"Queda en stock":"Sale del stock"} <small>${dif>=0?"se compró más de lo que se vendió":"se vendió más de lo que se compró en el período"}</small></span><b>${arMoney(Math.abs(dif))}</b></div>
+            ${avisos.length?`<div class="arx-avs">${avisos.join("")}</div>`:`<div class="arx-ok">Todo lo vendido tiene receta y precio de compra.</div>`}
+            <div class="arx-nota">CMV teórico: unidades vendidas (Compras-Ventas de ATC, netas de reversiones) × receta × costo de la última compra de cada insumo a ese día. Cuando haya conteos de stock, el consumo real reemplaza al teórico en los insumos contados. Sólo cuentan los insumos marcados como mercadería.</div>
+          </div></div>`;
+      } else if(G.cmvDisponible){
+        html += `<div class="arx-box"><div class="arx-h"><span class="chev"></span><span class="nm">Mercadería: compras vs. consumo</span>
+          <span class="arx-sw"><button type="button" onclick="arCmvSwitch(true)">Por consumo (CMV)</button><button class="on" type="button">Como antes (compras)</button></span></div></div>`;
+      }
+    }
+    // --- prorrateo ---
+    const P = (G.prorr||[]).filter(x=>Math.abs(x.imp)>=0.5 || Math.abs(x.fact)>=0.5).sort((a,b)=>b.imp-a.imp || b.fact-a.fact);
+    if(P.length){
+      const tImp = P.reduce((a,x)=>a+x.imp,0), tFact = P.reduce((a,x)=>a+x.fact,0);
+      const rows = P.map(x=>{ const o = x.o, [a,b] = x.cubre, dias = arDays(a,b)+1;
+        const tipo = TG_LBL[x.tg] + (x.tg==="mensual" ? (arState.provMes && arState.provMes.get(arNorm(o.proveedor))==="vencido" ? " · mes vencido" : " · mes corriente") : "");
+        return `<tr><td class="l"><b>${arEsc(o.proveedor)}</b><small>${arEsc(o.rubro||o.concepto||"")}</small></td><td class="l">${tipo}</td><td class="l">${arDMY(o.fecha_comprobante)}</td><td class="l">${arDMY(a)} al ${arDMY(b)} <small>${dias} días</small></td><td>${arMoney(x.monto)}</td><td>${x.fact?arMoney(x.fact):"—"}</td><td><b>${arMoney(x.imp)}</b><small>${arPct(x.imp, x.monto)}</small></td></tr>`; }).join("");
+      html += `<div class="arx-box${expandAll?" open":""}">
+        <div class="arx-h" onclick="arToggleBox(this)"><span class="chev">${chev}</span><span class="nm">Gastos prorrateados <small>${P.length} orden${P.length===1?"":"es"} mensuales, semestrales o anuales</small></span>
+          <span class="arx-res">Facturado ${arMoney(tFact)} · Imputado <b>${arMoney(tImp)}</b></span></div>
+        <div class="arx-b"><div class="arx-tw"><table class="arx-t"><thead><tr><th class="l">Proveedor</th><th class="l">Tipo</th><th class="l">Factura</th><th class="l">Período que cubre</th><th>Monto</th><th>Facturado en el período</th><th>Imputado al período</th></tr></thead><tbody>${rows}</tbody>
+          <tfoot><tr><td class="l" colspan="5">Total</td><td>${arMoney(tFact)}</td><td><b>${arMoney(tImp)}</b></td></tr></tfoot></table></div>
+          <div class="arx-nota">Cada orden se reparte por día en el período que cubre (mensual: el mes del servicio; semestral / anual: 6 / 12 meses desde el mes de inicio). “Facturado en el período” es la factura entera si su fecha cae en el rango elegido; “Imputado” es la parte de los días del rango. Los gastos puntuales (mercadería, compras sueltas) se imputan enteros el día de la factura.</div></div></div>`;
+    }
+    return html;
+  };
+})();
 </script>
 </body>
 </html>
