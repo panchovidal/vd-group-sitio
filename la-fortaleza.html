@@ -3102,6 +3102,28 @@
   body.vdb-noselect{user-select:none}
   @media (max-width:900px){ .vdb-item{grid-column:span 12} .vdb-rs{display:none} }
 </style>
+<style>
+  /* Sueldos: bonificación y adicionales adheridos (04/11/2026) */
+  .liqx-adh{border:1.5px dashed #D6DBEE;border-radius:12px;padding:10px 12px 11px}
+  .liqx-adh.on{border-style:solid;border-color:#C9D4F4;background:#F5F7FE}
+  .liqx-adh label{display:flex;align-items:center;gap:8px}
+  .liqx-tag{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);background:#EEF1F8;border-radius:6px;padding:2px 7px}
+  .liqx-adh select{width:100%}
+  .liqx-hint{margin-top:6px;font-size:11.5px;color:var(--text-3);font-weight:600;line-height:1.4}
+  .liqx-hint b{color:var(--text-1)}
+  .liqx-box{margin-top:14px;border:1px solid var(--border);border-radius:14px;padding:12px 14px;background:#fff}
+  .liqx-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .liqx-h b{font-size:13px}
+  .liqx-h span{font-size:11.5px;color:var(--text-3);font-weight:600}
+  .liqx-t{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}
+  .liqx-t th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);text-align:right;padding:7px 8px;border-bottom:1px solid var(--border)}
+  .liqx-t td{text-align:right;padding:7px 8px;border-bottom:1px solid #F0F2F8;font-variant-numeric:tabular-nums}
+  .liqx-t .l{text-align:left}
+  .liqx-t td.mut{color:var(--text-3)}
+  .liqx-t tfoot td{font-weight:800;border-bottom:0}
+  .liqx-t tfoot tr.g td{border-top:1px solid var(--border);color:var(--text-1)}
+  .liqx-empty{font-size:12px;color:var(--text-3);font-weight:600}
+</style>
 </head>
 <body>
 
@@ -6439,7 +6461,7 @@ function mapOrdenRow(row){
   return {
     id: row.id, fechaOrden: row.fecha_orden,
     comprobanteTipo: row.comprobante_tipo === "Pago B" ? "Compra B" : row.comprobante_tipo,
-    fechaComprobante: row.fecha_comprobante, comprobante: row.comprobante || "", periodoDesde: row.periodo_desde || null,
+    fechaComprobante: row.fecha_comprobante, comprobante: row.comprobante || "", periodoDesde: row.periodo_desde || null, liqMes: row.liq_mes || null,
     proveedor: row.proveedor || "", concepto: row.concepto || "", rubro: row.rubro || "",
     montoFactura: Number(row.monto_factura||0), montoRetencion: Number(row.monto_retencion||0), monto: Number(row.monto||0),
     estado: row.estado, metodo: row.metodo || "", fechaVenc: row.fecha_venc, fechaPago: row.fecha_pago, notas: row.notas || "",
@@ -8530,6 +8552,7 @@ async function saveOrder(){
     monto_factura: montoFactura, monto_retencion: montoRetencion, monto,
     comprobante_tipo: comprobanteTipo||null, comprobante,
     periodo_desde: typeof tgxPeriodoVal==="function" ? tgxPeriodoVal("f") : undefined,
+    liq_mes: typeof liqxVal==="function" ? liqxVal("f") : undefined,
     fecha_orden: fechaOrden || null, fecha_comprobante: fechaComprobante || null,
     factura_pendiente: typeof pgFpVal==="function" ? pgFpVal("f", comprobanteTipo) : false,
     fecha_pago: fechaPago || null,
@@ -8814,6 +8837,7 @@ async function saveNuevaOrden(){
     estado, metodo, fecha_venc: null, fecha_pago: fechaPagoISO || null, notas,
     adjuntos: pgStateToFiles("nueva"), adjuntos_pago: pgStateToFiles("nuevaPago"),
     periodo_desde: typeof tgxPeriodoVal==="function" ? tgxPeriodoVal("n") : undefined,
+    liq_mes: typeof liqxVal==="function" ? liqxVal("n") : undefined,
     unread: true,
     creado_por: currentPerfil ? currentPerfil.id : null, creado_por_nombre: currentPerfil ? currentPerfil.nombre : "—",
     modificado_por: currentPerfil ? currentPerfil.id : null, modificado_por_nombre: currentPerfil ? currentPerfil.nombre : "—",
@@ -10558,7 +10582,7 @@ async function arLoadAll(force){
     arState.gastosErr = null; arState.ventasErr = null;
     const puedeGastos = AR_SITE.tieneSeccion("pagos") || AR_SITE.tieneSeccion("costeo");
     const tareas = [
-      puedeGastos ? arSelectAll(P+"_ordenes", "id,proveedor,concepto,rubro,monto,monto_factura,estado,fecha_comprobante,periodo_desde", q=>q.neq("estado","Anulado")) : Promise.resolve(null),
+      puedeGastos ? arSelectAll(P+"_ordenes", "id,proveedor,concepto,rubro,monto,monto_factura,estado,fecha_comprobante,periodo_desde,liq_mes", q=>q.neq("estado","Anulado")) : Promise.resolve(null),
       puedeGastos ? arSelectAll(P+"_proveedores", "nombre,tipo_gasto,mes_imputacion") : Promise.resolve(null),
       sb.from(P+"_socios").select("id,nombre,porcentaje,orden").order("orden").order("nombre"),
       AR_SITE.ventas ? AR_SITE.ventas(force).catch(e=>{ arState.ventasErr = e.message || String(e); return null; }) : Promise.resolve(null),
@@ -10589,7 +10613,9 @@ async function arLoadAll(force){
 }
 
 /* ---------- cálculo ---------- */
-function arTipoGasto(o){ return arState.provTipo.get(arNorm(o.proveedor)) || "puntual"; }
+// Adicional de sueldos adherido a una liquidación (04/11/2026): entero en el mes de esa liquidación.
+function arFechaImput(o){ return o.liq_mes ? arMonthEnd(String(o.liq_mes).slice(0,10)) : o.fecha_comprobante; }
+function arTipoGasto(o){ if(o.liq_mes) return "puntual"; return arState.provTipo.get(arNorm(o.proveedor)) || "puntual"; }
 // Mensual a mes vencido (19/10/2026): la factura cobra el servicio del mes anterior → se prorratea en ese mes.
 function arMesServicio(o, f){
   if(!(arState.provMes && arState.provMes.get(arNorm(o.proveedor))==="vencido")) return f;
@@ -10600,7 +10626,7 @@ function arMesServicio(o, f){
 function arImporteOrden(o){ return Number(o.monto)||0; }
 // Parte del gasto de una orden que cae en [desde, hasta] (ambos inclusive).
 function arGastoEnRango(o, desde, hasta){
-  const f = o.fecha_comprobante, imp = arImporteOrden(o), tg = arTipoGasto(o);
+  const f = arFechaImput(o), imp = arImporteOrden(o), tg = arTipoGasto(o);
   if(tg==="semestral" || tg==="anual"){
     // Período de 6 / 12 meses desde el mes de inicio de la orden (por defecto, el de la factura), por día.
     const ms = o.periodo_desde ? String(o.periodo_desde).slice(0,7)+"-01" : arMonthStart(f);
@@ -12822,6 +12848,7 @@ async function liqProcesarArchivo(parsed, fileName){
   liqState.horasExtraManual = filaExistente ? (filaExistente.horas_extra_manual || {}) : {};
   liqState.feriadosManual = filaExistente ? (filaExistente.feriados_manual || {}) : {};
   liqState.ausenciasManual = filaExistente ? (filaExistente.ausencias_manual || {}) : {};
+  liqState.bonificacionManual = filaExistente ? (filaExistente.bonificacion_manual || {}) : {};
   liqState.liquidado = false; // el caso liquidado=true ya se descartó arriba
   liqState.liquidacionId = filaExistente ? filaExistente.id : null;
   liqState.ordenAId = filaExistente ? filaExistente.orden_a_id : null;
@@ -13240,7 +13267,7 @@ function liqRenderTablaLiquidacion(){
       "<th colspan=\"2\" class=\"liq-th-group\">Horas extra</th>" +
       "<th colspan=\"2\" class=\"liq-th-group\">Feriados</th>" +
       "<th colspan=\"2\" class=\"liq-th-group\">Ausencias</th>" +
-      "<th rowspan=\"2\">Sugerido pago B</th><th rowspan=\"2\">Pago B</th>" +
+      "<th rowspan=\"2\" title=\"Monto en $ que se suma al pago B y al recibo\">Bonificación</th><th rowspan=\"2\">Sugerido pago B</th><th rowspan=\"2\">Pago B</th>" +
     "</tr>" +
     "<tr>" +
       "<th class=\"liq-th-sub\">Reporte</th><th class=\"liq-th-sub\">Manual</th>" +
@@ -13253,7 +13280,7 @@ function liqRenderTablaLiquidacion(){
   var rows = "";
   filas.forEach(function(f){
     if(!f.emp){
-      rows += "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+"<span class=\"liq-sin-presentismo\">sin ficha en la base</span></td><td colspan=\"13\" class=\"liq-num-cell\" style=\"color:var(--text-3);\">—</td></tr>";
+      rows += "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+"<span class=\"liq-sin-presentismo\">sin ficha en la base</span></td><td colspan=\"14\" class=\"liq-num-cell\" style=\"color:var(--text-3);\">—</td></tr>";
       return;
     }
     var sueldo = Number(f.emp.sueldo||0);
@@ -13269,7 +13296,8 @@ function liqRenderTablaLiquidacion(){
     var horasExtraManual = Number(liqState.horasExtraManual[f.key]||0);
     var feriadosManual = Number(liqState.feriadosManual[f.key]||0);
     var ausenciasManual = Number(liqState.ausenciasManual[f.key]||0);
-    var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora));
+    var bonif = Number((liqState.bonificacionManual||{})[f.key]||0); // bonificación manual (04/11/2026): se paga en B y suma al recibo
+    var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora) + bonif);
     var aNeto = a;
     if(esCondA && sugerido < 0 && a > 0){ aNeto = Math.max(0, a + sugerido); sugerido = sugerido + (a - aNeto); } // excedente de adelantos → se descuenta de A
     var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
@@ -13297,6 +13325,7 @@ function liqRenderTablaLiquidacion(){
       "<td>"+manualInput("feriadosManual", feriadosManual)+"</td>" +
       "<td class=\"liq-num-cell\">"+(f.tienePresentismo?agr.ausencias:"—")+"</td>" +
       "<td>"+manualInput("ausenciasManual", ausenciasManual)+"</td>" +
+      "<td><input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"bonif\" value=\""+fmtMoney(bonif)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+"></td>" +
       "<td class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(sugerido)+"</td>" +
       "<td><input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"pagob\" value=\""+fmtMoney(pagoB)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+"></td>" +
       "</tr>";
@@ -13305,7 +13334,7 @@ function liqRenderTablaLiquidacion(){
   /* Totales de A y de Pago B al pie de cada columna: A + B = total liquidado (pedido de Pancho, 08/10/2026). */
   var tfoot = filas.length ? "<tfoot><tr class=\"liq-tot-row\"><td class=\"liq-col-nombre\">Totales<span class=\"liq-col-esperado\">A + B = "+fmtMoney(totalA+totalB)+"</span></td><td></td><td></td>" +
     "<td class=\"liq-num-cell\"><span class=\"liq-tot-lbl\">Total A</span>"+fmtMoney(totalA)+"</td>" +
-    "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>" +
+    "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>" +
     "<td class=\"liq-num-cell\"><span class=\"liq-tot-lbl\">Total B</span>"+fmtMoney(totalB)+"</td></tr></tfoot>" : "";
   document.getElementById("liqTablaLiquidacion").innerHTML = thead+"<tbody>"+rows+"</tbody>"+tfoot;
   document.getElementById("liqTotalGeneral").textContent = fmtMoney(totalA+totalB);
@@ -13320,7 +13349,9 @@ function liqOnMontoInput(el){
   if(liqState.liquidado) return;
   var key = el.dataset.emp, field = el.dataset.field;
   var val = liqParseMontoInput(el.value);
-  if(field==="a") liqState.montoA[key] = val; else liqState.pagoBManual[key] = val;
+  if(field==="a") liqState.montoA[key] = val;
+  else if(field==="bonif"){ liqState.bonificacionManual = liqState.bonificacionManual || {}; liqState.bonificacionManual[key] = val; }
+  else liqState.pagoBManual[key] = val;
   liqRenderTablaLiquidacion();
   /* liqRenderTablaLiquidacion() reconstruye toda la tabla (recalcula B, sugerido y totales),
      lo que destruye y recrea el <input> sobre el que se estaba escribiendo. Sin este paso,
@@ -13395,7 +13426,8 @@ function liqComputeTotales(){
     var horasExtraManual = Number(liqState.horasExtraManual[f.key]||0);
     var feriadosManual = Number(liqState.feriadosManual[f.key]||0);
     var ausenciasManual = Number(liqState.ausenciasManual[f.key]||0);
-    var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora));
+    var bonif = Number((liqState.bonificacionManual||{})[f.key]||0); // bonificación manual (04/11/2026): se paga en B y suma al recibo
+    var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora) + bonif);
     var aNeto = a;
     if(esCondA && sugerido < 0 && a > 0){ aNeto = Math.max(0, a + sugerido); sugerido = sugerido + (a - aNeto); } // excedente de adelantos → se descuenta de A
     var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
@@ -13425,6 +13457,7 @@ async function liqGuardarDraftAhora(){
     horas_extra_manual: liqState.horasExtraManual,
     feriados_manual: liqState.feriadosManual,
     ausencias_manual: liqState.ausenciasManual,
+    bonificacion_manual: liqState.bonificacionManual || {},
     total_a: tot.totalA,
     total_b: tot.totalB,
     modificado_por: (typeof currentPerfil!=="undefined" && currentPerfil) ? currentPerfil.id : null
@@ -13462,6 +13495,7 @@ async function liqOnTabOpen(){
       liqState.horasExtraManual = row.horas_extra_manual || {};
       liqState.feriadosManual = row.feriados_manual || {};
       liqState.ausenciasManual = row.ausencias_manual || {};
+      liqState.bonificacionManual = row.bonificacion_manual || {};
       liqState.liquidado = !!row.liquidado;
       liqState.liquidacionId = row.id;
       liqState.ordenAId = row.orden_a_id;
@@ -23360,7 +23394,7 @@ async function lfQuitarProveedorIns(id){
     const prorr = [];
     const cat = c=>{ if(!cats.has(c)) cats.set(c, { name:c, total:0, fact:0, subs:new Map(), subsFact:new Map(), n:0 }); return cats.get(c); };
     arState.ordenes.forEach(o=>{
-      const v = arGastoEnRango(o, desde, hasta), f = o.fecha_comprobante;
+      const v = arGastoEnRango(o, desde, hasta), f = typeof arFechaImput==="function" ? arFechaImput(o) : o.fecha_comprobante;
       const fa = (f>=desde && f<=hasta) ? arImporteOrden(o) : 0;
       if(!v && !fa) return;
       let partes = arPartesOrden(o), fm = 0;
@@ -23571,6 +23605,60 @@ async function lfQuitarProveedorIns(id){
       const g = vw.querySelector(".vr-grid"); if(g && !g.children.length) g.style.display = "none"; }
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();
+</script>
+<script>
+/* ===== Sueldos: adicionales adheridos a una liquidación (04/11/2026) =====
+   Una orden de pago cargada en Pagos (ej. liquidación final por despido, diferencia de pago B) puede
+   "adherirse" a la liquidación de un mes: se imputa a ese mes en los reportes (como la liquidación) y
+   aparece en Sueldos › Liquidación debajo de la tabla, sumada al total. Columna lf_ordenes.liq_mes. */
+(function(){
+  if(typeof liqState==="undefined") return;
+  var MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  function mesTxt(iso){ var p = String(iso).split("-").map(Number); return MES[p[1]-1]+" "+p[0]; }
+  function mes1(iso){ return iso ? String(iso).slice(0,7)+"-01" : ""; }
+  function hoyMes(){ var d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-01"; }
+  function addM(iso, n){ var p = iso.split("-").map(Number), d = new Date(p[0], p[1]-1+n, 1); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-01"; }
+  function opciones(sel){ var h = '<option value="">No, es un pago independiente</option>', b = hoyMes(), vistos = {};
+    for(var i=-6;i<=1;i++){ var v = addM(b,i); vistos[v]=1; h += '<option value="'+v+'"'+(v===sel?" selected":"")+'>Liquidación de '+mesTxt(v)+'</option>'; }
+    if(sel && !vistos[sel]) h += '<option value="'+sel+'" selected>Liquidación de '+mesTxt(sel)+'</option>';
+    return h; }
+  function campo(pref){ return '<div class="field liqx-adh" id="fld-'+pref+'LiqMes"><label>Adicional de sueldos <span class="liqx-tag">opcional</span></label>'
+    + '<select id="'+pref+'LiqMes" onchange="liqxSync(\''+pref+'\')">'+opciones("")+'</select>'
+    + '<div class="liqx-hint" id="'+pref+'LiqMesHint">Adherilo a una liquidación (despido, diferencia de pago B, premio…) para que se impute a ese mes y figure en Sueldos › Liquidación.</div></div>'; }
+  ["n","f"].forEach(function(pref){ var ref = document.getElementById("fld-"+pref+"Periodo"); if(ref && !document.getElementById(pref+"LiqMes")) ref.insertAdjacentHTML("afterend", campo(pref)); });
+  window.liqxSync = function(pref){ var s = document.getElementById(pref+"LiqMes"), h = document.getElementById(pref+"LiqMesHint"); if(!s||!h) return;
+    h.innerHTML = s.value ? "Se imputa a <b>"+mesTxt(s.value)+"</b> (como la liquidación de ese mes), sin importar la fecha de la factura, y se suma en Sueldos › Liquidación." : "Adherilo a una liquidación (despido, diferencia de pago B, premio…) para que se impute a ese mes y figure en Sueldos › Liquidación.";
+    document.getElementById("fld-"+pref+"LiqMes").classList.toggle("on", !!s.value); };
+  window.liqxVal = function(pref){ var s = document.getElementById(pref+"LiqMes"); return s ? (s.value || null) : undefined; };
+  function setPanel(){ var s = document.getElementById("fLiqMes"); if(!s) return;
+    var o = (typeof ordenes!=="undefined" ? ordenes : []).find(function(x){ return x.id===openOrderId; });
+    var v = o && o.liqMes ? mes1(o.liqMes) : ""; s.innerHTML = opciones(v); s.value = v; liqxSync("f"); }
+  function envolver(nombre, despues){ if(typeof window[nombre]!=="function") return; var f = window[nombre];
+    window[nombre] = function(){ var r = f.apply(this, arguments); try{ despues.apply(this, arguments); }catch(e){ console.warn(e); } return r; }; }
+  envolver("openPanel", setPanel);
+  envolver("resetNuevaOrdenForm", function(){ var s = document.getElementById("nLiqMes"); if(s){ s.innerHTML = opciones(""); liqxSync("n"); } });
+
+  /* ---- Liquidación: adicionales del mes debajo de la tabla ---- */
+  window.liqxAdicionales = function(mesISO){ var m = mes1(mesISO); if(!m) return [];
+    return (typeof ordenes!=="undefined" ? ordenes : []).filter(function(o){ return o.liqMes && mes1(o.liqMes)===m && o.estado!=="Anulado"; }); };
+  function render(){
+    var tabla = document.getElementById("liqTablaLiquidacion"); if(!tabla) return;
+    var wrap = tabla.closest(".liq-scroll"); if(!wrap) return;
+    var box = document.getElementById("liqxBox");
+    if(!box){ box = document.createElement("div"); box.id = "liqxBox"; box.className = "liqx-box"; wrap.insertAdjacentElement("afterend", box); }
+    var L = liqState.mes ? liqxAdicionales(liqState.mes) : [];
+    if(!liqState.mes){ box.innerHTML = ""; return; }
+    var tot = L.reduce(function(a,o){ return a + (Number(o.monto)||0); }, 0);
+    var liq = 0; try{ var t = liqComputeTotales(); liq = (t.totalA||0)+(t.totalB||0); }catch(e){}
+    box.innerHTML = '<div class="liqx-h"><b>Adicionales adheridos</b><span>órdenes cargadas en Pagos que se imputan a '+mesTxt(liqState.mes)+'</span></div>'
+      + (L.length ? '<table class="liqx-t"><thead><tr><th class="l">Orden</th><th class="l">Proveedor</th><th class="l">Rubro</th><th class="l">Observaciones</th><th class="l">Estado</th><th>Monto</th></tr></thead><tbody>'
+        + L.map(function(o){ return '<tr><td class="l">'+liqEscapeHtml(o.id)+'</td><td class="l">'+liqEscapeHtml(o.proveedor)+'</td><td class="l">'+liqEscapeHtml(o.rubro||"")+'</td><td class="l mut">'+liqEscapeHtml(o.notas||"")+'</td><td class="l">'+liqEscapeHtml(o.estado||"")+'</td><td><b>'+fmtMoney(o.monto)+'</b></td></tr>'; }).join("")
+        + '</tbody><tfoot><tr><td class="l" colspan="5">Total adicionales</td><td>'+fmtMoney(tot)+'</td></tr><tr class="g"><td class="l" colspan="5">Liquidación (A + B) + adicionales</td><td>'+fmtMoney(liq+tot)+'</td></tr></tfoot></table>'
+        : '<div class="liqx-empty">No hay adicionales adheridos a este mes. Se cargan desde Pagos: en la orden, elegí “Adicional de sueldos › Liquidación de '+mesTxt(liqState.mes)+'”.</div>');
+  }
+  envolver("liqRenderTablaLiquidacion", render);
+  window.liqxRender = render;
 })();
 </script>
 </body>
