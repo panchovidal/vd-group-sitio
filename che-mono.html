@@ -5635,10 +5635,18 @@ function liqEmpleadoPorNombreCorto(nombreCorto){
   });
   if(candidatos.length===1) return candidatos[0];
   if(candidatos.length>1){
-    var exacto = candidatos.filter(function(e){ return String(e.nombre_completo||"").trim().toLowerCase()===key; })[0];
-    if(exacto) return exacto;
-    var prefijo = candidatos.filter(function(e){ return String(e.nombre_completo||"").trim().toLowerCase().indexOf(key)===0; })[0];
-    return prefijo || candidatos[0];
+    // Varios posibles (04/11/2026: "Liz" matcheaba tanto a "Liz Paredes" como a "Liza Ojeda" y se
+    // quedaba con la primera). Se elige la coincidencia más fuerte: nombre completo igual > primera
+    // palabra igual > alguna palabra igual > empieza igual > el resto.
+    var nivel = function(e){
+      var n = String(e.nombre_completo||"").trim().toLowerCase(), pal = n.split(/\s+/);
+      if(n===key) return 0;
+      if(pal[0]===key) return 1;
+      if(pal.indexOf(key)!==-1) return 2;
+      if(n.indexOf(key)===0) return 3;
+      return 4;
+    };
+    return candidatos.slice().sort(function(a,b){ return nivel(a)-nivel(b); })[0];
   }
   return null;
 }
