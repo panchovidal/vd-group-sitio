@@ -3073,6 +3073,35 @@
   .skv-thb button{border:0;background:none;padding:0;font:inherit;font-weight:800;color:var(--sky,#3B5BDB);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
   .skv-grid .skc-est .skc-st-add input{width:140px}
 </style>
+<style>
+  /* Cuadros movibles y redimensionables (03/11/2026) */
+  .vdb-board{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start;margin-bottom:16px}
+  .vdb-item{grid-column:span var(--vdb-span,12);position:relative;min-width:0;display:flex;flex-direction:column}
+  .vdb-item:has(> .hidden){display:none}
+  .vdb-item > .vdb-card{margin:0 !important;max-height:calc(100vh - 140px);overflow:auto;flex:1 1 auto;min-height:0;overscroll-behavior:contain}
+  .vdb-item.vdb-fixed > .vdb-card{max-height:none;height:100%}
+  .vdb-item > .vdb-card{padding-top:0 !important}
+  .vdb-card > h3{position:sticky;top:0;z-index:5;background:#fff;margin:0 -20px 12px !important;padding:18px 76px 10px 20px}
+  .vdb-card thead th{position:sticky;top:var(--vdb-top,0px);z-index:4;background:#fff;box-shadow:0 1px 0 var(--border)}
+  .vdb-card .ar-er-head{position:sticky;top:var(--vdb-top,0px);z-index:4;background:#fff}
+  .vdb-card .vr-tbl-wrap,.vdb-card .arx-tw,.vdb-card .ar-tbl-wrap{overflow:visible !important;max-height:none !important}
+  .vdb-card.vdb-panning{cursor:grabbing !important}
+  .vdb-tools{position:absolute;top:12px;right:12px;display:flex;gap:4px;z-index:7;opacity:0;transition:opacity .15s}
+  .vdb-item:hover .vdb-tools,.vdb-item.vdb-resizing .vdb-tools{opacity:1}
+  .vdb-btn{width:28px;height:28px;border:1px solid var(--border);background:#fff;border-radius:8px;display:grid;place-items:center;color:var(--text-3);cursor:pointer;padding:0}
+  .vdb-btn:hover{color:var(--text-1);background:#F4F6FB}
+  .vdb-btn svg{width:14px;height:14px}
+  .vdb-grip{cursor:grab}
+  .vdb-rs{position:absolute;right:3px;bottom:3px;width:18px;height:18px;cursor:nwse-resize;z-index:7;border-radius:0 0 10px 0;
+    background:linear-gradient(135deg,transparent 0 55%,var(--text-3) 55% 60%,transparent 60% 70%,var(--text-3) 70% 75%,transparent 75%);opacity:.35}
+  .vdb-item:hover .vdb-rs,.vdb-item.vdb-resizing .vdb-rs{opacity:.9}
+  .vdb-item.vdb-resizing > .vdb-card{box-shadow:0 0 0 2px var(--sky,#5977D2)}
+  .vdb-item.vdb-dragging{opacity:.45}
+  .vdb-item.vdb-before > .vdb-card{box-shadow:-4px 0 0 var(--sky,#5977D2)}
+  .vdb-item.vdb-after > .vdb-card{box-shadow:4px 0 0 var(--sky,#5977D2)}
+  body.vdb-noselect{user-select:none}
+  @media (max-width:900px){ .vdb-item{grid-column:span 12} .vdb-rs{display:none} }
+</style>
 </head>
 <body>
 
@@ -23414,6 +23443,126 @@ async function lfQuitarProveedorIns(id){
     }
     return html;
   };
+})();
+</script>
+<script>
+/* =====================================================================
+   CUADROS MOVIBLES Y REDIMENSIONABLES (pedido de Pancho, 03/11/2026) · mismo código en ambos sitios
+   Cada "tablero" (Ventas › Análisis de resultados, Ventas › Facturación) ordena sus cuadros en una
+   grilla de 12 columnas:
+   · Mover: arrastrar desde la manija (⋮⋮) arriba a la derecha del cuadro.
+   · Tamaño: arrastrar la esquina inferior derecha (ancho en columnas, alto libre). Doble clic en la
+     esquina o el botón ⤢ vuelve al tamaño original.
+   · Desplazarse: arrastrar con el mouse desde cualquier parte del cuadro (que no sea un botón o un
+     campo) lo mueve en cualquier dirección.
+   · Encabezados: el título del cuadro y los encabezados de columnas quedan siempre fijos.
+   El orden y los tamaños se recuerdan por usuario en este navegador.
+   ===================================================================== */
+(function(){
+  const PRE = (typeof AR_SITE!=="undefined" && AR_SITE.pre) || "vd";
+  const LSK = b=>`vdb_${PRE}_${b}`;
+  const lsGet = b=>{ try{ return JSON.parse(localStorage.getItem(LSK(b))||"{}")||{}; }catch(e){ return {}; } };
+  const lsSet = (b,v)=>{ try{ localStorage.setItem(LSK(b), JSON.stringify(v)); }catch(e){} };
+  const GRIP = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
+  const RESET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
+  const INTER = "input,button,select,textarea,a,label,[contenteditable],.vdb-tools,.vdb-rs,.sk-chip";
+
+  function setup(boardKey, anchor, defs){
+    // anchor: elemento antes del cual va el tablero; defs: [{id, el, span}]
+    const cards = defs.filter(d=>d.el);
+    if(!cards.length || document.querySelector(`.vdb-board[data-board="${boardKey}"]`)) return null;
+    const board = document.createElement("div"); board.className = "vdb-board"; board.dataset.board = boardKey;
+    anchor.parentNode.insertBefore(board, anchor);
+    const st = lsGet(boardKey);
+    const items = {};
+    cards.forEach(d=>{
+      const it = document.createElement("div"); it.className = "vdb-item"; it.dataset.box = d.id; it.dataset.def = d.span;
+      it.innerHTML = `<div class="vdb-tools"><span class="vdb-btn vdb-grip" title="Arrastrá para mover el cuadro" draggable="true">${GRIP}</span><button type="button" class="vdb-btn vdb-reset" title="Volver al tamaño original">${RESET}</button></div><div class="vdb-rs" title="Arrastrá para cambiar el tamaño · doble clic: tamaño original"></div>`;
+      it.insertBefore(d.el, it.firstChild);
+      d.el.classList.add("vdb-card");
+      const medir = ()=>{ const h3 = d.el.querySelector(":scope > h3"); d.el.style.setProperty("--vdb-top", (h3 ? h3.offsetHeight : 0)+"px"); };
+      medir(); try{ new MutationObserver(medir).observe(d.el, { childList:true }); new ResizeObserver(medir).observe(d.el); }catch(_){}
+      items[d.id] = it;
+    });
+    const orden = (st.order||[]).filter(id=>items[id]); cards.forEach(d=>{ if(!orden.includes(d.id)) orden.push(d.id); });
+    orden.forEach(id=>board.appendChild(items[id]));
+    const aplicar = ()=>{ const s = lsGet(boardKey);
+      Object.values(items).forEach(it=>{ const id = it.dataset.box, sp = (s.span&&s.span[id]) || Number(it.dataset.def)||12, h = s.h&&s.h[id];
+        it.style.setProperty("--vdb-span", sp); it.classList.toggle("vdb-fixed", !!h); it.style.height = h ? h+"px" : ""; }); };
+    aplicar();
+    const guardar = fn=>{ const s = lsGet(boardKey); fn(s); lsSet(boardKey, s); };
+    // ---- mover ----
+    let drag = null;
+    Object.values(items).forEach(it=>{
+      const g = it.querySelector(".vdb-grip");
+      g.addEventListener("dragstart", e=>{ drag = it; it.classList.add("vdb-dragging"); e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", it.dataset.box); e.dataTransfer.setDragImage(it, 30, 20); }catch(_){} });
+      g.addEventListener("dragend", ()=>{ drag = null; Object.values(items).forEach(x=>x.classList.remove("vdb-dragging","vdb-before","vdb-after")); });
+      it.addEventListener("dragover", e=>{ if(!drag || drag===it) return; e.preventDefault(); const r = it.getBoundingClientRect();
+        const af = (r.width > board.clientWidth*0.7) ? (e.clientY-r.top) > r.height/2 : (e.clientX-r.left) > r.width/2;
+        it.classList.toggle("vdb-after", af); it.classList.toggle("vdb-before", !af); });
+      it.addEventListener("dragleave", e=>{ if(!it.contains(e.relatedTarget)) it.classList.remove("vdb-before","vdb-after"); });
+      it.addEventListener("drop", e=>{ e.preventDefault(); if(!drag || drag===it) return; const af = it.classList.contains("vdb-after");
+        board.insertBefore(drag, af ? it.nextSibling : it); it.classList.remove("vdb-before","vdb-after");
+        guardar(s=>{ s.order = [...board.children].map(x=>x.dataset.box); }); });
+      // ---- tamaño ----
+      const rs = it.querySelector(".vdb-rs");
+      rs.addEventListener("mousedown", e=>{ if(e.button!==0) return; e.preventDefault(); e.stopPropagation();
+        const r0 = it.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY;
+        const cs = getComputedStyle(board), gap = parseFloat(cs.columnGap)||16, colW = (board.clientWidth - gap*11)/12;
+        it.classList.add("vdb-resizing"); document.body.classList.add("vdb-noselect");
+        let sp = null, h = null;
+        const mm = ev=>{ const w = r0.width + (ev.clientX-x0); sp = Math.max(3, Math.min(12, Math.round((w+gap)/(colW+gap))));
+          h = Math.max(160, Math.round(r0.height + (ev.clientY-y0)));
+          it.style.setProperty("--vdb-span", sp); it.style.height = h+"px"; it.classList.add("vdb-fixed"); };
+        const mu = ()=>{ document.removeEventListener("mousemove", mm); document.removeEventListener("mouseup", mu); it.classList.remove("vdb-resizing"); document.body.classList.remove("vdb-noselect");
+          if(sp!=null) guardar(s=>{ s.span = s.span||{}; s.h = s.h||{}; s.span[it.dataset.box] = sp; s.h[it.dataset.box] = h; }); };
+        document.addEventListener("mousemove", mm); document.addEventListener("mouseup", mu); });
+      const reset = ()=>{ guardar(s=>{ if(s.span) delete s.span[it.dataset.box]; if(s.h) delete s.h[it.dataset.box]; }); aplicar(); };
+      rs.addEventListener("dblclick", reset);
+      it.querySelector(".vdb-reset").addEventListener("click", reset);
+    });
+    return board;
+  }
+
+  // ---- desplazarse arrastrando desde cualquier parte del cuadro ----
+  function scroller(t){ for(let e = t; e && e!==document.body; e = e.parentElement){
+      if(e.classList && e.classList.contains("vdb-card")) return (e.scrollHeight>e.clientHeight+1 || e.scrollWidth>e.clientWidth+1) ? e : null;
+      const cs = getComputedStyle(e); if(/(auto|scroll)/.test(cs.overflowX+cs.overflowY) && (e.scrollWidth>e.clientWidth+1 || e.scrollHeight>e.clientHeight+1) && e.closest(".vdb-card")) return e; }
+    return null; }
+  document.addEventListener("mousedown", e=>{
+    if(e.button!==0 || !e.target.closest || !e.target.closest(".vdb-card") || e.target.closest(INTER)) return;
+    const sc = scroller(e.target); if(!sc) return;
+    const x0 = e.clientX, y0 = e.clientY, l0 = sc.scrollLeft, t0 = sc.scrollTop; let moved = false;
+    const mm = ev=>{ const dx = ev.clientX-x0, dy = ev.clientY-y0; if(!moved && Math.abs(dx)+Math.abs(dy)<5) return;
+      if(!moved){ moved = true; sc.classList.add("vdb-panning"); document.body.classList.add("vdb-noselect"); }
+      sc.scrollLeft = l0-dx; sc.scrollTop = t0-dy; ev.preventDefault(); };
+    const mu = ()=>{ document.removeEventListener("mousemove", mm, true); document.removeEventListener("mouseup", mu, true);
+      sc.classList.remove("vdb-panning"); document.body.classList.remove("vdb-noselect");
+      if(moved){ const kill = ev=>{ ev.stopPropagation(); ev.preventDefault(); }; document.addEventListener("click", kill, { capture:true, once:true }); setTimeout(()=>document.removeEventListener("click", kill, true), 0); } };
+    document.addEventListener("mousemove", mm, true); document.addEventListener("mouseup", mu, true);
+  });
+
+  // ---- tableros de cada sitio ----
+  function init(){
+    // Ventas › Análisis de resultados (ambos sitios)
+    const none = document.getElementById("arNoneMsg");
+    if(none) setup("analisis", none, [
+      { id:"er", el:document.getElementById("arCard_er"), span:7 },
+      { id:"comp", el:document.getElementById("arCard_comp"), span:5 },
+      { id:"evo", el:document.getElementById("arCard_evo"), span:12 },
+      { id:"div", el:document.getElementById("arCard_div"), span:12 } ]);
+    const row = document.getElementById("arRow1"); if(row && !row.children.length) row.style.display = "none";
+    // Ventas › Facturación (La Fortaleza)
+    const vw = document.querySelector("#ventasResultados .ventas-resultados-wrap");
+    if(vw){ const cards = [...vw.querySelectorAll(".vr-card")];
+      const pc = document.getElementById("ventasPorConcepto"), ab = cards.find(c=>c.querySelector("#ventasAB")), ca = cards.find(c=>c.querySelector("#ventasCanchas"));
+      const anchor = document.createElement("div"); vw.insertBefore(anchor, vw.firstChild);
+      if(ab && !ab.id) ab.id = "vrCard_ab"; if(ca && !ca.id) ca.id = "vrCard_canchas"; if(ca) ca.style.marginTop = "";
+      setup("facturacion", anchor, [ { id:"concepto", el:pc, span:7 }, { id:"ab", el:ab, span:5 }, { id:"canchas", el:ca, span:12 } ]);
+      anchor.remove();
+      const g = vw.querySelector(".vr-grid"); if(g && !g.children.length) g.style.display = "none"; }
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
 </script>
 </body>
