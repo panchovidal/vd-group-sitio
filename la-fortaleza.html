@@ -2733,6 +2733,23 @@
   .liq-obs-sub.no{color:#B22A32;}
   .liq-table thead th.liq-th-sem{background:#EEF1F8;}
   .liq-table .liq-sem-first{border-left:3px solid var(--navy);}
+  /* Fichadas imputadas con el promedio, semanas cortadas (mes anterior/siguiente) y presentismo manual (11/2026) */
+  .liq-dia-imp{background:#E2F4F5;color:#0B6470;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;}
+  .liq-imp-h{display:block;}
+  .liq-imp-sub{display:block;font-size:8.5px;font-weight:700;line-height:1.1;white-space:normal;max-width:58px;margin:1px auto 0;}
+  .liq-imp-chip{display:inline-block;margin-top:3px;font-size:10px;font-weight:700;color:#0B6470;background:#E2F4F5;border-radius:999px;padding:1px 8px;cursor:help;}
+  .liq-dia-vec{background:#F3F4F8;color:#9AA1B8;font-weight:600;font-size:11px;opacity:.85;}
+  .liq-table thead th.liq-th-vec{background:#EDEFF5;color:#9AA1B8;}
+  .liq-th-vec .liq-flag{display:block;font-size:8.5px;font-weight:800;color:#9AA1B8;}
+  .liq-aviso-cortada{font-size:12px;color:#6B7390;background:#F3F4F8;border:1px solid var(--border);border-radius:9px;padding:7px 12px;margin:0 0 10px 0;font-weight:600;line-height:1.5;}
+  .liq-pend-imp{display:block;font-size:11px;font-weight:700;color:#0B6470;margin-top:2px;cursor:help;}
+  .liq-pres-w{display:inline-flex;flex-direction:column;align-items:center;gap:3px;}
+  .liq-pres-sel{width:114px;padding:5px 2px;border:1.5px solid var(--border);border-radius:7px;font-size:11.8px;font-weight:700;font-family:inherit;color:var(--text-1);background:#fff;cursor:pointer;}
+  .liq-pres-sel:disabled{cursor:not-allowed;opacity:.75;}
+  .liq-pres-sel.si{border-color:#B22A32;color:#B22A32;background:#FDF1F2;}
+  .liq-pres-sel.pend{border-color:#E3A008;background:#FFF8E8;box-shadow:0 0 0 2px rgba(227,160,8,.22);}
+  .liq-pres-mk{position:absolute;top:3px;right:2px;width:14px;height:14px;border-radius:50%;font-size:9.5px;font-style:normal;font-weight:800;line-height:14px;text-align:center;color:#fff;cursor:help;}
+  .liq-pres-mk.pend{background:#E3A008;} .liq-pres-mk.neutro{background:#8A90A6;}
   .liq-sem-cell{font-variant-numeric:tabular-nums;min-width:74px;}
   .liq-sem-tot{border-left:2px solid #CBD3E6;font-weight:800;}
   .liq-pend-sup{color:#A56500;font-weight:800;margin-left:2px;}
@@ -4088,6 +4105,8 @@
                   <span><span class="lg-dot" style="background:#EAF1FE;border:1px solid #2B5FC7;"></span>Franco</span>
                   <span><span class="lg-dot" style="background:#FCE6E7;border:1px solid #B22A32;"></span>Ausencia</span>
                   <span><span class="lg-dot" style="background:#FFF1D6;border:1px solid #C27C0E;"></span>Fichada incompleta (a definir)</span>
+                  <span><span class="lg-dot" style="background:#E2F4F5;border:1px solid #0B6470;"></span>Imputado con el promedio (falta fichada entrada/salida)</span>
+                  <span><span class="lg-dot" style="background:#F3F4F8;border:1px solid #9AA1B8;"></span>Día del mes anterior/siguiente (completa la semana cortada)</span>
                   <span><span class="lg-dot" style="background:#FFF6DF;border:1px solid #E3A008;"></span>Feriado</span>
                   <span><span class="lg-dot" style="background:#E9ECF7;border:1px solid #5B6BA8;"></span>Ausencia justificada (observación)</span>
                   <span><i class="liq-obs-mk ok" style="position:static;display:inline-block;margin-right:6px;vertical-align:-2px">✓</i>Observación cumplida (desfase hasta 30 min)</span>
@@ -11596,7 +11615,7 @@ function goSueldosTab(tab){
   if(target) target.classList.add("active");
   if(tab==="nuevoEmpleado" && !eEditId){ resetNuevoEmpleadoForm(); }
   if(tab==="esquema"){ renderEmpleadosTable(); renderUltimaActualizacionInfo(); renderPendienteActualizacionInfo(); if(typeof obsRefrescarContador==="function") obsRefrescarContador(); }
-  if(tab==="liquidacion"){ liqOnTabOpen(); if(liqInitDone && liqState.mes){ if((liqState.marcacionesRows||[]).length){ liqRecalcularPresentismo(); liqRenderTodo(); } else liqRenderTablaLiquidacion(); liqRefrescarObservaciones(); } } // re-cruza: las fichas pudieron cambiar (nombre en el reloj); y relee las observaciones (pudieron cargarse en Cuadrilla)
+  if(tab==="liquidacion"){ liqOnTabOpen(); if(liqInitDone && liqState.mes){ if((liqState.marcacionesRows||[]).length){ liqRecalcularPresentismo(); liqRenderTodo(); liqCargarVecinos().then(function(){ if(liqState.mes && !liqState.liquidado) liqRenderTodo(); }); } else liqRenderTablaLiquidacion(); liqRefrescarObservaciones(); } } // re-cruza: las fichas pudieron cambiar (nombre en el reloj); y relee las observaciones (pudieron cargarse en Cuadrilla)
 }
 
 /* ---- alta / edición / baja de empleados ---- */
@@ -12787,7 +12806,8 @@ var liqState = {
   feriadosManual: {},        // {key: cantidad de jornales}
   ausenciasManual: {},       // {key: cantidad de jornales}
   horasDiaManual: {},        // {key: {jornadaISO: minutos}} — días con fichadas incompletas, definidos a mano
-  presentismoManual: {},     // {key: true|false} — casilla manual de "pierde presentismo"; sin valor manda el reporte
+  presentismoManual: {},     // {key: true|false} — decisión del dueño: true = se descuenta el presentismo, false = no; sin clave = sin definir (NO se descuenta; el reporte solo sugiere)
+  vecinos: { prev:null, next:null, mes:null }, // liquidaciones de los meses vecinos (solo lectura; completan las semanas cortadas)
   extraordinarias: [],       // [{id, key, empleado, concepto, monto}] — liquidaciones extraordinarias (se pagan en B)
   observaciones: {},         // {empleadoId: {jornadaISO: fila de lf_sueldos_observaciones}} — justificativos del mes en estudio (Cuadrilla › Observaciones)
   liquidado: false,
@@ -13145,6 +13165,140 @@ async function liqOnFileSelected(file){
   document.getElementById("liqFileInput").value = "";
 }
 
+/* ---------- meses vecinos y fichadas imputadas (pedido del dueño, 11/2026) ----------
+   · SEMANAS CORTADAS: las semanas van de martes a lunes; la primera/última del mes suele tener días de otro mes. Para evaluarlas
+     enteras se leen de la base las marcaciones de la liquidación del mes anterior (y, si ya existe, la del siguiente; no se exige):
+     liqCargarVecinos → liqState.vecinos = {prev, next} con {mes, rows, feriados}. liqVecinoCalc las procesa con el MISMO cruce
+     exacto de nombres (liqEmpleadoPorNombreCorto: nombre_fichada / nombre_completo) y deja {empleadoId: {jornadaISO: día}} solo
+     con los días que caen FUERA del mes en estudio; los nombres que no cruzan se ignoran. Se cachea por referencia.
+   · Reglas de la semana cortada: ver liqSemanas.
+   · FICHADA INCOMPLETA: ver liqImputarDia / liqFaltaFichada. */
+function liqMesVecinoISO(mesISO, n){
+  var p = String(mesISO).split("-").map(Number), d = new Date(Date.UTC(p[0], p[1]-1+n, 1));
+  return d.toISOString().slice(0,10);
+}
+async function liqCargarVecinos(){
+  var mes = liqState.mes, vec = { prev:null, next:null, mes:mes };
+  if(mes){
+    try{
+      var pv = liqMesVecinoISO(mes,-1), nx = liqMesVecinoISO(mes,1);
+      var res = await sb.from("lf_liquidaciones").select("mes,marcaciones_rows,feriados").in("mes", [pv, nx]);
+      if(res.error) console.warn("No se pudieron cargar los meses vecinos", res.error);
+      else (res.data||[]).forEach(function(r){
+        var m = String(r.mes).slice(0,10), rows = r.marcaciones_rows || [];
+        if(!rows.length) return;
+        var o = { mes:m, rows:rows, feriados:r.feriados || [] };
+        if(m===pv) vec.prev = o; else if(m===nx) vec.next = o;
+      });
+    }catch(e){ console.warn("No se pudieron cargar los meses vecinos", e); }
+  }
+  if(liqState.mes!==mes) return; // cambió el mes mientras se cargaba
+  liqState.vecinos = vec; liqState._vecCalc = null;
+}
+function liqVecinoCalc(){
+  var vec = liqState.vecinos;
+  if(!vec || vec.mes!==liqState.mes || (!vec.prev && !vec.next)) return null;
+  var own = liqState.marcacionesRows || [];
+  var lista = (typeof empleadosTodos!=="undefined" && empleadosTodos.length) ? empleadosTodos : (empleadosCache||[]);
+  var c = liqState._vecCalc;
+  if(c && c.vec===vec && c.own===own && c.n===own.length && c.lista===lista && c.nl===lista.length) return c;
+  var M = String(liqState.mes).slice(0,7), seen = {}, rows = [], porEmp = {};
+  var add = function(r){
+    if(!r || !r.empleado || !r.fecha || !r.hora) return;
+    var k = empNormNombre(r.empleado)+"|"+r.fecha+"|"+r.hora+"|"+r.tipo;
+    if(seen[k]) return; seen[k] = 1; rows.push(Object.assign({}, r));
+  };
+  ["prev","next"].forEach(function(side){ if(vec[side]) vec[side].rows.forEach(add); });
+  /* Lo fichado de madrugada (00:00–04:59) del día 1 pertenece a la jornada del último día del mes anterior: si el reporte del mes
+     en estudio trae esas fichadas, se suman (sin duplicar) a las del mes vecino. */
+  own.forEach(function(r){ var j = (r && r.fecha && r.hora) ? liqJornadaISO(r.fecha, r.hora) : null; if(j && j.slice(0,7)!==M) add(r); });
+  liqCanonNombresReporte(rows);
+  var grupos = liqAgruparPorEmpleadoYJornada(rows);
+  Object.keys(grupos).forEach(function(nombre){
+    var emp = liqEmpleadoPorNombreCorto(nombre); if(!emp) return;
+    var proc = liqProcesarEmpleado(emp, grupos[nombre]) || {};
+    var dst = porEmp[emp.id] = porEmp[emp.id] || {};
+    Object.keys(proc).forEach(function(j){ if(j.slice(0,7)!==M) dst[j] = proc[j]; });
+  });
+  c = { vec:vec, own:own, n:own.length, lista:lista, nl:lista.length, porEmp:porEmp,
+        ok:{ prev:!!vec.prev, next:!!vec.next }, feriados:{ prev:vec.prev?vec.prev.feriados:[], next:vec.next?vec.next.feriados:[] } };
+  liqState._vecCalc = c;
+  return c;
+}
+/* Minutos del reloj de una hora "HH:MM" dentro de la jornada: de 00:00 a 04:59 pertenece a la jornada anterior (+24 h). */
+function liqMinJornada(hhmm){
+  var p = String(hhmm||"").split(":"), h = Number(p[0])||0, m = Number(p[1])||0;
+  return h*60 + m + (h<5 ? 1440 : 0);
+}
+var LIQ_DOW_PLURAL = ["domingos","lunes","martes","miércoles","jueves","viernes","sábados"];
+/* Promedios del empleado SOLO con días del mes en estudio (no los prestados por semanas cortadas): por día de la semana y
+   general, más la entrada y salida típicas. Cuentan los días con fichada completa que NO sean feriado ni tengan una observación de
+   horas/ausencia/reemplazo/suplencia (la observación "otra" es solo informativa y no excluye). Los incompletos nunca cuentan. */
+function liqPromediosDias(emp, datos){
+  var r = { dow:{}, n:0, sum:0, eSum:0, sSum:0, nES:0 };
+  liqDiasDelMes(liqState.mes).forEach(function(j){
+    var d = datos[j]; if(!d || d.estado!=="trabajado") return;
+    if(liqState.feriados.indexOf(j)!==-1) return;
+    var ob = liqObsDe(emp, j); if(ob && ob.tipo!=="otro") return;
+    var w = liqDowISO(j), a = r.dow[w] = r.dow[w] || { sum:0, n:0 };
+    a.sum += d.minutos; a.n++; r.sum += d.minutos; r.n++;
+    var iv = d.intervalos;
+    if(iv && iv.length){
+      var e0 = liqMinJornada(iv[0].e), s1 = liqMinJornada(iv[iv.length-1].s);
+      if(s1<=e0) s1 += 1440;
+      r.eSum += e0; r.sSum += s1; r.nES++;
+    }
+  });
+  return r;
+}
+/* ¿Qué fichada falta? Devuelve "entrada", "salida" o "entrada y salida". Regla (documentada, pedido del dueño):
+   · Una sola fichada: se compara su hora con la entrada y la salida TÍPICAS del empleado (promedio de sus días completos del
+     mes). Más cerca de la entrada típica → era la entrada, falta la salida; más cerca de la salida típica → era la salida,
+     falta la entrada (empate: falta la salida).
+   · Sin días completos para comparar: se usa el tipo marcado en el reloj (Entrada → falta salida; Salida → falta entrada) y,
+     si tampoco sirve, la hora: antes de las 15:00 se asume entrada (falta salida), desde las 15:00 se asume salida (falta entrada).
+   · Cantidad impar mayor a 1 (E, S, E…): se asume que la última fichada no tiene par, como el motor las toma en orden de
+     entrada/salida: falta la salida.
+   · Cantidad par con la primera marcada como Salida y la última como Entrada: faltan "entrada y salida". */
+function liqFaltaFichada(d, prom){
+  var f = d.fichadas || [], n = f.length;
+  if(n%2===0) return "entrada y salida";
+  if(n>=3) return "salida";
+  var h = liqMinJornada(f[0].hora);
+  if(prom && prom.nES>0){
+    var aE = prom.eSum/prom.nES, aS = prom.sSum/prom.nES;
+    return Math.abs(h-aE) <= Math.abs(h-aS) ? "salida" : "entrada";
+  }
+  var t = String(f[0].tipo||"").toLowerCase();
+  if(t==="entrada") return "salida";
+  if(t==="salida") return "entrada";
+  return h < 15*60 ? "salida" : "entrada";
+}
+/* Imputa las horas de un día con fichada incompleta (null si no corresponde o no hay con qué): promedio de ese empleado en los
+   mismos días de la semana del mes → promedio de todos sus días completos del mes → horas esperadas diarias de su ficha
+   (emp.horas_esperadas, solo si está cargada) → nada (queda "a definir" como antes). Las horas definidas a mano mandan sobre esto
+   (se chequean antes) y no se imputa en feriados ni en ausencias justificadas por observación. */
+function liqImputarDia(emp, d, j, prom, fer, ob){
+  if(!d || d.estado!=="incompleto" || fer || (ob && ob.tipo==="ausencia")) return null;
+  var w = liqDowISO(j), a = prom.dow[w], min = null, fuente = null, n = 0;
+  if(a && a.n>0){ min = Math.round(a.sum/a.n); fuente = "dow"; n = a.n; }
+  else if(prom.n>0){ min = Math.round(prom.sum/prom.n); fuente = "mes"; n = prom.n; }
+  else if(emp && emp.horas_esperadas!=null && emp.horas_esperadas!=="" && Number(emp.horas_esperadas)>0){ min = Math.round(Number(emp.horas_esperadas)*60); fuente = "esperadas"; }
+  if(min==null) return null;
+  var falta = liqFaltaFichada(d, prom), dow = LIQ_DOW_PLURAL[w];
+  var how = fuente==="dow" ? "Se tomó el promedio de los "+dow+" del mes: "+liqHM(min)+" hs ("+n+" día"+(n>1?"s":"")+")"
+          : fuente==="mes" ? "No hay otros "+dow+" completos en el mes: se tomó el promedio de todos los días completos del mes: "+liqHM(min)+" hs ("+n+" día"+(n>1?"s":"")+")"
+          : "No hay días completos en el mes: se tomaron las horas esperadas del empleado: "+liqHM(min)+" hs";
+  return { j:j, min:min, fuente:fuente, n:n, falta:falta, texto:"falta fichada "+falta,
+           tooltip:"Falta fichada de "+falta+". "+how+". Se puede pisar definiendo las horas a mano." };
+}
+/* Indicador discreto "2 días imputados" (tooltip con los días). */
+function liqChipImputados(imps){
+  if(!imps || !imps.length) return "";
+  var tip = imps.map(function(i){ return liqDiaSemana(i.j)+" "+liqDMcorto(i.j)+": "+liqHM(i.min)+" hs ("+i.texto+")"; }).join("\n");
+  return "<span class=\"liq-imp-chip\" title=\""+liqEscapeHtml("Horas imputadas con el promedio (no figuran en el reporte del reloj):\n"+tip)+"\">"+imps.length+" día"+(imps.length>1?"s":"")+" imputado"+(imps.length>1?"s":"")+"</span>";
+}
+
 /* ---------- procesamiento: detecta el mes, corre el motor, funde con el draft guardado ----------
    Adaptado: en vez de iterar las claves fijas de LIQ_EXPECTED_HOURS, se procesan todos los
    nombres cortos que aparecen efectivamente en el reporte subido, matcheados contra
@@ -13190,6 +13344,7 @@ async function liqProcesarArchivo(parsed, fileName){
   liqState.presentismoManual = filaExistente ? (filaExistente.presentismo_manual || {}) : {};
   liqState.extraordinarias = filaExistente ? (filaExistente.extraordinarias || []) : [];
   await liqCargarObservaciones();
+  await liqCargarVecinos();
   liqState.liquidado = false;
   liqState.liquidacionId = filaExistente ? filaExistente.id : null;
   liqState.ordenAId = filaExistente ? filaExistente.orden_a_id : null;
@@ -13500,16 +13655,20 @@ function liqAplicarFeriados(){
    · Las fichadas que quedan se toman en orden como entrada / salida / entrada / salida… (así,
      un turno cortado suma sus dos intervalos). El tipo marcado en el reloj solo se usa para
      avisar si no coincide (el personal a veces marca entrada en vez de salida).
-   · Si falta una de las dos partes (cantidad impar de fichadas), el día queda "a definir": se
-     muestran la fecha y las fichadas que existen, y las horas de ese día las define el
-     empleador a mano (liqState.horasDiaManual).
+   · Si falta una de las dos partes (cantidad impar de fichadas), el día es "incompleto": se
+     muestran la fecha y las fichadas que existen y las horas se imputan con el promedio
+     (liqImputarDia). Si no hay con qué promediar queda "a definir" y las define el empleador a
+     mano (liqState.horasDiaManual, que además pisa la imputación).
    · Evaluación semanal: horas trabajadas contra horas a cumplir. Las ausencias de la semana
      hasta la cantidad de francos son francos; las que exceden, ausencias. Un feriado no
      trabajado no es ausencia. Las ausencias y los feriados no trabajados descuentan de las
      horas a cumplir las horas de un día (horas semanales ÷ días de trabajo de la semana), para
-     no penalizar dos veces. En las semanas que empiezan o terminan en otro mes, los francos se
-     toman como disponibles dentro de los días del mes y se exigen las horas de los días del mes
-     que no fueron franco.
+     no penalizar dos veces. En las semanas que empiezan o terminan en otro mes se usan los días del
+     mes vecino si existe su liquidación (ver liqSemanas); si no, los francos se toman como
+     disponibles dentro de los días del mes y se exigen las horas de los días del mes que no
+     fueron franco.
+   · (11/2026) Un día con fichada incompleta se imputa con el promedio del empleado en ese día de
+     la semana (liqImputarDia); las horas definidas a mano lo pisan.
    ========================================================= */
 var LIQ_AGRUPAR_MIN = 15;
 function liqCfgParaEmpleado(emp){
@@ -13629,27 +13788,65 @@ function liqObsEvaluar(ob, eMin, trab, ficho){
   r.txt = r.cumple ? "Cumple" : "No cumple";
   return r;
 }
-/* Semanas (martes a lunes) del mes en estudio para un empleado, con su evaluación. */
+/* Semanas (martes a lunes) del mes en estudio: estructura común (días del mes y días de otro mes de cada semana). */
+function liqSemanasBase(){
+  var dias = liqDiasDelMes(liqState.mes), semanas = [], porIni = {};
+  dias.forEach(function(j){
+    var ini = liqAddDaysISO(j, -((liqDowISO(j)-2+7)%7));
+    if(!porIni[ini]){ porIni[ini] = { ini:ini, fin:liqAddDaysISO(ini,6), dias:[], antes:[], despues:[] }; semanas.push(porIni[ini]); }
+    porIni[ini].dias.push(j);
+  });
+  semanas.forEach(function(s){
+    for(var i=0;i<7;i++){
+      var j = liqAddDaysISO(s.ini, i);
+      if(j<dias[0]) s.antes.push(j); else if(j>dias[dias.length-1]) s.despues.push(j);
+    }
+    s.lado = s.antes.length ? "prev" : (s.despues.length ? "next" : null);
+  });
+  return semanas;
+}
+/* Semanas (martes a lunes) del mes en estudio para un empleado, con su evaluación.
+   SEMANAS CORTADAS (pedido del dueño, 11/2026). La primera/última semana del mes puede tener días de otro mes. Reglas:
+   · Si existe la liquidación del mes vecino (liqState.vecinos; el siguiente no se exige) y el empleado tiene fichadas ahí
+     (cruce exacto de nombres; si no cruza o no existía, se ignora), la semana se evalúa ENTERA (7 días, horas semanales y
+     francos completos) usando los días prestados: s.prestados / s.prestadoDia[j] = "prev"|"next".
+   · Los días prestados cuentan para las horas y el balance de esa semana y para los francos (un franco tomado en el otro mes
+     cuenta como franco de la semana: se asignan primero a los días prestados). NO generan ausencias, extras, feriados ni
+     descuentos del mes en estudio: una ausencia prestada que excede los francos no suma a s.ausencias (se liquidó en su mes) pero sí
+     baja las horas a cumplir, igual que cualquier ausencia, para no penalizar dos veces. Los feriados del día prestado salen de la
+     liquidación vecina. Las observaciones del otro mes no se leen. Un día prestado con fichada incompleta se imputa con los promedios
+     del mes en estudio (s.imputadosPrest) y no suma a "días imputados" ni a pendientes.
+   · Sin liquidación del mes vecino (o empleado sin fichadas ahí) la semana se evalúa como antes: solo con los días de este mes
+     (s.vecSinEmp = true si el vecino existe pero el empleado no tiene datos).
+   · Los promedios del punto "fichada incompleta" usan solo días del mes en estudio (liqPromediosDias).
+   FICHADA INCOMPLETA: un día laborable con fichadas incompletas se imputa con el promedio (liqImputarDia): estado "imputado"; las horas
+   cuentan para el total diario/semanal, el presentismo semanal y las horas extra como un día trabajado, pero no para ausencias, y no se
+   tocan las marcaciones guardadas. Las horas definidas a mano (horasDiaManual) mandan sobre la imputación. */
 function liqSemanas(key){
   var emp = liqEmpleadosPorKey()[key];
   var cfg = liqCfgParaEmpleado(emp);
   var datos = (liqState.presentismo && liqState.presentismo[key]) || {};
-  var dias = liqDiasDelMes(liqState.mes);
-  var semanas = [], porIni = {};
-  dias.forEach(function(j){
-    var ini = liqAddDaysISO(j, -((liqDowISO(j)-2+7)%7));
-    if(!porIni[ini]){ porIni[ini] = { ini:ini, fin:liqAddDaysISO(ini,6), dias:[] }; semanas.push(porIni[ini]); }
-    porIni[ini].dias.push(j);
-  });
+  var semanas = liqSemanasBase();
   var diaMin = cfg.horasDia*60;
+  var prom = liqPromediosDias(emp, datos);
+  var vc = liqVecinoCalc(), vdatos = (vc && emp) ? (vc.porEmp[emp.id] || null) : null;
+  /* ¿El empleado tiene fichadas en cada mes vecino? (si no cruzó o no existía, esa semana se evalúa como antes) */
+  var tiene = { prev:false, next:false }, mesLado = { prev:liqMesVecinoISO(liqState.mes,-1).slice(0,7), next:liqMesVecinoISO(liqState.mes,1).slice(0,7) };
+  if(vdatos) Object.keys(vdatos).forEach(function(j){ var m = j.slice(0,7); if(m===mesLado.prev) tiene.prev = true; else if(m===mesLado.next) tiene.next = true; });
   semanas.forEach(function(s){
     var k = s.dias.length;
-    /* Semana completa: horas semanales y sus francos. Semana partida con otro mes: los francos se
-       consideran disponibles dentro de los días del mes (no se sabe si se tomaron en los días del
-       otro mes), y se exigen las horas de los días del mes que no fueron franco. */
-    s.francosPermitidos = Math.min(cfg.francos, k);
-    s.trabajado = 0; s.pendientes = []; s.ausentes = []; s.feriadosNoTrab = 0; s.feriadosTrab = 0; s.estadoDia = {};
+    var prest = s.lado==="prev" ? s.antes : s.lado==="next" ? s.despues : [];
+    var vecExiste = !!(s.lado && vc && vc.ok[s.lado]);
+    var vecOk = !!(vecExiste && tiene[s.lado]);
+    s.vecOk = vecOk; s.vecSinEmp = vecExiste && !vecOk;
+    s.prestados = vecOk ? prest : []; s.prestadoDia = {};
+    /* Semana completa (o completada con el mes vecino): horas semanales y sus francos. Semana partida sin datos del otro mes: los
+       francos se consideran disponibles dentro de los días del mes (no se sabe si se tomaron en los días del otro mes), y se
+       exigen las horas de los días del mes que no fueron franco. */
+    s.francosPermitidos = vecOk ? cfg.francos : Math.min(cfg.francos, k);
+    s.trabajado = 0; s.pendientes = []; s.ausentes = []; s.ausentesPrest = []; s.feriadosNoTrab = 0; s.feriadosTrab = 0; s.estadoDia = {};
     s.justificadas = []; s.justPierden = []; s.ajusteEsp = 0; s.obsDia = {}; s.justNoCumplidas = 0;
+    s.imputados = []; s.imputInfo = {}; s.imputadosPrest = [];
     s.dias.forEach(function(j){
       var d = datos[j], fer = liqState.feriados.indexOf(j)!==-1;
       var ob = liqObsDe(emp, j), eMin = liqObsEsperadosMin(ob, diaMin), trab = null;
@@ -13660,7 +13857,15 @@ function liqSemanas(key){
         else s.ausentes.push(j);
       } else {
         if(fer) s.feriadosTrab++;
-        if(d.estado==="incompleto"){ var man = liqHorasManualDe(key,j); if(man==null){ s.pendientes.push(j); s.estadoDia[j]="pendiente"; } else { s.trabajado += man; s.estadoDia[j]="manual"; trab = man; } }
+        if(d.estado==="incompleto"){
+          var man = liqHorasManualDe(key,j);
+          if(man!=null){ s.trabajado += man; s.estadoDia[j]="manual"; trab = man; }
+          else {
+            var imp = liqImputarDia(emp, d, j, prom, fer, ob);
+            if(imp){ s.trabajado += imp.min; s.estadoDia[j]="imputado"; s.imputInfo[j] = imp; s.imputados.push(imp); trab = imp.min; }
+            else { s.pendientes.push(j); s.estadoDia[j]="pendiente"; }
+          }
+        }
         else { s.trabajado += d.minutos; s.estadoDia[j]="trabajado"; trab = d.minutos; }
         if(eMin!=null && trab!=null) s.ajusteEsp += eMin - diaMin;
       }
@@ -13670,19 +13875,36 @@ function liqSemanas(key){
         if(ev.cumple===false) s.justNoCumplidas++;
       }
     });
-    s.francosTomados = Math.min(s.francosPermitidos, s.ausentes.length);
-    s.ausentes.forEach(function(j,i){ s.estadoDia[j] = i < s.francosTomados ? "franco" : "ausente"; });
-    s.ausencias = s.ausentes.length - s.francosTomados;
-    s.esperadoBase = k===7 ? cfg.horasSemanales*60 : diaMin * Math.max(0, k - s.francosTomados);
-    s.esperado = Math.max(0, s.esperadoBase + s.ajusteEsp - (s.ausencias + s.feriadosNoTrab + s.justificadas.length)*diaMin);
+    if(vecOk) prest.forEach(function(j){
+      s.prestadoDia[j] = s.lado;
+      var dv = vdatos[j], fer = (vc.feriados[s.lado]||[]).indexOf(j)!==-1;
+      if(!dv){
+        if(fer){ s.feriadosNoTrab++; s.estadoDia[j]="feriado"; }
+        else s.ausentesPrest.push(j);
+      } else if(dv.estado==="incompleto"){
+        var impV = liqImputarDia(emp, dv, j, prom, fer, null);
+        if(impV){ s.trabajado += impV.min; s.estadoDia[j]="imputado"; s.imputInfo[j] = impV; s.imputadosPrest.push(impV); }
+        else s.estadoDia[j]="pendiente";
+      } else { s.trabajado += dv.minutos; s.estadoDia[j]="trabajado"; }
+    });
+    /* Francos: primero los de los días prestados (se tomaron en el otro mes), después los del mes. */
+    var B = s.ausentesPrest.length, I = s.ausentes.length;
+    var frB = Math.min(s.francosPermitidos, B), frM = Math.min(s.francosPermitidos - frB, I);
+    s.francosTomados = frB + frM;
+    s.ausentesPrest.forEach(function(j,i){ s.estadoDia[j] = i < frB ? "franco" : "ausente"; });
+    s.ausentes.forEach(function(j,i){ s.estadoDia[j] = i < frM ? "franco" : "ausente"; });
+    s.ausencias = I - frM;
+    s.ausPrestExceso = B - frB;
+    s.esperadoBase = (k===7 || vecOk) ? cfg.horasSemanales*60 : diaMin * Math.max(0, k - s.francosTomados);
+    s.esperado = Math.max(0, s.esperadoBase + s.ajusteEsp - (s.ausencias + s.ausPrestExceso + s.feriadosNoTrab + s.justificadas.length)*diaMin);
     s.diff = s.trabajado - s.esperado;
   });
   return semanas;
 }
 function liqCalcularAgregados(key){
   var sem = liqSemanas(key);
-  var r = { ausencias:0, feriadosTrabajados:0, horasExtraMin:0, pendientes:0, justificadas:0, justNoCumplidas:0, justPierden:[] };
-  sem.forEach(function(s){ r.justPierden = r.justPierden.concat(s.justPierden); r.ausencias += s.ausencias; r.feriadosTrabajados += s.feriadosTrab; r.horasExtraMin += s.diff; r.pendientes += s.pendientes.length; r.justificadas += s.justificadas.length; r.justNoCumplidas += s.justNoCumplidas; });
+  var r = { ausencias:0, feriadosTrabajados:0, horasExtraMin:0, pendientes:0, justificadas:0, justNoCumplidas:0, justPierden:[], imputados:[] };
+  sem.forEach(function(s){ r.justPierden = r.justPierden.concat(s.justPierden); r.imputados = r.imputados.concat(s.imputados); r.ausencias += s.ausencias; r.feriadosTrabajados += s.feriadosTrab; r.horasExtraMin += s.diff; r.pendientes += s.pendientes.length; r.justificadas += s.justificadas.length; r.justNoCumplidas += s.justNoCumplidas; });
   return r;
 }
 /* Marcador y tooltip de una observación en la matriz de presentismo. */
@@ -13707,17 +13929,55 @@ function liqObsTooltip(ev){
 }
 
 /* ---------- tabla de presentismo (misma estructura: un día por columna) + evaluación semanal ---------- */
+/* Celda de un día prestado por una semana cortada (otro mes): atenuada, con la leyenda del mes. */
+function liqCeldaVecino(j, lado, st, vd, imp, wk){
+  var ley = lado==="prev" ? "mes anterior" : "mes siguiente";
+  var tip = ["<b>"+ley+"</b>: este día se liquida en su mes; acá solo completa la semana (no genera ausencias, extras ni descuentos de este mes)."];
+  if(vd){
+    if(vd.intervalos && vd.intervalos.length) tip.push(vd.intervalos.map(function(iv){ return iv.e+" → "+iv.s+" ("+liqHM(iv.min)+")"; }).join("<br>"));
+    else tip.push("Fichadas: "+vd.fichadas.map(function(f){ return f.hora+" ("+String(f.tipo||"").toLowerCase()+")"; }).join(", "));
+  }
+  if(imp) tip.push(liqEscapeHtml(imp.tooltip));
+  if(st==="franco") tip.push("Franco de la semana (tomado en el otro mes).");
+  if(st==="ausente") tip.push("Ausencia del otro mes: se descontó en su liquidación; no cuenta acá.");
+  if(st==="pendiente") tip.push("Fichada incompleta sin promedio posible: cuenta 0 horas.");
+  var txt = !st ? "—" : st==="franco" ? "franco" : st==="ausente" ? "aus." : st==="feriado" ? "fer." : st==="imputado" ? liqHM(imp.min)+"~" : st==="pendiente" ? "?" : liqHM(vd ? vd.minutos : 0);
+  return "<td class=\"liq-dia-vec liq-tiene-obs"+wk+"\" style=\"position:relative;\">"+txt+"<div class=\"liq-tooltip\">"+tip.join("<br>")+"</div></td>";
+}
+/* Avisos de semana cortada sobre la matriz: sin liquidación del mes anterior, y empleados sin fichadas en él. */
+function liqRenderAvisoCortada(base, vc, keys){
+  var tabla = document.getElementById("liqTablaPresentismo"); if(!tabla) return;
+  var wrap = tabla.closest ? tabla.closest(".liq-scroll") : null; if(!wrap) return;
+  var el = document.getElementById("liqAvisoCortada");
+  if(!el){ el = document.createElement("div"); el.id = "liqAvisoCortada"; wrap.parentNode.insertBefore(el, wrap); }
+  var msgs = [], pr = base.length && base[0].antes.length;
+  if(pr && !(vc && vc.ok.prev)) msgs.push("Semana cortada sin datos del mes anterior: se evalúa con los días de este mes.");
+  else if(pr && keys.length){
+    var sin = keys.filter(function(k){ var s0 = liqSemanas(k)[0]; return s0 && s0.vecSinEmp; }).map(function(k){ var e = liqEmpleadosPorKey()[k]; return liqEscapeHtml(e ? e.nombre_completo : k); });
+    if(sin.length) msgs.push("Sin fichadas en el mes anterior (su semana cortada se evalúa con los días de este mes): <b>"+sin.join("</b>, <b>")+"</b>.");
+  }
+  el.innerHTML = msgs.length ? "<div class=\"liq-aviso-cortada\">"+msgs.join("<br>")+"</div>" : "";
+}
 function liqRenderTablaPresentismo(){
-  var dias = liqDiasDelMes(liqState.mes);
+  var diasMes = liqDiasDelMes(liqState.mes);
   var porKey = liqEmpleadosPorKey();
   var keys = Object.keys(liqState.presentismo||{});
+  var base = liqSemanasBase(), vc = liqVecinoCalc();
   var semRef = keys.length ? liqSemanas(keys[0]) : [];
+  var colsPrev = (base.length && base[0].antes.length && vc && vc.ok.prev) ? base[0].antes : [];
+  var ult = base[base.length-1];
+  var colsNext = (ult && ult.despues.length && vc && vc.ok.next) ? ult.despues : [];
+  var dias = colsPrev.concat(diasMes, colsNext);
+  var ladoDe = function(j){ return j<diasMes[0] ? "prev" : (j>diasMes[diasMes.length-1] ? "next" : null); };
   var thead = "<thead><tr><th class=\"liq-col-nombre\">Nombre completo</th>";
   dias.forEach(function(j){
-    var esFeriado = liqState.feriados.indexOf(j)!==-1, wk = liqDowISO(j)===2;
-    thead += "<th class=\""+(esFeriado?"liq-th-feriado ":"")+(wk?"liq-wk-start":"")+"\"><span class=\"liq-th-dow\">"+liqDiaSemana(j)+"</span><span class=\"liq-th-dd\">"+j.slice(8,10)+"</span>"+(esFeriado?"<span class=\"liq-flag\">FERIADO</span>":"")+"</th>";
+    var lado = ladoDe(j), esFeriado = !lado && liqState.feriados.indexOf(j)!==-1, wk = liqDowISO(j)===2;
+    thead += "<th class=\""+(lado?"liq-th-vec ":"")+(esFeriado?"liq-th-feriado ":"")+(wk?"liq-wk-start":"")+"\"><span class=\"liq-th-dow\">"+liqDiaSemana(j)+"</span><span class=\"liq-th-dd\">"+j.slice(8,10)+"</span>"+(esFeriado?"<span class=\"liq-flag\">FERIADO</span>":"")+(lado?"<span class=\"liq-flag\">"+(lado==="prev"?"mes anterior":"mes siguiente")+"</span>":"")+"</th>";
   });
-  semRef.forEach(function(s,i){ thead += "<th class=\"liq-th-sem"+(i===0?" liq-sem-first":"")+"\"><span class=\"liq-th-dow\">Semana "+(i+1)+"</span><span class=\"liq-th-dd\" style=\"font-size:11px\">"+liqDMcorto(s.ini)+" – "+liqDMcorto(s.fin)+"</span>"+(s.dias.length<7?"<span class=\"liq-flag\" style=\"color:var(--text-3)\">"+s.dias.length+" días del mes</span>":"")+"</th>"; });
+  semRef.forEach(function(s,i){
+    var comp = s.lado && vc && vc.ok[s.lado];
+    thead += "<th class=\"liq-th-sem"+(i===0?" liq-sem-first":"")+"\"><span class=\"liq-th-dow\">Semana "+(i+1)+"</span><span class=\"liq-th-dd\" style=\"font-size:11px\">"+liqDMcorto(s.ini)+" – "+liqDMcorto(s.fin)+"</span>"+(s.dias.length<7?"<span class=\"liq-flag\" style=\"color:var(--text-3)\">"+(comp ? "completa con "+(s.lado==="prev"?"mes anterior":"mes siguiente") : s.dias.length+" días del mes")+"</span>":"")+"</th>";
+  });
   thead += "<th class=\"liq-th-sem\"><span class=\"liq-th-dow\">Mes</span><span class=\"liq-th-dd\">Total</span></th></tr></thead>";
 
   var tbody = "<tbody>";
@@ -13725,11 +13985,14 @@ function liqRenderTablaPresentismo(){
     var emp = porKey[key], cfg = liqCfgParaEmpleado(emp);
     var nombre = emp ? emp.nombre_completo : key;
     var datos = liqState.presentismo[key] || {};
-    var sem = liqSemanas(key), estadoDia = {}, obsDia = {};
-    sem.forEach(function(s){ Object.assign(estadoDia, s.estadoDia); Object.assign(obsDia, s.obsDia); });
-    var row = "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(nombre)+"<span class=\"liq-col-esperado\">"+liqFmtDecimal(cfg.horasSemanales)+" h/sem · "+cfg.francos+" franco"+(cfg.francos===1?"":"s")+"</span></td>";
+    var vdatos = (vc && emp) ? (vc.porEmp[emp.id] || {}) : {};
+    var sem = liqSemanas(key), estadoDia = {}, obsDia = {}, prestadoDia = {}, imputInfo = {}, imputados = [];
+    sem.forEach(function(s){ Object.assign(estadoDia, s.estadoDia); Object.assign(obsDia, s.obsDia); Object.assign(prestadoDia, s.prestadoDia); Object.assign(imputInfo, s.imputInfo); imputados = imputados.concat(s.imputados); });
+    var row = "<tr><td class=\"liq-col-nombre\">"+liqEscapeHtml(nombre)+"<span class=\"liq-col-esperado\">"+liqFmtDecimal(cfg.horasSemanales)+" h/sem · "+cfg.francos+" franco"+(cfg.francos===1?"":"s")+"</span>"+liqChipImputados(imputados)+"</td>";
     dias.forEach(function(j){
-      var d = datos[j], st = estadoDia[j], cls = (liqState.feriados.indexOf(j)!==-1?" liq-dia-feriado-col":"")+(liqDowISO(j)===2?" liq-wk-start":"");
+      var lado = ladoDe(j), wk0 = (liqDowISO(j)===2?" liq-wk-start":"");
+      if(lado){ row += liqCeldaVecino(j, lado, prestadoDia[j] ? estadoDia[j] : null, vdatos[j], imputInfo[j], wk0); return; }
+      var d = datos[j], st = estadoDia[j], cls = (liqState.feriados.indexOf(j)!==-1?" liq-dia-feriado-col":"")+wk0;
       var tip = [];
       if(d){
         if(d.intervalos && d.intervalos.length) tip.push(d.intervalos.map(function(iv){ return iv.e+" → "+iv.s+" ("+liqHM(iv.min)+")"; }).join("<br>"));
@@ -13747,6 +14010,8 @@ function liqRenderTablaPresentismo(){
       else if(st==="feriado") row += "<td class=\"liq-dia-ausente"+(ev?" liq-noline":"")+oCls+cls+"\""+(ev?pos:"")+">fer."+mk+simpleTip+"</td>";
       else if(st==="justificada") row += "<td class=\"liq-dia-just"+(ev&&ev.pierde?" pierde":"")+(ev?" liq-noline":"")+oCls+cls+"\""+(ev?pos:"")+">just."+mk+simpleTip+"</td>";
       else if(st==="pendiente") row += "<td class=\"liq-dia-incompleto liq-tiene-obs"+(ev?" liq-obs-td-"+ev.cls:"")+cls+"\" style=\"position:relative;\" onclick=\"liqIrADefinir('"+liqEscapeHtml(key)+"','"+j+"')\">?"+mk+tipHtml+"</td>";
+      else if(st==="imputado"){ var im = imputInfo[j];
+        row += "<td class=\"liq-dia-imp liq-tiene-obs"+(ev?" liq-obs-td-"+ev.cls:"")+cls+"\" style=\"position:relative;\" onclick=\"liqIrADefinir('"+liqEscapeHtml(key)+"','"+j+"')\"><span class=\"liq-imp-h\">"+liqHM(im.min)+"</span><span class=\"liq-imp-sub\">"+liqEscapeHtml(im.texto)+"</span>"+mk+"<div class=\"liq-tooltip\">"+(ev?oTip+"<br>":"")+"<b>Horas imputadas (promedio)</b><br>"+liqEscapeHtml(im.tooltip)+"<br>"+tip.filter(function(t){ return t!==oTip; }).join("<br>")+"</div></td>"; }
       else if(st==="manual") row += "<td class=\"liq-dia-manual liq-tiene-obs"+(ev?" liq-obs-td-"+ev.cls:"")+cls+"\" style=\"position:relative;\" onclick=\"liqIrADefinir('"+liqEscapeHtml(key)+"','"+j+"')\">"+liqHM(liqHorasManualDe(key,j))+"*"+mk+"<div class=\"liq-tooltip\">"+(ev?oTip+"<br>":"")+"Horas definidas a mano<br>"+tip.filter(function(t){ return t!==oTip; }).join("<br>")+"</div></td>";
       else row += "<td class=\"liq-dia-ok"+(tipHtml?" liq-tiene-obs":"")+((d&&d.obs&&d.obs.length)?"":" liq-noline")+(ev?" liq-obs-td-"+ev.cls:"")+cls+"\" style=\"position:relative;\">"+liqHM(d?d.minutos:0)+mk+tipHtml+"</td>";
     });
@@ -13754,7 +14019,12 @@ function liqRenderTablaPresentismo(){
     sem.forEach(function(s,i){
       totDiff += s.diff; totPend += s.pendientes.length;
       var c = s.diff>LIQ_TOLERANCIA_MIN ? "liq-dia-verde" : s.diff<-LIQ_TOLERANCIA_MIN ? "liq-dia-rojo" : "liq-dia-neutro";
-      var tt = "Horas a cumplir: "+liqHM(s.esperado)+(s.esperado!==s.esperadoBase?" (de "+liqHM(s.esperadoBase)+")":"")+"<br>Horas trabajadas: "+liqHM(s.trabajado)+"<br>Francos: "+s.francosTomados+" de "+s.francosPermitidos+"<br>Ausencias: "+s.ausencias+(s.justificadas.length?"<br>Ausencias justificadas: "+s.justificadas.length+(s.justPierden.length?" ("+s.justPierden.length+" pierde"+(s.justPierden.length>1?"n":"")+" presentismo)":""):"")+(s.justNoCumplidas?"<br><b>Justificaciones no cumplidas: "+s.justNoCumplidas+"</b>":"")+(s.feriadosNoTrab?"<br>Feriados no trabajados: "+s.feriadosNoTrab:"")+(s.dias.length<7?"<br><i>Semana compartida con otro mes ("+s.dias.length+" días en este mes)</i>":"")+(s.pendientes.length?"<br><b>"+s.pendientes.length+" día"+(s.pendientes.length>1?"s":"")+" a definir</b>":"");
+      var ladoTxt = s.lado==="prev" ? "mes anterior" : "mes siguiente";
+      var tt = "Horas a cumplir: "+liqHM(s.esperado)+(s.esperado!==s.esperadoBase?" (de "+liqHM(s.esperadoBase)+")":"")+"<br>Horas trabajadas: "+liqHM(s.trabajado)+"<br>Francos: "+s.francosTomados+" de "+s.francosPermitidos+"<br>Ausencias: "+s.ausencias+(s.justificadas.length?"<br>Ausencias justificadas: "+s.justificadas.length+(s.justPierden.length?" ("+s.justPierden.length+" pierde"+(s.justPierden.length>1?"n":"")+" presentismo)":""):"")+(s.justNoCumplidas?"<br><b>Justificaciones no cumplidas: "+s.justNoCumplidas+"</b>":"")+(s.feriadosNoTrab?"<br>Feriados no trabajados: "+s.feriadosNoTrab:"")
+        +(s.vecOk?"<br><i>Semana completada con "+s.prestados.length+" día"+(s.prestados.length>1?"s":"")+" del "+ladoTxt+" (solo completan la semana: no generan ausencias ni extras de este mes)</i>"+(s.ausPrestExceso?"<br>Ausencias del otro mes que no cuentan acá: "+s.ausPrestExceso:""):
+          s.dias.length<7?"<br><i>Semana compartida con otro mes ("+s.dias.length+" días en este mes)"+(s.vecSinEmp?": sin fichadas del empleado en el "+ladoTxt+", se evalúa con los días de este mes":"")+"</i>":"")
+        +(s.imputados.length?"<br><b>"+s.imputados.length+" día"+(s.imputados.length>1?"s":"")+" imputado"+(s.imputados.length>1?"s":"")+" con el promedio</b>: "+liqHM(s.imputados.reduce(function(t,x){ return t+x.min; },0))+" hs":"")
+        +(s.pendientes.length?"<br><b>"+s.pendientes.length+" día"+(s.pendientes.length>1?"s":"")+" a definir</b>":"");
       row += "<td class=\"liq-sem-cell "+c+" liq-tiene-obs"+(i===0?" liq-sem-first":"")+"\" style=\"position:relative;\">"+liqFmtHM(s.diff)+(s.pendientes.length?"<sup class=\"liq-pend-sup\">?</sup>":"")+"<div class=\"liq-tooltip\">"+tt+"</div></td>";
     });
     var ct = totDiff>LIQ_TOLERANCIA_MIN ? "liq-dia-verde" : totDiff<-LIQ_TOLERANCIA_MIN ? "liq-dia-rojo" : "liq-dia-neutro";
@@ -13763,9 +14033,10 @@ function liqRenderTablaPresentismo(){
   });
   tbody += "</tbody>";
   document.getElementById("liqTablaPresentismo").innerHTML = thead+tbody;
+  liqRenderAvisoCortada(base, vc, keys);
   liqRenderPendientes();
 }
-/* ---------- días con fichadas incompletas: los define el empleador ---------- */
+/* ---------- días con fichadas incompletas: se imputan con el promedio; el empleador puede pisarlos a mano ---------- */
 function liqRenderPendientes(){
   var el = document.getElementById("liqPendientes"); if(!el) return;
   var porKey = liqEmpleadosPorKey(), items = [];
@@ -13775,14 +14046,24 @@ function liqRenderPendientes(){
     Object.keys(datos).sort().forEach(function(j){ if(j.slice(0,7)===mes && datos[j].estado==="incompleto") items.push({key:key, j:j, d:datos[j], nombre: emp?emp.nombre_completo:key}); });
   });
   if(!items.length){ el.innerHTML = ""; return; }
-  var faltan = items.filter(function(x){ return liqHorasManualDe(x.key,x.j)==null; }).length;
+  var cache = {};
+  var impDe = function(key, j){
+    var m = cache[key];
+    if(!m){ m = cache[key] = {}; liqSemanas(key).forEach(function(s){ Object.assign(m, s.imputInfo); }); }
+    return m[j] || null;
+  };
+  items.forEach(function(x){ x.man = liqHorasManualDe(x.key,x.j); x.imp = x.man==null ? impDe(x.key,x.j) : null; });
+  var nMan = items.filter(function(x){ return x.man!=null; }).length, nImp = items.filter(function(x){ return x.imp; }).length;
+  var faltan = items.length - nMan - nImp;
   var dis = liqState.liquidado ? "disabled" : "";
-  el.innerHTML = "<div class=\"liq-pend\"><div class=\"liq-pend-h\"><b>Fichadas incompletas</b><span>"+(faltan?faltan+" de "+items.length+" día"+(items.length>1?"s":"")+" sin definir":"Todos los días definidos")+" · Falta la entrada o la salida, así que las horas de ese día no se pueden calcular: definilas a mano (ej. 8, 8,5 u 8:30). Hasta que se definan, el día cuenta 0 horas.</span></div>"
+  var resumen = [nImp ? nImp+" imputado"+(nImp>1?"s":"")+" con el promedio" : "", faltan ? faltan+" sin definir (cuentan 0 horas)" : "", nMan ? nMan+" definido"+(nMan>1?"s":"")+" a mano" : ""].filter(Boolean).join(" · ");
+  el.innerHTML = "<div class=\"liq-pend\"><div class=\"liq-pend-h\"><b>Fichadas incompletas</b><span>"+resumen+" · Falta la entrada o la salida: el sistema toma el promedio de horas del empleado en esos días y lo aclara en la matriz (el reporte guardado no se toca). Si querés otro valor, definilo a mano (ej. 8, 8,5 u 8:30).</span></div>"
     + "<div class=\"liq-pend-list\">" + items.map(function(x){
-      var man = liqHorasManualDe(x.key,x.j);
-      return "<div class=\"liq-pend-row"+(man==null?" falta":"")+"\" id=\"liqPend_"+String(x.key).replace(/\W/g,"_")+"_"+x.j+"\"><span class=\"n\">"+liqEscapeHtml(x.nombre)+"</span><span class=\"f\">"+liqDiaSemana(x.j)+" "+liqDMcorto(x.j)+"</span><span class=\"fx\">"
-        + x.d.fichadas.map(function(f){ return "<i>"+f.hora+"</i> "+String(f.tipo||"").toLowerCase(); }).join(" · ")+"</span>"
-        + "<span class=\"in\"><input type=\"text\" class=\"liq-input-num\" placeholder=\"h:mm\" value=\""+(man==null?"":liqHM(man))+"\" data-key=\""+liqEscapeHtml(x.key)+"\" data-j=\""+x.j+"\" onchange=\"liqSetHorasDia(this)\" onkeydown=\"if(event.key==='Enter') this.blur()\" "+dis+"> hs</span></div>";
+      var ph = x.imp ? liqHM(x.imp.min) : "h:mm";
+      return "<div class=\"liq-pend-row"+(x.man==null && !x.imp?" falta":"")+"\" id=\"liqPend_"+String(x.key).replace(/\W/g,"_")+"_"+x.j+"\"><span class=\"n\">"+liqEscapeHtml(x.nombre)+"</span><span class=\"f\">"+liqDiaSemana(x.j)+" "+liqDMcorto(x.j)+"</span><span class=\"fx\">"
+        + x.d.fichadas.map(function(f){ return "<i>"+f.hora+"</i> "+String(f.tipo||"").toLowerCase(); }).join(" · ")
+        + (x.imp ? "<span class=\"liq-pend-imp\" title=\""+liqEscapeHtml(x.imp.tooltip)+"\">"+liqEscapeHtml(x.imp.texto)+" · se toma el promedio "+liqHM(x.imp.min)+"</span>" : "")+"</span>"
+        + "<span class=\"in\"><input type=\"text\" class=\"liq-input-num\" placeholder=\""+ph+"\" value=\""+(x.man==null?"":liqHM(x.man))+"\" data-key=\""+liqEscapeHtml(x.key)+"\" data-j=\""+x.j+"\" onchange=\"liqSetHorasDia(this)\" onkeydown=\"if(event.key==='Enter') this.blur()\" "+dis+"> hs</span></div>";
     }).join("") + "</div></div>";
 }
 (function(){
@@ -13872,7 +14153,7 @@ function liqCalcFila(f, adelantosPorNombre){
   var b = sueldo - a;
   var adelantoKey = emp._proveedor_nombre || emp.nombre_completo;
   var adelanto = Number((adelantosPorNombre||{})[adelantoKey]||0);
-  var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0, pendientes:0, justificadas:0, justNoCumplidas:0, justPierden:[]};
+  var agr = f.tienePresentismo ? liqCalcularAgregados(f.key) : {ausencias:0, feriadosTrabajados:0, horasExtraMin:0, pendientes:0, justificadas:0, justNoCumplidas:0, justPierden:[], imputados:[]};
   var jornal = sueldo/30;
   var valorHora = jornal/8;
   var horasExtraManual = Number(liqState.horasExtraManual[f.key]||0);
@@ -13885,7 +14166,12 @@ function liqCalcFila(f, adelantosPorNombre){
   var pierdenPres = f.tienePresentismo ? liqAusenciasQuePierdenPresentismo(f.key, agr) : 0;
   var reporteX = f.tienePresentismo && pierdenPres>=1;
   var man = (liqState.presentismoManual||{})[f.key];
-  var pierdePresentismo = (man===undefined || man===null) ? reporteX : !!man;
+  /* Presentismo (11/2026): el reporte (X) es solo una SUGERENCIA. El descuento lo decide el dueño en "Manual":
+     true = descuenta, false = no descuenta, sin definir = NO descuenta (pero queda marcado cuando el reporte sugiere perderlo). */
+  var presManual = (man===undefined || man===null) ? undefined : !!man;
+  var pierdePresentismo = presManual===true;
+  var presSinDefinir = presManual===undefined && reporteX;
+  var presContradice = presManual!==undefined && presManual!==reporteX;
   var presDescuento = sueldo*LIQ_PRESENTISMO_PCT;
   var sugerido = Math.round(sueldo - a - adelanto - (ausenciasManual*jornal) + (feriadosManual*jornal) + (horasExtraManual*valorHora) + bonif + extra - (pierdePresentismo ? presDescuento : 0));
   var aNeto = a;
@@ -13893,7 +14179,7 @@ function liqCalcFila(f, adelantosPorNombre){
   var pagoB = liqState.pagoBManual[f.key]!=null ? liqState.pagoBManual[f.key] : sugerido;
   return { sueldo:sueldo, esCondA:esCondA, a:a, aNeto:aNeto, b:b, adelanto:adelanto, adelantoKey:adelantoKey, agr:agr,
            jornal:jornal, valorHora:valorHora, horasExtraManual:horasExtraManual, feriadosManual:feriadosManual, ausenciasManual:ausenciasManual,
-           bonif:bonif, extras:extras, extra:extra, injustificadas:injustificadas, pierdenPres:pierdenPres, reporteX:reporteX, pierdePresentismo:pierdePresentismo,
+           bonif:bonif, extras:extras, extra:extra, injustificadas:injustificadas, pierdenPres:pierdenPres, reporteX:reporteX, pierdePresentismo:pierdePresentismo, presManual:presManual, presSinDefinir:presSinDefinir, presContradice:presContradice,
            presDescuento:presDescuento, sugerido:sugerido, pagoB:pagoB };
 }
 function liqRenderTablaLiquidacion(){
@@ -13908,7 +14194,7 @@ function liqRenderTablaLiquidacion(){
       "<th colspan=\"2\" class=\"liq-th-group\">Feriados</th>" +
       "<th colspan=\"2\" class=\"liq-th-group\">Ausencias</th>" +
       "<th colspan=\"2\" class=\"liq-th-group\">Horas extra</th>" +
-      "<th colspan=\"2\" class=\"liq-th-group\" title=\"10% del sueldo. Se pierde con ausencias no justificadas o con ausencias justificadas por enfermedad.\">Presentismo</th>" +
+      "<th colspan=\"2\" class=\"liq-th-group\" title=\"10% del sueldo. Reporte: sugiere si corresponde perderlo (ausencias no justificadas o justificadas por enfermedad). Manual: lo definís vos; sin definir no se descuenta.\">Presentismo</th>" +
       "<th rowspan=\"2\" title=\"Monto en $ que se suma al pago B y al recibo\">Bonificación</th>" +
       "<th rowspan=\"2\" title=\"Liquidaciones extraordinarias del mes (se pagan en B)\">Extraordinaria</th>" +
       "<th rowspan=\"2\">Sugerido pago B</th><th rowspan=\"2\">Pago B</th>" +
@@ -13937,12 +14223,16 @@ function liqRenderTablaLiquidacion(){
     var manualInput = function(field, val){
       return "<input type=\"text\" class=\"liq-input-num\" data-emp=\""+f.key+"\" data-field=\""+field+"\" value=\""+liqFmtDecimal(val)+"\" oninput=\"liqOnVariableManualInput(this)\" "+dis+">";
     };
-    var presTitulo = "10% del sueldo. Se pierde con ausencias no justificadas o con ausencias justificadas por enfermedad.";
+    var presTitulo = "10% del sueldo. El reporte sugiere perderlo con ausencias no justificadas o con ausencias justificadas por enfermedad; el descuento lo definís vos en Manual.";
+    var presSelCls = "liq-pres-sel"+(c.presManual===true?" si":"")+(c.presSinDefinir?" pend":"");
+    var presMk = c.presSinDefinir ? "<i class=\"liq-pres-mk pend\" title=\"El reporte sugiere perder el presentismo: definilo\">!</i>"
+      : (c.presContradice ? "<i class=\"liq-pres-mk neutro\" title=\""+(c.reporteX ? "El reporte sugiere perder el presentismo, pero definiste que no se descuenta" : "El reporte no sugiere perder el presentismo, pero definiste que se descuenta")+"\">i</i>" : "");
+    var sugTitulo = c.presManual===true ? "Incluye el descuento de presentismo: −"+fmtMoney(Math.round(c.presDescuento)) : (c.presSinDefinir ? "Presentismo sin definir: no se descontó (se paga completo)" : "");
     var justPierdenTxt = (c.agr.justPierden||[]).map(function(x){ return liqDMcorto(x.j)+" ("+x.motivo+")"; }).join(", ");
     var extraTitulo = c.extras.length ? c.extras.map(function(x){ return "• "+x.concepto+": "+fmtMoney(x.monto); }).join("\n") : "Sin liquidaciones extraordinarias.";
 
     rows += "<tr>" +
-      "<td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+(f.tienePresentismo?"":"<span class=\"liq-sin-presentismo\">sin presentismo</span>")+"</td>" +
+      "<td class=\"liq-col-nombre\">"+liqEscapeHtml(f.nombre)+(f.tienePresentismo?"":"<span class=\"liq-sin-presentismo\">sin presentismo</span>")+liqChipImputados(c.agr.imputados)+"</td>" +
       "<td><span class=\"liq-badge-cond cond-"+f.emp.condicion.toLowerCase()+"\">"+f.emp.condicion+"</span></td>" +
       "<td class=\"liq-num-cell\">"+fmtMoney(c.sueldo)+"</td>" +
       "<td>"+(c.esCondA
@@ -13957,10 +14247,10 @@ function liqRenderTablaLiquidacion(){
       "<td class=\"liq-num-cell "+horasExtraCls+"\""+(c.agr.pendientes?" title=\""+c.agr.pendientes+" día(s) con fichadas incompletas sin definir: cuentan 0 horas\"":"")+">"+(f.tienePresentismo?horasExtraTxt+(c.agr.pendientes?"<sup class=\"liq-pend-sup\">?</sup>":""):"—")+"</td>" +
       "<td>"+manualInput("horasExtraManual", c.horasExtraManual)+"</td>" +
       "<td class=\"liq-num-cell\" title=\""+presTitulo+(justPierdenTxt?" Ausencias justificadas que pierden presentismo: "+justPierdenTxt+".":"")+(c.agr.justNoCumplidas?" Justificaciones no cumplidas: "+c.agr.justNoCumplidas+" (no restan presentismo por sí solas).":"")+"\">"+(c.reporteX?"<span class=\"liq-x-rep\">X</span>":"<span style=\"color:var(--text-3);\">—</span>")+(c.agr.justPierden && c.agr.justPierden.length?"<span class=\"liq-obs-sub no\" title=\""+liqEscapeHtml(justPierdenTxt)+"\">"+c.agr.justPierden.length+" just. con pérdida</span>":"")+(c.agr.justNoCumplidas?"<span class=\"liq-obs-sub no\">"+c.agr.justNoCumplidas+" no cumpl.</span>":"")+"</td>" +
-      "<td title=\""+presTitulo+"\"><label class=\"liq-pres-man\"><input type=\"checkbox\" data-emp=\""+liqEscapeHtml(f.key)+"\" "+(c.pierdePresentismo?"checked ":"")+"onchange=\"liqOnPresentismoChange(this)\" "+dis+">"+(c.pierdePresentismo?"<span class=\"liq-pres-desc\">−"+fmtMoney(Math.round(c.presDescuento))+"</span>":"")+"</label></td>" +
+      "<td title=\""+presTitulo+"\" style=\"position:relative;\"><div class=\"liq-pres-w\"><select class=\""+presSelCls+"\" data-emp=\""+liqEscapeHtml(f.key)+"\" onchange=\"liqOnPresentismoChange(this)\" "+dis+"><option value=\"\""+(c.presManual===undefined?" selected":"")+">—</option><option value=\"1\""+(c.presManual===true?" selected":"")+">Descuenta</option><option value=\"0\""+(c.presManual===false?" selected":"")+">No descuenta</option></select>"+(c.pierdePresentismo?"<span class=\"liq-pres-desc\">−"+fmtMoney(Math.round(c.presDescuento))+"</span>":"")+"</div>"+presMk+"</td>" +
       "<td><input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"bonif\" value=\""+fmtMoney(c.bonif)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+"></td>" +
       "<td class=\"liq-num-cell\" style=\""+(c.extra>0?"color:#137B44;font-weight:700;":"color:var(--text-3);")+"\" title=\""+liqEscapeHtml(extraTitulo)+"\">"+(c.extra>0?"+"+fmtMoney(c.extra):"—")+"</td>" +
-      "<td class=\"liq-num-cell\" style=\"color:var(--text-3);\">"+fmtMoney(c.sugerido)+"</td>" +
+      "<td class=\"liq-num-cell\" style=\"color:var(--text-3);\""+(sugTitulo?" title=\""+liqEscapeHtml(sugTitulo)+"\"":"")+">"+fmtMoney(c.sugerido)+"</td>" +
       "<td><input type=\"text\" class=\"liq-input-monto\" data-emp=\""+f.key+"\" data-field=\"pagob\" value=\""+fmtMoney(c.pagoB)+"\" oninput=\"liqOnMontoInput(this)\" "+dis+"></td>" +
       "</tr>";
   });
@@ -14031,24 +14321,28 @@ function liqParseMontoInput(str){
 function liqComputeTotales(){
   var filas = liqFilasLiquidacion();
   var adelantosPorNombre = liqAdelantosPorNombre();
-  var totalA=0, totalB=0, totalAdelantos=0, totalExtra=0, montosA={}, pagosB={}, recibos=[], extraordinarias=[], presentismoEfectivo={};
+  var totalA=0, totalB=0, totalAdelantos=0, totalExtra=0, montosA={}, pagosB={}, recibos=[], extraordinarias=[], presentismoEfectivo={}, presSinDefinir=[];
   filas.forEach(function(f){
     if(!f.emp) return;
     var c = liqCalcFila(f, adelantosPorNombre);
     totalA += c.aNeto; totalB += c.pagoB; totalAdelantos += c.adelanto; totalExtra += c.extra;
     montosA[f.key] = c.aNeto; pagosB[f.key] = c.pagoB;
     presentismoEfectivo[f.key] = c.pierdePresentismo;
+    if(c.presSinDefinir) presSinDefinir.push(f.nombre);
     c.extras.forEach(function(x){ extraordinarias.push(x); });
     if(c.pagoB > 0) recibos.push({key:f.key, emp:f.emp, monto:c.pagoB}); // sin recibo B si no hay pago B (ej. sueldo 100% A)
   });
-  return {totalA:totalA, totalB:totalB, totalAdelantos:totalAdelantos, totalExtra:totalExtra, montosA:montosA, pagosB:pagosB, recibos:recibos, extraordinarias:extraordinarias, presentismoEfectivo:presentismoEfectivo};
+  return {totalA:totalA, totalB:totalB, totalAdelantos:totalAdelantos, totalExtra:totalExtra, montosA:montosA, pagosB:pagosB, recibos:recibos, extraordinarias:extraordinarias, presentismoEfectivo:presentismoEfectivo, presSinDefinir:presSinDefinir};
 }
 
-/* ---------- presentismo manual (casilla) ---------- */
+/* ---------- presentismo manual (selector: — sin definir / Descuenta / No descuenta) ----------
+   Sin definir = se omite la clave en presentismo_manual (true/false se guardan como siempre). */
 function liqOnPresentismoChange(el){
   if(liqState.liquidado) return;
   liqState.presentismoManual = liqState.presentismoManual || {};
-  liqState.presentismoManual[el.dataset.emp] = !!el.checked;
+  if(el.value==="1") liqState.presentismoManual[el.dataset.emp] = true;
+  else if(el.value==="0") liqState.presentismoManual[el.dataset.emp] = false;
+  else delete liqState.presentismoManual[el.dataset.emp];
   liqRenderTablaLiquidacion();
   liqGuardarDraft();
 }
@@ -14154,7 +14448,7 @@ function liqDescargarExcel(){
     rows.push([liqState.mes, estado, f.nombre, f.emp.puesto||"", f.emp.condicion||"", c.sueldo, c.a, c.b, c.adelanto,
       c.agr.feriadosTrabajados, c.feriadosManual, c.agr.ausencias, c.ausenciasManual,
       Math.round(c.agr.horasExtraMin/60*100)/100, c.horasExtraManual,
-      c.reporteX ? "No" : "Sí", c.pierdePresentismo ? "Sí" : "No", c.pierdePresentismo ? Math.round(c.presDescuento) : 0,
+      c.reporteX ? "Sí" : "No", c.presManual===true ? "Sí" : (c.presManual===false ? "No" : "Sin definir"), c.pierdePresentismo ? Math.round(c.presDescuento) : 0,
       c.bonif, c.extra, c.extras.length ? c.extras.map(function(x){ return x.concepto; }).join("; ") : "Ninguna",
       c.sugerido, c.pagoB]);
   });
@@ -14174,8 +14468,10 @@ function liqDescargarPresentismo(){
     liqSemanas(key).forEach(function(s, i){
       s.dias.forEach(function(j){
         var st = s.estadoDia[j] || "ausente", d = datos[j], hs = 0;
+        var imp = s.imputInfo[j], aclar = "";
         if(st==="trabajado" && d && d.minutos!=null) hs = d.minutos/60;
         else if(st==="manual") hs = (liqHorasManualDe(key, j) || 0)/60;
+        else if(st==="imputado" && imp) aclar = "Falta fichada " + imp.falta; // las horas imputadas van aparte: Horas trabajadas = solo lo real
         var ev = s.obsDia[j], ob = ev && ev.obs;
         var r2 = function(m){ return m==null ? null : Math.round(m/60*100)/100; };
         rows.push([liqState.mes, j, emp.nombre_completo, Math.round(hs*100)/100, st, i+1,
@@ -14184,12 +14480,13 @@ function liqDescargarPresentismo(){
           ev && ob.tipo!=="otro" ? r2(ev.desfaseMin) : null,
           ev ? (ev.cumple===true ? "Sí" : ev.cumple===false ? "No" : "N/A") : "N/A",
           ob ? (ob.detalle||"") : "",
-          ob && ob.tipo==="ausencia" ? liqObsMotivoTxt(ob) : "", ob && ob.tipo==="ausencia" ? (liqObsPierdePres(ob) ? "Sí" : "No") : ""]);
+          ob && ob.tipo==="ausencia" ? liqObsMotivoTxt(ob) : "", ob && ob.tipo==="ausencia" ? (liqObsPierdePres(ob) ? "Sí" : "No") : "",
+          aclar, imp && st==="imputado" ? Math.round(imp.min/60*100)/100 : null]);
       });
     });
   });
   var cols = [{h:"Mes",t:"fecha"},{h:"Fecha",t:"fecha"},{h:"Empleado"},{h:"Horas trabajadas",t:"num"},{h:"Estado"},{h:"Semana",t:"int"},
-    {h:"Observación"},{h:"Horas esperadas",t:"num"},{h:"Desfase (horas)",t:"num"},{h:"Cumple"},{h:"Detalle",w:40},{h:"Motivo",w:34},{h:"Pierde presentismo (Sí/No)"}];
+    {h:"Observación"},{h:"Horas esperadas",t:"num"},{h:"Desfase (horas)",t:"num"},{h:"Cumple"},{h:"Detalle",w:40},{h:"Motivo",w:34},{h:"Pierde presentismo (Sí/No)"},{h:"Aclaración",w:30},{h:"Horas imputadas (promedio)",t:"num"}];
   var club = (typeof vdXlsClub==="function") ? vdXlsClub() : "";
   vdXls("Presentismo " + club + " " + String(liqState.mes).slice(0,7) + ".xlsx", cols, rows, "Presentismo");
 }
@@ -14520,6 +14817,7 @@ async function liqOnTabOpen(){
       liqState.ordenBId = row.orden_b_id;
       liqCanonNombresReporte(liqState.marcacionesRows);
       await liqCargarObservaciones();
+      await liqCargarVecinos();
       liqRecalcularPresentismo();
       liqRenderZone();
       liqRenderTodo();
@@ -14629,6 +14927,7 @@ function liqConfirmarLiquidar(){
     (tot.totalB>0 ? "• Parte B (Efectivo - Caja Mayor, con recibo): " + fmtMoney(tot.totalB) + "\n" : "") +
     (tot.totalExtra>0 ? "• Incluye liquidaciones extraordinarias por " + fmtMoney(tot.totalExtra) + " (en la parte B)\n" : "") +
     (tot.totalAdelantos>0 ? "\n(Ya se descontaron " + fmtMoney(tot.totalAdelantos) + " en adelantos de sueldo pagados este mes, cargados desde Pagos)\n" : "") +
+    (tot.presSinDefinir.length ? "\nPresentismo sin definir (se pagará completo): " + tot.presSinDefinir.join(", ") + ".\n" : "") +
     (sinDni.length ? "\nAtención: estos empleados no tienen DNI cargado y su recibo saldrá sin DNI: " + sinDni.join(", ") + ".\n" : "") +
     "\nEsto va a crear la(s) orden(es) de pago en Pagos (como Pendiente) y va a descargar un .zip con los recibos de sueldo. " + (sinDni.length ? "¿Continuar?" : "¿Confirmás?");
   if(!confirm(msg)) return;
