@@ -1190,7 +1190,7 @@
      de otros módulos (Pagos) que acá quedaba desalineado con la grilla de 2
      columnas, que no tenía tope. Se pisa acá, con más especificidad, sin tocar
      el comportamiento de esas clases en los demás módulos que las reutilizan. */
-  .ventas-resultados-wrap{max-width:1180px;}
+  .ventas-resultados-wrap{max-width:none;}
   .ventas-resultados-wrap .kpi-row{max-width:none;}
   .ventas-resultados-wrap .kpi-tile{max-width:360px;}
   .ventas-resultados-wrap .rank-card{max-width:none;margin-bottom:0;height:100%;box-sizing:border-box;}
@@ -1837,7 +1837,7 @@
   /* =====================================================================
      VENTAS › ANÁLISIS DE RESULTADOS (05/10/2026)
      ===================================================================== */
-  .ar-wrap{max-width:1180px;}
+  .ar-wrap{max-width:none;} /* 10/11/2026: ancho completo */
   .ar-bar{display:flex;align-items:stretch;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--border);border-radius:14px;padding:8px;box-shadow:var(--shadow-sm);margin:14px 0 12px 0;}
   .ar-bar .ar-presets{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:2px 4px;}
   .ar-bar .preset-pill{padding:7px 11px;font-size:11.5px;background:transparent;}
@@ -1883,6 +1883,81 @@
 
   .ar-row{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start;margin-bottom:16px;}
   .ar-row.single{grid-template-columns:minmax(0,1fr);}
+  .ar-semcorta{font-size:11.5px;color:#8A5A00;background:#FFF6E0;border:1px solid #F4DFA6;border-radius:9px;padding:7px 10px;margin:6px 0 8px;line-height:1.45;}
+  .ar-tbl td.ar-dias-corta{color:#B5760A;font-weight:800;}
+  /* KPI de gastos → vista de gastos (10/11/2026) */
+  .ar-kpi.clk{cursor:pointer;transition:box-shadow .15s,border-color .15s,transform .15s;position:relative;}
+  .ar-kpi.clk:hover{border-color:#E9A86B;box-shadow:0 6px 18px -10px rgba(212,120,40,.55);transform:translateY(-1px);}
+  .ar-kpi.clk .go{position:absolute;right:14px;top:14px;font-size:11px;font-weight:800;color:#C2671E;display:flex;align-items:center;gap:4px;opacity:.85;}
+  .ar-kpi.clk.on{border-color:#E08A3C;box-shadow:0 0 0 2px rgba(224,138,60,.25);}
+  .ar-gv{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:16px;}
+  .ar-gv-h{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .ar-gv-h h3{margin:0;font-size:17px;color:var(--navy);}
+  .ar-gv-h .sub{font-size:12px;color:var(--text-3);font-weight:600;margin-top:2px;}
+  .ar-gv-back{margin-left:auto;border:1px solid var(--border);background:#fff;border-radius:9px;padding:8px 12px;font:inherit;font-size:12.5px;font-weight:700;color:var(--navy);cursor:pointer;display:flex;align-items:center;gap:6px;}
+  .ar-gv-back:hover{background:#F4F6FB;}
+  .ar-gv-tot{display:flex;gap:26px;flex-wrap:wrap;padding:12px 16px;border-radius:12px;background:#FFF7EF;border:1px solid #F6DCC2;margin-bottom:14px;}
+  .ar-gv-tot .k{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#A86A35;}
+  .ar-gv-tot .v{font-size:20px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .ar-gv-tot .v.sm{font-size:15px;}
+  .ar-gv-cat{border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;}
+  .ar-gv-row{display:grid;grid-template-columns:18px minmax(160px,1.3fr) minmax(120px,2fr) 70px 70px 130px;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;}
+  .ar-gv-row:hover{background:#FBFAF8;}
+  .ar-gv-row .chev svg{width:13px;height:13px;color:var(--text-3);transition:transform .15s;}
+  .ar-gv-cat.open .ar-gv-row .chev svg{transform:rotate(90deg);}
+  .ar-gv-row .nm{font-weight:700;font-size:13.5px;color:var(--navy);}
+  .ar-gv-row .nm small{display:block;font-size:11px;color:var(--text-3);font-weight:600;}
+  .ar-gv-bar{height:8px;border-radius:6px;background:#F3EEE8;overflow:hidden;}
+  .ar-gv-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#F0A35E,#D9782F);}
+  .ar-gv-row .pc{font-size:12px;color:var(--text-2);font-weight:700;text-align:right;font-variant-numeric:tabular-nums;}
+  .ar-gv-row .pc small{display:block;font-size:10px;color:var(--text-3);font-weight:600;}
+  .ar-gv-row .mt{font-weight:800;text-align:right;font-variant-numeric:tabular-nums;color:var(--navy);}
+  .ar-gv-b{display:none;border-top:1px solid var(--border);background:#FCFBFA;padding:12px 14px 14px;}
+  .ar-gv-cat.open .ar-gv-b{display:block;}
+  .ar-gv-subs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .ar-gv-subs span{font-size:11.5px;font-weight:700;color:var(--text-2);background:#fff;border:1px solid var(--border);border-radius:20px;padding:3px 10px;}
+  .ar-gv-subs span b{color:var(--navy);margin-left:4px;}
+  .ar-gv-tw{overflow:auto;max-height:420px;border:1px solid var(--border);border-radius:10px;background:#fff;}
+  .ar-gv-t{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;}
+  .ar-gv-t th{position:sticky;top:0;background:#F7F8FB;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:800;padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+  .ar-gv-t td{padding:8px 10px;border-bottom:1px solid #F1F2F6;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .ar-gv-t .l{text-align:left;}
+  .ar-gv-t td small{display:block;color:var(--text-3);font-size:10.5px;}
+  .ar-gv-t tr.dim td{color:var(--text-3);}
+  .ar-gv-est{font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 7px;}
+  .ar-gv-est.ok{background:#E4F6EA;color:#137B44;} .ar-gv-est.pe{background:#FFF1DA;color:#B5760A;}
+  .ar-gv-note{font-size:11.5px;color:var(--text-3);margin-top:8px;line-height:1.5;}
+  /* Top productos y cubiertos (10/11/2026) */
+  .ar-top-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;}
+  .ar-top-g{border:1px solid var(--border);border-radius:12px;padding:12px 14px;}
+  .ar-top-g h4{margin:0 0 2px;font-size:13.5px;color:var(--navy);}
+  .ar-top-g .sub{font-size:11px;color:var(--text-3);font-weight:600;margin-bottom:10px;}
+  .ar-top-q{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .ar-top-l .t{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+  .ar-top-l.best .t{color:#137B44;} .ar-top-l.worst .t{color:#B42318;}
+  .ar-top-it{display:grid;grid-template-columns:16px 1fr auto;gap:6px;align-items:baseline;font-size:12px;padding:4px 0;border-bottom:1px dashed #EEF0F4;}
+  .ar-top-it:last-child{border-bottom:none;}
+  .ar-top-it .n{font-weight:800;color:var(--text-3);font-size:11px;}
+  .ar-top-it .p{color:var(--text-1);font-weight:600;line-height:1.3;}
+  .ar-top-it .v{font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .ar-top-it .v small{display:block;font-weight:600;color:var(--text-3);font-size:10px;text-align:right;}
+  .ar-top-sep{font-size:10.5px;font-weight:800;color:var(--text-2);margin:10px 0 6px;padding-top:8px;border-top:1px solid var(--border);}
+  .ar-top-sep:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+  .ar-cub-k{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+  .ar-cub-k > div{flex:1;min-width:150px;border:1px solid var(--border);border-radius:12px;padding:10px 14px;}
+  .ar-cub-k .k{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
+  .ar-cub-k .v{font-size:20px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .ar-cub-k .s{font-size:11px;color:var(--text-3);font-weight:600;}
+  .ar-cub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;}
+  .ar-cub-box{border:1px solid var(--border);border-radius:12px;padding:12px 14px;}
+  .ar-cub-box h4{margin:0 0 8px;font-size:13px;color:var(--navy);}
+  .ar-cub-bars{display:flex;flex-direction:column;gap:6px;}
+  .ar-cub-bar{display:grid;grid-template-columns:110px 1fr 58px;gap:8px;align-items:center;font-size:12px;}
+  .ar-cub-bar .l{color:var(--text-2);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ar-cub-bar .l small{font-weight:600;color:var(--text-3);}
+  .ar-cub-bar .tr{height:10px;border-radius:6px;background:#EEF1F8;overflow:hidden;}
+  .ar-cub-bar .tr i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#7F96E0,#4C67C9);}
+  .ar-cub-bar .v{text-align:right;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
   .ar-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;min-width:0;margin-bottom:16px;}
   .ar-row .ar-card{margin-bottom:0;}
   .ar-card > h3{font-size:14px;font-weight:800;margin:0 0 14px 0;color:var(--text-1);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
@@ -3175,6 +3250,10 @@
   .arx-kv small{display:block;font-size:10.5px;color:var(--text-3);font-weight:600}
   .arx-kv b{font-variant-numeric:tabular-nums;white-space:nowrap}
   .arx-kv.tot{border-bottom:0;font-weight:700}
+  .arx-kv.sub{padding:5px 2px 5px 14px;font-size:12px;color:var(--text-2)}
+  .arx-kv.sub b{font-weight:700}
+  .arx-av.info{background:#EEF3FF;border-color:#C9D6F5;color:#2B3F7A}
+  .arx-av.info span{color:#4A5F99}
   .arx-avs{margin-top:10px;display:grid;gap:6px}
   .arx-av{font-size:12px;line-height:1.5;color:#8A4B00;background:#FFF6E6;border:1px solid #F5DDB0;border-radius:9px;padding:8px 10px}
   .arx-av span{color:#A86A1E;font-size:11px}
@@ -3208,8 +3287,6 @@
 </style>
 <style>
   /* Cuadros movibles y redimensionables (03/11/2026) */
-  .vdb-board{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start;margin-bottom:16px}
-  .vdb-item{grid-column:span var(--vdb-span,12);position:relative;min-width:0;display:flex;flex-direction:column}
   .vdb-item:has(> .hidden){display:none}
   .vdb-item > .vdb-card{margin:0 !important;max-height:calc(100vh - 140px);overflow:auto;flex:1 1 auto;min-height:0;overscroll-behavior:contain}
   .vdb-item.vdb-fixed > .vdb-card{max-height:none;height:100%}
@@ -3229,11 +3306,24 @@
     background:linear-gradient(135deg,transparent 0 55%,var(--text-3) 55% 60%,transparent 60% 70%,var(--text-3) 70% 75%,transparent 75%);opacity:.35}
   .vdb-item:hover .vdb-rs,.vdb-item.vdb-resizing .vdb-rs{opacity:.9}
   .vdb-item.vdb-resizing > .vdb-card{box-shadow:0 0 0 2px var(--sky,#5977D2)}
-  .vdb-item.vdb-dragging{opacity:.45}
-  .vdb-item.vdb-before > .vdb-card{box-shadow:-4px 0 0 var(--sky,#5977D2)}
-  .vdb-item.vdb-after > .vdb-card{box-shadow:4px 0 0 var(--sky,#5977D2)}
   body.vdb-noselect{user-select:none}
-  @media (max-width:900px){ .vdb-item{grid-column:span 12} .vdb-rs{display:none} }
+  /* tablero libre con alineación automática (10/11/2026) */
+  .vdb-bar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:0 0 8px;font-size:11.5px;color:var(--text-3);font-weight:600;}
+  .vdb-auto{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 11px;font:inherit;font-size:11.5px;font-weight:700;color:var(--navy);cursor:pointer;}
+  .vdb-auto:hover{background:#F4F6FB;}
+  .vdb-board.vdb-free{position:relative;display:block;margin-bottom:16px;min-height:40px;}
+  .vdb-free .vdb-item{position:absolute;left:0;top:0;min-width:0;display:flex;flex-direction:column;transition:left .18s ease,top .18s ease;}
+  .vdb-free .vdb-item.vdb-moving,.vdb-free .vdb-item.vdb-resizing{transition:none;z-index:30;}
+  .vdb-free .vdb-item.vdb-moving > .vdb-card{box-shadow:0 22px 44px -18px rgba(15,27,77,.38);}
+  .vdb-free .vdb-item.vdb-moving .vdb-grip{cursor:grabbing;}
+  .vdb-item.vdb-off{display:none;}
+  .vdb-guides{position:absolute;inset:0;pointer-events:none;z-index:40;}
+  .vdb-g{position:absolute;display:block;}
+  .vdb-g.v{top:-8px;bottom:-8px;width:0;border-left:1.5px dashed var(--sky,#5977D2);}
+  .vdb-g.h{left:-8px;right:-8px;height:0;border-top:1.5px dashed var(--sky,#5977D2);}
+  .vdb-board.vdb-stack{height:auto !important;}
+  .vdb-board.vdb-stack .vdb-item{position:relative;width:auto !important;left:auto !important;top:auto !important;margin-bottom:16px;}
+  @media (max-width:900px){ .vdb-rs,.vdb-grip,.vdb-bar{display:none !important} }
 </style>
 <style>
   /* Sueldos: bonificación y adicionales adheridos (04/11/2026) */
@@ -3724,11 +3814,13 @@
                 <div id="arBody" class="hidden">
                   <div class="ar-kpis" id="arKpis"></div>
                   <div class="ar-row" id="arRow1">
-                    <div class="ar-card" id="arCard_er"><h3>Estado de resultados <span class="sub">% sobre ventas totales</span></h3><div id="arER"></div></div>
-                    <div class="ar-card" id="arCard_comp"><h3>Composición de ventas <span class="sub">Venta A vs B y ocupación de canchas</span></h3><div id="arComp"></div></div>
+                    <div class="ar-card" id="arCard_er"><h3>Estado de resultados <span class="sub">devengado · lo vendido en el período</span></h3><div id="arER"></div></div>
+                    <div class="ar-card" id="arCard_comp"><h3>Composición de ventas <span class="sub">Venta A vs B (lo cobrado) y ocupación de canchas</span></h3><div id="arComp"></div></div>
                   </div>
+                  <div class="ar-card" id="arCard_ff"><h3>Flujo de fondos <span class="sub">lo que entró y salió de cada cuenta</span></h3><div id="arFF"></div></div>
                   <div class="ar-card" id="arCard_evo"><h3>Evolución de rendimientos <span class="sub">ventas, gastos y utilidad</span></h3><div id="arEvo"></div></div>
                   <div class="ar-card" id="arCard_div"><h3>Dividendos entre socios <span class="sub">distribución de la utilidad del período</span></h3><div id="arDiv"></div></div>
+                  <div class="ar-card" id="arCard_prod"><h3>Productos vendidos y cubiertos <span class="sub">cubiertos · Cafetería y bebidas · Servicio de cocina</span></h3><div id="arProd"></div></div>
                   <div class="ar-none hidden" id="arNoneMsg">Elegí al menos un reporte en “Mostrar”.</div>
                 </div>
               </div>
@@ -10614,16 +10706,41 @@ async function arVentasProviderLF(force){
   const cH = caja.header;
   const cConcepto = vFindColIndex(cH, ["Concepto"]), cFecha = vFindColIndex(cH, ["Fecha de movimiento"]), cHora = vFindColIndex(cH, ["Hora de movimiento"]);
   const cMetodo = vFindColIndex(cH, ["Método de pago","Metodo de pago"]), cIng = vFindColIndex(cH, ["Ingresos"]), cEgr = vFindColIndex(cH, ["Egresos"]);
+  const cUsu = vFindColIndex(cH, ["Usuario"]), cNotas = vFindColIndex(cH, ["Notas"]), cJug = vFindColIndex(cH, ["Jugador"]);
   if([cConcepto,cFecha,cHora,cMetodo,cIng,cEgr].includes(-1)) throw new Error("Movimientos de caja no tiene las columnas esperadas");
+  const txt = (r,i)=> i===-1 ? "" : ((r[i]==null||r[i]==="-") ? "" : String(r[i]).trim());
   caja.rows.forEach(r=>{
     const f = vJornadaFecha(r[cFecha], r[cHora]); if(!f) return;
-    const D = dia(vToISODate(f)); D.activo = true;
-    const info = idxCtx.map.get((r[cConcepto]||"").toString().trim());
+    const iso = vToISODate(f), D = dia(iso); D.activo = true;
+    const concepto = (r[cConcepto]||"").toString().trim();
+    const info = idxCtx.map.get(concepto);
     if(info && info.cat1==="Caja" && info.cat2==="Reguladora de caja") return;
     const ing = (r[cIng]==="-"||r[cIng]==null) ? 0 : Number(r[cIng]);
     const egr = (r[cEgr]==="-"||r[cEgr]==null) ? 0 : Number(r[cEgr]);
     const neto = ing + egr, metodo = (r[cMetodo]||"Sin especificar").toString().trim();
     D.caja += neto; D.metodos[metodo] = (D.metodos[metodo]||0) + neto;
+    // Flujo de fondos (10/11/2026): cada movimiento a su cuenta (método de pago), separando
+    // cobros de ventas, regularizadores y otros movimientos de caja que no son ventas (Ingreso, Retiro, retiros de dinero).
+    if(!neto) return;
+    const F = D.ff || (D.ff = {}), Fm = F[metodo] || (F[metodo] = { cobros:0, otros:0, regE:0, regS:0 });
+    const mov = { iso, fm:vToISODate(vParseFlexDate(r[cFecha])||f), h:txt(r,cHora).slice(0,5), u:txt(r,cUsu), m:metodo, v:neto, c:concepto, n:txt(r,cNotas), j:txt(r,cJug) };
+    (D.movs || (D.movs = [])).push(mov);
+    if(concepto==="Regularizador de mov. por error"){ if(neto>0) Fm.regE += neto; else Fm.regS += neto; (D.regs || (D.regs = [])).push(mov); }
+    else if((info && info.cat1==="Caja") || (!info && neto<0 && /^retiro/i.test(concepto))){ Fm.otros += neto; (D.otros || (D.otros = [])).push(mov); }
+    else Fm.cobros += neto;
+  });
+  // contrapartida de cada regularizador: otro movimiento del mismo día por el mismo importe y signo contrario
+  // (primero otro regularizador en otra cuenta = cruce entre cuentas; si no, cualquier concepto)
+  dias.forEach(D=>{
+    if(D.regs && D.regs.length){
+      const usados = new Set(D.regs.filter(x=>x.par).map(x=>x.par));
+      D.regs.forEach(R=>{ if(R.par) return;
+        const cand = D.movs.filter(x=>x!==R && !usados.has(x) && Math.abs(x.v + R.v) < 0.5);
+        const p = cand.find(x=>x.c===R.c && x.m!==R.m) || cand.find(x=>x.c!==R.c) || cand.find(x=>x.c===R.c);
+        if(p){ R.par = p; usados.add(p); usados.add(R); if(p.c===R.c){ p.par = R; } }
+      });
+    }
+    delete D.movs;
   });
   // Compras-Ventas → apertura por Cat. 1 / Cat. 2 del índice
   const vH = cv.header;
@@ -10632,6 +10749,13 @@ async function arVentasProviderLF(force){
   const vCant = vFindColIndex(vH, ["Cantidad"]), vCompras = vFindColIndex(vH, ["Compras"]);
   if([vConcepto,vFecha,vHora,vVentas,vPer].includes(-1)) throw new Error("Compras-Ventas no tiene las columnas esperadas");
   cv.rows.forEach(r=>{
+    // Cubiertos (10/11/2026): ítem "Cubierto" a $0 que se carga por cada persona que consume en el bar.
+    // No tiene importe (Ventas "-"), así que se cuenta aparte, por la cantidad (neta de reversiones).
+    if(vCant!==-1 && /^cubiertos?$/i.test((r[vConcepto]||"").toString().trim())){
+      const qc = Number(r[vCant]), fC = vJornadaFecha(r[vFecha], r[vHora]);
+      if(fC && qc && isFinite(qc)){ const DC = dia(vToISODate(fC)); DC.cub = (DC.cub||0) + qc; }
+      return;
+    }
     // Unidades vendidas por día y concepto (03/11/2026, costo de mercadería): sólo ventas (columna Ventas) y sus
     // reversiones (cantidad negativa con Compras negativa). Las filas sin importe son ajustes de stock de ATC.
     if(vCant!==-1){
@@ -10694,9 +10818,11 @@ const AR_COLORS = { ventas:"#5977D2", gastos:"#D9822B", util:"#2E9E7E" }; // val
 const AR_MARK = { ventas:"circle", gastos:"square", util:"diamond" };
 const AR_REPORTES = [
   { id:"er",   lbl:"Estado de resultados" },
+  { id:"ff",   lbl:"Flujo de fondos" },
   { id:"comp", lbl:"Composición de ventas" },
   { id:"evo",  lbl:"Evolución de rendimientos" },
-  { id:"div",  lbl:"Dividendos entre socios" }
+  { id:"div",  lbl:"Dividendos entre socios" },
+  { id:"prod", lbl:"Productos vendidos y cubiertos" }
 ];
 const AR_PRESETS = [
   { id:"semana",  lbl:"Última semana" },
@@ -10709,10 +10835,11 @@ const AR_PRESETS = [
 const AR_MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const AR_MESES_L = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 const AR_DIV_PISO = 1000000;
+const AR_HIST_DESDE = "2026-07-01"; // primer mes con datos de ventas y gastos (pedido de Pancho, 10/11/2026)
 
 const arState = {
   preset:"mesAnt", desde:null, hasta:null,
-  show:{ er:true, comp:true, evo:true, div:true },
+  show:{ er:true, ff:true, comp:true, evo:true, div:true, prod:true },
   open:new Set(), loaded:false, loading:null,
   ordenes:[], provTipo:new Map(), mesesLiq:null, socios:[], ventas:null, ventasErr:null, gastosErr:null,
   reservas:null, cancelaciones:null, ocupErr:null,
@@ -10778,7 +10905,7 @@ async function arLoadAll(force){
     arState.gastosErr = null; arState.ventasErr = null;
     const puedeGastos = AR_SITE.tieneSeccion("pagos") || AR_SITE.tieneSeccion("costeo");
     const tareas = [
-      puedeGastos ? arSelectAll(P+"_ordenes", "id,proveedor,concepto,rubro,monto,monto_factura,estado,fecha_comprobante,periodo_desde,liq_mes", q=>q.neq("estado","Anulado")) : Promise.resolve(null),
+      puedeGastos ? arSelectAll(P+"_ordenes", "id,proveedor,concepto,rubro,monto,monto_factura,estado,fecha_comprobante,periodo_desde,liq_mes,fecha_orden,fecha_pago,metodo,comprobante,comprobante_tipo", q=>q.neq("estado","Anulado")) : Promise.resolve(null),
       puedeGastos ? arSelectAll(P+"_proveedores", "nombre,tipo_gasto,mes_imputacion") : Promise.resolve(null),
       sb.from(P+"_socios").select("id,nombre,porcentaje,orden").order("orden").order("nombre"),
       AR_SITE.ventas ? AR_SITE.ventas(force).catch(e=>{ arState.ventasErr = e.message || String(e); return null; }) : Promise.resolve(null),
@@ -10839,17 +10966,27 @@ function arGastoEnRango(o, desde, hasta){
   }
   return (f >= desde && f <= hasta) ? imp : 0;
 }
+/* 10/11/2026 (pedido de Pancho): DOS MÉTRICAS.
+   · Estado de resultados = DEVENGADO: lo vendido / prestado en el período (Compras-Ventas, corte 05:00),
+     sin "Movimientos de caja" (Ingreso, Retiro…) y sin regularizadores. total = ventas devengadas.
+   · Flujo de fondos = PERCIBIDO: lo que entró y salió de cada cuenta (Movimientos de caja + pagos de órdenes).
+   La diferencia entre ambos ya no es una línea del estado de resultados: se explica en el Flujo de fondos. */
+const AR_GRUPO_MOVCAJA = "Movimientos de caja";
 function arVentasRango(desde, hasta){
   const V = arState.ventas;
-  const r = { total:0, metodos:{}, grupos:new Map(), cv:0, dias:0 };
+  const r = { total:0, caja:0, metodos:{}, cobrosMet:{}, grupos:new Map(), cv:0, movCaja:0, dias:0, ff:{}, regs:[], otros:[] };
   if(!V) return r;
   V.dias.forEach((d, iso)=>{
     if(iso < desde || iso > hasta) return;
-    r.total += d.caja; if(d.activo) r.dias++;
+    r.caja += d.caja; if(d.activo) r.dias++;
     Object.entries(d.metodos).forEach(([m,v])=>{ r.metodos[m] = (r.metodos[m]||0)+v; });
+    if(d.ff) Object.entries(d.ff).forEach(([m,x])=>{ const F = r.ff[m] || (r.ff[m] = { cobros:0, otros:0, regE:0, regS:0 }); F.cobros += x.cobros; F.otros += x.otros; F.regE += x.regE; F.regS += x.regS; r.cobrosMet[m] = (r.cobrosMet[m]||0) + x.cobros; });
+    if(d.regs) r.regs.push(...d.regs); if(d.otros) r.otros.push(...d.otros);
     d.grupos.forEach((g, key)=>{
+      r.cv += g.total;
+      if(g.grupo===AR_GRUPO_MOVCAJA){ r.movCaja += g.total; return; }
       if(!r.grupos.has(g.grupo)) r.grupos.set(g.grupo, { name:g.grupo, total:0, subs:new Map() });
-      const G = r.grupos.get(g.grupo); G.total += g.total; r.cv += g.total;
+      const G = r.grupos.get(g.grupo); G.total += g.total; r.total += g.total;
       G.subs.set(g.sub, (G.subs.get(g.sub)||0) + g.total);
     });
   });
@@ -11007,8 +11144,8 @@ function arCalcular(desde, hasta){
   while(ini <= hasta){
     const dow = arDate(ini).getDay(), dom = arAddDays(ini, dow===0 ? 0 : 7-dow);
     const fin = dom < hasta ? dom : hasta;
-    const vR = arVentasRango(ini, fin), gR = arGastosRango(ini, fin);
-    semanas.push({ desde:ini, hasta:fin, lbl:`Sem ${semanas.length+1}`, sub:`${arDM(ini)}–${arDM(fin)}`,
+    const vR = arVentasRango(ini, fin), gR = arGastosRango(ini, fin), nd = arDays(ini, fin)+1;
+    semanas.push({ desde:ini, hasta:fin, dias:nd, lbl:`Sem ${semanas.length+1}`, sub:`${arDM(ini)}–${arDM(fin)}${nd<7?` · ${nd} día${nd===1?"":"s"}`:""}`,
       ventas:vR.total, gastos:gR.total, util:vR.total-gR.total,
       ventasDet:arDetArr(vR.grupos), gastosDet:arDetArr(gR.cats) });
     ini = arAddDays(fin, 1);
@@ -11019,6 +11156,7 @@ function arCalcular(desde, hasta){
   if(arState.ventas && arState.ventas.minISO) fechas.push(arState.ventas.minISO);
   arState.ordenes.forEach(o=>fechas.push(o.fecha_comprobante));
   let primer = fechas.length ? fechas.reduce((a,b)=>a<b?a:b) : arMonthStart(hoy);
+  if(primer < AR_HIST_DESDE) primer = AR_HIST_DESDE; // 10/11/2026: antes de julio 2026 no hay datos
   if(primer > hoy) primer = hoy;
   const meses = [];
   for(let m = arMonthStart(primer); m <= arMonthStart(hoy); m = arAddDays(arMonthEnd(m),1)){
@@ -11095,6 +11233,9 @@ async function arRefresh(force){
   arRenderComp(document.getElementById("arComp"), arState.calc);
   arRenderEvo(document.getElementById("arEvo"), arState.calc, false);
   arRenderDiv(document.getElementById("arDiv"), arState.calc);
+  if(typeof arRenderFF==="function") arRenderFF(document.getElementById("arFF"), arState.calc, false);
+  if(typeof arRenderProd==="function") arRenderProd(document.getElementById("arProd"), arState.calc, false);
+  if(typeof arGvRender==="function" && arState.gastosVista) arGvRender();
   if(body) body.classList.remove("hidden");
   arApplyVisibility();
 }
@@ -11115,7 +11256,7 @@ function arRenderKpis(){
   const c = arState.calc, el = document.getElementById("arKpis"); if(!el) return;
   const margen = c.v.total ? c.util/c.v.total : null;
   el.innerHTML = `
-    <div class="ar-kpi"><div class="lbl"><i style="background:${AR_COLORS.ventas}"></i>Ventas totales</div><div class="val">${arMoney(c.v.total)}</div><div class="note">${c.v.dias} día(s) con actividad</div></div>
+    <div class="ar-kpi"><div class="lbl"><i style="background:${AR_COLORS.ventas}"></i>Ventas totales</div><div class="val">${arMoney(c.v.total)}</div><div class="note">${c.v.dias} día(s) con actividad · devengado</div></div>
     <div class="ar-kpi"><div class="lbl"><i style="background:${AR_COLORS.gastos}"></i>Gastos totales</div><div class="val">${arMoney(c.g.total)}</div><div class="note">${arPct(c.g.total, c.v.total)} de las ventas</div></div>
     <div class="ar-kpi hero ${c.util<0?"neg":""}"><div class="lbl"><i style="background:${AR_COLORS.util}"></i>Utilidad del período</div><div class="val">${arMoney(c.util)}</div><div class="note">${margen==null?"Sin ventas en el período":"Margen "+arPct(c.util,c.v.total)}</div></div>`;
 }
@@ -11135,7 +11276,6 @@ function arRenderER(el, c, expandAll){
   const V = c.v, G = c.g, base = V.total;
   const vGrupos = arOrdenarGrupos([...V.grupos.values()]);
   const gCats = [...G.cats.values()].sort((a,b)=>b.total-a.total);
-  const dif = V.total - V.cv;
   const row = (key, name, monto, opts)=>{
     const o = opts||{}, subs = o.subs || [], open = expandAll || arState.open.has(key);
     const exp = subs.length > 0;
@@ -11148,8 +11288,7 @@ function arRenderER(el, c, expandAll){
         <span class="nm">${arEsc(name)}${o.hint?`<small>${arEsc(o.hint)}</small>`:""}</span><span class="pc">${arPct(monto, base)}</span><span class="mt">${val}</span>
       </div>${subHtml}</div>`;
   };
-  const ventasRows = vGrupos.map(g=>row("v:"+g.name, g.name, g.total, { subs:[...g.subs.entries()].sort((a,b)=>b[1]-a[1]) })).join("")
-    + (AR_SITE.ventas ? row("v:__dif", "Diferencia de conciliación", dif, { hint:"Mismo ingreso, visto con dos recortes de fecha distintos (se empareja solo)" }) : "");
+  const ventasRows = vGrupos.map(g=>row("v:"+g.name, g.name, g.total, { subs:[...g.subs.entries()].sort((a,b)=>b[1]-a[1]) })).join("");
   const gastosRows = gCats.map(g=>row("g:"+g.name, g.name, g.total, { gasto:true, hint:(typeof arHintGasto==="function"?arHintGasto(g):""), subs:[...g.subs.entries()].sort((a,b)=>b[1]-a[1]) })).join("")
     || `<div class="ar-er-empty">${arState.gastosErr ? arEsc(arState.gastosErr) : "Sin órdenes de pago imputadas al período."}</div>`;
   const sinLiq = arMesesSinLiquidar(c.desde, c.hasta);
@@ -11157,7 +11296,7 @@ function arRenderER(el, c, expandAll){
   el.innerHTML = avisoLiq + `
     <div class="ar-er-head"><span></span><span>Concepto</span><span class="pc">% s/ ventas</span><span class="mt">Importe</span></div>
     <div class="ar-er-sec ventas">
-      <div class="ar-er-total"><span class="bar" style="background:${AR_COLORS.ventas}"></span><span class="nm">Ventas totales</span><span class="pc">${base?"100,0%":"—"}</span><span class="mt">${arMoney(V.total)}</span></div>
+      <div class="ar-er-total"><span class="bar" style="background:${AR_COLORS.ventas}"></span><span class="nm">Ventas totales${AR_SITE.ventas?`<small>lo vendido en el período (devengado)</small>`:""}</span><span class="pc">${base?"100,0%":"—"}</span><span class="mt">${arMoney(V.total)}</span></div>
       ${vGrupos.length || AR_SITE.ventas ? ventasRows : `<div class="ar-er-empty">${arEsc(AR_SITE.ventasPendienteTxt || "Sin ventas en el período.")}</div>`}
     </div>
     <div class="ar-er-sec gastos">
@@ -11166,7 +11305,7 @@ function arRenderER(el, c, expandAll){
     </div>
     <div class="ar-er-util ${c.util<0?"neg":""}"><span class="bar" style="background:${AR_COLORS.util}"></span><span class="nm">Utilidad del período</span><span class="pc">${base?arPct(c.util, base):"—"}</span><span class="mt">${arMoney(c.util)}</span></div>
     ${typeof arBloquesER==="function"?arBloquesER(c, expandAll):""}
-    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros (el % de cada sub-rubro es sobre el total de su categoría, no sobre el total general). Las ventas se miran por dos caminos que casi siempre coinciden: lo que entró a la caja, y el detalle de qué se vendió. Cuando no coinciden exactamente el mismo día (por ejemplo, alguien seña hoy una cancha que va a usar en otra fecha, o un cobro se carga como un solo movimiento de caja mientras el detalle de ventas lo abre en varios ítems), esa pequeña distancia en el tiempo aparece como “Diferencia de conciliación”: no es plata que falta ni un error, se empareja sola. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes del servicio (el de la factura, o el anterior si son a mes vencido, como ocurre con Sueldos) y los semestrales / anuales, por día en el período de cada orden — por eso una semana corta de fin de mes puede concentrar parte de un gasto mensual y verse más alta que las demás, sin que sea un error.</div>`}`;
+    ${expandAll?"":`<div class="ar-note">Tocá una línea para ver sus sub-rubros (el % de cada sub-rubro es sobre el total de su categoría, no sobre el total general). Estado de resultados <b>devengado</b>: las ventas son lo que se vendió o prestó en el período (Compras-Ventas de ATC, corte de jornada 05:00), se haya cobrado o no; no incluye movimientos de caja que no son ventas (Ingreso, Retiro, Regularizador de mov. por error). Lo que efectivamente entró y salió de cada cuenta, y su diferencia con este estado, está en <b>Flujo de fondos</b>. Gastos: órdenes de pago no anuladas, por monto a pagar y fecha de la factura; los proveedores “mensuales” se reparten en el mes del servicio (el de la factura, o el anterior si son a mes vencido, como ocurre con Sueldos) y los semestrales / anuales, por día en el período de cada orden — por eso una semana corta de fin de mes puede concentrar parte de un gasto mensual y verse más alta que las demás, sin que sea un error.</div>`}`;
 }
 function arToggleER(row){
   const it = row.parentElement, k = it.dataset.key;
@@ -11176,7 +11315,7 @@ function arToggleER(row){
 function arRenderComp(el, c){
   if(!el) return;
   if(!AR_SITE.renderAB){ el.innerHTML = `<div class="ar-empty">${arEsc(AR_SITE.ventasPendienteTxt || "Sin ventas integradas para este club.")}</div>`; return; }
-  const m = c.v.metodos; let efectivo = 0, facturado = 0;
+  const m = c.v.cobrosMet && Object.keys(c.v.cobrosMet).length ? c.v.cobrosMet : c.v.metodos; let efectivo = 0, facturado = 0; // 10/11/2026: sólo cobros de ventas (sin regularizadores ni otros movimientos de caja)
   Object.entries(m).forEach(([k,v])=>{ if(AR_SITE.esVentaB ? AR_SITE.esVentaB(k) : k==="Efectivo") efectivo += v; else facturado += v; });
   // Ocupación de canchas debajo de Venta A vs B (pedido de Pancho, 19/10/2026): mismo espacio de la
   // tarjeta, usado de forma proporcional — no agrega una tarjeta nueva, sigue a continuación.
@@ -11383,7 +11522,8 @@ function arLegend(){
   return `<div class="ar-legend">${["ventas","gastos","util"].map(k=>`<span><i class="m-${AR_MARK[k]}" style="background:${AR_COLORS[k]}"></i>${{ventas:"Ventas",gastos:"Gastos",util:"Utilidad"}[k]}</span>`).join("")}</div>`;
 }
 function arEvoTable(points){
-  return `<table class="ar-tbl"><thead><tr><th class="l">Período</th><th>Ventas</th><th>Gastos</th><th>Utilidad</th><th>Margen</th></tr></thead><tbody>${points.map(p=>`<tr><td class="l"><b>${arEsc(p.lbl)}</b>${p.sub?` <span class="mut">${arEsc(p.sub)}</span>`:""}</td><td>${arMoney(p.ventas)}</td><td>${arMoney(p.gastos)}</td><td class="${p.util<0?"neg":""}"><b>${arMoney(p.util)}</b></td><td class="mut">${arPct(p.util,p.ventas)}</td></tr>`).join("")}</tbody></table>`;
+  const conDias = points.some(p=>p.dias);
+  return `<table class="ar-tbl"><thead><tr><th class="l">Período</th>${conDias?"<th>Días</th>":""}<th>Ventas</th>${conDias?"<th>Ventas / día</th>":""}<th>Gastos</th><th>Utilidad</th><th>Margen</th></tr></thead><tbody>${points.map(p=>`<tr><td class="l"><b>${arEsc(p.lbl)}</b>${p.sub?` <span class="mut">${arEsc(p.sub)}</span>`:""}</td>${conDias?`<td class="${p.dias<7?"ar-dias-corta":""}">${p.dias}</td>`:""}<td>${arMoney(p.ventas)}</td>${conDias?`<td class="mut">${arMoney(p.dias?p.ventas/p.dias:0)}</td>`:""}<td>${arMoney(p.gastos)}</td><td class="${p.util<0?"neg":""}"><b>${arMoney(p.util)}</b></td><td class="mut">${arPct(p.util,p.ventas)}</td></tr>`).join("")}</tbody></table>`;
 }
 function arMesPills(meses){
   // Pastillas para elegir qué meses mostrar en "Mes a mes" — pedido de Pancho (16/10/2026).
@@ -11412,6 +11552,7 @@ function arRenderEvo(el, c, print){
       <div class="ar-evo">
         <div class="ar-evo-h"><div><h4>Semana a semana</h4><div class="sub">Semanas calendario (lunes a domingo) del período · total de cada semana</div></div></div>
         ${arBarChart(c.semanas, { w, h, interactive:!print, aria:"Ventas, gastos y utilidad por semana" })}
+        ${(()=>{ const cortas = c.semanas.filter(p=>p.dias<7); return cortas.length ? `<div class="ar-semcorta"><b>Semana${cortas.length>1?"s":""} incompleta${cortas.length>1?"s":""}:</b> ${cortas.map(p=>`${arEsc(p.lbl)} tiene ${p.dias} día${p.dias===1?"":"s"} (${arDM(p.desde)}–${arDM(p.hasta)})`).join(" · ")}. El período elegido corta la semana: su total no es comparable con una semana de 7 días (en “Ver valores” está la venta promedio por día).</div>` : ""; })()}
         ${print ? arEvoTable(c.semanas) : `<details class="ar-vals"><summary>Ver valores</summary>${arEvoTable(c.semanas)}</details>`}
       </div>
       <div class="ar-evo">
@@ -11501,6 +11642,8 @@ function arGenerarPdf(){
   const compHtml = render(d=>{ d.id = "arpComp"; arRenderComp(d, c); });
   const evoHtml = render(d=>arRenderEvo(d, c, true));
   const divHtml = render(d=>arRenderDiv(d, c));
+  const ffHtml = sel.show.ff && typeof arRenderFF==="function" ? render(d=>arRenderFF(d, c, true)) : "";
+  const prodHtml = sel.show.prod && typeof arRenderProd==="function" ? render(d=>arRenderProd(d, c, true)) : "";
   let pr = document.getElementById("arPrint");
   if(!pr){ pr = document.createElement("div"); pr.id = "arPrint"; document.body.appendChild(pr); }
   pr.innerHTML = `
@@ -11514,10 +11657,12 @@ function arGenerarPdf(){
       <div><div class="lbl">Gastos totales</div><div class="val">${arMoney(c.g.total)}</div></div>
       <div class="hero ${c.util<0?"neg":""}"><div class="lbl">Utilidad del período</div><div class="val">${arMoney(c.util)}</div><div class="note">Margen ${margen}</div></div>
     </div>
-    ${sec("er","Estado de resultados","Importes en pesos · % sobre ventas totales", erHtml)}
+    ${sec("er","Estado de resultados","Devengado · importes en pesos · % sobre ventas totales", erHtml)}
+    ${sec("ff","Flujo de fondos","Percibido · lo que entró y salió de cada cuenta", ffHtml)}
     ${sec("comp","Composición de ventas","Venta A (facturado) vs. Venta B (efectivo y posnet)", compHtml)}
     ${sec("evo","Evolución de rendimientos","", evoHtml)}
     ${sec("div","Dividendos entre socios","", divHtml)}
+    ${sec("prod","Productos vendidos y cubiertos","Cubiertos · Cafetería y bebidas · Servicio de cocina", prodHtml)}
     <footer class="arp-foot">Ventas: Movimientos de caja y Compras-Ventas de ATC (corte de jornada 05:00). Gastos: órdenes de pago no anuladas, por monto a pagar, imputadas por fecha de factura; proveedores mensuales repartidos en el mes del servicio (el de la factura o, a mes vencido, el anterior); semestrales y anuales, por día en el período de cada orden. Documento generado desde el panel de administración de ${arEsc(AR_SITE.club)}.</footer>`;
   const prevTitle = document.title;
   document.title = `Analisis de resultados - ${AR_SITE.club} - ${per}`;
@@ -25308,6 +25453,8 @@ async function lfQuitarProveedorIns(id){
 (function(){
   if(typeof arGastosRango!=="function" || typeof arState==="undefined") return;
   const AR_CMV_CAT = "Costo de mercadería vendida (CMV)";
+  // categorías cuyos proveedores venden mercadería, mientras no esté marcado en el proveedor (10/11/2026)
+  window.AR_MERC_CONCEPTOS = ["Cafeteria y Bebidas","Servicio de cocina"];
   arState.cmvOn = true;
 
   /* ---------- datos de stock: % mercadería de cada factura y CMV por día ---------- */
@@ -25376,8 +25523,32 @@ async function lfQuitarProveedorIns(id){
           dias.set(iso, R);
         });
         // facturas de mercadería sin ítems cargados: no se puede separar la mercadería → siguen enteras como gasto
+        // (salvo que el proveedor venda mercadería: entonces la factura entera va a stock — 10/11/2026)
         const conceptosMerc = new Set(); (S.base.compras||[]).forEach(c=>{ if(merc.has(c.insumo_id)){ const it = itemDe(c.insumo_id); if(it) conceptosMerc.add(it.cN); } });
-        return { ordMerc, dias, conceptosMerc, conItems:new Set(porOrden.keys()) };
+        // Proveedores que venden mercadería (10/11/2026, pedido de Pancho): todo lo que venden es mercadería
+        // (ej. Quilmes, Segafredo, verdulería). Columna {pre}_proveedores.vende_mercaderia; si todavía no
+        // está cargada, se toma por la categoría del proveedor (Cafetería y bebidas / Servicio de cocina).
+        const provVende = new Set();
+        try{
+          const [rp, rc] = await Promise.all([ sb.from(P+"_proveedores").select("*"), sb.from(P+"_conceptos").select("id,nombre") ]);
+          const conN = {}; (rc.data||[]).forEach(c=>conN[c.id] = c.nombre);
+          (rp.data||[]).forEach(pv=>{ const v = pv.vende_mercaderia; const porCat = AR_MERC_CONCEPTOS.includes(String(conN[pv.concepto_id]||"").trim());
+            if(v===true || (v==null && porCat)) provVende.add(arNorm(pv.nombre)); });
+        }catch(e){}
+        // Cómputos de stock (conteo inicial → conteo final, período [desde, hasta)): en esos días el CMV es el
+        // del cómputo (real en los ítems contados, teórico en el resto), repartido por día; fuera de ellos, teórico.
+        const comps = [];
+        try{
+          const rk = await sb.from(P+"_stock_computos").select("id,desde,hasta,totales,resultado").order("desde");
+          (rk.data||[]).forEach(k=>{ if(!k.desde || !k.hasta || !(k.hasta > k.desde)) return;
+            const its = (k.resultado && k.resultado.items) || []; let real = 0, teo = 0; const rubros = new Map();
+            its.forEach(r=>{ const v = Number(r.cmv); if(!isFinite(v) || !v) return;
+              if(r.t==="i" && !merc.has(String(r.id))) return; // sólo mercadería (los semi-elaborados se toman como vienen)
+              if(r.m==="real") real += v; else teo += v; const g = r.g || "Sin rubro"; rubros.set(g, (rubros.get(g)||0)+v); });
+            const n = arDays(String(k.desde).slice(0,10), String(k.hasta).slice(0,10)); if(n<=0) return;
+            comps.push({ id:k.id, desde:String(k.desde).slice(0,10), hasta:String(k.hasta).slice(0,10), n, real, teo, rubros }); });
+        }catch(e){}
+        return { ordMerc, dias, conceptosMerc, conItems:new Set(porOrden.keys()), provVende, comps };
       }
     };
     const _load = arLoadAll;
@@ -25392,11 +25563,31 @@ async function lfQuitarProveedorIns(id){
       const st = document.getElementById("arStatus"); if(st && arState.cmvErr) st.innerHTML += ` · <b>Costo de mercadería:</b> ${arEsc(arState.cmvErr)} (se muestran las compras como gasto)`; };
   }
 
+  /* Parte mercadería de una orden (única regla, la usan el Estado de resultados y la vista de gastos):
+     · con ítems cargados → % del costo de sus ítems marcados como mercadería (el resto, a su categoría);
+     · sin ítems y el proveedor vende mercadería → la factura entera es mercadería (va a stock). */
+  window.arMercOrden = function(o, CM){
+    if(!CM) return null;
+    const om = CM.ordMerc && CM.ordMerc.get(o.id); if(om) return { fm:om.fm, partes:om.partes, sinItems:false };
+    if(CM.provVende && !(CM.conItems && CM.conItems.has(o.id)) && CM.provVende.has(arNorm(o.proveedor))) return { fm:1, partes:[], sinItems:true };
+    return null;
+  };
+  // día cubierto por un cómputo de stock: [desde, hasta)
+  function compDe(D, iso){ return (D.comps||[]).slice().reverse().find(k=>iso>=k.desde && iso<k.hasta) || null; }
   function arCmvRango(desde, hasta){
-    const D = arState.cmvData, out = { total:0, rubros:new Map(), sinCosto:new Map(), sinPrecio:new Map() };
+    const D = arState.cmvData, out = { total:0, real:0, teo:0, diasReal:0, comps:new Set(), rubros:new Map(), sinCosto:new Map(), sinPrecio:new Map() };
     if(!D) return out;
+    // días con cómputo: su CMV repartido por día
+    if(D.comps && D.comps.length){
+      for(let iso = desde; iso <= hasta; iso = arAddDays(iso, 1)){
+        const k = compDe(D, iso); if(!k) continue;
+        out.real += k.real/k.n; out.teo += k.teo/k.n; out.total += (k.real+k.teo)/k.n; out.diasReal++; out.comps.add(k.id);
+        k.rubros.forEach((v,g)=>out.rubros.set(g,(out.rubros.get(g)||0)+v/k.n));
+      }
+    }
     D.dias.forEach((R, iso)=>{ if(iso<desde || iso>hasta) return;
-      out.total += R.total;
+      if(D.comps && D.comps.length && compDe(D, iso)) return; // ese día ya lo cubre el cómputo
+      out.total += R.total; out.teo += R.total;
       R.rubros.forEach((v,k)=>out.rubros.set(k,(out.rubros.get(k)||0)+v));
       R.sinCosto.forEach((g,k)=>{ const x = out.sinCosto.get(k) || { u:0, imp:0, st:g.st }; x.u += g.u; x.imp += g.imp; out.sinCosto.set(k, x); });
       R.sinPrecio.forEach((q,k)=>out.sinPrecio.set(k,(out.sinPrecio.get(k)||0)+q)); });
@@ -25417,7 +25608,7 @@ async function lfQuitarProveedorIns(id){
 
   /* ---------- gastos del rango: imputado, facturado, mercadería y CMV ---------- */
   window.arGastosRango = function(desde, hasta){
-    const cats = new Map(); let total = 0, fact = 0, mercCompras = 0, mercSinItems = [];
+    const cats = new Map(); let total = 0, fact = 0, mercCompras = 0, mercSinItems = [], mercEnteras = [];
     const CM = arState.cmvOn!==false ? arState.cmvData : null;
     const prorr = [];
     const cat = c=>{ if(!cats.has(c)) cats.set(c, { name:c, total:0, fact:0, subs:new Map(), subsFact:new Map(), n:0 }); return cats.get(c); };
@@ -25426,8 +25617,8 @@ async function lfQuitarProveedorIns(id){
       const fa = (f>=desde && f<=hasta) ? arImporteOrden(o) : 0;
       if(!v && !fa) return;
       let partes = arPartesOrden(o), fm = 0;
-      const om = CM && CM.ordMerc.get(o.id);
-      if(om){ fm = om.fm; partes = om.partes; }
+      const om = arMercOrden(o, CM);
+      if(om){ fm = om.fm; partes = om.partes; if(om.sinItems && fa) mercEnteras.push(o); }
       else if(CM && fa && !CM.conItems.has(o.id) && CM.conceptosMerc.has((o.concepto||"").trim())) mercSinItems.push(o);
       mercCompras += v*fm;
       const vistas = new Set();
@@ -25446,8 +25637,8 @@ async function lfQuitarProveedorIns(id){
     let cmv = null;
     if(CM){
       cmv = arCmvRango(desde, hasta);
-      if(cmv.total){ const C = cat(AR_CMV_CAT); C.cmv = true; C.total += cmv.total; C.fact += cmv.total; cmv.rubros.forEach((v,k)=>{ C.subs.set(k,v); C.subsFact.set(k,v); }); total += cmv.total; fact += cmv.total; }
-      cmv.mercCompras = mercCompras; cmv.mercSinItems = mercSinItems;
+      if(cmv.total){ const C = cat(AR_CMV_CAT); C.cmv = true; C.cmvReal = cmv.real; C.cmvTeo = cmv.teo; C.total += cmv.total; C.fact += cmv.total; cmv.rubros.forEach((v,k)=>{ C.subs.set(k,v); C.subsFact.set(k,v); }); total += cmv.total; fact += cmv.total; }
+      cmv.mercCompras = mercCompras; cmv.mercSinItems = mercSinItems; cmv.mercEnteras = mercEnteras;
     }
     [...cats.keys()].forEach(k=>{ const C = cats.get(k); if(Math.abs(C.total)<0.005 && !C.cmv) cats.delete(k); });
     return { total, cats, fact, prorr, cmv, cmvActivo:!!CM, cmvDisponible:!!arState.cmvData };
@@ -25455,7 +25646,7 @@ async function lfQuitarProveedorIns(id){
 
   /* ---------- Estado de resultados: textos y bloques nuevos ---------- */
   window.arHintGasto = function(g){
-    if(g.cmv) return "Ventas × receta × costo de compra (stock teórico)";
+    if(g.cmv) return (g.cmvReal>0.5 ? `Real ${arMoney(g.cmvReal)} (conteos de stock) · teórico ${arMoney(g.cmvTeo||0)}` : "Teórico: ventas × receta × costo de la última compra");
     const d = g.total - (g.fact||0);
     if(Math.abs(d) < 1) return "";
     return `Facturado ${arMoney(g.fact||0)} · ${d>0?"+":"−"}${arMoney(Math.abs(d)).replace(/^−/,"")} por prorrateo`;
@@ -25477,20 +25668,23 @@ async function lfQuitarProveedorIns(id){
         const M = G.cmv, dif = M.mercCompras - M.total;
         const sinC = [...M.sinCosto.entries()].filter(([,x])=>x.imp>0).sort((a,b)=>b[1].imp-a[1].imp);
         const sinP = [...M.sinPrecio.entries()].sort((a,b)=>b[1]-a[1]);
-        const sinI = M.mercSinItems || [];
+        const sinI = M.mercSinItems || [], ent = M.mercEnteras || [];
         const avisos = [];
         if(sinC.length) avisos.push(`<div class="arx-av"><b>${sinC.length} artículo${sinC.length===1?"":"s"} vendido${sinC.length===1?"":"s"} sin costo</b> (${arMoney(sinC.reduce((a,[,x])=>a+x.imp,0))} de ventas): ${sinC.slice(0,8).map(([n,x])=>`${arEsc(n)} <span>${x.st==="sin_vincular"?"no está en Recetas":"sin receta"} · ${arMoney(x.imp)}</span>`).join(" · ")}${sinC.length>8?" · …":""}</div>`);
         if(sinP.length) avisos.push(`<div class="arx-av"><b>${sinP.length} insumo${sinP.length===1?"":"s"} sin precio de compra</b> (su consumo no se valoriza): ${sinP.slice(0,8).map(([n])=>arEsc(n)).join(" · ")}${sinP.length>8?" · …":""}</div>`);
-        if(sinI.length) avisos.push(`<div class="arx-av"><b>${sinI.length} factura${sinI.length===1?"":"s"} de mercadería sin ítems cargados</b> (siguen enteras como gasto): ${sinI.slice(0,6).map(o=>`${arEsc(o.proveedor)} ${arDMY(o.fecha_comprobante)} <span>${arMoney(arImporteOrden(o))}</span>`).join(" · ")}${sinI.length>6?" · …":""}</div>`);
+        if(sinI.length) avisos.push(`<div class="arx-av"><b>${sinI.length} factura${sinI.length===1?"":"s"} con mercadería sin ítems cargados</b> (el proveedor no está marcado como vendedor de mercadería: siguen enteras como gasto): ${sinI.slice(0,6).map(o=>`${arEsc(o.proveedor)} ${arDMY(o.fecha_comprobante)} <span>${arMoney(arImporteOrden(o))}</span>`).join(" · ")}${sinI.length>6?" · …":""}</div>`);
+        if(ent.length) avisos.push(`<div class="arx-av info"><b>${ent.length} factura${ent.length===1?"":"s"} de proveedores de mercadería sin ítems cargados</b> (van enteras a stock; cargar sus ítems mejora el costo por insumo): ${ent.slice(0,6).map(o=>`${arEsc(o.proveedor)} ${arDMY(o.fecha_comprobante)} <span>${arMoney(arImporteOrden(o))}</span>`).join(" · ")}${ent.length>6?" · …":""}</div>`);
         html += `<div class="arx-box${expandAll?" open":""}">
           <div class="arx-h" onclick="arToggleBox(this)"><span class="chev">${chev}</span><span class="nm">Mercadería: compras vs. consumo</span>
             <span class="arx-sw" onclick="event.stopPropagation()"><button class="on" type="button">Por consumo (CMV)</button><button type="button" onclick="arCmvSwitch(false)">Como antes (compras)</button></span></div>
           <div class="arx-b">
             <div class="arx-kv"><span>Compras de mercadería del período <small>parte mercadería de las facturas, sale de gastos</small></span><b>${arMoney(M.mercCompras)}</b></div>
-            <div class="arx-kv"><span>Costo de mercadería vendida (CMV) <small>entra a gastos</small></span><b>${arMoney(M.total)}</b></div>
+            <div class="arx-kv"><span>Costo de mercadería vendida (CMV) <small>única línea de mercadería en gastos</small></span><b>${arMoney(M.total)}</b></div>
+            <div class="arx-kv sub"><span>· Teórico <small>unidades vendidas × receta × costo de la última compra${M.diasReal?" (días sin cómputo y ítems no contados)":""}</small></span><b>${arMoney(M.teo||0)}</b></div>
+            <div class="arx-kv sub"><span>· Real <small>${M.diasReal ? `movimiento de stock medido en ${M.comps.size} cómputo${M.comps.size===1?"":"s"} (${M.diasReal} día${M.diasReal===1?"":"s"} del período)` : "todavía no hay cómputos de stock (conteo inicial → conteo final) en este período"}</small></span><b>${arMoney(M.real||0)}</b></div>
             <div class="arx-kv tot"><span>${dif>=0?"Queda en stock":"Sale del stock"} <small>${dif>=0?"se compró más de lo que se vendió":"se vendió más de lo que se compró en el período"}</small></span><b>${arMoney(Math.abs(dif))}</b></div>
             ${avisos.length?`<div class="arx-avs">${avisos.join("")}</div>`:`<div class="arx-ok">Todo lo vendido tiene receta y precio de compra.</div>`}
-            <div class="arx-nota">CMV teórico: unidades vendidas (Compras-Ventas de ATC, netas de reversiones) × receta × costo de la última compra de cada insumo a ese día. Cuando haya conteos de stock, el consumo real reemplaza al teórico en los insumos contados. Sólo cuentan los insumos marcados como mercadería.</div>
+            <div class="arx-nota">El CMV es la única línea de gastos por mercadería: las facturas de mercadería no van a su categoría, van a stock, y entran a gastos a medida que se vende. Teórico: unidades vendidas (Compras-Ventas de ATC, netas de reversiones) × receta × costo de la última compra de cada insumo a ese día. Real: en los días cubiertos por un cómputo de Stock (entre dos conteos), el consumo medido (stock inicial + compras − stock final) de los insumos contados; el resto del cómputo sigue teórico. Son mercadería los insumos marcados como tal y todo lo que venden los proveedores marcados como “vende mercadería”.</div>
           </div></div>`;
       } else if(G.cmvDisponible){
         html += `<div class="arx-box"><div class="arx-h"><span class="chev"></span><span class="nm">Mercadería: compras vs. consumo</span>
@@ -25517,82 +25711,186 @@ async function lfQuitarProveedorIns(id){
 </script>
 <script>
 /* =====================================================================
-   CUADROS MOVIBLES Y REDIMENSIONABLES (pedido de Pancho, 03/11/2026) · mismo código en ambos sitios
-   Cada "tablero" (Ventas › Análisis de resultados, Ventas › Facturación) ordena sus cuadros en una
-   grilla de 12 columnas:
-   · Mover: arrastrar desde la manija (⋮⋮) arriba a la derecha del cuadro.
-   · Tamaño: arrastrar la esquina inferior derecha (ancho en columnas, alto libre). Doble clic en la
-     esquina o el botón ⤢ vuelve al tamaño original.
-   · Desplazarse: arrastrar con el mouse desde cualquier parte del cuadro (que no sea un botón o un
-     campo) lo mueve en cualquier dirección.
-   · Encabezados: el título del cuadro y los encabezados de columnas quedan siempre fijos.
-   El orden y los tamaños se recuerdan por usuario en este navegador.
+   TABLERO LIBRE CON ALINEACIÓN AUTOMÁTICA (pedido de Pancho, 10/11/2026 · reemplaza la grilla del 03/11)
+   Ventas › Análisis de resultados y Ventas › Facturación, a ancho completo:
+   · Mover: arrastrar desde la manija (⋮⋮) arriba a la derecha del cuadro, a cualquier lugar.
+   · Imán: al mover o agrandar, el cuadro se pega a los bordes de los otros cuadros (arriba, abajo,
+     costados y la separación estándar entre cuadros) y a los bordes del tablero; se ven líneas guía.
+   · Nunca se superponen: si un cuadro cae encima de otro, los de abajo se corren hacia abajo.
+   · Tamaño: esquina inferior derecha (ancho y alto libres, con imán). Doble clic en la esquina o ↺:
+     vuelve al tamaño original. "Acomodar automáticamente" rearma el tablero como al principio.
+   · Desplazarse dentro de un cuadro: arrastrar desde cualquier parte que no sea un botón o un campo.
+   · La posición se guarda por usuario en este navegador (en proporción al ancho, así se adapta a
+     cualquier pantalla). En pantallas angostas (< 900 px) los cuadros se apilan.
    ===================================================================== */
 (function(){
   const PRE = (typeof AR_SITE!=="undefined" && AR_SITE.pre) || "vd";
-  const LSK = b=>`vdb_${PRE}_${b}`;
+  const LSK = b=>`vdb_${PRE}_${b}_libre${b==="analisis"?"2":""}`; // 10/11/2026: analisis v2 (Flujo de fondos + Productos y cubiertos)
   const lsGet = b=>{ try{ return JSON.parse(localStorage.getItem(LSK(b))||"{}")||{}; }catch(e){ return {}; } };
   const lsSet = (b,v)=>{ try{ localStorage.setItem(LSK(b), JSON.stringify(v)); }catch(e){} };
+  const GAP = 16, SNAP = 10, MINW = 260, MINH = 140;
   const GRIP = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
   const RESET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
-  const INTER = "input,button,select,textarea,a,label,[contenteditable],.vdb-tools,.vdb-rs,.sk-chip";
+  const INTER = "input,button,select,textarea,a,label,[contenteditable],.vdb-tools,.vdb-rs,.sk-chip,summary,.ar-er-row,.ar-mes-pill,.ar-gv-row";
+  const boards = [];
 
   function setup(boardKey, anchor, defs){
-    // anchor: elemento antes del cual va el tablero; defs: [{id, el, span}]
     const cards = defs.filter(d=>d.el);
     if(!cards.length || document.querySelector(`.vdb-board[data-board="${boardKey}"]`)) return null;
-    const board = document.createElement("div"); board.className = "vdb-board"; board.dataset.board = boardKey;
-    anchor.parentNode.insertBefore(board, anchor);
-    const st = lsGet(boardKey);
-    const items = {};
+    const bar = document.createElement("div"); bar.className = "vdb-bar";
+    bar.innerHTML = `<span class="vdb-bar-t">Mové los cuadros desde ⋮⋮ y agrandalos desde la esquina: se alinean solos.</span><button type="button" class="vdb-auto">Acomodar automáticamente</button>`;
+    const board = document.createElement("div"); board.className = "vdb-board vdb-free"; board.dataset.board = boardKey;
+    anchor.parentNode.insertBefore(bar, anchor); anchor.parentNode.insertBefore(board, anchor);
+    const guides = document.createElement("div"); guides.className = "vdb-guides"; board.appendChild(guides);
+    const items = {}, order = [];
     cards.forEach(d=>{
       const it = document.createElement("div"); it.className = "vdb-item"; it.dataset.box = d.id; it.dataset.def = d.span;
-      it.innerHTML = `<div class="vdb-tools"><span class="vdb-btn vdb-grip" title="Arrastrá para mover el cuadro" draggable="true">${GRIP}</span><button type="button" class="vdb-btn vdb-reset" title="Volver al tamaño original">${RESET}</button></div><div class="vdb-rs" title="Arrastrá para cambiar el tamaño · doble clic: tamaño original"></div>`;
+      it.innerHTML = `<div class="vdb-tools"><span class="vdb-btn vdb-grip" title="Arrastrá para mover el cuadro">${GRIP}</span><button type="button" class="vdb-btn vdb-reset" title="Volver al tamaño original">${RESET}</button></div><div class="vdb-rs" title="Arrastrá para cambiar el tamaño · doble clic: tamaño original"></div>`;
       it.insertBefore(d.el, it.firstChild);
       d.el.classList.add("vdb-card");
       const medir = ()=>{ const h3 = d.el.querySelector(":scope > h3"); d.el.style.setProperty("--vdb-top", (h3 ? h3.offsetHeight : 0)+"px"); };
-      medir(); try{ new MutationObserver(medir).observe(d.el, { childList:true }); new ResizeObserver(medir).observe(d.el); }catch(_){}
-      items[d.id] = it;
+      medir();
+      board.appendChild(it); items[d.id] = it; order.push(d.id);
     });
-    const orden = (st.order||[]).filter(id=>items[id]); cards.forEach(d=>{ if(!orden.includes(d.id)) orden.push(d.id); });
-    orden.forEach(id=>board.appendChild(items[id]));
-    const aplicar = ()=>{ const s = lsGet(boardKey);
-      Object.values(items).forEach(it=>{ const id = it.dataset.box, sp = (s.span&&s.span[id]) || Number(it.dataset.def)||12, h = s.h&&s.h[id];
-        it.style.setProperty("--vdb-span", sp); it.classList.toggle("vdb-fixed", !!h); it.style.height = h ? h+"px" : ""; }); };
-    aplicar();
-    const guardar = fn=>{ const s = lsGet(boardKey); fn(s); lsSet(boardKey, s); };
+    const B = { key:boardKey, board, items, order, pos:{} };
+    const st = lsGet(boardKey);
+    B.pos = (st && st.pos) || {};
+    // 10/11/2026: mientras el usuario no mueva ni agrande un cuadro, el tablero se reacomoda solo con la altura real de cada cuadro
+    B.manual = !!(st && st.pos && Object.keys(st.pos).length && st.manual!==false); // estados guardados antes de este cambio: se respetan
+    const visible = id=>{ const c = items[id].firstChild; return c && !c.classList.contains("hidden") && !(board.offsetParent===null); };
+    const W = ()=>board.clientWidth;
+    const apilado = ()=>window.innerWidth < 900;
+
+    // Posición por defecto: flujo en 12 columnas, en el orden original, con la altura natural de cada cuadro.
+    function autoLayout(){
+      const w = W(); if(!w) return;
+      const colW = (w - GAP*11)/12; let x = 0, y = 0, rowH = 0; const nuevo = {};
+      order.forEach(id=>{
+        if(!visible(id)) return;
+        const sp = Number(items[id].dataset.def)||12, ancho = sp*colW + (sp-1)*GAP;
+        if(x + ancho > w + 1){ x = 0; y += rowH + GAP; rowH = 0; }
+        nuevo[id] = { x:x/w, y, w:ancho/w, h:null };
+        items[id].style.width = ancho+"px"; items[id].style.height = "";
+        const hh = items[id].offsetHeight; rowH = Math.max(rowH, hh);
+        x += ancho + GAP;
+      });
+      order.forEach(id=>{ if(!nuevo[id] && B.pos[id]) nuevo[id] = B.pos[id]; });
+      B.pos = nuevo;
+    }
+    // rectángulo en px de un cuadro (con su alto real)
+    const rect = id=>{ const p = B.pos[id], w = W(); const it = items[id];
+      return { id, l:p.x*w, t:p.y, w:p.w*w, h: p.h!=null ? p.h : it.offsetHeight }; };
+    const solapan = (a,b)=> a.l < b.l+b.w-1 && b.l < a.l+a.w-1 && a.t < b.t+b.h-1 && b.t < a.t+a.h-1;
+    // Sin superposición: se respeta el orden vertical; el que queda encima de otro se corre hacia abajo.
+    function resolver(prioridad){
+      const ids = order.filter(id=>visible(id) && B.pos[id]);
+      ids.sort((a,b)=> a===prioridad ? -1 : b===prioridad ? 1 : (B.pos[a].y - B.pos[b].y) || (B.pos[a].x - B.pos[b].x));
+      const puestos = [];
+      ids.forEach(id=>{
+        const r = rect(id); let mov = true, guard = 0;
+        while(mov && guard++ < 50){ mov = false;
+          for(const q of puestos){ if(solapan(r, q)){ r.t = q.t + q.h + GAP; mov = true; } } }
+        B.pos[id].y = r.t; puestos.push(r);
+      });
+    }
+    function pintar(){
+      if(apilado()){ board.classList.add("vdb-stack"); order.forEach(id=>{ const it = items[id]; it.style.left = it.style.top = it.style.width = ""; it.style.height = ""; }); board.style.height = ""; return; }
+      board.classList.remove("vdb-stack");
+      const w = W(); let maxB = 0;
+      order.forEach(id=>{ const it = items[id], p = B.pos[id];
+        if(!visible(id) || !p){ it.classList.add("vdb-off"); return; } it.classList.remove("vdb-off");
+        const l = Math.max(0, Math.min(p.x*w, w - MINW)), ww = Math.min(p.w*w, w - l);
+        it.style.left = l+"px"; it.style.top = p.y+"px"; it.style.width = ww+"px";
+        it.style.height = p.h!=null ? p.h+"px" : ""; it.classList.toggle("vdb-fixed", p.h!=null);
+      });
+      order.forEach(id=>{ if(visible(id) && B.pos[id]) maxB = Math.max(maxB, B.pos[id].y + items[id].offsetHeight); });
+      board.style.height = (maxB + 4)+"px";
+    }
+    let raf = 0;
+    function relayout(prio){
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(()=>{
+        if(!W()) return;
+        if(!B.manual || !order.some(id=>B.pos[id] && visible(id))) autoLayout();
+        order.forEach(id=>{ if(visible(id) && !B.pos[id]){ // cuadro que vuelve a mostrarse sin posición: al final
+          let maxB = 0; order.forEach(o=>{ if(o!==id && B.pos[o] && visible(o)) maxB = Math.max(maxB, B.pos[o].y + items[o].offsetHeight + GAP); });
+          const sp = Number(items[id].dataset.def)||12; B.pos[id] = { x:0, y:maxB, w:Math.min(1, (sp/12)), h:null }; } });
+        pintar(); resolver(prio); pintar();
+      });
+    }
+    B.relayout = relayout;
+    const guardar = ()=>{ B.manual = true; lsSet(boardKey, { pos:B.pos, manual:true }); };
+
+    // ---- guías e imán ----
+    function lineas(excl){
+      const xs = [0, W()], ys = [0], vis = order.filter(id=>id!==excl && visible(id) && B.pos[id]).map(rect);
+      vis.forEach(r=>{ xs.push(r.l, r.l+r.w, r.l+r.w+GAP, r.l-GAP); ys.push(r.t, r.t+r.h, r.t+r.h+GAP, r.t-GAP); });
+      return { xs, ys };
+    }
+    function mejor(cands, vals){ let best = null;
+      vals.forEach(v=>cands.forEach(c=>{ const d = c.v - v.v; if(Math.abs(d) <= SNAP && (!best || Math.abs(d) < Math.abs(best.d))) best = { d, at:c.v }; }));
+      return best; }
+    function guia(tipo, val){ const g = document.createElement("i"); g.className = "vdb-g "+tipo; if(tipo==="v") g.style.left = val+"px"; else g.style.top = val+"px"; guides.appendChild(g); }
+
     // ---- mover ----
-    let drag = null;
-    Object.values(items).forEach(it=>{
-      const g = it.querySelector(".vdb-grip");
-      g.addEventListener("dragstart", e=>{ drag = it; it.classList.add("vdb-dragging"); e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", it.dataset.box); e.dataTransfer.setDragImage(it, 30, 20); }catch(_){} });
-      g.addEventListener("dragend", ()=>{ drag = null; Object.values(items).forEach(x=>x.classList.remove("vdb-dragging","vdb-before","vdb-after")); });
-      it.addEventListener("dragover", e=>{ if(!drag || drag===it) return; e.preventDefault(); const r = it.getBoundingClientRect();
-        const af = (r.width > board.clientWidth*0.7) ? (e.clientY-r.top) > r.height/2 : (e.clientX-r.left) > r.width/2;
-        it.classList.toggle("vdb-after", af); it.classList.toggle("vdb-before", !af); });
-      it.addEventListener("dragleave", e=>{ if(!it.contains(e.relatedTarget)) it.classList.remove("vdb-before","vdb-after"); });
-      it.addEventListener("drop", e=>{ e.preventDefault(); if(!drag || drag===it) return; const af = it.classList.contains("vdb-after");
-        board.insertBefore(drag, af ? it.nextSibling : it); it.classList.remove("vdb-before","vdb-after");
-        guardar(s=>{ s.order = [...board.children].map(x=>x.dataset.box); }); });
+    order.forEach(id=>{
+      const it = items[id], grip = it.querySelector(".vdb-grip");
+      grip.addEventListener("pointerdown", e=>{
+        if(e.button!==0 || apilado()) return; e.preventDefault();
+        const r0 = rect(id), x0 = e.clientX, y0 = e.clientY, L = lineas(id);
+        it.classList.add("vdb-moving"); document.body.classList.add("vdb-noselect");
+        let cur = { l:r0.l, t:r0.t };
+        const mm = ev=>{
+          let l = r0.l + (ev.clientX-x0), t = Math.max(0, r0.t + (ev.clientY-y0));
+          guides.innerHTML = "";
+          const bx = mejor(L.xs.map(v=>({v})), [{v:l},{v:l+r0.w}]); if(bx){ l += bx.d; guia("v", bx.at); }
+          const by = mejor(L.ys.filter(v=>v>=0).map(v=>({v})), [{v:t},{v:t+r0.h}]); if(by){ t = Math.max(0, t + by.d); guia("h", by.at); }
+          l = Math.max(0, Math.min(l, W()-r0.w));
+          cur = { l, t }; it.style.left = l+"px"; it.style.top = t+"px";
+        };
+        const mu = ()=>{ document.removeEventListener("pointermove", mm); document.removeEventListener("pointerup", mu);
+          it.classList.remove("vdb-moving"); document.body.classList.remove("vdb-noselect"); guides.innerHTML = "";
+          B.pos[id].x = cur.l / W(); B.pos[id].y = cur.t; pintar(); resolver(id); pintar(); guardar(); };
+        document.addEventListener("pointermove", mm); document.addEventListener("pointerup", mu);
+      });
       // ---- tamaño ----
       const rs = it.querySelector(".vdb-rs");
-      rs.addEventListener("mousedown", e=>{ if(e.button!==0) return; e.preventDefault(); e.stopPropagation();
-        const r0 = it.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY;
-        const cs = getComputedStyle(board), gap = parseFloat(cs.columnGap)||16, colW = (board.clientWidth - gap*11)/12;
+      rs.addEventListener("pointerdown", e=>{
+        if(e.button!==0 || apilado()) return; e.preventDefault(); e.stopPropagation();
+        const r0 = rect(id), x0 = e.clientX, y0 = e.clientY, L = lineas(id);
         it.classList.add("vdb-resizing"); document.body.classList.add("vdb-noselect");
-        let sp = null, h = null;
-        const mm = ev=>{ const w = r0.width + (ev.clientX-x0); sp = Math.max(3, Math.min(12, Math.round((w+gap)/(colW+gap))));
-          h = Math.max(160, Math.round(r0.height + (ev.clientY-y0)));
-          it.style.setProperty("--vdb-span", sp); it.style.height = h+"px"; it.classList.add("vdb-fixed"); };
-        const mu = ()=>{ document.removeEventListener("mousemove", mm); document.removeEventListener("mouseup", mu); it.classList.remove("vdb-resizing"); document.body.classList.remove("vdb-noselect");
-          if(sp!=null) guardar(s=>{ s.span = s.span||{}; s.h = s.h||{}; s.span[it.dataset.box] = sp; s.h[it.dataset.box] = h; }); };
-        document.addEventListener("mousemove", mm); document.addEventListener("mouseup", mu); });
-      const reset = ()=>{ guardar(s=>{ if(s.span) delete s.span[it.dataset.box]; if(s.h) delete s.h[it.dataset.box]; }); aplicar(); };
+        let cur = { w:r0.w, h:r0.h };
+        const mm = ev=>{
+          let w = Math.max(MINW, r0.w + (ev.clientX-x0)), h = Math.max(MINH, r0.h + (ev.clientY-y0));
+          guides.innerHTML = "";
+          const bx = mejor(L.xs.map(v=>({v})), [{v:r0.l+w}]); if(bx){ w += bx.d; guia("v", bx.at); }
+          const by = mejor(L.ys.map(v=>({v})), [{v:r0.t+h}]); if(by){ h += by.d; guia("h", by.at); }
+          w = Math.min(w, W()-r0.l); cur = { w, h };
+          it.style.width = w+"px"; it.style.height = h+"px"; it.classList.add("vdb-fixed");
+        };
+        const mu = ()=>{ document.removeEventListener("pointermove", mm); document.removeEventListener("pointerup", mu);
+          it.classList.remove("vdb-resizing"); document.body.classList.remove("vdb-noselect"); guides.innerHTML = "";
+          B.pos[id].w = cur.w / W(); B.pos[id].h = Math.round(cur.h); pintar(); resolver(id); pintar(); guardar(); };
+        document.addEventListener("pointermove", mm); document.addEventListener("pointerup", mu);
+      });
+      const reset = ()=>{ const sp = Number(it.dataset.def)||12, w = W(), colW = (w - GAP*11)/12;
+        B.pos[id].w = (sp*colW + (sp-1)*GAP)/w; B.pos[id].h = null; if(B.pos[id].x + B.pos[id].w > 1) B.pos[id].x = Math.max(0, 1 - B.pos[id].w);
+        pintar(); resolver(id); pintar(); guardar(); };
       rs.addEventListener("dblclick", reset);
       it.querySelector(".vdb-reset").addEventListener("click", reset);
+      // contenido que cambia de alto → reacomodar
+      try{ new ResizeObserver(()=>{ if(!it.classList.contains("vdb-resizing")) relayout(); }).observe(it.firstChild); }catch(_){}
+      try{ new MutationObserver(()=>relayout()).observe(it.firstChild, { attributes:true, attributeFilter:["class"] }); }catch(_){}
     });
+    bar.querySelector(".vdb-auto").addEventListener("click", ()=>{ B.pos = {}; order.forEach(id=>{ items[id].style.height = ""; items[id].classList.remove("vdb-fixed"); }); autoLayout(); pintar(); resolver(); pintar(); B.manual = false; lsSet(boardKey, { pos:B.pos, manual:false }); });
+    boards.push(B);
+    relayout();
     return board;
   }
+  window.addEventListener("resize", ()=>boards.forEach(B=>B.relayout()));
+  // el tablero puede crearse mientras su pantalla está oculta: se acomoda al hacerse visible
+  try{ const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const B = boards.find(b=>b.board===e.target); if(B) B.relayout(); } })); setTimeout(()=>boards.forEach(B=>io.observe(B.board)), 0); }catch(_){}
+  window.vdbRelayout = ()=>boards.forEach(B=>B.relayout());
 
   // ---- desplazarse arrastrando desde cualquier parte del cuadro ----
   function scroller(t){ for(let e = t; e && e!==document.body; e = e.parentElement){
@@ -25612,17 +25910,16 @@ async function lfQuitarProveedorIns(id){
     document.addEventListener("mousemove", mm, true); document.addEventListener("mouseup", mu, true);
   });
 
-  // ---- tableros de cada sitio ----
   function init(){
-    // Ventas › Análisis de resultados (ambos sitios)
     const none = document.getElementById("arNoneMsg");
     if(none) setup("analisis", none, [
       { id:"er", el:document.getElementById("arCard_er"), span:7 },
       { id:"comp", el:document.getElementById("arCard_comp"), span:5 },
+      { id:"ff", el:document.getElementById("arCard_ff"), span:12 },
       { id:"evo", el:document.getElementById("arCard_evo"), span:12 },
+      { id:"prod", el:document.getElementById("arCard_prod"), span:12 },
       { id:"div", el:document.getElementById("arCard_div"), span:12 } ]);
     const row = document.getElementById("arRow1"); if(row && !row.children.length) row.style.display = "none";
-    // Ventas › Facturación (La Fortaleza)
     const vw = document.querySelector("#ventasResultados .ventas-resultados-wrap");
     if(vw){ const cards = [...vw.querySelectorAll(".vr-card")];
       const pc = document.getElementById("ventasPorConcepto"), ab = cards.find(c=>c.querySelector("#ventasAB")), ca = cards.find(c=>c.querySelector("#ventasCanchas"));
@@ -25633,6 +25930,567 @@ async function lfQuitarProveedorIns(id){
       const g = vw.querySelector(".vr-grid"); if(g && !g.children.length) g.style.display = "none"; }
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();
+</script>
+<script>
+/* =====================================================================
+   ANÁLISIS DE RESULTADOS · agregados del 10/11/2026 (pedido de Pancho)
+   1) Vista de gastos: tocando la burbuja "Gastos totales" el reporte pasa a mostrar sólo los gastos,
+      por categoría, y cada categoría abre sus sub-rubros y las órdenes de pago que la componen
+      (orden, proveedor, fechas de factura / orden / pago, estado, método, monto e imputado al período).
+      Mismo cálculo que el Estado de resultados (prorrateo, reparto por ítems y CMV).
+   2) Productos más y menos vendidos: Cafetería y bebidas y Servicio de cocina (Cat. 2 del índice),
+      top 3 y últimos 3 por unidades y por importe, sobre lo vendido en el período (Compras-Ventas, neto de
+      reversiones). "Menos vendidos" = los de menor venta entre los que se vendieron al menos una vez.
+   3) Cubiertos: ítem "Cubierto" a $0 que se carga por persona que consume en el bar. Total del período,
+      por semana (lunes a domingo) y acumulado por día de la semana; consumo de Bar / Cafetería por cubierto
+      (el consumo por cubierto se agrega cuando la carga de cubiertos sea completa).
+   ===================================================================== */
+(function(){
+  if(typeof arState==="undefined") return;
+  const CHEV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+  const DOW = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+  const n0 = v=>Number(v||0).toLocaleString("es-AR",{maximumFractionDigits:0});
+  const n1 = v=>Number(v||0).toLocaleString("es-AR",{minimumFractionDigits:1,maximumFractionDigits:1});
+
+  /* ---------------- 1) vista de gastos ---------------- */
+  arState.gastosVista = false;
+  arState.gvOpen = new Set();
+  function detalleGastos(desde, hasta){
+    const CM = arState.cmvOn!==false ? arState.cmvData : null, map = new Map();
+    arState.ordenes.forEach(o=>{
+      const v = arGastoEnRango(o, desde, hasta), f = typeof arFechaImput==="function" ? arFechaImput(o) : o.fecha_comprobante;
+      const fa = (f>=desde && f<=hasta) ? arImporteOrden(o) : 0;
+      if(!v && !fa) return;
+      let partes = arPartesOrden(o), fm = 0; const om = typeof arMercOrden==="function" ? arMercOrden(o, CM) : null;
+      if(om){ fm = om.fm; partes = om.partes; }
+      if(om && fm>0){ const k = "Costo de mercadería vendida (CMV)"; if(!map.has(k)) map.set(k, []); map.get(k).push({ o, rb:o.rubro||"", imp:0, fact:fa*fm, stock:v*fm, fm, sinItems:!!om.sinItems }); }
+      if(om && !partes.length) return;
+      partes.forEach(pt=>{
+        const c = (pt.concepto||"").trim() || "Sin categoría", rb = (pt.rubro||"").trim() || "Sin rubro";
+        const imp = v*pt.f, fact = fa*pt.f; if(Math.abs(imp)<0.5 && Math.abs(fact)<0.5) return;
+        if(!map.has(c)) map.set(c, []); map.get(c).push({ o, rb, imp, fact, stock:v*fm*(pt.f/Math.max(1e-9, partes.reduce((a,x)=>a+x.f,0))) , fm });
+      });
+    });
+    return map;
+  }
+  window.arGastosVista = function(on){
+    arState.gastosVista = on==null ? !arState.gastosVista : !!on;
+    const board = document.querySelector('.vdb-board[data-board="analisis"]'), bar = board && board.previousElementSibling;
+    let gv = document.getElementById("arGastosView");
+    if(!gv){ gv = document.createElement("div"); gv.id = "arGastosView"; gv.className = "ar-gv hidden";
+      const kp = document.getElementById("arKpis"); kp.parentNode.insertBefore(gv, kp.nextSibling); }
+    gv.classList.toggle("hidden", !arState.gastosVista);
+    if(board) board.style.display = arState.gastosVista ? "none" : "";
+    if(bar && bar.classList.contains("vdb-bar")) bar.style.display = arState.gastosVista ? "none" : "";
+    const tg = document.getElementById("arToggles"); if(tg) tg.closest && (tg.style.opacity = arState.gastosVista ? ".45" : "");
+    document.querySelectorAll("#arKpis .ar-kpi.clk").forEach(k=>k.classList.toggle("on", arState.gastosVista));
+    if(arState.gastosVista){ arGvRender(); gv.scrollIntoView({ behavior:"smooth", block:"start" }); }
+    else if(window.vdbRelayout) window.vdbRelayout();
+  };
+  window.arGvToggle = function(el){ const c = el.closest(".ar-gv-cat"); c.classList.toggle("open"); const k = c.dataset.cat; if(c.classList.contains("open")) arState.gvOpen.add(k); else arState.gvOpen.delete(k); };
+  window.arGvRender = function(){
+    const gv = document.getElementById("arGastosView"), c = arState.calc; if(!gv || !c) return;
+    const G = c.g, V = c.v, det = detalleGastos(c.desde, c.hasta);
+    const cats = [...G.cats.values()].sort((a,b)=>b.total-a.total);
+    const max = cats.reduce((a,x)=>Math.max(a, x.total), 0) || 1;
+    const est = o=>o.estado==="Pagado" ? `<span class="ar-gv-est ok">Pagado</span>` : `<span class="ar-gv-est pe">${arEsc(o.estado||"Pendiente")}</span>`;
+    const filas = (c2)=>{
+      if(c2.cmv){
+        const subs = [...c2.subs.entries()].sort((a,b)=>b[1]-a[1]);
+        return `<div class="ar-gv-tw"><table class="ar-gv-t"><thead><tr><th class="l">Rubro del insumo</th><th>Costo de lo vendido</th><th>% de la categoría</th></tr></thead><tbody>${subs.map(([k,v])=>`<tr><td class="l">${arEsc(k)}</td><td><b>${arMoney(v)}</b></td><td>${arPct(v, c2.total)}</td></tr>`).join("")}</tbody></table></div>
+          ${(()=>{ const F = (det.get(c2.name)||[]).filter(x=>x.stock>0.5).sort((a,b)=>String(b.o.fecha_comprobante).localeCompare(String(a.o.fecha_comprobante)));
+            if(!F.length) return "";
+            const tS = F.reduce((a,x)=>a+x.stock,0);
+            return `<div class="ar-gv-sub">Facturas de mercadería del período <small>van a stock: no suman acá, entran al CMV a medida que se vende</small></div>
+              <div class="ar-gv-tw"><table class="ar-gv-t"><thead><tr><th class="l">Orden</th><th class="l">Proveedor</th><th class="l">Fecha factura</th><th class="l">Pago</th><th>Monto a pagar</th><th>A stock</th></tr></thead><tbody>
+              ${F.map(x=>{ const o = x.o; return `<tr><td class="l"><b>${arEsc(o.id)}</b>${o.comprobante?`<small>${arEsc(o.comprobante_tipo||"")} ${arEsc(o.comprobante)}</small>`:""}</td><td class="l">${arEsc(o.proveedor||"—")}<small>${x.sinItems?"sin ítems cargados · entera a stock":x.fm<0.999?arPct(x.fm,1)+" mercadería según sus ítems":"todos sus ítems son mercadería"}</small></td><td class="l">${arDMY(o.fecha_comprobante)}</td><td class="l">${est(o)}${o.fecha_pago?`<small>${arDMY(String(o.fecha_pago).slice(0,10))}${o.metodo?" · "+arEsc(o.metodo):""}</small>`:""}</td><td>${arMoney(arImporteOrden(o))}</td><td><b>${arMoney(x.stock)}</b></td></tr>`; }).join("")}
+              </tbody><tfoot><tr><td class="l" colspan="5"><b>Compras de mercadería a stock</b> · ${F.length} factura${F.length===1?"":"s"}</td><td><b>${arMoney(tS)}</b></td></tr></tfoot></table></div>`; })()}
+          <div class="ar-gv-note">Costo de mercadería vendida: única línea de gastos por mercadería. ${c2.cmvReal>0.5?`Real ${arMoney(c2.cmvReal)} (conteos de stock) + teórico ${arMoney(c2.cmvTeo||0)}.`:"Teórico: unidades vendidas en el período × receta × costo de la última compra de cada insumo."} La mercadería de cada factura queda en stock y entra a gastos a medida que se vende.</div>`;
+      }
+      const L = (det.get(c2.name)||[]).slice().sort((a,b)=>(b.imp-a.imp) || String(b.o.fecha_comprobante).localeCompare(String(a.o.fecha_comprobante)));
+      if(!L.length) return `<div class="ar-gv-note">Sin órdenes para mostrar.</div>`;
+      const tImp = L.reduce((a,x)=>a+x.imp,0), tFact = L.reduce((a,x)=>a+x.fact,0);
+      const hayStock = L.some(x=>x.stock>0.5);
+      return `<div class="ar-gv-tw"><table class="ar-gv-t"><thead><tr><th class="l">Orden</th><th class="l">Proveedor</th><th class="l">Rubro</th><th class="l">Fecha factura</th><th class="l">Fecha orden</th><th class="l">Pago</th><th>Monto a pagar</th>${hayStock?"<th>A stock</th>":""}<th>Imputado al período</th></tr></thead><tbody>
+        ${L.map(x=>{ const o = x.o, tg = typeof arTipoGasto==="function" ? arTipoGasto(o) : "puntual";
+          const tipo = o.liq_mes ? "adicional de sueldos" : tg!=="puntual" ? tg : "";
+          const parcial = Math.abs(x.imp - arImporteOrden(o)) > 1;
+          return `<tr${x.imp<0.5?' class="dim"':''}><td class="l"><b>${arEsc(o.id)}</b>${o.comprobante?`<small>${arEsc(o.comprobante_tipo||"")} ${arEsc(o.comprobante)}</small>`:""}</td>
+            <td class="l">${arEsc(o.proveedor||"—")}${tipo?`<small>${arEsc(tipo)}</small>`:""}</td><td class="l">${arEsc(x.rb)}</td>
+            <td class="l">${arDMY(o.fecha_comprobante)}</td><td class="l">${o.fecha_orden?arDMY(String(o.fecha_orden).slice(0,10)):"—"}</td>
+            <td class="l">${est(o)}${o.fecha_pago?`<small>${arDMY(String(o.fecha_pago).slice(0,10))}${o.metodo?" · "+arEsc(o.metodo):""}</small>`:(o.metodo?`<small>${arEsc(o.metodo)}</small>`:"")}</td>
+            <td>${arMoney(arImporteOrden(o))}</td>${hayStock?`<td>${x.stock>0.5?arMoney(x.stock):"—"}</td>`:""}
+            <td><b>${arMoney(x.imp)}</b>${parcial?`<small>${arPct(x.imp, arImporteOrden(o))} de la orden</small>`:""}</td></tr>`; }).join("")}
+        </tbody><tfoot><tr><td class="l" colspan="${hayStock?8:7}"><b>Total ${arEsc(c2.name)}</b> · ${L.length} orden${L.length===1?"":"es"}${Math.abs(tFact-tImp)>1?` · facturado en el período ${arMoney(tFact)}`:""}</td><td><b>${arMoney(tImp)}</b></td></tr></tfoot></table></div>
+        ${hayStock?`<div class="ar-gv-note">“A stock”: parte mercadería de la factura (ítems marcados como mercadería). No entra acá: se suma al gasto como Costo de mercadería vendida a medida que se vende.</div>`:""}`;
+    };
+    gv.innerHTML = `<div class="ar-gv-h"><div><h3>Gastos del período</h3><div class="sub">${arEsc(arPeriodoTxt(c.desde, c.hasta))} · tocá una categoría para ver sus órdenes de pago</div></div>
+        <button type="button" class="ar-gv-back" onclick="arGastosVista(false)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Volver al análisis completo</button></div>
+      <div class="ar-gv-tot"><div><div class="k">Gastos totales</div><div class="v">${arMoney(G.total)}</div></div>
+        <div><div class="k">% sobre ventas</div><div class="v sm">${arPct(G.total, V.total)}</div></div>
+        ${G.fact!=null && Math.abs(G.total-G.fact)>1 ? `<div><div class="k">Facturado en el período</div><div class="v sm">${arMoney(G.fact)}</div></div><div><div class="k">Por prorrateo</div><div class="v sm">${G.total-G.fact>0?"+":"−"}${arMoney(Math.abs(G.total-G.fact)).replace(/^−/,"")}</div></div>` : ""}
+        <div><div class="k">Categorías</div><div class="v sm">${cats.length}</div></div></div>
+      ${cats.map(c2=>{ const nOrd = c2.cmv ? 0 : (det.get(c2.name)||[]).length;
+        return `<div class="ar-gv-cat${arState.gvOpen.has(c2.name)?" open":""}" data-cat="${arEsc(c2.name)}">
+          <div class="ar-gv-row" onclick="arGvToggle(this)"><span class="chev">${CHEV}</span>
+            <span class="nm">${arEsc(c2.name)}<small>${c2.cmv ? "costo de lo vendido" : nOrd+" orden"+(nOrd===1?"":"es")}${c2.subs && c2.subs.size ? " · "+c2.subs.size+" rubro"+(c2.subs.size===1?"":"s") : ""}</small></span>
+            <span class="ar-gv-bar"><i style="width:${Math.max(1, c2.total/max*100)}%"></i></span>
+            <span class="pc">${arPct(c2.total, G.total)}<small>de gastos</small></span><span class="pc">${arPct(c2.total, V.total)}<small>de ventas</small></span>
+            <span class="mt">${arMoney(c2.total)}</span></div>
+          <div class="ar-gv-b">${c2.subs && c2.subs.size ? `<div class="ar-gv-subs">${[...c2.subs.entries()].sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span>${arEsc(k)}<b>${arMoney(v)}</b></span>`).join("")}</div>` : ""}${filas(c2)}</div></div>`; }).join("") || `<div class="ar-gv-note">Sin gastos imputados al período.</div>`}
+      <div class="ar-gv-note">Órdenes de pago no anuladas, por monto a pagar, imputadas por fecha de factura. Mensuales: repartidas en el mes del servicio; semestrales / anuales: por día en el período de cada orden (por eso una orden puede imputar sólo una parte). Facturas con ítems de varios rubros: repartidas por el costo de sus ítems.</div>`;
+  };
+  // burbuja de gastos clickeable
+  const _kpis = window.arRenderKpis || arRenderKpis;
+  window.arRenderKpis = function(){ _kpis.apply(this, arguments);
+    const k = document.querySelectorAll("#arKpis .ar-kpi")[1]; if(!k) return;
+    k.classList.add("clk"); k.classList.toggle("on", !!arState.gastosVista); k.title = "Ver el detalle de los gastos";
+    if(!k.querySelector(".go")) k.insertAdjacentHTML("beforeend", `<span class="go">${arState.gastosVista?"Viendo detalle":"Ver detalle"} ${CHEV.replace('<svg ','<svg width="11" height="11" ')}</span>`);
+    k.onclick = ()=>arGastosVista(); };
+  arRenderKpis = window.arRenderKpis;
+
+  /* ---------------- 2) productos más y menos vendidos ---------------- */
+  const TOP_GRUPOS = [ { sub:"Cafeteria y Bebidas", lbl:"Cafetería y bebidas" }, { sub:"Servicio de cocina", lbl:"Servicio de cocina" } ];
+  function ventasProductos(desde, hasta){
+    const V = arState.ventas; const out = new Map(); if(!V) return out;
+    let ctx = null; try{ ctx = vBuildIndiceCtx(); }catch(e){ return out; }
+    const cls = new Map();
+    V.dias.forEach((d, iso)=>{ if(iso<desde || iso>hasta || !d.uds) return;
+      d.uds.forEach((x, nm)=>{ if(/^cubiertos?$/i.test(nm)) return;
+        if(!cls.has(nm)){ const c = vClasificarConcepto(nm, "", ctx); cls.set(nm, c ? c.sub : null); }
+        const sub = cls.get(nm); if(!sub) return;
+        if(!out.has(sub)) out.set(sub, new Map());
+        const m = out.get(sub), p = m.get(nm) || { nm, u:0, imp:0 }; p.u += x.u; p.imp += x.imp; m.set(nm, p); }); });
+    return out;
+  }
+  window.arRenderTop = function(el, c, print){
+    if(!el) return;
+    if(!arState.ventas){ el.innerHTML = `<div class="ar-empty">Sin datos de ventas para el período.</div>`; return; }
+    const P = ventasProductos(c.desde, c.hasta);
+    const lista = (arr, k, best)=>arr.map((p,i)=>`<div class="ar-top-it"><span class="n">${best?i+1:"·"}</span><span class="p">${arEsc(p.nm)}</span><span class="v">${k==="u"?n0(p.u)+" u.":arMoney(p.imp)}<small>${k==="u"?arMoney(p.imp):n0(p.u)+" u."}</small></span></div>`).join("") || `<div class="ar-top-it"><span></span><span class="p" style="color:var(--text-3)">—</span><span></span></div>`;
+    // 10/11/2026: por categoría, tres listas — más vendidos por cantidad, más vendidos por importe y menos vendidos por cantidad
+    const col = (arr, k, best, titulo, cls2)=>`<div class="ar-top-l ${cls2}"><div class="t">${titulo}</div>${arr.length?lista(arr, k, best):`<div class="ar-top-it"><span></span><span class="p" style="color:var(--text-3)">—</span><span></span></div>`}</div>`;
+    el.innerHTML = `<div class="ar-top-grid">${TOP_GRUPOS.map(g=>{ const m = P.get(g.sub), arr = m ? [...m.values()] : [];
+        const tu = arr.reduce((a,p)=>a+Math.max(0,p.u),0), ti = arr.reduce((a,p)=>a+p.imp,0);
+        const vend = arr.filter(p=>p.u>0);
+        const porU = vend.slice().sort((a,b)=>(b.u-a.u)||(b.imp-a.imp)), porI = vend.filter(p=>p.imp>0).sort((a,b)=>(b.imp-a.imp)||(b.u-a.u));
+        const low = porU.length>3 ? porU.slice(-3).reverse() : [];
+        return `<div class="ar-top-g"><h4>${g.lbl}</h4><div class="sub">${vend.length} productos vendidos · ${n0(tu)} unidades · ${arMoney(ti)}</div>
+          ${arr.length ? `<div class="ar-top-3">${col(porU.slice(0,3), "u", true, "▲ Más vendidos · cantidad", "best")}${col(porI.slice(0,3), "imp", true, "▲ Más vendidos · $", "best")}${low.length?col(low, "u", false, "▼ Menos vendidos · cantidad", "worst"):`<div class="ar-top-l worst"><div class="t">▼ Menos vendidos · cantidad</div><div class="ar-top-it"><span></span><span class="p" style="color:var(--text-3)">Hay ${vend.length} producto${vend.length===1?"":"s"} vendido${vend.length===1?"":"s"}: no alcanza para comparar.</span><span></span></div></div>`}</div>` : `<div class="ar-empty">Sin ventas de esta categoría en el período.</div>`}</div>`; }).join("")}</div>
+      ${print?"":`<div class="ar-note">Unidades netas de reversiones (Compras-Ventas de ATC), con la categoría del índice de artículos. “Menos vendidos” se elige entre los productos que se vendieron al menos una vez en el período.</div>`}`;
+  };
+
+  /* ---------------- 3) cubiertos ---------------- */
+  window.arRenderCub = function(el, c, print){
+    if(!el) return;
+    const V = arState.ventas; if(!V){ el.innerHTML = `<div class="ar-empty">Sin datos de ventas para el período.</div>`; return; }
+    let tot = 0, diasCon = 0, barCon = 0, primero = null; const porDow = [0,0,0,0,0,0,0], diasDow = [0,0,0,0,0,0,0];
+    V.dias.forEach((d, iso)=>{ if(!d.cub) return; if(!primero || iso<primero) primero = iso; });
+    V.dias.forEach((d, iso)=>{ if(iso<c.desde || iso>c.hasta || !d.cub) return;
+      tot += d.cub; diasCon++; const w = (arDate(iso).getDay()+6)%7; porDow[w] += d.cub; diasDow[w]++;
+      d.grupos.forEach(g=>{ if(g.grupo==="Bar / Cafeteria") barCon += g.total; }); });
+    const semanas = (c.semanas||[]).map(s=>{ let q = 0, dd = 0; V.dias.forEach((d, iso)=>{ if(iso>=s.desde && iso<=s.hasta && d.cub){ q += d.cub; dd++; } }); return { s, q, dd }; });
+    if(!tot){
+      el.innerHTML = `<div class="ar-empty">No hay cubiertos cargados en el período.${primero?` El ítem “Cubierto” se carga desde el ${arDMY(primero)}.`:" Todavía no hay cubiertos cargados en ATC."}</div>`; return; }
+    const maxS = Math.max(1, ...semanas.map(x=>x.q)), maxD = Math.max(1, ...porDow);
+    el.innerHTML = `<div class="ar-cub-k">
+        <div><div class="k">Cubiertos del período</div><div class="v">${n0(tot)}</div><div class="s">${diasCon} día${diasCon===1?"":"s"} con cubiertos cargados</div></div>
+        <div><div class="k">Promedio por día</div><div class="v">${n1(tot/diasCon)}</div><div class="s">sobre los días con carga</div></div></div>
+      <div class="ar-cub-grid">
+        <div class="ar-cub-box"><h4>Por semana</h4><div class="ar-cub-bars">${semanas.map(x=>`<div class="ar-cub-bar"><span class="l">${arEsc(x.s.lbl)} <small>${arDM(x.s.desde)}–${arDM(x.s.hasta)}</small></span><span class="tr"><i style="width:${x.q/maxS*100}%"></i></span><span class="v">${n0(x.q)}</span></div>`).join("")}</div></div>
+        <div class="ar-cub-box"><h4>Acumulado por día de la semana</h4><div class="ar-cub-bars">${DOW.map((d,i)=>`<div class="ar-cub-bar"><span class="l">${d} <small>${diasDow[i]} día${diasDow[i]===1?"":"s"}</small></span><span class="tr"><i style="width:${porDow[i]/maxD*100}%"></i></span><span class="v">${n0(porDow[i])}</span></div>`).join("")}</div></div>
+      </div>
+      ${print?"":`<div class="ar-note">Cubiertos: cantidad del ítem “Cubierto” ($0) de Compras-Ventas, neta de reversiones, con el corte de jornada de las 05:00.${primero && primero>c.desde?` Se carga desde el ${arDMY(primero)}: los días anteriores no tienen dato.`:""}</div>`}`;
+  };
+})();
+</script>
+<style>
+  /* Flujo de fondos, regularizadores, productos y cubiertos, mercadería (10/11/2026) */
+  .ff-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px;}
+  .ff-kpis > div{border:1px solid var(--border);border-radius:12px;padding:10px 14px;background:#fff;}
+  .ff-kpis span{display:block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);}
+  .ff-kpis b{display:block;font-size:19px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap;}
+  .ff-kpis .hero{background:var(--navy);border-color:var(--navy);}
+  .ff-kpis .hero span{color:#AEB6D8;} .ff-kpis .hero b{color:#fff;}
+  .ff-kpis .hero.neg b{color:#FFB4A8;}
+  .ff-kpis b.neg,.ff-t .neg,.ffr-t .neg,.ffr-k b.neg,.ff-cc .neg b{color:#B42318;}
+  .ff-kpis b.pos,.ff-t .pos,.ffr-t .pos,.ffr-k b.pos{color:#137B44;}
+  .ffr-tw{overflow-x:auto;}
+  #arFF .ar-sub-h{margin-top:20px;}
+  #arFF > .ffr-tw{margin-bottom:4px;}
+  .ff-t,.ffr-t{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:720px;}
+  .ff-t th,.ffr-t th{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);text-align:right;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:bottom;}
+  .ff-t th small,.ffr-t th small{display:block;text-transform:none;letter-spacing:0;font-weight:600;font-size:10px;}
+  .ff-t th.l,.ff-t td.l,.ffr-t th.l,.ffr-t td.l{text-align:left;}
+  .ff-t td,.ffr-t td{padding:8px 10px;border-bottom:1px solid #EEF0F4;text-align:right;font-variant-numeric:tabular-nums;vertical-align:top;}
+  .ff-t td small,.ffr-t td small{display:block;color:var(--text-3);font-size:10.5px;font-weight:600;}
+  .ff-t td.z{color:#C3C8D6;}
+  .ff-t td.nt{background:#F6F8FD;}
+  .ff-t tfoot td,.ffr-t tfoot td{font-weight:800;border-top:2px solid var(--border);border-bottom:none;color:var(--navy);}
+  .ffr-t td.nt{max-width:320px;color:var(--text-2);white-space:normal;}
+  .ffr-t tr.dim td{color:var(--text-3);} .ffr-t tr.dim td b{color:var(--text-2);}
+  .ffr-chip{display:inline-block;font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 7px;white-space:nowrap;}
+  .ffr-chip.ok{background:#E4F6EA;color:#137B44;} .ffr-chip.warn{background:#FFF1DA;color:#B5760A;} .ffr-chip.info{background:#EEF3FF;color:#2B3F7A;}
+  .ffr-k{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .ffr-k > div{border:1px solid var(--border);border-radius:10px;padding:7px 12px;min-width:120px;}
+  .ffr-k span{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+  .ffr-k b{font-size:15px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .ffr-k small{display:block;font-size:10.5px;color:var(--text-3);font-weight:600;}
+  .ffr-k .tot{background:#F6F8FD;}
+  .ffr-k .al{border-color:#F5DDB0;background:#FFF6E6;} .ffr-k .al b{font-size:12.5px;color:#8A4B00;}
+  .ffr-empty{font-size:12px;color:var(--text-3);padding:8px 2px;}
+  .ffr-nota{font-size:11px;color:var(--text-3);margin-top:8px;line-height:1.5;}
+  .ff-conc{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;}
+  .ff-cc{border:1px solid var(--border);border-radius:12px;padding:10px 14px;}
+  .ff-cc.hl{background:#F6F8FD;}
+  .ff-cc .h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--sky);margin-bottom:4px;}
+  .ff-cc .kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #E3E6EF;font-size:12.5px;}
+  .ff-cc .kv small{display:block;font-size:10.5px;color:var(--text-3);font-weight:600;}
+  .ff-cc .kv b{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--navy);}
+  .ff-cc .kv.d{border-bottom:none;font-weight:800;}
+  .ff-exp{font-size:11.5px;color:var(--text-2);line-height:1.55;margin:10px 0 4px;background:#FAFBFE;border-radius:10px;padding:10px 12px;}
+  .ffx{border:1px solid var(--border);border-radius:12px;margin-top:12px;overflow:hidden;}
+  .ffx-h{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;background:#FAFBFE;flex-wrap:wrap;}
+  .ffx-h .chev{width:16px;height:16px;color:var(--text-3);transition:transform .15s ease;flex-shrink:0;}
+  .ffx-h .chev svg{width:16px;height:16px;}
+  .ffx.open .ffx-h .chev{transform:rotate(90deg);}
+  .ffx-h .nm{font-weight:800;color:var(--navy);font-size:13px;}
+  .ffx-h .nm small{font-weight:600;color:var(--text-3);font-size:11px;margin-left:6px;}
+  .ffx-res{margin-left:auto;font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums;}
+  .ffx-res b.neg{color:#B42318;} .ffx-res b.pos{color:#137B44;}
+  .ffx-b{display:none;padding:12px;}
+  .ffx.open .ffx-b{display:block;}
+  .ar-gv-sub{font-size:12px;font-weight:800;color:var(--navy);margin:14px 0 6px;}
+  .ar-gv-sub small{font-weight:600;color:var(--text-3);margin-left:6px;font-size:11px;}
+  .pc-sec + .pc-sec{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+  .pc-h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--sky);margin-bottom:10px;}
+  .pc-h small{text-transform:none;letter-spacing:0;font-weight:600;color:var(--text-3);margin-left:6px;}
+  #arCard_prod .ar-top-grid{grid-template-columns:repeat(auto-fit,minmax(520px,1fr));}
+  .ar-top-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media (max-width:760px){ .ar-top-3{grid-template-columns:1fr;} #arCard_prod .ar-top-grid{grid-template-columns:1fr;} }
+  .cm-regs{margin:12px 0;border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#fff;}
+  .cm-regs-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:12.5px;}
+  .cm-regs-h b{color:var(--navy);} .cm-regs-h > span{color:var(--text-3);font-size:11.5px;}
+  .cm-regs-h .g{flex:1;} .cm-regs-h .r{color:var(--text-2);font-size:12px;} .cm-regs-h .r b{font-variant-numeric:tabular-nums;}
+  .cm-regs-cierre{font-size:11.5px;color:var(--text-2);margin-top:8px;padding:8px 10px;border-radius:9px;background:#F6F8FD;line-height:1.55;}
+  .mk-merc{display:flex;align-items:flex-start;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px;}
+  .mk-merc input{position:absolute;opacity:0;pointer-events:none;}
+  .mk-merc .sw{width:34px;height:20px;border-radius:12px;background:#D5D9E6;position:relative;flex-shrink:0;transition:background .15s ease;margin-top:1px;}
+  .mk-merc .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .15s ease;}
+  .mk-merc input:checked + .sw{background:var(--sky);}
+  .mk-merc input:checked + .sw::after{transform:translateX(14px);}
+  .mk-merc input:focus-visible + .sw{outline:2px solid var(--sky);outline-offset:2px;}
+  .mk-merc .t b{font-size:13px;color:var(--navy);} .mk-merc .t small{display:block;font-size:11px;color:var(--text-3);line-height:1.45;margin-top:2px;}
+  @media print{ .ffx-b{display:block !important;} .ffx-h{cursor:default;} }
+</style>
+<script>
+/* =====================================================================
+   ANÁLISIS DE RESULTADOS · FLUJO DE FONDOS, REGULARIZADORES, PRODUCTOS Y CUBIERTOS, MERCADERÍA
+   (pedido de Pancho, 10/11/2026 16:39)
+   1) Dos métricas distintas:
+      · Estado de resultados = devengado (lo vendido / prestado en el período). Ver arVentasRango.
+      · Flujo de fondos = percibido: lo que entró y salió de cada cuenta (método de pago) en el período:
+        cobros de ventas y otros movimientos de Movimientos de caja de ATC, regularizadores, y pagos de
+        órdenes (fecha de pago). Se concilia con el estado de resultados (percibido vs. prestado).
+   2) Regularizador de mov. por error: único artículo para alinear cuentas (el artículo "Ingreso" se da
+      de baja). Siempre es la contrapartida de otro movimiento y lleva la justificación en Notas. Se
+      suman sus entradas y salidas del período, en el Flujo de fondos y en los cierres de Caja Mayor.
+   3) Productos vendidos y cubiertos: una sola sección.
+   4) Mercadería: proveedores que venden mercadería ("vende mercadería") y casilla "Es mercadería" en
+      el insumo, con sugerencia automática al crearlo.
+   ===================================================================== */
+// Cuenta de cada método de pago, ATC y órdenes de pago (confirmado por Pancho, 10/11/2026):
+// · "Cheque" en ATC = cobro con QR y "Transferencia" = transferencia: ambos se acreditan en Bco. Galicia,
+//   que es también el método con que se paga desde esa cuenta.
+// · Mercado Pago: mismo nombre para cobros y pagos.
+// · Débito = "Posnet": cobra con débito y también se paga con él.
+// · Efectivo: lo cobrado en caja (ATC) pasa a Caja Mayor con los retiros, y desde ahí se paga ("Efectivo - Caja Mayor").
+window.AR_FF_CUENTAS = window.AR_FF_CUENTAS || {
+  "Cheque":"Bco. Galicia", "Transferencia":"Bco. Galicia", "Bco. Galicia":"Bco. Galicia",
+  "Mercado Pago":"Mercado Pago",
+  "Tarjeta de débito":"Posnet", "Tarjeta de debito":"Posnet", "Débito":"Posnet", "Debito":"Posnet", "Posnet":"Posnet",
+  "Efectivo":"Efectivo", "Efectivo - Caja Mayor":"Efectivo"
+};
+// cómo se muestra cada método de origen debajo de la cuenta
+window.AR_FF_ALIAS = window.AR_FF_ALIAS || { "Cheque":"QR (“Cheque” en ATC)" };
+const AR_REG = "Regularizador de mov. por error";
+(function(){
+  if(typeof arState==="undefined") return;
+  const CHEV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+  const cuenta = m=>{ const k = String(m||"Sin especificar").trim(); return AR_FF_CUENTAS[k] || k; };
+  window.arFFCuenta = cuenta;
+  const sg = v=> (v>0.5 ? "+" : "") + arMoney(v);
+  const cls = v=> v<-0.5 ? "neg" : v>0.5 ? "pos" : "";
+  const hm = r=> r.h ? r.h : "";
+
+  /* ---------- tabla de regularizadores (la usan Análisis y Caja Mayor) ---------- */
+  window.arRegsResumen = function(regs){
+    const L = regs||[]; let ent = 0, sal = 0, sinNota = 0, sinPar = 0, cruces = 0;
+    L.forEach(r=>{ if(r.v>0) ent += r.v; else sal += r.v; if(!r.n) sinNota++; if(!r.par) sinPar++; else if(r.par.c===AR_REG) cruces++; });
+    return { n:L.length, ent, sal, neto:ent+sal, sinNota, sinPar, cruces };
+  };
+  window.arRegsHtml = function(regs, opts){
+    const o = opts||{}, L = (regs||[]).slice().sort((a,b)=>(a.fm||a.iso).localeCompare(b.fm||b.iso) || String(a.h).localeCompare(String(b.h)));
+    const R = arRegsResumen(L);
+    if(!L.length) return `<div class="ffr-empty">Sin movimientos de “${AR_REG}” en el período.</div>`;
+    const par = r=>{
+      if(!r.par) return `<span class="ffr-chip warn">Sin contrapartida en ATC</span>`;
+      if(r.par.c===AR_REG) return `<span class="ffr-chip ok">Cruce con ${arEsc(cuenta(r.par.m))}</span><small>neto $0 entre cuentas</small>`;
+      return `<span class="ffr-chip info">${arEsc(r.par.c)}</span><small>${arEsc(cuenta(r.par.m))}${r.par.h?" · "+arEsc(r.par.h):""}${r.par.u?" · "+arEsc(r.par.u):""}</small>`;
+    };
+    const filas = L.map(r=>`<tr class="${r.par && r.par.c===AR_REG ? "dim" : ""}"><td class="l">${arDMY(r.fm||r.iso)}<small>${arEsc(hm(r))}</small></td><td class="l">${arEsc(r.u||"—")}</td><td class="l">${arEsc(cuenta(r.m))}</td>
+      <td class="${cls(r.v)}"><b>${sg(r.v)}</b></td><td class="l">${par(r)}</td><td class="l nt">${r.n ? arEsc(r.n) : `<span class="ffr-chip warn">Sin justificación</span>`}</td></tr>`).join("");
+    return `<div class="ffr-k">
+        <div><span>Entradas</span><b class="pos">${sg(R.ent)}</b></div>
+        <div><span>Salidas</span><b class="neg">${arMoney(R.sal)}</b></div>
+        <div class="tot"><span>Neto del período</span><b class="${cls(R.neto)}">${sg(R.neto)}</b></div>
+        <div><span>Movimientos</span><b>${R.n}</b><small>${R.cruces} en cruces entre cuentas</small></div>
+        ${R.sinPar||R.sinNota ? `<div class="al"><span>A revisar</span><b>${R.sinPar} sin contrapartida · ${R.sinNota} sin justificación</b></div>` : ""}
+      </div>
+      <div class="ffr-tw"><table class="ffr-t"><thead><tr><th class="l">Fecha</th><th class="l">Usuario</th><th class="l">Cuenta</th><th>Monto</th><th class="l">Contrapartida</th><th class="l">Justificación (Notas)</th></tr></thead><tbody>${filas}</tbody>
+        <tfoot><tr><td class="l" colspan="3">Total · ${R.n} movimiento${R.n===1?"":"s"}</td><td class="${cls(R.neto)}"><b>${sg(R.neto)}</b></td><td class="l" colspan="2"></td></tr></tfoot></table></div>
+      ${o.nota===false?"":`<div class="ffr-nota">El regularizador siempre es la contrapartida de otro movimiento: los cruces entre cuentas (ej. un cobro cargado en Efectivo que era Mercado Pago) netean $0. Los que no tienen contrapartida en ATC son plata que salió o entró por fuera de la operación (ej. un retiro de cierre de caja cargado como regularizador): justificados en Notas, explican la diferencia con Caja Mayor.</div>`}`;
+  };
+
+  /* ---------- 1) Flujo de fondos ---------- */
+  function pagosRango(desde, hasta){
+    const out = { porMet:{}, total:0, n:0, sinFecha:[] };
+    arState.ordenes.forEach(o=>{
+      if(o.estado!=="Pagado") return;
+      const fp = o.fecha_pago ? String(o.fecha_pago).slice(0,10) : null;
+      if(!fp){ const f = o.fecha_comprobante; if(f>=desde && f<=hasta) out.sinFecha.push(o); return; }
+      if(fp<desde || fp>hasta) return;
+      const m = (o.metodo||"Sin método").trim(), v = arImporteOrden(o);
+      out.porMet[m] = (out.porMet[m]||0) + v; out.total += v; out.n++;
+    });
+    return out;
+  }
+  window.arToggleFF = function(el){ el.closest(".ffx").classList.toggle("open"); };
+  window.arRenderFF = function(el, c, print){
+    if(!el) return;
+    if(!AR_SITE.ventas){ el.innerHTML = `<div class="ar-empty">${arEsc(AR_SITE.ventasPendienteTxt || "Sin ventas integradas para este club.")}</div>`; return; }
+    if(!arState.ventas){ el.innerHTML = `<div class="ar-empty">Sin datos de Movimientos de caja para el período.</div>`; return; }
+    const V = c.v, G = c.g, P = pagosRango(c.desde, c.hasta);
+    const cu = new Map(), row = k=>{ if(!cu.has(k)) cu.set(k, { k, cobros:0, otros:0, reg:0, pagos:0, orig:new Set() }); return cu.get(k); };
+    Object.entries(V.ff||{}).forEach(([m,x])=>{ const r = row(cuenta(m)); r.cobros += x.cobros; r.otros += x.otros; r.reg += x.regE + x.regS; r.orig.add("ATC: "+((window.AR_FF_ALIAS||{})[m]||m)); });
+    Object.entries(P.porMet).forEach(([m,v])=>{ const r = row(cuenta(m)); r.pagos -= v; r.orig.add("Pagos: "+m); });
+    const rows = [...cu.values()].map(r=>Object.assign(r, { neto:r.cobros+r.otros+r.reg+r.pagos })).sort((a,b)=>(b.cobros-b.pagos)-(a.cobros-a.pagos));
+    const T = rows.reduce((a,r)=>{ a.cobros+=r.cobros; a.otros+=r.otros; a.reg+=r.reg; a.pagos+=r.pagos; a.neto+=r.neto; return a; }, { cobros:0, otros:0, reg:0, pagos:0, neto:0 });
+    const td = v=> Math.abs(v)<0.5 ? `<td class="z">—</td>` : `<td class="${cls(v)}">${sg(v)}</td>`;
+    const tabla = `<div class="ffr-tw"><table class="ff-t"><thead><tr><th class="l">Cuenta</th><th>Cobros de ventas<small>Movimientos de caja</small></th><th>Otros mov. de caja<small>Ingreso · Retiro · retiros de dinero</small></th><th>Regularizadores<small>neto</small></th><th>Pagos de órdenes<small>por fecha de pago</small></th><th>Neto del período</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td class="l"><b>${arEsc(r.k)}</b><small>${arEsc([...r.orig].join(" · "))}</small></td>${td(r.cobros)}${td(r.otros)}${td(r.reg)}${td(r.pagos)}<td class="nt ${cls(r.neto)}"><b>${sg(r.neto)}</b></td></tr>`).join("")}
+      </tbody><tfoot><tr><td class="l">Total</td>${td(T.cobros)}${td(T.otros)}${td(T.reg)}${td(T.pagos)}<td class="nt ${cls(T.neto)}"><b>${sg(T.neto)}</b></td></tr></tfoot></table></div>`;
+    // conciliación con el estado de resultados
+    const difV = T.cobros - V.total, difG = -T.pagos - G.total, difU = (T.cobros + T.pagos) - c.util;
+    const conc = `<div class="ff-conc">
+        <div class="ff-cc"><div class="h">Ventas</div>
+          <div class="kv"><span>Vendido en el período <small>estado de resultados (devengado)</small></span><b>${arMoney(V.total)}</b></div>
+          <div class="kv"><span>Cobrado por ventas <small>flujo de fondos (percibido)</small></span><b>${arMoney(T.cobros)}</b></div>
+          <div class="kv d ${cls(difV)}"><span>Diferencia</span><b>${sg(difV)}</b></div></div>
+        <div class="ff-cc"><div class="h">Gastos</div>
+          <div class="kv"><span>Gastos del período <small>estado de resultados (devengado)</small></span><b>${arMoney(G.total)}</b></div>
+          <div class="kv"><span>Pagado <small>${P.n} orden${P.n===1?"":"es"} con fecha de pago en el período</small></span><b>${arMoney(-T.pagos)}</b></div>
+          <div class="kv d ${cls(-difG)}"><span>Diferencia</span><b>${sg(difG)}</b></div></div>
+        <div class="ff-cc hl"><div class="h">Resultado</div>
+          <div class="kv"><span>Utilidad <small>estado de resultados</small></span><b>${arMoney(c.util)}</b></div>
+          <div class="kv"><span>Cobros − pagos <small>flujo operativo</small></span><b>${arMoney(T.cobros + T.pagos)}</b></div>
+          <div class="kv d ${cls(difU)}"><span>Diferencia de conciliación con el estado de resultados</span><b>${sg(difU)}</b></div></div>
+      </div>
+      <div class="ff-exp"><b>Por qué no coinciden (percibido vs. prestado).</b> Ventas: el estado de resultados cuenta lo que se vendió o prestó en el período; el flujo, lo que se cobró. Difieren por señas cobradas antes del turno (o turnos de este período señados antes), consumos todavía sin cobrar o cobrados al día siguiente, y cobros cargados como un total mientras el detalle se abre en varios ítems (o al revés).${Math.abs(V.movCaja)>0.5?` Además, Compras-Ventas tiene ${arMoney(V.movCaja)} de movimientos de caja (Ingreso, Retiro) que no son venta y quedan fuera del estado de resultados.`:""} Gastos: el estado de resultados imputa por fecha de factura (con prorrateos y la mercadería al CMV a medida que se vende); el flujo, por fecha de pago — facturas pendientes de pago, pagos de facturas de otros períodos y compras de mercadería que quedan en stock. Los regularizadores y otros movimientos de caja no son operación: se ven aparte, abajo.</div>`;
+    const R = arRegsResumen(V.regs);
+    const otros = (V.otros||[]).slice().sort((a,b)=>(a.fm||a.iso).localeCompare(b.fm||b.iso));
+    const tOtros = otros.reduce((a,x)=>a+x.v,0);
+    const abre = print ? " open" : "";
+    const boxRegs = `<div class="ffx open">
+        <div class="ffx-h" onclick="arToggleFF(this)"><span class="chev">${CHEV}</span><span class="nm">Regularizadores de mov. por error <small>movimientos ajenos a la operación, justificados</small></span>
+          <span class="ffx-res">Entradas ${sg(R.ent)} · Salidas ${arMoney(R.sal)} · <b class="${cls(R.neto)}">Neto ${sg(R.neto)}</b></span></div>
+        <div class="ffx-b">${arRegsHtml(V.regs)}</div></div>`;
+    const boxOtros = otros.length ? `<div class="ffx${abre}">
+        <div class="ffx-h" onclick="arToggleFF(this)"><span class="chev">${CHEV}</span><span class="nm">Otros movimientos de caja <small>no son ventas: Ingreso, Retiro, retiros de dinero</small></span>
+          <span class="ffx-res">${otros.length} mov. · <b class="${cls(tOtros)}">${sg(tOtros)}</b></span></div>
+        <div class="ffx-b"><div class="ffr-tw"><table class="ffr-t"><thead><tr><th class="l">Fecha</th><th class="l">Concepto</th><th class="l">Usuario</th><th class="l">Cuenta</th><th>Monto</th><th class="l">Notas</th></tr></thead><tbody>
+          ${otros.map(x=>`<tr><td class="l">${arDMY(x.fm||x.iso)}<small>${arEsc(hm(x))}</small></td><td class="l">${arEsc(x.c)}</td><td class="l">${arEsc(x.u||"—")}</td><td class="l">${arEsc(cuenta(x.m))}</td><td class="${cls(x.v)}"><b>${sg(x.v)}</b></td><td class="l nt">${arEsc(x.n||"")}</td></tr>`).join("")}
+          </tbody></table></div>
+          <div class="ffr-nota">El artículo “Ingreso” se da de baja: para alinear cuentas se usa sólo “${AR_REG}”, con la justificación en Notas. Los retiros de dinero de la caja que pagan algo deberían tener su orden de pago (si no, el gasto no figura en el estado de resultados).</div></div></div>` : "";
+    const avisos = [];
+    if(P.sinFecha.length) avisos.push(`${P.sinFecha.length} orden${P.sinFecha.length===1?"":"es"} pagada${P.sinFecha.length===1?"":"s"} sin fecha de pago (${P.sinFecha.slice(0,4).map(o=>arEsc(o.id)).join(", ")}${P.sinFecha.length>4?"…":""}): no entran al flujo hasta tener la fecha.`);
+    el.innerHTML = `<div class="ff-kpis">
+        <div><span>Cobros de ventas</span><b>${arMoney(T.cobros)}</b></div>
+        <div><span>Pagos de órdenes</span><b>${arMoney(-T.pagos)}</b></div>
+        <div><span>Regularizadores (neto)</span><b class="${cls(T.reg)}">${sg(T.reg)}</b></div>
+        <div><span>Otros mov. de caja</span><b class="${cls(T.otros)}">${sg(T.otros)}</b></div>
+        <div class="hero ${T.neto<0?"neg":""}"><span>Flujo neto del período</span><b>${sg(T.neto)}</b></div></div>
+      ${tabla}${avisos.length?`<div class="ar-warn">${avisos.join("<br>")}</div>`:""}
+      <h4 class="ar-sub-h">Conciliación con el estado de resultados<span class="sub">percibido vs. prestado</span></h4>${conc}
+      ${boxRegs}${boxOtros}
+      ${print?"":`<div class="ar-note">Cuentas: Bco. Galicia = cobros con QR (“Cheque” en ATC) y por transferencia + pagos con Bco. Galicia; Mercado Pago = cobros y pagos por Mercado Pago; Posnet = débito; Efectivo = lo cobrado en caja (pasa a Caja Mayor con los retiros) + pagos desde Caja Mayor. No incluye los movimientos internos de caja (apertura, cierre, retiro a caja mayor). Control contra el saldo real: para que cada cuenta cierre en $0 hace falta su saldo real al inicio y al final del período.</div>`}`;
+  };
+
+  /* ---------- 3) Productos vendidos y cubiertos ---------- */
+  window.arRenderProd = function(el, c, print){
+    if(!el) return;
+    if(!arState.ventas){ el.innerHTML = `<div class="ar-empty">Sin datos de ventas para el período.</div>`; return; }
+    el.innerHTML = `<div class="pc-sec"><div class="pc-h">Cubiertos</div><div id="${el.id}_cub"></div></div>
+      <div class="pc-sec"><div class="pc-h">Productos <small>Cafetería y bebidas · Servicio de cocina</small></div><div id="${el.id}_top"></div></div>`;
+    if(typeof arRenderCub==="function") arRenderCub(document.getElementById(el.id+"_cub"), c, true);
+    if(typeof arRenderTop==="function") arRenderTop(document.getElementById(el.id+"_top"), c, true);
+    if(!print) el.insertAdjacentHTML("beforeend", `<div class="ar-note">Cubiertos: cantidad del ítem “Cubierto” ($0) de Compras-Ventas, neta de reversiones (corte de jornada 05:00). Productos: unidades netas de reversiones con la categoría del índice de artículos; “Menos vendidos” se elige entre los que se vendieron al menos una vez en el período.</div>`);
+  };
+})();
+
+/* ---------- 2b) Regularizadores en Caja Mayor ---------- */
+(function(){
+  if(typeof cmProcesarArchivo!=="function") return;
+  function regsDeFilas(header, rows, desde, hasta){
+    const iC = vFindColIndex(header,["Concepto"]), iF = vFindColIndex(header,["Fecha de movimiento"]), iH = vFindColIndex(header,["Hora de movimiento"]),
+      iM = vFindColIndex(header,["Método de pago","Metodo de pago"]), iI = vFindColIndex(header,["Ingresos"]), iE = vFindColIndex(header,["Egresos"]),
+      iU = vFindColIndex(header,["Usuario"]), iN = vFindColIndex(header,["Notas"]);
+    if([iC,iF,iI,iE].includes(-1)) return [];
+    const t = (r,i)=> i===-1 || r[i]==null || r[i]==="-" ? "" : String(r[i]).trim();
+    const porDia = new Map(), regs = [];
+    rows.forEach(r=>{
+      const f = vParseFlexDate(r[iF]); if(!f) return; const fm = vToISODate(f);
+      if(fm<desde || fm>hasta) return;
+      const v = (r[iI]==="-"||r[iI]==null?0:Number(r[iI])) + (r[iE]==="-"||r[iE]==null?0:Number(r[iE])); if(!v) return;
+      const m = { fm, iso:fm, h:t(r,iH).slice(0,5), u:t(r,iU), m:t(r,iM)||"Sin especificar", v, c:t(r,iC), n:t(r,iN) };
+      if(!porDia.has(fm)) porDia.set(fm, []); porDia.get(fm).push(m);
+      if(m.c===AR_REG) regs.push(m);
+    });
+    const usados = new Set();
+    regs.forEach(R=>{ if(R.par) return; const L = porDia.get(R.fm)||[];
+      const cand = L.filter(x=>x!==R && !usados.has(x) && Math.abs(x.v+R.v)<0.5);
+      const p = cand.find(x=>x.c===R.c && x.m!==R.m) || cand.find(x=>x.c!==R.c) || cand.find(x=>x.c===R.c);
+      if(p){ R.par = { c:p.c, m:p.m, h:p.h, u:p.u }; usados.add(p); usados.add(R); if(p.c===R.c) p.par = { c:R.c, m:R.m, h:R.h, u:R.u }; } });
+    return regs;
+  }
+  function render(){
+    const anchor = document.getElementById("cmOtrosEgresos"); if(!anchor) return;
+    let box = document.getElementById("cmRegsBox");
+    if(!box){ box = document.createElement("div"); box.id = "cmRegsBox"; box.className = "cm-regs"; anchor.insertAdjacentElement("afterend", box); }
+    if(!cmState.desde || !cmState.file){ box.innerHTML = ""; box.classList.add("hidden"); return; }
+    const regs = cmState.regs || []; box.classList.remove("hidden");
+    const R = arRegsResumen(regs);
+    box.innerHTML = `<div class="cm-regs-h"><b>Regularizadores de mov. por error</b><span>${isoToDMY(cmState.desde)} al ${isoToDMY(cmState.hasta)} · cuenta aparte, no se suman a caja mayor</span>
+        <span class="g"></span><span class="r">Entradas <b>${fmtMoney(R.ent)}</b> · Salidas <b>${fmtMoney(Math.abs(R.sal))}</b> · Neto <b>${R.neto<0?"−":""}${fmtMoney(Math.abs(R.neto))}</b></span></div>
+      ${regs.length ? arRegsHtml(regs, { nota:false }) : `<div class="ffr-empty">Sin regularizadores en el período.</div>`}
+      ${R.sinPar ? `<div class="ffr-nota">Los regularizadores <b>sin contrapartida en ATC</b> son plata que se movió por fuera de la operación. Si uno de ellos es en realidad un retiro de cierre de caja (ej. cargado como regularizador por error), ese retiro <b>no aparece</b> en la lista de retiros a imputar: su monto queda acá, sumado en esta cuenta aparte.</div>` : ""}`;
+  }
+  const _proc = cmProcesarArchivo;
+  window.cmProcesarArchivo = function(){
+    const r = _proc.apply(this, arguments);
+    try{ cmState.regs = (cmState.file && cmState.desde) ? regsDeFilas(cmState.file.header, cmState.file.rows, cmState.desde, cmState.hasta) : []; render(); cmSaveState(); }catch(e){ console.warn("Regularizadores (Caja Mayor):", e); }
+    return r;
+  };
+  const _checks = cmRenderChecks;
+  window.cmRenderChecks = function(){ const r = _checks.apply(this, arguments); try{ render(); }catch(e){} return r; };
+  // al cerrar, el resumen de regularizadores queda guardado en el cierre
+  const _cerrar = cmEjecutarCierre;
+  window.cmEjecutarCierre = async function(){
+    const resumen = cmState.regs ? Object.assign(arRegsResumen(cmState.regs), { desde:cmState.desde, hasta:cmState.hasta,
+      sinPar:(cmState.regs||[]).filter(x=>!x.par).map(x=>({ f:x.fm, h:x.h, u:x.u, m:x.m, v:x.v, n:x.n })) }) : null;
+    const n0 = cmState.historialCierres.length;
+    const r = await _cerrar.apply(this, arguments);
+    try{ if(resumen && cmState.historialCierres.length>n0){ const ci = cmState.historialCierres[0]; delete resumen.sinNota; ci.regularizadores = resumen; cmState.regs = []; await cmSaveState(); if(typeof cmRenderResumenUltimoCierre==="function") cmRenderResumenUltimoCierre(); } }catch(e){}
+    try{ render(); }catch(e){}
+    return r;
+  };
+  if(typeof cmRenderResumenTable==="function"){
+    const _tab = cmRenderResumenTable;
+    window.cmRenderResumenTable = function(cierre){
+      const h = _tab.apply(this, arguments), g = cierre && cierre.regularizadores; if(!g) return h;
+      const fm = v=>(v<0?"−":"")+fmtMoney(Math.abs(v));
+      return h + `<div class="cm-regs-cierre"><b>Regularizadores de mov. por error</b> (cuenta aparte, ${g.desde?isoToDMY(g.desde)+" al "+isoToDMY(g.hasta):"período del cierre"}): entradas ${fmtMoney(g.ent)} · salidas ${fmtMoney(Math.abs(g.sal))} · neto <b>${fm(g.neto)}</b> · ${g.n} movimiento${g.n===1?"":"s"}${(g.sinPar||[]).length?`<br>Sin contrapartida en ATC: ${g.sinPar.map(x=>`${isoToDMY(x.f)} ${x.h||""} · ${x.m} · <b>${fm(x.v)}</b>${x.u?" · "+x.u:""}${x.n?" · “"+x.n+"”":" · sin justificación"}`).join(" — ")}`:""}</div>`;
+    };
+  }
+  if(cmState && cmState.desde) setTimeout(()=>{ try{ render(); }catch(e){} }, 0);
+})();
+
+/* ---------- 4) Mercadería: proveedor "vende mercadería" e insumo "Es mercadería" ---------- */
+(function(){
+  if(typeof cfgOpenPanel!=="function" || typeof sb==="undefined") return;
+  const PRE = (typeof AR_SITE!=="undefined" && AR_SITE.pre) || "lf";
+  if(PRE!=="lf") return;
+  let PF = null; // proveedor_id → vende_mercaderia
+  async function flags(force){
+    if(PF && !force) return PF;
+    const r = await sb.from("lf_proveedores").select("id,vende_mercaderia"); PF = {};
+    (r.data||[]).forEach(p=>PF[p.id] = p.vende_mercaderia); return PF;
+  }
+  const catDeRubro = rid=>{ try{ const r = cfgRub("proveedores", rid), c = r && cfgCat("proveedores", r.catId); return c ? c.nombre : ""; }catch(e){ return ""; } };
+  const nomProv = id=>{ try{ return (cfgProv(id)||{}).nombre || ""; }catch(e){ return ""; } };
+  function sugerir(provId, rubroId){
+    if(provId && PF && PF[provId]===true) return { v:true, why:`${nomProv(provId)} vende mercadería: todo lo que le compramos es mercadería.` };
+    if(provId && PF && PF[provId]===false) return { v:false, why:`${nomProv(provId)} no está marcado como proveedor de mercadería.` };
+    const cat = catDeRubro(rubroId);
+    if((window.AR_MERC_CONCEPTOS||[]).includes(cat)) return { v:true, why:`Es de ${cat}: se vende en el bar / la cocina.` };
+    return { v:false, why:"" };
+  }
+  const BOX = (id, titulo, txt, sub)=>`<div class="cfg-sec-title"><span class="n">${document.querySelectorAll("#cfgPanelBody .cfg-sec-title").length+1}</span>${titulo}</div>
+    <label class="mk-merc" for="${id}"><input type="checkbox" id="${id}"><span class="sw"></span><span class="t"><b>${txt}</b><small>${sub}</small></span></label>
+    <div class="config-conv-hint" id="${id}Hint" style="margin:-4px 0 16px"></div>`;
+
+  // ----- insumo -----
+  const _ins = window.cfgOpenInsumoForm;
+  if(typeof _ins==="function") window.cfgOpenInsumoForm = function(id){
+    const r = _ins.apply(this, arguments);
+    const ps = cfgPS, err = document.getElementById("cfgErrBox");
+    if(!ps || !err || ps.hoja!=="Insumo" || document.getElementById("cfgFInsMerc")) return r;
+    err.insertAdjacentHTML("beforebegin", BOX("cfgFInsMerc", "Mercadería", "Es mercadería", "Se vende (sola o dentro de una receta): al comprarla va a stock y entra a gastos como costo de mercadería vendida (CMV) a medida que se vende. Si no, es gasto del día de la factura."));
+    const ck = document.getElementById("cfgFInsMerc"), hint = document.getElementById("cfgFInsMercHint");
+    let actual = null, tocado = false;
+    const pv = ()=>(document.getElementById("cfgFInsProv")||{}).value || null, rb = ()=>(document.getElementById("cfgFInsRubro")||{}).value || null;
+    const refrescar = ()=>{ const s = sugerir(pv(), rb());
+      if(actual==null && !tocado) ck.checked = s.v;
+      hint.innerHTML = actual==null ? (s.why ? (tocado ? "Sugerido: "+(s.v?"sí":"no")+" · " : "Marcado automáticamente · ")+arEsc(s.why) : "") : (actual!==s.v && s.why ? "Ojo: "+arEsc(s.why) : ""); };
+    ck.onchange = ()=>{ tocado = true; refrescar(); };
+    ["cfgFInsProv","cfgFInsRubro","cfgFInsCat"].forEach(i=>{ const e = document.getElementById(i); if(e) e.addEventListener("change", ()=>setTimeout(refrescar,0)); });
+    (async()=>{ await flags(); if(id){ const q = await sb.from("lf_costeo_insumos").select("mercaderia").eq("id", id).maybeSingle(); actual = q.data ? q.data.mercaderia : null; if(actual!=null) ck.checked = !!actual; } refrescar(); })();
+    const sub = ps.submit;
+    ps.submit = async function(){
+      const ok = await sub.apply(this, arguments); if(ok===false) return ok;
+      try{
+        const v = !!ck.checked;
+        let ids = [];
+        if(id) ids = [id];
+        else { let q = sb.from("lf_costeo_insumos").select("id").order("created_at", { ascending:false }).limit(1); q = pv() ? q.eq("proveedor_id", pv()) : q.is("proveedor_id", null); const rr = await q; ids = (rr.data||[]).map(x=>x.id); }
+        if(ids.length && v!==actual){ const u = await sb.from("lf_costeo_insumos").update({ mercaderia:v }).in("id", ids);
+          if(u.error) showToast("El insumo se guardó, pero no se pudo marcar si es mercadería", "warn");
+          else if(id && actual!=null){ try{ logHistorialConfig("Editó un insumo", "mercadería: "+(actual?"sí":"no")+" → "+(v?"sí":"no")); }catch(e){} } }
+        if(window.arState) arState.cmvData = null; // el análisis recalcula el CMV
+      }catch(e){}
+      return ok;
+    };
+    return r;
+  };
+
+  // ----- proveedor -----
+  const _prov = window.cfgOpenProvForm;
+  if(typeof _prov==="function") window.cfgOpenProvForm = function(id){
+    const r = _prov.apply(this, arguments);
+    const ps = cfgPS, err = document.getElementById("cfgErrBox");
+    if(!ps || !err || ps.hoja!=="Proveedor" || document.getElementById("cfgFProvMerc")) return r;
+    err.insertAdjacentHTML("beforebegin", BOX("cfgFProvMerc", "Mercadería", "Vende mercadería", "Todo lo que le compramos es mercadería (ej. bebidas, verdulería, carnicería): sus insumos nuevos se marcan solos como mercadería y sus facturas van a stock, también las que no tienen ítems cargados."));
+    const ck = document.getElementById("cfgFProvMerc"), hint = document.getElementById("cfgFProvMercHint");
+    let actual = null;
+    (async()=>{ await flags(true); actual = id ? (PF[id]==null ? null : !!PF[id]) : null; ck.checked = !!actual;
+      hint.textContent = id && actual==null ? "Sin marcar todavía." : ""; })();
+    const sub = ps.submit;
+    ps.submit = async function(){
+      const ok = await sub.apply(this, arguments); if(ok===false) return ok;
+      try{
+        const v = !!ck.checked;
+        let pid = id;
+        if(!pid){ const nm = (document.getElementById("cfgFNombre")||{}).value || ""; const q = await sb.from("lf_proveedores").select("id").ilike("nombre", nm.replace(/\s+/g," ").trim()).order("created_at", { ascending:false }).limit(1); pid = q.data && q.data[0] && q.data[0].id; }
+        if(pid && v!==actual){ const u = await sb.from("lf_proveedores").update({ vende_mercaderia:v }).eq("id", pid);
+          if(u.error) showToast("El proveedor se guardó, pero no se pudo marcar si vende mercadería", "warn");
+          else { PF = null; try{ logHistorialConfig("Editó un proveedor", "“"+nomProv(pid)+"” · vende mercadería: "+(actual?"sí":"no")+" → "+(v?"sí":"no")+(v?" (sus insumos sin marcar pasan a mercadería)":"")); }catch(e){} } }
+        if(window.arState) arState.cmvData = null;
+      }catch(e){}
+      return ok;
+    };
+    return r;
+  };
 })();
 </script>
 <script>
