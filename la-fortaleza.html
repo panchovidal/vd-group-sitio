@@ -15307,6 +15307,41 @@ function cmBuildRetiros(header, rows){
   });
   events.sort((a,b)=> (a.dt-b.dt) || (CM_TIPO_ORDEN[a.tipo]-CM_TIPO_ORDEN[b.tipo]));
 
+  /* Correcciones de cierre/apertura (11/11/2026, casos de Pancho): cuando un empleado se equivoca
+     y vuelve a cerrar / abrir enseguida (cierre mal tipeado, venta olvidada, retiro cargado como
+     cierre…), quedan varios cierres y aperturas seguidos. Una "ráfaga" = cierres/aperturas
+     consecutivos, sin retiros a caja mayor en el medio y a menos de CM_RAFAGA_MIN minutos entre sí.
+     De cada ráfaga vale el ÚLTIMO cierre (con lo que realmente quedó en caja) y la ÚLTIMA apertura
+     posterior a él; los demás se netean entre sí y se listan como corrección (no generan diferencia). */
+  const correcciones = [];
+  {
+    const MIN = CM_RAFAGA_MIN * 60000, limpio = [];
+    let i = 0;
+    while(i < events.length){
+      const ev = events[i];
+      if(ev.tipo==="retiro"){ limpio.push(ev); i++; continue; }
+      let j = i;
+      while(j+1 < events.length && events[j+1].tipo!=="retiro" && (events[j+1].dt - events[j].dt) <= MIN) j++;
+      const R = events.slice(i, j+1);
+      const cierres = R.filter(e=>e.tipo==="cierre"), aperturas = R.filter(e=>e.tipo==="apertura");
+      if(R.length>1 && (cierres.length>1 || aperturas.length>1)){
+        const cU = cierres.length ? cierres[cierres.length-1] : null;
+        let aU = aperturas.length ? aperturas[aperturas.length-1] : null;
+        if(cU && aU && aU.dt < cU.dt) aU = null; // la ráfaga termina cerrada
+        const quedan = [cU, aU].filter(Boolean);
+        const anulados = R.filter(e=>!quedan.includes(e));
+        quedan.forEach(e=>limpio.push(e));
+        const nCI = anulados.filter(e=>e.tipo==="cierre").reduce((a,e)=>a+e.montoOut,0), nAP = anulados.filter(e=>e.tipo==="apertura").reduce((a,e)=>a+e.montoIn,0);
+        correcciones.push({ fechaMovISO:R[0].fechaMovISO, jornadaISO:vToISODate(R[0].jornada), desdeHora:cmFmtHora(R[0].dt), hastaHora:cmFmtHora(R[R.length-1].dt),
+          usuarios:[...new Set(R.map(e=>e.usuario))].join(", "),
+          movs:R.map(e=>({ tipo:e.tipo, hora:cmFmtHora(e.dt), usuario:e.usuario, monto:e.tipo==="cierre"?e.montoOut:e.montoIn, vale:quedan.includes(e) })),
+          cierreValido: cU ? cU.montoOut : null, aperturaValida: aU ? aU.montoIn : null, neto: nAP - nCI });
+      } else R.forEach(e=>limpio.push(e));
+      i = j+1;
+    }
+    events.length = 0; limpio.forEach(e=>events.push(e));
+  }
+
   const turnosPorDia = {};
   let turnoActual = null;
   events.forEach(ev=>{
@@ -15382,8 +15417,10 @@ function cmBuildRetiros(header, rows){
     }
   }
 
-  return {retiros: out, diffs, otrosEgresos};
+  return {retiros: out, diffs, otrosEgresos, correcciones};
 }
+const CM_RAFAGA_MIN = 30;
+function cmFmtHora(d){ return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
 
 /* ---------- carga del archivo (reutiliza attach-zone + vReadWorkbook, igual que Ventas) ---------- */
 function renderCMZone(){
@@ -15501,6 +15538,7 @@ function cmProcesarArchivo(){
   // diffs/otros egresos: solo los que caen (parcial o totalmente) dentro del período elegido
   const diffsEnRango = parsed.diffs.filter(d=> d.hastaFecha>=desde && d.desdeFecha<=hasta);
   const otrosEnRango = parsed.otrosEgresos.filter(o=> o.fechaMovISO>=desde && o.fechaMovISO<=hasta);
+  cmState.correcciones = (parsed.correcciones||[]).filter(c=> c.fechaMovISO>=desde && c.fechaMovISO<=hasta);
 
   cmState.desde = desde; cmState.hasta = hasta;
   cmState.pendientes = pendientes;
@@ -15530,6 +15568,17 @@ function cmRenderChecks(){
     wrap.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"12\"/><line x1=\"12\" y1=\"16\" x2=\"12.01\" y2=\"16\"/></svg><div>"+
       diffs.map(d=> "Dif. de caja: "+fmtMoney(Math.abs(d.diff))+" · "+d.desde+" ("+isoToDMY(d.desdeFecha)+") → "+d.hasta+" ("+isoToDMY(d.hastaFecha)+")").join("<br>")+
       "</div>";
+  }
+  // cierres / aperturas repetidos por error del empleado: se netean y se muestran aparte
+  const corr = cmState.correcciones||[];
+  let corrWrap = document.getElementById("cmCorrecciones");
+  if(!corrWrap){ corrWrap = document.createElement("div"); corrWrap.id = "cmCorrecciones"; wrap.insertAdjacentElement("afterend", corrWrap); }
+  if(!corr.length){ corrWrap.className = "hidden"; corrWrap.innerHTML = ""; }
+  else {
+    corrWrap.className = "cm-corr";
+    const lbl = {cierre:"Cierre", apertura:"Apertura"};
+    corrWrap.innerHTML = `<div class="cm-corr-h"><b>${corr.length} ${corr.length===1?"corrección":"correcciones"} de cierre / apertura</b><span>cierres y aperturas repetidos seguidos (error al cerrar, venta olvidada, retiro cargado como cierre): vale el último cierre y la última apertura; los demás se netean y no generan diferencia</span></div>`+
+      corr.map(c=>`<div class="cm-corr-r"><div class="f">${isoToDMY(c.fechaMovISO)}<small>${c.desdeHora}–${c.hastaHora} · ${escapeHtmlSueldos(c.usuarios)}</small></div><div class="m">${c.movs.map(m=>`<span class="${m.vale?"ok":"x"}">${m.hora} ${lbl[m.tipo]} ${fmtMoney(m.monto)}${m.vale?" ✓":""}</span>`).join("")}</div></div>`).join("");
   }
   const otros = cmState.otrosEgresos||[];
   const otrosWrap = document.getElementById("cmOtrosEgresos");
@@ -16135,7 +16184,7 @@ async function cmEjecutarCierre(saldoInicial, totalRetiros, totalSalidas, totalA
   cmState.oficinaToggle = "no";
   cmState.desde = null; cmState.hasta = null;
   cmState.yaImputadosAntesCount = 0;
-  cmState.diffs = []; cmState.otrosEgresos = [];
+  cmState.diffs = []; cmState.otrosEgresos = []; cmState.correcciones = [];
 
   cmSaveState();
   renderCMZone();
@@ -16175,7 +16224,7 @@ async function cmSaveState(){
       ajustesToggle: cmState.ajustesToggle,
       oficinaToggle: cmState.oficinaToggle,
       yaImputadosAntesCount: cmState.yaImputadosAntesCount,
-      diffs: cmState.diffs, otrosEgresos: cmState.otrosEgresos,
+      diffs: cmState.diffs, otrosEgresos: cmState.otrosEgresos, correcciones: cmState.correcciones||[],
       historialKeys: cmState.historialKeys,
       descartadosKeys: cmState.descartadosKeys,
       ultimoCierreFecha: cmState.ultimoCierreFecha,
@@ -16211,7 +16260,7 @@ async function cmLoadState(){
     cmState.ajustesToggle = raw.ajustesToggle || "no";
     cmState.oficinaToggle = raw.oficinaToggle || "no";
     cmState.yaImputadosAntesCount = raw.yaImputadosAntesCount || 0;
-    cmState.diffs = raw.diffs || [];
+    cmState.diffs = raw.diffs || []; cmState.correcciones = raw.correcciones || [];
     cmState.otrosEgresos = raw.otrosEgresos || [];
     cmState.historialKeys = raw.historialKeys || [];
     cmState.descartadosKeys = raw.descartadosKeys || [];
@@ -26169,6 +26218,15 @@ async function lfQuitarProveedorIns(id){
   #arCard_prod .ar-top-grid{grid-template-columns:repeat(auto-fit,minmax(520px,1fr));}
   .ar-top-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
   @media (max-width:760px){ .ar-top-3{grid-template-columns:1fr;} #arCard_prod .ar-top-grid{grid-template-columns:1fr;} }
+  .cm-corr{margin:10px 0;border:1px solid #C9D6F5;background:#F4F7FF;border-radius:12px;padding:10px 14px;font-size:12px;}
+  .cm-corr-h{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:6px;}
+  .cm-corr-h b{color:var(--navy);} .cm-corr-h span{color:var(--text-3);font-size:11.5px;}
+  .cm-corr-r{display:flex;gap:12px;padding:6px 0;border-top:1px dashed #D5DEF3;align-items:flex-start;flex-wrap:wrap;}
+  .cm-corr-r .f{min-width:130px;font-weight:700;color:var(--navy);} .cm-corr-r .f small{display:block;font-weight:600;color:var(--text-3);font-size:10.5px;}
+  .cm-corr-r .m{display:flex;flex-wrap:wrap;gap:6px;}
+  .cm-corr-r .m span{border-radius:6px;padding:2px 8px;font-variant-numeric:tabular-nums;font-size:11.5px;}
+  .cm-corr-r .m span.ok{background:#E4F6EA;color:#137B44;font-weight:700;}
+  .cm-corr-r .m span.x{background:#fff;color:var(--text-3);text-decoration:line-through;border:1px solid #E3E6EF;}
   .cm-regs{margin:12px 0;border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#fff;}
   .cm-regs-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:12.5px;}
   .cm-regs-h b{color:var(--navy);} .cm-regs-h > span{color:var(--text-3);font-size:11.5px;}
