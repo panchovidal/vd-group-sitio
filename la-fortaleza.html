@@ -7218,6 +7218,51 @@ function zoomStep(delta){
   setZoom(saved);
 })();
 
+/* ---- Orden según el Índice de artículos (pedido de Pancho, 27/10/2026) ----
+   Las tablas de Costeo (Precios de venta, Recetas) y el buscador de catálogo de la Carta ordenaban
+   sus categorías y artículos alfabéticamente. Pancho pidió que, en cambio, respeten el orden de
+   filas del Índice de artículos (el mismo .xlsx que ya se usa para clasificarlos): si el índice
+   trae 2 o 3 categorías (Cat. 2), que las tablas se agrupen y ordenen en ese mismo orden, y que los
+   artículos dentro de cada categoría sigan el orden exacto en que aparecen en el índice.
+   indiceOrdenArticulosMap(): nombre de artículo (normalizado) → posición de su primera fila en el
+   índice vigente. indiceOrdenCategoriasMap(): igual, pero por categoría (Cat. 2) del artículo, según
+   la primera fila de esa categoría. Ambas devuelven un Map vacío si no hay índice cargado — en ese
+   caso los comparadores de abajo caen de nuevo en orden alfabético, como antes.
+   IMPORTANTE (16/11/2026): estas 4 funciones tienen que quedar en el scope global — el módulo de
+   Costeo "nuevo" (Carga de compras, Precios de venta más abajo) las llama desde afuera del IIFE
+   "COSTEO (La Fortaleza)" que arranca justo debajo. Estaban definidas ADENTRO de ese IIFE y por eso
+   quedaban inaccesibles desde afuera ("indiceOrdenCategoriasMap is not defined"): eso rompía
+   renderCosteoComprasList() (y por lo tanto costeoConceptosPresentes) en TODOS sus usos — buscador
+   de facturas, volver al listado y, puntualmente, el flujo de borrar un ítem de una factura, que
+   quedaba a mitad de camino (el ítem SÍ se borraba pero el popup de confirmación no se cerraba
+   porque la función se interrumpía con esa excepción antes de llegar a closeConfirm()). Reporte de
+   Pancho: "lo elimina, pero el popup no se va". */
+const norm = s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+function indiceOrdenArticulosMap(){
+  const map = new Map();
+  if(typeof recIndiceArticulosDisponibles!=="function") return map;
+  recIndiceArticulosDisponibles().forEach((a,i)=>{ const k=norm(a.nombre); if(!map.has(k)) map.set(k,i); });
+  return map;
+}
+function indiceOrdenCategoriasMap(){
+  const map = new Map();
+  if(typeof recIndiceArticulosDisponibles!=="function") return map;
+  recIndiceArticulosDisponibles().forEach((a,i)=>{ const k=norm(a.concepto); if(!map.has(k)) map.set(k,i); });
+  return map;
+}
+function cmpPorIndiceArticulo(nombreA,nombreB,map){
+  const m = map || indiceOrdenArticulosMap();
+  const ra = m.has(norm(nombreA)) ? m.get(norm(nombreA)) : Infinity, rb = m.has(norm(nombreB)) ? m.get(norm(nombreB)) : Infinity;
+  if(ra!==rb) return ra-rb;
+  return String(nombreA||"").localeCompare(String(nombreB||""),"es");
+}
+function cmpPorIndiceCategoria(catA,catB,map){
+  const m = map || indiceOrdenCategoriasMap();
+  const ra = m.has(norm(catA)) ? m.get(norm(catA)) : Infinity, rb = m.has(norm(catB)) ? m.get(norm(catB)) : Infinity;
+  if(ra!==rb) return ra-rb;
+  return String(catA||"").localeCompare(String(catB||""),"es");
+}
+
 /* =====================================================================
    COSTEO (La Fortaleza) — misma estructura que Costeo de Che Mono (pedido de Pancho, 02/10/2026):
    Precios (tablas por categoría del Índice de artículos de Ventas) · Recetas (artículos y
@@ -7382,40 +7427,6 @@ function missingIns(a){ return artLineas(a).filter(l=>{ const r=lineRef(l); retu
 const ST = { tab:LS.get("tab","precios"), cols:LS.get("cols",{precios:2,recetas:2,compras:3}), order:LS.get("order",{}), focus:{precios:null,recetas:null,compras:null},
   sort:{}, filt:{}, pvSearch:"", ajuste:null, recMode:"art", recSearch:"", recCardQ:{}, recOpen:null, coSearch:"", coEstado:"todas" };
 const artsActivos = ()=>D.arts.filter(a=>a.activo);
-/* ---- Orden según el Índice de artículos (pedido de Pancho, 27/10/2026) ----
-   Las tablas de Costeo (Precios de venta, Recetas) y el buscador de catálogo de la Carta ordenaban
-   sus categorías y artículos alfabéticamente. Pancho pidió que, en cambio, respeten el orden de
-   filas del Índice de artículos (el mismo .xlsx que ya se usa para clasificarlos): si el índice
-   trae 2 o 3 categorías (Cat. 2), que las tablas se agrupen y ordenen en ese mismo orden, y que los
-   artículos dentro de cada categoría sigan el orden exacto en que aparecen en el índice.
-   indiceOrdenArticulosMap(): nombre de artículo (normalizado) → posición de su primera fila en el
-   índice vigente. indiceOrdenCategoriasMap(): igual, pero por categoría (Cat. 2) del artículo, según
-   la primera fila de esa categoría. Ambas devuelven un Map vacío si no hay índice cargado — en ese
-   caso los comparadores de abajo caen de nuevo en orden alfabético, como antes. */
-function indiceOrdenArticulosMap(){
-  const map = new Map();
-  if(typeof recIndiceArticulosDisponibles!=="function") return map;
-  recIndiceArticulosDisponibles().forEach((a,i)=>{ const k=norm(a.nombre); if(!map.has(k)) map.set(k,i); });
-  return map;
-}
-function indiceOrdenCategoriasMap(){
-  const map = new Map();
-  if(typeof recIndiceArticulosDisponibles!=="function") return map;
-  recIndiceArticulosDisponibles().forEach((a,i)=>{ const k=norm(a.concepto); if(!map.has(k)) map.set(k,i); });
-  return map;
-}
-function cmpPorIndiceArticulo(nombreA,nombreB,map){
-  const m = map || indiceOrdenArticulosMap();
-  const ra = m.has(norm(nombreA)) ? m.get(norm(nombreA)) : Infinity, rb = m.has(norm(nombreB)) ? m.get(norm(nombreB)) : Infinity;
-  if(ra!==rb) return ra-rb;
-  return String(nombreA||"").localeCompare(String(nombreB||""),"es");
-}
-function cmpPorIndiceCategoria(catA,catB,map){
-  const m = map || indiceOrdenCategoriasMap();
-  const ra = m.has(norm(catA)) ? m.get(norm(catA)) : Infinity, rb = m.has(norm(catB)) ? m.get(norm(catB)) : Infinity;
-  if(ra!==rb) return ra-rb;
-  return String(catA||"").localeCompare(String(catB||""),"es");
-}
 // Las 3 categorías "conocidas" de Costeo (COSTEO_CONCEPTOS), reordenadas según el Índice vigente —
 // para los lugares donde solo importan esas 3 (ej. el catálogo de la Carta). El array original no
 // se toca (otros lugares dependen de .includes() sobre él), solo se usa una copia para el orden.
