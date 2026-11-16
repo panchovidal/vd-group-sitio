@@ -16805,9 +16805,21 @@ function costeoInsumoUnidadEfectiva(ins){
 async function loadCosteoCompraItems(){
   const ids = costeoOrdenesFiltradas().map(o=>o.id);
   if(!ids.length){ costeoCompraItems = []; return; }
-  const { data, error } = await sb.from("lf_costeo_compra_items").select("*").in("orden_id", ids).order("created_at");
-  if(error){ showToast("No se pudieron cargar los ítems de compra", "warn"); return; }
-  costeoCompraItems = data || [];
+  // Paginado (11/2026): Supabase corta la respuesta en 1000 filas por default. Con más de 1000
+  // ítems de compra en total, los más nuevos (quedan al final del orden ascendente por fecha)
+  // dejaban de verse en la factura aunque SÍ se habían guardado bien en la base — se veía como que
+  // "agrego el ítem y no queda guardado" cuando en realidad el problema era que no se traían todas
+  // las filas (reporte de Pancho, 16/11/2026). Mismo problema que ya se había resuelto para el
+  // conteo de ítems de Pagos (pgItemsCount) paginando con .range().
+  const out = []; let from = 0;
+  for(;;){
+    const { data, error } = await sb.from("lf_costeo_compra_items").select("*").in("orden_id", ids).order("created_at").range(from, from+999);
+    if(error){ showToast("No se pudieron cargar los ítems de compra", "warn"); return; }
+    out.push(...(data||[]));
+    if(!data || data.length<1000) break;
+    from += 1000;
+  }
+  costeoCompraItems = out;
 }
 async function loadCosteoOrdenAjustes(){
   const ids = costeoOrdenesFiltradas().map(o=>o.id);
