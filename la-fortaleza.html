@@ -17736,6 +17736,13 @@ async function costeoAddItem(){
   costeoInitAddRowUI();
   await loadCosteoCompraItems();
   renderCosteoItemsList();
+  // Hacer scroll para que la fila recién agregada (y el formulario de alta) queden visibles — con
+  // varios ítems ya cargados, la tabla scrollea y la fila nueva se agrega abajo de todo, fuera de
+  // la vista. Sin este scroll, parece que no se guardó y se termina cargando el mismo ítem varias
+  // veces (11/2026, reporte de Pancho: "agrego un ítem pero no queda guardado" — en realidad SÍ se
+  // guardaba, pero quedaba oculto más abajo del scroll).
+  const addRow = document.getElementById("ciAddRow");
+  if(addRow && addRow.scrollIntoView) addRow.scrollIntoView({block:"nearest"});
   logHistorialConfig("Cargó un ítem de compra (Costeo)", `${nombre} — orden ${costeoOpenOrdenId}`);
   showToast("Ítem agregado correctamente");
 }
