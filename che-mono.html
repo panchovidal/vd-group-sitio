@@ -2424,6 +2424,23 @@
   .skc-sw button.on.r{background:var(--sk-ok);color:#fff}
   .skc-sw button.on.t{background:var(--sk-teo-bg);color:var(--sk-teo)}
   .skc-sw.busy{opacity:.5;pointer-events:none}
+  /* 19/11/2026 — Che Mono: planilla de Salón / Cocina */
+  .skc-sec{display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
+  .skc-sec>small{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+  .skc-sec .skc-sw button.on.sa{background:#1B2C66;color:#fff}
+  .skc-sec .skc-sw button.on.co{background:#B45309;color:#fff}
+  .skp-opts{display:grid;gap:12px;padding:4px 22px 18px}
+  .skp-opt{display:flex;gap:14px;align-items:flex-start;text-align:left;width:100%;padding:16px 18px;border:1.5px solid var(--border);border-radius:14px;background:#fff;cursor:pointer;font-family:inherit;transition:border-color .15s,box-shadow .15s,transform .15s}
+  .skp-opt:hover:not(:disabled){border-color:#1B2C66;box-shadow:0 6px 18px rgba(27,44,102,.12);transform:translateY(-1px)}
+  .skp-opt:disabled{opacity:.45;cursor:not-allowed}
+  .skp-opt .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;color:#fff;font-weight:900;font-size:17px}
+  .skp-opt .ic.sa{background:#1B2C66}.skp-opt .ic.co{background:#B45309}
+  .skp-opt b{display:block;font-size:15px;color:var(--text-1,#111);margin-bottom:3px}
+  .skp-opt small{display:block;font-size:12.5px;line-height:1.45;color:var(--text-2,#4b5563)}
+  .skp-opt .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .skp-opt .chips span{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:#EEF1F8;color:#1B2C66}
+  .skp-opt .chips span.co{background:#FEF3E2;color:#92400E}
+  .skp-opt em{font-style:normal;margin-left:auto;font-size:12px;font-weight:800;color:var(--text-3);white-space:nowrap;padding-top:2px}
   .skc-bulk{display:inline-flex;gap:4px;margin-left:auto}
   @media (max-width:900px){
     .sk-phead,.sk-scroll,#ctabStock .sk-wrap{padding-left:16px;padding-right:16px}
@@ -14672,7 +14689,7 @@ async function loadAll(force){
   if(S.base && !force && Date.now()-S.loadedAt < 45000) return true;
   S.loading = (async()=>{
     try{
-      const [base, sItems, est, conteos, pOrd, pIt, comps, vmap] = await Promise.all([
+      const [base, sItems, est, conteos, pOrd, pIt, comps, vmap, sects] = await Promise.all([
         SK_SITE.load(fetchAll),
         fetchAll(T("stock_items"),"item_tipo,item_id,modo,modificado_nombre,modificado_fecha,conteo_unidad,conteo_factor","item_id"),
         fetchAll(T("stock_estaciones"),"id,grupo_tipo,grupo_id,nombre,orden"),
@@ -14680,12 +14697,14 @@ async function loadAll(force){
         fetchAll(T("produccion_ordenes"),"*"),
         fetchAll(T("produccion_items"),"*"),
         fetchAll(T("stock_computos"),"id,conteo_ini_id,conteo_fin_id,desde,hasta,totales,nota,creado_por_nombre,created_at,recalculado_fecha,recalculado_por_nombre"),
-        fetchAll(T("stock_ventas_map"),"*","nombre")
+        fetchAll(T("stock_ventas_map"),"*","nombre"),
+        fetchAll(T("stock_sectores"),"grupo_tipo,grupo_id,sector",null).catch(()=>[])
       ]);
       S.base = base;
       S.modo = {}; S.modoMeta = {};
       sItems.forEach(r=>{ const k=r.item_tipo+":"+r.item_id; S.modo[k]=r.modo; S.modoMeta[k]=r; });
       S.est = est;
+      S.sector = {}; (sects||[]).forEach(r=>S.sector[r.grupo_tipo+":"+r.grupo_id]=r.sector);
       S.conteos = conteos.sort((a,b)=>a.fecha<b.fecha?1:a.fecha>b.fecha?-1:0);
       S.prodOrd = pOrd; S.prodIt = pIt.map(x=>({...x, cantidad:Number(x.cantidad)||0, costo_unitario:x.costo_unitario==null?null:Number(x.costo_unitario)}));
       S.computos = comps.sort((a,b)=>a.desde<b.desde?1:a.desde>b.desde?-1:0);
@@ -14742,6 +14761,11 @@ const itemsDe = t=>Object.values(S.items).filter(x=>x.t===t);
 const realesDe = t=>itemsDe(t).filter(x=>modo(x.k)==="real");
 function estDe(gT,gId){ return S.est.filter(e=>e.grupo_tipo===gT && e.grupo_id===gId).sort((a,b)=>(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,"es")); }
 function estNombres(it){ const l=estDe(it.gT,it.gId).map(e=>e.nombre); return l.length?l:["Stock"]; }
+/* 19/11/2026 — Che Mono: cada rubro (insumos) o categoría (semi-elaborados) se cuenta en la planilla de Salón o en la de Cocina.
+   Sin definir: los rubros de Cafetería y Bebidas van a Salón; el resto, a Cocina. */
+function secDe(gT, gId, cN){ const r = S.sector && S.sector[gT+":"+gId]; if(r==="salon"||r==="cocina") return r; return gT==="rubro" && /cafeter|bebida/.test(norm(cN)) ? "salon" : "cocina"; }
+const secIt = it=>secDe(it.gT, it.gId, it.cN);
+const SEC_N = { salon:"Salón", cocina:"Cocina" };
 // Árbol categoría → grupo (rubro o categoría de semi) → ítems
 function tree(t, pred){
   const cats = {};
@@ -15016,7 +15040,7 @@ function cfgRender(){
   const puede = SK_SITE.tiene("config");
   const nVis = G._vis.length, nVisR = G._vis.filter(k=>modo(k)==="real").length;
   let h = `<div class="skc-head"><div class="sk-grow"><h1>Stock</h1>
-      <div class="sk-sub">Elegí qué ${G.tipo==="i"?"insumos":"semi-elaborados"} trabajan con <b>stock real</b> (se cuentan en Stock › Conteos y se les mide la fuga) y cuáles siguen con <b>stock teórico</b> (su consumo sale de ventas × receta). Para cada ${G.tipo==="i"?"rubro":"categoría"} definí las <b>estaciones de stock</b> donde se guarda la mercadería: son las columnas de la planilla de conteo.</div></div>
+      <div class="sk-sub">Elegí qué ${G.tipo==="i"?"insumos":"semi-elaborados"} trabajan con <b>stock real</b> (se cuentan en Stock › Conteos y se les mide la fuga) y cuáles siguen con <b>stock teórico</b> (su consumo sale de ventas × receta). Para cada ${G.tipo==="i"?"rubro":"categoría"} definí las <b>estaciones de stock</b> donde se guarda la mercadería y en qué <b>planilla</b> se cuenta: <b>Salón</b> (una sola hoja, con todas las estaciones como columnas) o <b>Cocina</b> (una pestaña por estación).</div></div>
       <div class="sk-kpis" style="grid-template-columns:repeat(2,minmax(150px,1fr));margin:0;min-width:320px">
         <div class="sk-kpi"><small>Insumos en real</small><b>${ci.r} <span style="display:inline;font-size:12px;color:var(--text-3)">de ${ci.n}</span></b><div class="bar"><i style="width:${ci.n?ci.r/ci.n*100:0}%"></i></div></div>
         <div class="sk-kpi"><small>Semi-elab. en real</small><b>${cs.r} <span style="display:inline;font-size:12px;color:var(--text-3)">de ${cs.n}</span></b><div class="bar"><i style="width:${cs.n?cs.r/cs.n*100:0}%"></i></div></div>
@@ -15036,7 +15060,7 @@ function cfgRender(){
     const ests = estDe(g.gT, g.gId); const falta = !ests.length && g.r>0;
     const pos = ORD.indexOf(g.gId)+1;
     return `<div class="sk-card" data-g="${esc(g.gId)}"><div class="sk-card-h">${cvCardHead(pos)}<span class="sk-card-t">${esc(g.nombre)}</span>${G.tipo==="i"?`<span class="sk-card-m">${esc(g.cN)}</span>`:""}
-        <span class="sk-grow"></span><span class="sk-card-m"><b style="color:${g.r?"var(--sk-ok)":"var(--text-3)"}">${g.r}</b> de ${g.n} en real</span></div>
+        <span class="sk-grow"></span>${g.gId!=="none"?(()=>{ const sv=secDe(g.gT,g.gId,g.cN); return `<span class="skc-sec" title="En qué planilla de conteo se cuentan estos ítems"><small>Planilla</small><span class="skc-sw">${["salon","cocina"].map(v=>`<button type="button" class="${v==="salon"?"sa":"co"} ${sv===v?"on":""}" data-act="sec" data-v="${v}" data-gt="${g.gT}" data-gid="${esc(g.gId)}" data-cn="${esc(g.cN||"")}" data-gn="${esc(g.nombre)}" ${puede?"":"disabled"}>${SEC_N[v]}</button>`).join("")}</span></span>`; })():""}<span class="sk-card-m"><b style="color:${g.r?"var(--sk-ok)":"var(--text-3)"}">${g.r}</b> de ${g.n} en real</span></div>
       <div class="skc-est ${falta?"none":""}"><span class="sk-lbl">${ICO.pin} Estaciones</span>
         ${ests.map((e,ix)=>`<span class="skc-st">${puede&&ix>0?`<button type="button" class="mv" data-act="est-mv" data-id="${e.id}" data-d="-1" title="Mover a la izquierda">${ICO.left}</button>`:""}${esc(e.nombre)}${puede&&ix<ests.length-1?`<button type="button" class="mv" data-act="est-mv" data-id="${e.id}" data-d="1" title="Mover a la derecha">${ICO.right}</button>`:""}${puede?`<button type="button" data-act="est-del" data-id="${e.id}" title="Quitar estación">${ICO.x}</button>`:""}</span>`).join("")}
         ${!ests.length?`<span style="font-size:12px;color:${falta?"#7A5200":"var(--text-3)"};font-weight:600">${falta?"Definí al menos una estación para poder contar estos ítems":"Sin estaciones todavía"}</span>`:""}
@@ -15067,6 +15091,12 @@ function cfgBind(){
     if(act==="toggle"){ if(e.target.closest(".skc-bulk")) return; const k=G.tipo+b.dataset.id; G.open[k]=!G.open[k]; LS.set("cfg_open",G.open); b.parentElement.classList.toggle("open"); return; }
     if(act==="expand"||act==="collapse"){ tree(G.tipo).forEach(c=>G.open[G.tipo+c.id]=act==="expand"); LS.set("cfg_open",G.open); cfgRender(); return; }
     if(act==="cu"){ e.stopPropagation(); return cuModal(b.dataset.k); }
+    if(act==="sec"){ e.stopPropagation(); const gT=b.dataset.gt, gId=b.dataset.gid, v=b.dataset.v, kk=gT+":"+gId;
+      if(secDe(gT,gId,b.dataset.cn)===v) return;
+      const prev = S.sector[kk]; S.sector[kk] = v; cfgRender();
+      const {error} = await sb.from(T("stock_sectores")).upsert({ grupo_tipo:gT, grupo_id:gId, sector:v, modificado_nombre:uname(), updated_at:new Date().toISOString() }, {onConflict:"grupo_tipo,grupo_id"});
+      if(error){ if(prev) S.sector[kk]=prev; else delete S.sector[kk]; cfgRender(); toast("No se pudo guardar la planilla de ese rubro","warn"); return; }
+      log("Cambió la planilla de conteo", `${b.dataset.gn} → ${SEC_N[v]}`, "config"); toast(`${b.dataset.gn}: se cuenta en la planilla de ${SEC_N[v]}`); return; }
     if(act==="modo"){ e.stopPropagation(); await setModo([b.dataset.k], b.dataset.m); return; }
     if(act==="bulk"){ e.stopPropagation();
       const keys = (b.dataset.scope==="vis" ? (G._vis||[]).map(k=>S.items[k]).filter(Boolean) : itemsDe(G.tipo).filter(x=>(b.dataset.scope==="cat"?x.cId:x.gId)===b.dataset.id)).filter(x=>modo(x.k)!==b.dataset.m).map(x=>x.k);
@@ -15217,7 +15247,7 @@ async function conteosRender(){
   const realI = realesDe("i"), realS = realesDe("s");
   const head = `<div class="sk-phead"><div class="sk-grow"><h1>Conteos de stock</h1><div class="sk-sub">Cada conteo es el stock <b>al inicio del día</b> de su fecha (para cerrar octubre: conteo del 1/10 y del 1/11). Se cuentan solo los ítems configurados con stock real, por estación.</div></div>
     <div class="sk-actions">${S.conteos.length?`<button type="button" class="sk-btn" data-act="hist">${ICO.layers} Historial <span class="sk-tag teo">${S.conteos.length}</span></button>`:""}
-      <button type="button" class="sk-btn" data-act="plantilla" ${realI.length+realS.length?"":"disabled"}>${ICO.dl} Descargar planilla</button>
+      <button type="button" class="sk-btn" data-act="plantilla" ${realI.length+realS.length?"":"disabled"}>${ICO.dl} Descargar planillas</button>
       <button type="button" class="sk-btn pri" data-act="nuevo" ${realI.length+realS.length?"":"disabled"}>${ICO.plus} Nuevo conteo</button></div></div>`;
   if(!realI.length && !realS.length){
     P0.innerHTML = head + `<div class="sk-scroll"><div class="sk-big"><div class="ic">${ICO.set}</div><b class="t">Todavía no hay ítems con stock real</b>Elegí en <b>Configuración › Stock</b> qué insumos y semi-elaborados se van a contar y definí las estaciones de cada rubro. Mientras tanto, todo se calcula con stock teórico.
@@ -15226,7 +15256,7 @@ async function conteosRender(){
   }
   if(!S.conteos.length){
     P0.innerHTML = head + `<div class="sk-scroll"><div class="sk-big"><div class="ic">${ICO.calc}</div><b class="t">Primer conteo</b>Hay <b>${realI.length}</b> insumo${realI.length===1?"":"s"} y <b>${realS.length}</b> semi-elaborado${realS.length===1?"":"s"} en stock real. Descargá la planilla, que la completen en cada estación y subila desde “Nuevo conteo” — o cargalo directo en pantalla. Este primer conteo es el stock inicial del primer cómputo.
-      <div class="sk-actions"><button type="button" class="sk-btn" data-act="plantilla">${ICO.dl} Descargar planilla</button><button type="button" class="sk-btn pri" data-act="nuevo">${ICO.plus} Nuevo conteo</button></div></div></div>`;
+      <div class="sk-actions"><button type="button" class="sk-btn" data-act="plantilla">${ICO.dl} Descargar planillas</button><button type="button" class="sk-btn pri" data-act="nuevo">${ICO.plus} Nuevo conteo</button></div></div></div>`;
     return conteosBind();
   }
   const cid = C.ver && S.conteos.some(c=>c.id===C.ver) ? C.ver : S.conteos[0].id;
@@ -15290,7 +15320,7 @@ function conteosBind(){
     if(a==="ircfg"){ goModule("config"); goConfigTab("stock"); return; }
     if(a==="nuevo") return editorOpen(null);
     if(a==="editar") return editorOpen(b.dataset.id);
-    if(a==="plantilla") return plantillaExcel(hoy(), null);
+    if(a==="plantilla") return plantillaMenu(hoy(), null);
     if(a==="hist") return conteosHist();
     if(a==="xls") return conteoExcel(b.dataset.id);
     if(a==="prev"||a==="next"){ const cur=C.ver&&S.conteos.some(c=>c.id===C.ver)?C.ver:S.conteos[0].id; const i=S.conteos.findIndex(c=>c.id===cur)+(a==="prev"?1:-1); if(S.conteos[i]){ C.ver=S.conteos[i].id; conteosRender(); } return; }
@@ -15353,7 +15383,7 @@ function editorRender(){
   let tab = 0;
   let h = `<div class="sk-phead"><div class="sk-grow"><h1>${E.id?"Editar conteo":"Nuevo conteo"}</h1><div class="sk-sub">Cargá lo que hay en cada estación. Podés completarlo en pantalla o bajar la planilla, completarla y subirla: los valores se vuelcan acá para revisarlos antes de guardar.</div></div>
     <div class="sk-actions"><div class="sk-f" style="flex-direction:row;align-items:center;gap:8px"><label for="skEdFecha" style="margin:0">Stock al inicio del</label><input type="date" id="skEdFecha" value="${E.fecha}" max="${addDays(hoy(),1)}" style="padding:7px 10px;border-radius:9px;border:1px solid var(--border);font-family:inherit;font-size:13px"></div>
-      <button type="button" class="sk-btn" data-act="plantilla">${ICO.dl} Planilla</button><button type="button" class="sk-btn" data-act="importar">${ICO.up} Importar planilla</button></div></div>
+      <button type="button" class="sk-btn" data-act="plantilla">${ICO.dl} Planillas</button><button type="button" class="sk-btn" data-act="importar">${ICO.up} Importar planilla</button></div></div>
     <div class="sk-scroll">`;
   if(E.ultima) h += note("", `Último conteo guardado: <b>inicio del ${fD(E.ultima.fecha)}</b>. Este conteo cierra el período desde esa fecha hasta el día anterior a la fecha que elijas.`);
   if(E.importInfo) h += E.importInfo;
@@ -15379,7 +15409,7 @@ function editorBind(){
   P0.onclick = async e=>{ const b=e.target.closest("[data-act]"); if(!b||b.disabled) return; const a=b.dataset.act;
     if(a==="cancelar"){ const pr=edProgress(); if(pr.done && !(await confirmar("¿Salir sin guardar?","Se pierden las cantidades cargadas en pantalla.","Salir sin guardar",true))) return; C.ed=null; conteosRender(); }
     else if(a==="guardar") editorGuardar();
-    else if(a==="plantilla") plantillaExcel(E.fecha, E);
+    else if(a==="plantilla") plantillaMenu(E.fecha, E);
     else if(a==="importar"){ const f=$("#skFileConteo"); f.value=""; f.onchange=()=>{ if(f.files[0]) importarPlanilla(f.files[0]); }; f.click(); }
     else if(a==="vaciar"){ const ks=edItems().filter(x=>x.t===E.tipo&&E.vals[x.k]).map(x=>x.k); if(!ks.length) return; if(!(await confirmar("¿Vaciar las cantidades?","Se borran de la pantalla las cantidades de "+(E.tipo==="i"?"insumos":"semi-elaborados")+" (no afecta conteos guardados).","Vaciar",true))) return; ks.forEach(k=>{ delete E.vals[k]; delete E.imp[k]; }); editorRender(); }
   };
@@ -15462,10 +15492,10 @@ function cargarXlsxStyle(){
     sc.onload=()=>fin(true); sc.onerror=()=>fin(false); setTimeout(()=>fin(false), 7000); document.head.appendChild(sc); });
   return _xlsS;
 }
-function plantillaExcel(fecha, E){ /* 04/11/2026: una pestaña por estación de stock (mismo nombre en todos los rubros) */
+function plantillaExcel(fecha, E, sec){ /* 04/11/2026: una pestaña por estación de stock (mismo nombre en todos los rubros) · 19/11: por planilla (Cocina) */
   if(!xlsxOk()) return;
-  const its = E ? edItems() : [...realesDe("i"), ...realesDe("s")];
-  if(!its.length){ toast("No hay ítems en stock real","warn"); return; }
+  const its = (E ? edItems() : [...realesDe("i"), ...realesDe("s")]).filter(it=>!sec || secIt(it)===sec);
+  if(!its.length){ toast(sec?`No hay ítems en stock real para la planilla de ${SEC_N[sec]}`:"No hay ítems en stock real","warn"); return; }
   const est = new Map();
   ["i","s"].forEach(t=>tree(t, x=>its.includes(x)).forEach(c=>c.groups.forEach(g=>g.items.forEach(it=>{ const v=E?(E.vals[it.k]||{}):{}; const cu=cuDe(it.k);
     estNombres(it).forEach(e=>{ const kk=norm(e); if(!est.has(kk)) est.set(kk,{ nombre:e, grupos:new Map() }); const S0=est.get(kk);
@@ -15490,8 +15520,91 @@ function plantillaExcel(fecha, E){ /* 04/11/2026: una pestaña por estación de 
       }
       X.utils.book_append_sheet(wb, ws, sheetName(S0.nombre, used)); });
     return wb; };
-  const archivo = `Conteo de stock ${SK_SITE.club} ${fecha}.xlsx`.replace(/[\\\/:*?"<>|]+/g,"-");
-  cargarXlsxStyle().then(XS=>{ try{ const X = XS||XLSX; X.writeFile(armar(X, !!XS), archivo); }catch(err){ console.warn(err); XLSX.writeFile(armar(XLSX,false), archivo); } });
+  const archivo = `Conteo de stock ${SK_SITE.club}${sec?" "+SEC_N[sec]:""} ${fecha}.xlsx`.replace(/[\\\/:*?"<>|]+/g,"-");
+  cargarXlsxStyle().then(XS=>{ try{ const X = XS||XLSX; if(sec) xlsxImprimible(X, armar(X, !!XS), archivo, { pie:`${SK_SITE.club} · ${SEC_N[sec]} · ${fecha}`, celda:"B3" }); else X.writeFile(armar(X, !!XS), archivo); }catch(err){ console.warn(err); XLSX.writeFile(armar(XLSX,false), archivo); } });
+}
+/* 19/11/2026 — guarda el libro listo para imprimir: A4 ajustado al ancho de la hoja, encabezados repetidos en cada
+   página y filas de título inmovilizadas (SheetJS no escribe esa configuración: se agrega al XML del .xlsx). */
+function xlsxImprimible(X, wb, archivo, o){
+  o = o||{};
+  try{
+    const z = X.CFB.read(new Uint8Array(X.write(wb, {bookType:"xlsx", type:"array"})), {type:"array"});
+    const td = new TextDecoder(), te = new TextEncoder(), defs = [];
+    wb.SheetNames.forEach((sn, ix)=>{
+      const f = X.CFB.find(z, `/xl/worksheets/sheet${ix+1}.xml`); if(!f) return;
+      let x = td.decode(f.content);
+      x = x.replace(/<dimension /, `<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension `);
+      x = x.replace(/<sheetView workbookViewId="0"\s*\/>/, `<sheetView workbookViewId="0"><pane xSplit="1" ySplit="2" topLeftCell="B3" activePane="bottomRight" state="frozen"/><selection pane="bottomRight" activeCell="${o.celda||"C3"}" sqref="${o.celda||"C3"}"/></sheetView>`);
+      const ps = `<printOptions horizontalCentered="1"/><pageMargins left="0.35" right="0.35" top="0.45" bottom="0.5" header="0.25" footer="0.25"/><pageSetup paperSize="9" orientation="${o.horizontal?"landscape":"portrait"}" fitToWidth="1" fitToHeight="0"/><headerFooter><oddFooter>&amp;L&amp;8${String(o.pie||"").replace(/&/g,"&amp;amp;").replace(/</g,"&amp;lt;")}&amp;R&amp;8Hoja &amp;P de &amp;N</oddFooter></headerFooter>`;
+      x = x.includes("</mergeCells>") ? x.replace("</mergeCells>", "</mergeCells>"+ps) : x.replace("</sheetData>", "</sheetData>"+ps);
+      f.content = te.encode(x);
+      defs.push(`<definedName name="_xlnm.Print_Titles" localSheetId="${ix}">'${sn.replace(/'/g,"''").replace(/&/g,"&amp;").replace(/</g,"&lt;")}'!$1:$2</definedName>`);
+    });
+    const w = X.CFB.find(z, "/xl/workbook.xml");
+    if(w && defs.length){ let x = td.decode(w.content); if(!x.includes("<definedNames>")) x = x.replace("</sheets>", `</sheets><definedNames>${defs.join("")}</definedNames>`); w.content = te.encode(x); }
+    const out = X.CFB.write(z, {fileType:"zip", type:"array"});
+    const url = URL.createObjectURL(new Blob([out], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
+    const a = document.createElement("a"); a.href = url; a.download = archivo; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  }catch(err){ console.warn("xlsxImprimible:", err); X.writeFile(wb, archivo); }
+}
+/* 19/11/2026 — Che Mono: elegir planilla (Salón / Cocina) */
+function plantillaMenu(fecha, E){
+  if(!xlsxOk()) return;
+  const its = E ? edItems() : [...realesDe("i"), ...realesDe("s")];
+  const iS = its.filter(it=>secIt(it)==="salon"), iC = its.filter(it=>secIt(it)==="cocina");
+  const eS = salonEst(iS, E), eC = [...new Set(iC.flatMap(it=>estNombres(it)).map(x=>x))].sort((a,b)=>a.localeCompare(b,"es"));
+  const chips = (l,c)=>l.length?`<span class="chips">${l.map(x=>`<span class="${c}">${esc(x)}</span>`).join("")}</span>`:"";
+  const sc = openLayer(mh("Descargar planilla de conteo", `Elegí qué planilla bajar${E?" (lleva lo que ya cargaste en pantalla)":""}. Las dos se importan con <b>Importar planilla</b> dentro del conteo.`) + `
+    <div class="skp-opts">
+      <button type="button" class="skp-opt" data-sec="salon" ${iS.length?"":"disabled"}><span class="ic sa">S</span><span style="flex:1;min-width:0"><b>Planilla Salón</b><small>Una sola hoja con todos los ítems y <b>todas las estaciones como columnas</b>. Se completa la cantidad en la estación donde está cada cosa.</small>${chips(eS,"")}</span><em>${iS.length} ítem${iS.length===1?"":"s"}</em></button>
+      <button type="button" class="skp-opt" data-sec="cocina" ${iC.length?"":"disabled"}><span class="ic co">C</span><span style="flex:1;min-width:0"><b>Planilla Cocina</b><small>Una pestaña por estación, con los ítems que se guardan en cada una.</small>${chips(eC,"co")}</span><em>${iC.length} ítem${iC.length===1?"":"s"}</em></button>
+    </div>
+    <div class="sk-mf"><span class="sk-grow" style="font-size:12px;color:var(--text-3);text-align:left">Qué rubro va en cada planilla se define en Configuración › Stock.</span><button type="button" class="sk-btn" data-close>Cerrar</button>${iS.length&&iC.length?`<button type="button" class="sk-btn pri" data-both>${ICO.dl} Bajar las dos</button>`:""}</div>`, {cls:"sm"});
+  $$("[data-sec]", sc).forEach(b=>b.onclick=()=>{ closeLayer(sc); b.dataset.sec==="salon" ? plantillaSalon(fecha, E) : plantillaExcel(fecha, E, "cocina"); });
+  const bb = $("[data-both]", sc); if(bb) bb.onclick=()=>{ closeLayer(sc); plantillaSalon(fecha, E); setTimeout(()=>plantillaExcel(fecha, E, "cocina"), 700); };
+}
+function salonEst(its, E){ /* columnas de Salón: todas las estaciones de los rubros de Salón (más las que ya tengan valores cargados) */
+  const m = new Map();
+  its.forEach(it=>{ const ests = estDe(it.gT,it.gId); (ests.length?ests:[{nombre:"Stock",orden:99}]).forEach(e=>{ const kk=norm(e.nombre), o=m.get(kk), od=Number(e.orden)||0;
+      if(!o) m.set(kk,{nombre:e.nombre,orden:od,n:1}); else { o.orden=Math.min(o.orden,od); o.n++; } });
+    if(E) Object.keys(E.vals[it.k]||{}).forEach(e=>{ const kk=norm(e); if(!m.has(kk)) m.set(kk,{nombre:e,orden:999,n:0}); }); });
+  return [...m.values()].sort((a,b)=>(a.orden-b.orden)||(b.n-a.n)||a.nombre.localeCompare(b.nombre,"es")).map(x=>x.nombre);
+}
+function plantillaSalon(fecha, E){
+  if(!xlsxOk()) return;
+  const its = (E ? edItems() : [...realesDe("i"), ...realesDe("s")]).filter(it=>secIt(it)==="salon");
+  if(!its.length){ toast("No hay ítems en stock real para la planilla de Salón","warn"); return; }
+  const est = salonEst(its, E), nE = est.length, cT = 2+nE, cId = 3+nE;
+  const grupos = [];
+  ["i","s"].forEach(t=>tree(t, x=>its.includes(x)).forEach(c=>c.groups.forEach(g=>grupos.push({ gl: t==="i" ? `${c.nombre} › ${g.nombre}` : `Semi-elaborados › ${g.nombre}`, items:g.items }))));
+  const [y,mo,d] = String(fecha).split("-");
+  const armar = (X, conEstilo)=>{
+    const L = c=>X.utils.encode_col(c);
+    const aoa = [[`Salón · conteo de stock${d?` del ${d}/${mo}/${y}`:""}`], ["Artículo","[un.]",...est,"Total","ID"]], gr=[], filas=[];
+    grupos.forEach(G0=>{ gr.push(aoa.length); aoa.push([G0.gl]);
+      G0.items.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,"es")).forEach(it=>{ const v = E ? (E.vals[it.k]||{}) : {}, cu = cuDe(it.k);
+        const vk = {}; Object.keys(v).forEach(e=>vk[norm(e)] = v[e]);
+        filas.push(aoa.length);
+        aoa.push([it.nombre, cu.u, ...est.map(e=>{ const n=parseNum(vk[norm(e)]); return n!=null&&!isNaN(n)?n:null; }), null, it.k]); }); });
+    const ws = X.utils.aoa_to_sheet(aoa);
+    filas.forEach(R=>{ const a=`${L(2)}${R+1}`, b=`${L(cT-1)}${R+1}`; ws[X.utils.encode_cell({r:R,c:cT})] = { t:"n", f:`IF(COUNT(${a}:${b}),SUM(${a}:${b}),"")` }; });
+    ws["!merges"] = [{s:{r:0,c:0},e:{r:0,c:cT}}].concat(gr.map(r=>({s:{r,c:0},e:{r,c:cT}})));
+    ws["!cols"] = [{wch:38},{wch:8}].concat(est.map(e=>({wch:Math.max(11, Math.min(18, e.length+2))}))).concat([{wch:10},{hidden:true,wch:6}]);
+    ws["!rows"] = [{hpt:34},{hpt:34}];
+    if(conEstilo){ const navy="FF1B2C66", linea={style:"thin",color:{rgb:"FFD7DCEC"}}, fuerte={style:"thin",color:{rgb:"FFB9C1DA"}};
+      ws["A1"].s = {font:{bold:true,sz:20,color:{rgb:navy}},alignment:{vertical:"center"}};
+      for(let c=0;c<=cT;c++){ const a=X.utils.encode_cell({r:1,c}); ws[a].s={font:{bold:true,sz:c>=2&&c<cT?10:11,color:{rgb:"FFFFFFFF"}},fill:{fgColor:{rgb:c===cT?"FF0F1A40":navy}},alignment:{horizontal:c<2?"left":"center",vertical:"center",wrapText:true},border:{left:c>=2?{style:"thin",color:{rgb:"FF3B4C86"}}:undefined}}; }
+      gr.forEach(r=>{ const cel=ws[X.utils.encode_cell({r,c:0})]; if(cel) cel.s={font:{bold:true,sz:10,color:{rgb:"FF4A5578"}},fill:{fgColor:{rgb:"FFEEF1F8"}}}; });
+      filas.forEach((R,ix)=>{ const zebra = ix%2===1;
+        const a=X.utils.encode_cell({r:R,c:0}), u=X.utils.encode_cell({r:R,c:1}), t=X.utils.encode_cell({r:R,c:cT});
+        if(ws[a]) ws[a].s={font:{sz:11},border:{bottom:linea},fill:zebra?{fgColor:{rgb:"FFFAFBFD"}}:undefined};
+        if(ws[u]) ws[u].s={font:{sz:10,color:{rgb:"FF6B7280"}},border:{bottom:linea},fill:zebra?{fgColor:{rgb:"FFFAFBFD"}}:undefined};
+        for(let c=2;c<cT;c++){ const k=X.utils.encode_cell({r:R,c}); if(!ws[k]) ws[k]={t:"s",v:""}; ws[k].s={fill:{fgColor:{rgb:zebra?"FFFFF2C4":"FFFFF7D6"}},border:{bottom:linea,left:fuerte,right:fuerte},alignment:{horizontal:"center"}}; }
+        if(ws[t]) ws[t].s={font:{bold:true,color:{rgb:navy}},fill:{fgColor:{rgb:"FFEEF1F8"}},border:{bottom:linea,left:fuerte},alignment:{horizontal:"center"}}; });
+    }
+    const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "Salón"); return wb; };
+  const archivo = `Conteo de stock ${SK_SITE.club} Salón ${fecha}.xlsx`.replace(/[\\\/:*?"<>|]+/g,"-");
+  cargarXlsxStyle().then(XS=>{ try{ const X = XS||XLSX; xlsxImprimible(X, armar(X, !!XS), archivo, { horizontal: nE>3, pie:`${SK_SITE.club} · Salón · ${fecha}` }); }catch(err){ console.warn(err); XLSX.writeFile(armar(XLSX,false), archivo); } });
 }
 function plantillaExcelVieja(fecha, E){
   if(!xlsxOk()) return;
@@ -15511,6 +15624,18 @@ function importarPlanilla(file){
     const conSet = new Set();
     wb.SheetNames.forEach(sn=>{
       const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:null, raw:true});
+      /* planilla de Salón (19/11/2026, Che Mono): encabezado Artículo | [un.] | estación 1 … estación N | Total | ID */
+      const hSa = aoa.findIndex(r=>r && norm(r[0])==="articulo" && r.some(x=>norm(x)==="id") && !r.some(x=>norm(x)==="cantidad"));
+      if(hSa>=0){ const H=aoa[hSa].map(x=>norm(x)), iI=H.indexOf("id");
+        const cols = []; for(let c=1;c<iI;c++){ const h=H[c]; if(!h || h==="total" || /^\[?un(idad)?\.?\]?$/.test(h)) continue; cols.push({ c, nombre:String(aoa[hSa][c]).trim() }); }
+        aoa.slice(hSa+1).forEach(r=>{ if(!r) return; const k=String(r[iI]??"").trim(); if(!/^[is]:\S+$/i.test(k)) return;
+          const it=S.items[k]; if(!it){ desconocidos++; return; }
+          if(!tocados.has(k)){ tocados.add(k); leidos++; if(!E.keys.includes(k)){ E.keys.push(k); fueraReal.push(it.nombre); } E.vals[k]={}; E.imp[k]={}; }
+          cols.forEach(({c,nombre})=>{ const raw=r[c]; if(raw==null || String(raw).trim()==="") return; const n=parseNum(raw); if(n==null) return;
+            const e = estNombres(it).find(x=>norm(x)===norm(nombre)) || nombre;
+            if(isNaN(n)||n<0){ invalidos.push(`${it.nombre} (${e})`); E.vals[k][e]=String(raw); return; }
+            E.vals[k][e]=fmtInput(n); E.imp[k][e]=true; if(!conSet.has(k)){ conSet.add(k); conValor++; } }); });
+        return; }
       /* planilla por estación (04/11/2026): título = estación, encabezado Artículo | Cantidad | [un.] | ID */
       const hS = aoa.findIndex(r=>r && norm(r[0])==="articulo" && r.some(x=>norm(x)==="cantidad") && r.some(x=>norm(x)==="id"));
       if(hS>=0){ const H=aoa[hS].map(x=>norm(x)), iC=H.indexOf("cantidad"), iI=H.indexOf("id");
