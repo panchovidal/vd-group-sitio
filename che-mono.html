@@ -1196,6 +1196,14 @@
   .cfg-pres-row input:focus, .cfg-pres-row select:focus{border-color:var(--sky);background:#fff;box-shadow:0 0 0 3px rgba(89,119,210,0.14);}
   .cfg-pres-row input.bad, .cfg-pres-row select.bad{border-color:#D1414A;background:#FFF6F6;}
   .cfg-pres-row input.num{text-align:right;font-variant-numeric:tabular-nums;}
+  /* Conversión por forma de pedido (19/11/2026) */
+  .cfg-pres-conv{grid-column:1 / -1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#F2F7FF;border:1px solid #D6E3FB;border-radius:9px;padding:7px 10px;font-size:12.3px;font-weight:700;color:var(--navy);}
+  .cfg-pres-conv input{width:96px !important;flex:0 0 96px;text-align:right;background:#fff !important;}
+  .cfg-pres-conv .u{color:var(--text-2);}
+  .cfg-pres-conv.need{background:#FFF6EC;border-color:#F3C98B;}
+  .cfg-conv-tag{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;color:#2B5FC7;background:#EAF1FE;border-radius:20px;padding:1px 7px;white-space:nowrap;}
+  .cfg-conv-tag.bad{color:#B22A32;background:#FCE6E7;}
+  .ci-equiv{display:block;font-size:10.5px;font-weight:700;color:#2B5FC7;margin-top:1px;white-space:nowrap;}
   .cfg-pres-prev{grid-column:1 / -1;font-size:11px;font-weight:700;color:#8A560B;margin-top:-2px;padding-left:2px;}
   .cfg-pres-add{display:inline-flex;align-items:center;gap:6px;margin:6px 14px 12px;font-size:12px;font-weight:800;color:var(--blue);cursor:pointer;background:none;border:none;padding:4px 0;}
   .cfg-pres-add:hover{text-decoration:underline;}
@@ -8278,6 +8286,19 @@ function cfgMermaOf(ins){ return ins ? (Number(ins.factor_merma)||0) : 0; }
 function cfgMermaTxt(ins){ return cfgFmtNum(cfgMermaOf(ins))+"%"; }
 function cfgMermaChip(ins, hiFn){ const m = cfgMermaOf(ins), t = cfgMermaTxt(ins); return `<span class="cfg-merma-chip${m===0?" zero":""}">${hiFn?hiFn(t):cfgEsc(t)}</span>`; }
 function cfgPresLabel(p){ return cfgFmtNum(p.cantidad) + " " + cfgUnLabel(p.unidad); }
+/* ---- Conversión por forma de pedido (pedido de Pancho, 19/11/2026) ----
+   Cada insumo tiene su unidad de medida (la de recetas: kg, lts, un o pq). Cada proveedor puede
+   venderlo en otra unidad (ej. se pide por "un" una lata y la receta usa kg): en ese caso la forma
+   de pedido guarda su equivalencia, cm_insumo_presentaciones.conversion = cuántas unidades de la
+   receta tiene 1 unidad de pedido (1 un = 0,4 kg). Costeo, Recetas y Stock pasan siempre las
+   compras a la unidad de la receta con esta equivalencia. */
+function cfgInsUnidad(insId){ const i = cfgIns(insId); return (i && i.unidad) || ((cfgPresDeIns(insId)[0])||{}).unidad || ""; }
+function cfgPresFactor(p, unReceta){ const u = unReceta!==undefined ? unReceta : cfgInsUnidad(p.insumo_id);
+  if(!u || !p.unidad || p.unidad===u) return 1; const c = Number(p.conversion); return c>0 ? c : null; }
+function cfgPresConvTxt(p, unReceta){ const u = unReceta!==undefined ? unReceta : cfgInsUnidad(p.insumo_id);
+  if(!u || !p.unidad || p.unidad===u) return ""; const c = Number(p.conversion);
+  return c>0 ? `1 ${cfgUnLabel(p.unidad)} = ${cfgFmtNum(c)} ${cfgUnLabel(u)}` : `falta la equivalencia en ${cfgUnLabel(u)}`; }
+function cfgPresConvTag(p){ const t = cfgPresConvTxt(p); if(!t) return ""; return `<span class="cfg-conv-tag${Number(p.conversion)>0?"":" bad"}" title="Equivalencia con la unidad de la receta">${cfgEsc(t)}</span>`; }
 function cfgExists(list, nombre, exceptId){ const n = cfgNorm(nombre); return list.find(x=>x.id!==exceptId && cfgNorm(x.nombre)===n); }
 
 /* ---------- carga de datos (Supabase) ---------- */
@@ -8288,7 +8309,7 @@ async function cfgLoadAll(){
     sb.from("cm_proveedores").select("id,nombre,plazo_pago_dias,entregas,tipo_gasto,mes_imputacion,contacto_nombre,telefono,email,medio_compra_id"),
     sb.from("cm_proveedor_rubros").select("proveedor_id,rubro_id"),
     sb.from("cm_insumos").select("id,nombre,rubro_id,notas,factor_merma,costo_manual,usar_costo_manual,unidad"),
-    sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden")
+    sb.from("cm_insumo_presentaciones").select("id,insumo_id,proveedor_id,bulto,cantidad,unidad,orden,conversion")
   ]);
   const err = res.find(r=>r.error);
   if(err){ console.warn("Config compras:", err.error); showToast("No se pudieron cargar los datos de Compras", "warn"); return false; }
@@ -8336,7 +8357,7 @@ function cfgBuildRows(dom){
           const provNames = [...new Set(cfgPresDeIns(i.id).map(p=>(cfgProv(p.proveedor_id)||{}).nombre).filter(Boolean))];
           const pres = cfgPresDeIns(i.id);
           rows.push({ catId:c.id, cat:c.nombre, rubroId:r.id, rubro:r.nombre, leafId:i.id, leaf:i.nombre, provs:provNames.length ? provNames : ["— Sin proveedor definido —"],
-            cants:[...new Set(pres.map(p=>cfgPresLabel(p)))], merma:cfgMermaTxt(i) });
+            cants:[...new Set(pres.map(p=>cfgPresLabel(p)+(cfgPresConvTxt(p)?` (${cfgPresConvTxt(p)})`:"")))], merma:cfgMermaTxt(i) });
         });
       }
     });
@@ -8694,7 +8715,7 @@ function cfgTableHtml(dom, rows){
               const touchesEnd = lastRow && (pi+n===sorted.length);
               html += `<td class="${touchesEnd?"grp-end":(pi+n===sorted.length?"":"c-sub")}" rowspan="${n}"><div class="cfg-cell"><div class="txt"><div class="nm" style="font-weight:600">${hiQ(pv?pv.nombre:"(proveedor eliminado)","prov")}</div></div></div></td>`;
             }
-            html += `<td class="${subEnd}"><div class="cfg-cell"><span class="cfg-costeo-cell">${hiQ(cfgPresLabel(p),"cantidad")}</span></div></td>`;
+            html += `<td class="${subEnd}"><div class="cfg-cell"><span class="cfg-costeo-cell">${hiQ(cfgPresLabel(p),"cantidad")}${cfgPresConvTag(p)}</span></div></td>`;
             if(pi===0) html += mermaCell;
             html += `</tr>`;
           });
@@ -8807,7 +8828,7 @@ function cfgHojasListHtml(dom, rows){
     leaves.forEach(i=>{ const x = cr(i);
       const pres = cfgPresDeIns(i.id).slice().sort((a,b)=>cfgCmp((cfgProv(a.proveedor_id)||{}).nombre,(cfgProv(b.proveedor_id)||{}).nombre) || a.orden-b.orden);
       const provs = pres.length ? pres.map((p,k)=>`<div>${k>0 && pres[k-1].proveedor_id===p.proveedor_id ? '<span class="cfg-dim">″</span>' : cfgHi((cfgProv(p.proveedor_id)||{}).nombre||"(proveedor eliminado)",q)}</div>`).join("") : '<span class="cfg-noprov">Sin proveedor definido</span>';
-      const cants = pres.length ? pres.map(p=>`<div>${cfgEsc(cfgPresLabel(p))}</div>`).join("") : '<span class="cfg-dim">—</span>';
+      const cants = pres.length ? pres.map(p=>`<div>${cfgEsc(cfgPresLabel(p))}${cfgPresConvTag(p)}</div>`).join("") : '<span class="cfg-dim">—</span>';
       html += `<tr class="cfg-lrow flat"><td><div class="cfg-cell"><div class="txt"><div class="nm">${cfgHi(i.nombre,q)}</div></div>${cfgActs([cfgBtn("edit","Editar insumo",`cfgOpenInsumoForm('${i.id}')`), cfgBtn("del","Eliminar insumo",`cfgDeleteInsumo('${i.id}')`)])}</div></td>
         <td><div class="cfg-cell stack" style="font-weight:400">${provs}</div></td>
         <td><div class="cfg-cell stack">${x.cats}</div></td><td><div class="cfg-cell stack">${x.rubs}</div></td>
@@ -8831,13 +8852,14 @@ function cfgExportExcel(dom){
       ps.forEach(p=>{ const es = cfgEntregas(p); out.push([cat, r.nombre, p.nombre, es.map(e=>CFG_DIAS[e.entrega]).join(", "), es.map(e=>CFG_DIAS[e.pedido]).join(", "), p.plazo_pago_dias==null?"":p.plazo_pago_dias, cfgTipoGastoLbl(p), p.contacto_nombre||"", p.telefono||"", p.email||"", typeof cfgMedioNombre==="function" ? cfgMedioNombre(p.medio_compra_id) : ""]); });
     });
   } else {
-    cols = ["Categoría","Rubro","Insumo","Proveedor","Cantidad","Unidad","Factor de merma","Notas"];
+    cols = ["Categoría","Rubro","Insumo","Unidad de receta","Proveedor","Cantidad","Unidad de pedido","Equivalencia (1 unidad de pedido =)","Factor de merma","Notas"];
     rubs.forEach(r=>{
       const cat = (cfgCat(dom,r.catId)||{}).nombre||"";
       cfgData.items.filter(i=>i.rubro_id===r.id).sort((a,b)=>cfgCmp(a.nombre,b.nombre)).forEach(i=>{
         const pres = cfgPresDeIns(i.id).slice().sort((a,b)=>cfgCmp((cfgProv(a.proveedor_id)||{}).nombre,(cfgProv(b.proveedor_id)||{}).nombre) || a.orden-b.orden);
-        if(!pres.length) out.push([cat, r.nombre, i.nombre, "Sin proveedor definido", "", "", cfgMermaTxt(i), i.notas||""]);
-        pres.forEach(p=>out.push([cat, r.nombre, i.nombre, (cfgProv(p.proveedor_id)||{}).nombre||"", Number(p.cantidad), cfgUnLabel(p.unidad), cfgMermaTxt(i), i.notas||""]));
+        const ur = cfgInsUnidad(i.id);
+        if(!pres.length) out.push([cat, r.nombre, i.nombre, cfgUnLabel(ur), "Sin proveedor definido", "", "", "", cfgMermaTxt(i), i.notas||""]);
+        pres.forEach(p=>out.push([cat, r.nombre, i.nombre, cfgUnLabel(ur), (cfgProv(p.proveedor_id)||{}).nombre||"", Number(p.cantidad), cfgUnLabel(p.unidad), (ur && p.unidad!==ur) ? (Number(p.conversion)>0 ? `${cfgFmtNum(p.conversion)} ${cfgUnLabel(ur)}` : "FALTA") : "", cfgMermaTxt(i), i.notas||""]));
       });
     });
   }
@@ -9312,7 +9334,12 @@ function cfgMsToggle(id){
 
 /* ===== Insumo: nombre › categoría › rubro › proveedores › presentaciones ===== */
 let cfgKeySeq = 0;
-function cfgNewPres(p){ return { key:++cfgKeySeq, id:p?p.id:null, cant:p?String(cfgFmtNum(p.cantidad)).replace(/\./g,""):"", unidad:p?p.unidad:"kg" }; }
+function cfgNewPres(p){ return { key:++cfgKeySeq, id:p?p.id:null, cant:p?String(cfgFmtNum(p.cantidad)).replace(/\./g,""):"", unidad:p?p.unidad:(cfgFormUn()||"kg"), conv:(p&&p.conversion!=null)?String(cfgFmtNum(p.conversion)).replace(/\./g,""):"" }; }
+/* unidad de la receta elegida en el formulario (o la de la primera forma de pedido) */
+function cfgFormUn(){ const s = document.getElementById("cfgFInsUn"); if(s && s.value) return s.value; if(cfgPS && cfgPS.pvs){ for(const g of cfgPS.pvs){ for(const p of g.pres){ if(p.unidad) return p.unidad; } } } return ""; }
+function cfgPresConvRow(gk, p){ const u = cfgFormUn(); if(!u || !p.unidad || p.unidad===u) return "";
+  const ok = cfgParseNum(p.conv)>0;
+  return `<div class="cfg-pres-conv${ok?"":" need"}" title="La receta usa ${cfgEsc(cfgUnLabel(u))}: indicá cuánto equivale 1 ${cfgEsc(cfgUnLabel(p.unidad))} de este proveedor">Equivalencia: 1 ${cfgEsc(cfgUnLabel(p.unidad))} =<input type="text" class="num" inputmode="decimal" maxlength="12" placeholder="Ej. 0,4" value="${cfgEsc(p.conv||"")}" oninput="cfgInsSetPres(${gk},${p.key},'conv',this.value)"><span class="u">${cfgEsc(cfgUnLabel(u))}</span></div>`; }
 function cfgOpenInsumoForm(id, presetRubroId){
   const ins = id ? cfgIns(id) : null;
   if(id && !ins){ showToast("El insumo ya no existe", "warn"); return; }
@@ -9352,7 +9379,7 @@ function cfgOpenInsumoForm(id, presetRubroId){
       </div>
       <div class="cfg-sec-title"><span class="n">3</span>Categoría y rubro</div>
       <div class="field-row" id="cfgClasif"></div>
-      <div class="field" id="cfgFldInsUn" style="max-width:320px"><label>Unidad de medida <span class="hint">(la de recetas y costo manual)</span></label><select id="cfgFInsUn" onchange="this.closest('.field').classList.remove('error')">${(()=>{ const u0 = (ins&&ins.unidad) || ((ins&&cfgPresDeIns(ins.id)[0])||{}).unidad || ""; return (u0?"":'<option value="">Elegí…</option>') + CFG_UNIDADES.map(u=>`<option value="${u.v}"${u.v===u0?" selected":""}>${u.l} · ${u.n}</option>`).join(""); })()}</select></div>
+      <div class="field" id="cfgFldInsUn" style="max-width:320px"><label>Unidad de medida <span class="hint">(la de recetas y costo manual)</span></label><select id="cfgFInsUn" onchange="this.closest('.field').classList.remove('error'); cfgInsRenderCards()">${(()=>{ const u0 = (ins&&ins.unidad) || ((ins&&cfgPresDeIns(ins.id)[0])||{}).unidad || ""; return (u0?"":'<option value="">Elegí…</option>') + CFG_UNIDADES.map(u=>`<option value="${u.v}"${u.v===u0?" selected":""}>${u.l} · ${u.n}</option>`).join(""); })()}</select></div>
       <div class="cfg-sec-title"><span class="n">4</span>Factor de merma <span class="opt">· opcional</span></div>
       <div class="cfg-note">${CFG_IC.info}<div>Se suma linealmente al costo por unidad de medida. Ej.: si el kg sale $1.000 y el insumo tiene <b>45%</b> de merma, el costo que ve Recetas es <b>$1.450/kg</b>. Si no tiene merma, dejalo en 0%.</div></div>
       <div class="cfg-plazo" style="margin-bottom:18px">
@@ -9441,6 +9468,7 @@ function cfgInsRenderCards(){
         <input type="text" class="num" inputmode="decimal" maxlength="12" placeholder="Cant." value="${cfgEsc(p.cant)}" oninput="cfgInsSetPres(${g.key},${p.key},'cant',this.value)">
         <select title="Unidad de pedido" onchange="cfgInsSetPres(${g.key},${p.key},'unidad',this.value)">${CFG_UNIDADES.map(u=>`<option value="${u.v}" title="${u.n}"${u.v===p.unidad?" selected":""}>${u.l}</option>`).join("")}</select>
         <button type="button" class="cfg-ibtn del" title="Quitar esta línea" onclick="cfgInsDelPres(${g.key},${p.key})"${g.pres.length<2?' style="visibility:hidden"':""}>${CFG_IC.del}</button>
+        ${cfgPresConvRow(g.key, p)}
         <div class="cfg-pres-prev" id="cfgPrev${p.key}">${cfgPresPreview(p)}</div>
       </div>`).join("");
     return `<div class="cfg-pv-card" id="cfgPv${g.key}">
@@ -9464,11 +9492,15 @@ function cfgInsRenderCards(){
 function cfgPresPreview(p){
   const n = cfgParseNum(p.cant);
   if(!(n>0)) return "";
-  return `→ Se pide por ${cfgFmtNum(n)} ${cfgEsc(cfgUnLabel(p.unidad))}`;
+  const u = cfgFormUn(), c = cfgParseNum(p.conv);
+  const eq = (u && p.unidad && p.unidad!==u) ? (c>0 ? ` · cada bulto equivale a ${cfgFmtNum(Math.round(n*c*1000)/1000)} ${cfgEsc(cfgUnLabel(u))} para recetas` : ` · falta la equivalencia en ${cfgEsc(cfgUnLabel(u))}`) : "";
+  return `→ Se pide por ${cfgFmtNum(n)} ${cfgEsc(cfgUnLabel(p.unidad))}${eq}`;
 }
 function cfgInsG(gk){ return cfgPS.pvs.find(g=>g.key===gk); }
 function cfgInsSetPres(gk, pk, field, val){
   const p = cfgInsG(gk).pres.find(x=>x.key===pk); p[field] = val;
+  if(field==="unidad"){ cfgInsRenderCards(); return; }
+  if(field==="conv"){ const cv = document.querySelector(`.cfg-pres-row[data-pkey="${pk}"] .cfg-pres-conv`); if(cv) cv.classList.toggle("need", !(cfgParseNum(val)>0)); }
   const pv = document.getElementById("cfgPrev"+pk); if(pv) pv.innerHTML = cfgPresPreview(p);
   const row = document.querySelector(`.cfg-pres-row[data-pkey="${pk}"]`); if(row) row.querySelectorAll(".bad").forEach(e=>e.classList.remove("bad"));
   cfgHideErr();
@@ -9584,7 +9616,10 @@ async function cfgInsSubmit(ins){
       const sig = n+"|"+p.unidad;
       if(seen.has(sig)){ row.querySelectorAll("input")[0].classList.add("bad"); card.classList.add("err"); errs.push(`${pvName}: hay dos líneas iguales (${cfgPresLabel({cantidad:n, unidad:p.unidad})}).`); return; }
       seen.add(sig);
-      pres.push({ id:p.id, proveedor_id:g.provId, bulto:"", cantidad:n, unidad:p.unidad, orden:orden++ });
+      const unRec = cfgFormUn(); let conv = null;
+      if(unRec && p.unidad!==unRec){ conv = cfgParseNum(p.conv);
+        if(!(conv>0)){ const ci = row.querySelector(".cfg-pres-conv input"); if(ci) ci.classList.add("bad"); card.classList.add("err"); errs.push(`${pvName}: indicá a cuántos ${cfgUnLabel(unRec)} equivale 1 ${cfgUnLabel(p.unidad)} (la receta usa ${cfgUnLabel(unRec)}).`); return; } }
+      pres.push({ id:p.id, proveedor_id:g.provId, bulto:"", cantidad:n, unidad:p.unidad, orden:orden++, conversion:conv });
     });
   });
   const mermaRaw = (document.getElementById("cfgFInsMerma").value||"").trim();
@@ -9600,7 +9635,7 @@ async function cfgInsSubmit(ins){
     const rm = await sb.from("cm_insumos").update({ factor_merma: merma }).eq("id", insId);
     if(rm.error){ showToast("El insumo se guardó, pero no se pudo guardar el factor de merma. Probá de nuevo.", "warn"); }
   }
-  const resumen = list => { const m = new Map(); list.forEach(p=>{ const k=(cfgProv(p.proveedor_id)||{}).nombre||"?"; if(!m.has(k)) m.set(k,[]); m.get(k).push(cfgPresLabel(p)); }); return [...m.entries()].map(([k,v])=>`${k} (${v.join(", ")})`).join("; "); };
+  const resumen = list => { const m = new Map(); list.forEach(p=>{ const k=(cfgProv(p.proveedor_id)||{}).nombre||"?"; if(!m.has(k)) m.set(k,[]); m.get(k).push(cfgPresLabel(p)+(p.conversion>0&&p.unidad!==cfgFormUn()?` [1 ${cfgUnLabel(p.unidad)} = ${cfgFmtNum(p.conversion)} ${cfgUnLabel(cfgFormUn())}]`:"")); }); return [...m.entries()].map(([k,v])=>`${k} (${v.join(", ")})`).join("; "); };
   const rubN = (cfgRub("insumos", rubroId)||{}).nombre, catN = (cfgCat("insumos", catId)||{}).nombre;
   if(ins){
     const antes = cfgPresDeIns(ins.id), ch = [];
@@ -13467,20 +13502,26 @@ function iiGenOrden(o){ const aj=ajDe(o.id); const gen=(aj.impuestos_generales||
   its.forEach(it=>{ const b=baseItem(it,its,aj); bases[it.id]=b; tot+=b; }); return { monto, bases, tot }; }
 let _insAux={ pp:{}, ult:{}, hist:{} };
 const vigenteDe = (L, mes)=>{ const dm=L.filter(c=>c.fecha.slice(0,7)===mes); return dm.length ? dm.reduce((a,b)=>b.unit>a.unit?b:a) : L.reduce((a,b)=>b.key>a.key?b:a); };
+/* cantidad comprada pasada a la unidad de la receta (con la equivalencia de la forma de pedido) */
+function itQtyReceta(it){ const q=Number(it.cantidad)||0; if(!q) return 0; const u=cfgInsUnidad(it.insumo_id);
+  if(!u || !it.unidad || it.unidad===u) return q;
+  const p=(cfgData.pres||[]).find(x=>x.id===it.presentacion_id && x.unidad===it.unidad) || (cfgData.pres||[]).find(x=>x.insumo_id===it.insumo_id && x.unidad===it.unidad && Number(x.conversion)>0);
+  const c=p?Number(p.conversion):0; return c>0 ? q*c : 0; }
 function insumoCosts(){
   if(_insCost) return _insCost; const by={};
   const ordById={}; D.ordenes.forEach(o=>ordById[o.id]=o); const iiCache={};
   D.items.forEach(it=>{ if(!it.insumo_id||!it.cantidad) return; const o=ordById[it.orden_id]; if(!o||o.comprobante_tipo==="NC") return;
     if(!(o.id in iiCache)) iiCache[o.id]=iiGenOrden(o); const ii=iiCache[o.id];
     const share = (ii&&ii.tot>0) ? ii.monto*(ii.bases[it.id]||0)/ii.tot : 0;
-    (by[it.insumo_id]=by[it.insumo_id]||[]).push({ fecha:ordFecha(o), key:ordFecha(o)+"|"+(it.created_at||""), unit:(Number(it.total||0)+share)/it.cantidad, prov:o.proveedor, ii:share }); });
+    const qr=itQtyReceta(it); if(!(qr>0)) return;
+    (by[it.insumo_id]=by[it.insumo_id]||[]).push({ fecha:ordFecha(o), key:ordFecha(o)+"|"+(it.created_at||""), unit:(Number(it.total||0)+share)/qr, prov:o.proveedor, ii:share }); });
   const now=new Date(), mes=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0"); const m={}, pp={}, ult={};
   Object.keys(by).forEach(id=>{ const L=by[id]; m[id]=vigenteDe(L,mes); ult[id]=L.reduce((a,b)=>b.key>a.key?b:a);
     const g={}; L.forEach(c=>{ const k=norm(c.prov); (g[k]=g[k]||[]).push(c); }); pp[id]={}; Object.keys(g).forEach(k=>pp[id][k]=vigenteDe(g[k],mes)); });
   _insAux={ pp, ult, hist:by };
   return _insCost=m;
 }
-function insUnidad(insId){ const p=cfgPresDeIns(insId)[0]; return p?p.unidad:((cfgIns(insId)||{}).unidad||"un"); }
+function insUnidad(insId){ return cfgInsUnidad(insId) || "un"; }
 function insMerma(insId){ const i=cfgIns(insId); return i?(Number(i.factor_merma)||0):0; }
 function insManual(insId){ const i=cfgIns(insId); return (i && i.usar_costo_manual && i.costo_manual!=null && i.costo_manual!=="") ? Number(i.costo_manual) : null; }
 function insCost(insId){ const man=insManual(insId); const c=insumoCosts()[insId]; const base = man!=null ? man : (c?c.unit:null); if(base==null) return null; return base*(1+insMerma(insId)/100); }
@@ -13499,7 +13540,7 @@ window.cxListaInsumos = function(){
     const hist=(A.hist[i.id]||[]).slice().sort((a,b)=>a.key<b.key?1:-1); const vgG=C[i.id]||null, fin=insCost(i.id);
     provs.forEach(({pid,pn})=>{ const vg=(pn&&ppI[norm(pn)])||null; const ps=byP[pid]||[];
       rows.push({ key:i.id+"|"+(pid||pn||""), insId:i.id, grp:i.id, nombre:i.nombre, provId:pid||null, provNombre:pn||"Sin proveedor", baja: !!pn && !(byP[pid]||[]).length, cat:c?c.nombre:"", rubro:r?r.nombre:"",
-        pres:ps.map(p=>cfgPresLabel(p)).join(" · ")||"—", unidad:ps[0]?cfgUnLabel(ps[0].unidad):cfgUnLabel(insUnidad(i.id)),
+        pres:ps.map(p=>cfgPresLabel(p)+(cfgPresConvTxt(p)?` (${cfgPresConvTxt(p)})`:"")).join(" · ")||"—", unidad:cfgUnLabel(insUnidad(i.id)),
         compra:vg?vg.unit:null, compraFecha:vg?vg.fecha:null, manual:man, usar, merma, final:fin, receta:fin,
         vigProv:vgG?vgG.prov:null, vigUnit:vgG?vgG.unit:null, vigFecha:vgG?vgG.fecha:null,
         ultima:hist[0]?{fecha:hist[0].fecha,prov:hist[0].prov,unit:hist[0].unit}:null, hist:hist.slice(0,10).map(h=>({fecha:h.fecha,prov:h.prov,unit:h.unit})) }); }); });
@@ -14071,6 +14112,10 @@ function ciDlHTML(){ return ciOpts().map(x=>`<option value="${esc(x.label)}">${e
       return `<option value="${esc(i.nombre)}">No asignado a este proveedor · ${ps.length?"lo vende "+esc(ps.join(", ")):"todavía sin proveedor"}</option>`; }).join(""); }
 function ciMatch(name){ const n=norm(name); if(!n) return null; return ciOpts().find(o=>norm(o.label)===n)||null; }
 function ciLabelDe(it){ const o=ciOpts().find(x=>x.p.id===it.presentacion_id) || ciOpts().find(x=>x.ins.id===it.insumo_id); return o?o.label:((cfgIns(it.insumo_id)||{}).nombre||it.insumo_nombre||"(eliminado)"); }
+/* $/unidad de receta cuando el proveedor vende en otra unidad (ej. $/un → $/kg) */
+function ciEquivHTML(it, punit){ const u=cfgInsUnidad(it.insumo_id); if(!u || !it.unidad || it.unidad===u || !(punit>0)) return "";
+  const p=(cfgData.pres||[]).find(x=>x.id===it.presentacion_id); const c=p?Number(p.conversion):0;
+  return c>0 ? `<span class="ci-equiv" title="1 ${esc(cfgUnLabel(it.unidad))} = ${esc(cfgFmtNum(c))} ${esc(cfgUnLabel(u))}">= ${fmtMC(punit/c)}/${esc(cfgUnLabel(u))}</span>` : `<span class="ci-equiv" style="color:#B22A32" title="Falta la equivalencia en Configuración › Insumos">sin equivalencia en ${esc(cfgUnLabel(u))}</span>`; }
 const ciItems = ()=>{ const o=D.ordenes.find(x=>x.id===CI.ordenId); return o?ordItems(o):[]; };
 const ciOrden = ()=>D.ordenes.find(x=>x.id===CI.ordenId);
 const $i = id=>document.getElementById(id);
@@ -14224,7 +14269,9 @@ function ciCrearInsumo(){
     +'<div class="ar-note" id="ciInsExiste" style="display:none;margin-top:6px"></div>'
     +'<div class="ar-mlbl">Categoría › Rubro</div><select id="ciInsRubro" '+inp+'>'+rubs.map(r=>'<option value="'+r.id+'"'+(princ&&princ.id===r.id?' selected':'')+'>'+esc((cfgCat("proveedores",r.catId)||{}).nombre||"")+' › '+esc(r.nombre)+'</option>').join("")+'</select>'
     +'<div style="display:flex;gap:10px"><div style="flex:1"><div class="ar-mlbl">Cantidad por bulto</div><input type="text" id="ciInsCant" inputmode="decimal" '+inp+' placeholder="Ej. 6"></div>'
-    +'<div style="flex:1"><div class="ar-mlbl">Unidad</div><select id="ciInsUn" '+inp+'>'+CFG_UNIDADES.map(u=>'<option value="'+u.v+'" title="'+u.n+'">'+u.l+' · '+u.n+'</option>').join("")+'</select></div></div>'
+    +'<div style="flex:1"><div class="ar-mlbl">Unidad de pedido</div><select id="ciInsUn" '+inp+' onchange="cxCI.onInsNombre()">'+CFG_UNIDADES.map(u=>'<option value="'+u.v+'" title="'+u.n+'">'+u.l+' · '+u.n+'</option>').join("")+'</select></div></div>'
+    +'<div style="display:flex;gap:10px;align-items:flex-end"><div style="flex:1"><div class="ar-mlbl">Unidad de la receta</div><select id="ciInsUnRec" '+inp+' onchange="cxCI.onInsNombre()"><option value="">Igual a la de pedido</option>'+CFG_UNIDADES.map(u=>'<option value="'+u.v+'" title="'+u.n+'">'+u.l+' · '+u.n+'</option>').join("")+'</select></div>'
+    +'<div style="flex:1;display:none" id="ciInsConvWrap"><div class="ar-mlbl" id="ciInsConvLbl">Equivalencia</div><input type="text" id="ciInsConv" inputmode="decimal" '+inp+' placeholder="Ej. 0,4"></div></div>'
     +'<div class="ar-note">El factor de merma y las notas se completan después desde Configuración › Compras › Insumos.</div>'
     +'</div><div class="ar-modal-f"><span class="hint"></span><button type="button" class="btn-ghost" onclick="cxCI.cerrarInsumo()">Cancelar</button><button type="button" class="btn-primary" id="ciInsGo" onclick="cxCI.guardarInsumo()">Guardar y usar</button></div></div>';
   ov.addEventListener("mousedown",e=>{ if(e.target===ov) ciCerrarInsumo(); });
@@ -14240,26 +14287,32 @@ function ciOnInsNombre(){ const ex=ciInsExistente(), note=$i("ciInsExiste"), sel
     note.style.display=""; note.innerHTML="<b>Este insumo no está asignado a este proveedor</b> ("+(ps.length?"hoy lo vende "+esc(ps.join(", ")):"todavía no tiene proveedor")+"). Si confirmás, queda asignado con la presentación que cargues abajo y se usa en esta factura. Rubro: <b>"+esc(r?r.nombre:"—")+"</b>.";
     const gb=$i("ciInsGo"); if(gb) gb.textContent="Asignar y usar";
     if(r && ![...sel.options].some(o=>o.value===r.id)) sel.add(new Option(r.nombre, r.id)); if(r) sel.value=r.id; sel.disabled=true;
-    const un=$i("ciInsUn"), u0=ex.unidad||((cfgPresDeIns(ex.id)[0])||{}).unidad; if(un && u0) un.value=u0;
+    const ur=$i("ciInsUnRec"), u0=cfgInsUnidad(ex.id); if(ur){ if(u0){ ur.value=u0; ur.disabled=true; } else ur.disabled=false; }
     if(!cfgData.pres.some(p=>p.insumo_id===ex.id)) note.innerHTML="Ya existe y todavía no tiene proveedor: queda asignado a este proveedor con esta presentación. Rubro: <b>"+esc(r?r.nombre:"—")+"</b>."; }
-  else { note.style.display="none"; sel.disabled=false; const gb=$i("ciInsGo"); if(gb) gb.textContent="Guardar y usar"; } }
+  else { note.style.display="none"; sel.disabled=false; const gb=$i("ciInsGo"); if(gb) gb.textContent="Guardar y usar"; const ur=$i("ciInsUnRec"); if(ur) ur.disabled=false; }
+  ciInsConvUpd(); }
+function ciInsUnRec(){ const ur=$i("ciInsUnRec"); return (ur&&ur.value) || (($i("ciInsUn")||{}).value) || ""; }
+function ciInsConvUpd(){ const w=$i("ciInsConvWrap"); if(!w) return; const up=($i("ciInsUn")||{}).value, ur=ciInsUnRec(); const need = up && ur && up!==ur;
+  w.style.display = need ? "" : "none"; if(need) $i("ciInsConvLbl").textContent = "1 "+cfgUnLabel(up)+" equivale a ("+cfgUnLabel(ur)+")"; }
 async function ciGuardarInsumo(){
   const o=ciOrden(); const prov=CI.provId?cfgProv(CI.provId):null; if(!o||!prov) return;
   const nombre=($i("ciInsNombre").value||"").trim().toUpperCase(), cant=pd($i("ciInsCant").value), un=$i("ciInsUn").value, rubroId=$i("ciInsRubro").value;
+  const unRec=ciInsUnRec(), conv = (unRec && un!==unRec) ? pd(($i("ciInsConv")||{}).value) : null;
   if(!nombre){ toast("Escribí el nombre del insumo","warn"); return; }
   if(!(cant>0)){ toast("Cargá la cantidad por bulto","warn"); return; }
+  if(unRec && un!==unRec && !(conv>0)){ toast("Indicá a cuántos "+cfgUnLabel(unRec)+" equivale 1 "+cfgUnLabel(un),"warn"); return; }
   const ex=ciInsExistente();
   if(ex && cfgData.pres.some(p=>p.insumo_id===ex.id && p.proveedor_id===prov.id && Number(p.cantidad)===cant && p.unidad===un)){ toast("Esa presentación ya está asignada a este proveedor","warn"); return; }
   if(!ex && !rubroId){ toast("Elegí el rubro del insumo","warn"); return; }
   const btn=$i("ciInsGo"); btn.disabled=true; btn.textContent="Guardando…";
   let insId = ex ? ex.id : null;
-  if(!ex){ const r=await sb.from("cm_insumos").insert({ nombre, rubro_id: rubroId, notas:"", factor_merma:0, unidad:un }).select("id").single();
+  if(!ex){ const r=await sb.from("cm_insumos").insert({ nombre, rubro_id: rubroId, notas:"", factor_merma:0, unidad:unRec||un }).select("id").single();
     if(r.error){ btn.disabled=false; btn.textContent="Guardar y usar"; toast(r.error.code==="23505"?"Ya existe un insumo con ese nombre":"No se pudo crear el insumo: "+r.error.message,"warn"); return; } insId=r.data.id; }
   const ordenP = cfgData.pres.filter(p=>p.insumo_id===insId).reduce((m,p)=>Math.max(m,Number(p.orden)||0),-1)+1;
-  const rp=await sb.from("cm_insumo_presentaciones").insert({ insumo_id:insId, proveedor_id:prov.id, bulto:"", cantidad:cant, unidad:un, orden:ordenP });
-  if(!rp.error && ex && !ex.unidad) await sb.from("cm_insumos").update({ unidad:un }).eq("id", insId);
+  const rp=await sb.from("cm_insumo_presentaciones").insert({ insumo_id:insId, proveedor_id:prov.id, bulto:"", cantidad:cant, unidad:un, orden:ordenP, conversion:conv });
+  if(!rp.error && ex && !ex.unidad) await sb.from("cm_insumos").update({ unidad:unRec||un }).eq("id", insId);
   if(rp.error){ btn.disabled=false; btn.textContent="Guardar y usar"; toast("No se pudo asignar la presentación: "+rp.error.message,"warn"); return; }
-  try{ await sb.from("cm_historial").insert({ usuario_id:uid(), usuario_nombre:uname(), accion: ex?"Asignó un insumo a un proveedor":"Creó un insumo", detalle:`“${nombre}” · ${prov.nombre} (${cfgFmtNum(cant)} ${cfgUnLabel(un)}) · desde la factura ${o.id}`, modulo:"config" }); }catch(e){}
+  try{ await sb.from("cm_historial").insert({ usuario_id:uid(), usuario_nombre:uname(), accion: ex?"Asignó un insumo a un proveedor":"Creó un insumo", detalle:`“${nombre}” · ${prov.nombre} (${cfgFmtNum(cant)} ${cfgUnLabel(un)}${conv?` · 1 ${cfgUnLabel(un)} = ${cfgFmtNum(conv)} ${cfgUnLabel(unRec)}`:""}) · desde la factura ${o.id}`, modulo:"config" }); }catch(e){}
   await cfgLoadAll(); if(typeof cfgRenderAll==="function") try{ cfgRenderAll(); }catch(e){}
   $("#cxDlProvIns").innerHTML=ciDlHTML();
   ciCerrarInsumo();
@@ -14339,7 +14392,7 @@ function renderItems(){ const list=ciItems(), aj=ajDe(CI.ordenId), el=$i("costeo
     return `<div class="ci-row">
       <div>${esc(ciLabelDe(it))}</div><div>${fmtMC(it.precio_lista)}</div><div>${fmtNC(it.bultos)}</div><div class="ci-auto">${fmtMC(r.precioBulto)}</div>
       <div class="ci-tax-cell">${taxChips(it.impuestos||[],it.id,false,bi)}</div><div class="ci-tax-cell">${descChips(it.descuentos||[],it.id,false,bf)}</div>
-      <div class="ci-auto">${fmtNC(cantBulto(it))}</div><div class="ci-auto ci-um-lbl">${un}</div><div class="ci-auto ci-punit">${fmtMC(r.punit)}</div><div class="ci-auto ci-um-lbl">${un}</div>
+      <div class="ci-auto">${fmtNC(cantBulto(it))}</div><div class="ci-auto ci-um-lbl">${un}</div><div class="ci-auto ci-punit">${fmtMC(r.punit)}${ciEquivHTML(it, r.punit)}</div><div class="ci-auto ci-um-lbl">${un}</div>
       <div class="ci-actions"><button class="icon-btn" onclick="cxCI.startEdit('${it.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
         <button class="icon-btn del-btn" onclick="cxCI.delItem('${it.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div></div>`; }).join("");
   if(CI.editing){ const it=list.find(x=>x.id===CI.editing); if(it){ CI.editTax[it.id]=JSON.parse(JSON.stringify(it.impuestos||[])); CI.editDesc[it.id]=JSON.parse(JSON.stringify(it.descuentos||[]));
@@ -14579,17 +14632,23 @@ const SK_SITE = {
       fetchAll("cm_conceptos","id,nombre"),
       fetchAll("cm_rubros","id,nombre,concepto_id"),
       fetchAll("cm_insumos","id,nombre,rubro_id,factor_merma,costo_manual,usar_costo_manual,unidad,mercaderia"),
-      fetchAll("cm_insumo_presentaciones","id,insumo_id,unidad,orden"),
+      fetchAll("cm_insumo_presentaciones","id,insumo_id,unidad,orden,conversion"),
       fetchAll("cm_semi_categorias","id,nombre"),
       fetchAll("cm_semielaborados","id,nombre,categoria_id,rinde,rinde_unidad"),
       fetchAll("cm_costeo_articulos","id,nombre,categoria,porciones,activo"),
       fetchAll("cm_receta_lineas","id,articulo_id,semi_id,insumo_id,sub_semi_id,sub_articulo_id,cantidad"),
-      fetchAll("cm_compra_items","id,orden_id,insumo_id,cantidad,total"),
+      fetchAll("cm_compra_items","id,orden_id,insumo_id,cantidad,total,unidad,presentacion_id"),
       fetchAll("cm_ordenes","id,fecha_comprobante,fecha_orden,comprobante_tipo,proveedor")
     ]);
     const unidadDe = {};
+    insumos.forEach(i=>{ if(i.unidad) unidadDe[i.id] = i.unidad; });
     pres.slice().sort((a,b)=>(a.orden||0)-(b.orden||0)).forEach(p=>{ if(!unidadDe[p.insumo_id]) unidadDe[p.insumo_id] = p.unidad||"un"; });
     const ordById = {}; ordenes.forEach(o=>ordById[o.id]=o);
+    // compras pasadas a la unidad de la receta (equivalencia de la forma de pedido, 19/11/2026)
+    const presById = {}; pres.forEach(p=>presById[p.id]=p);
+    const qtyRec = it=>{ const q = Number(it.cantidad)||0, u = unidadDe[it.insumo_id]; if(!u || !it.unidad || it.unidad===u) return q;
+      const p = (presById[it.presentacion_id] && presById[it.presentacion_id].unidad===it.unidad) ? presById[it.presentacion_id] : pres.find(x=>x.insumo_id===it.insumo_id && x.unidad===it.unidad && Number(x.conversion)>0);
+      const c = p ? Number(p.conversion) : 0; return c>0 ? q*c : 0; };
     return {
       cats: conceptos.map(c=>({ id:c.id, nombre:c.nombre })),
       rubros: rubros.map(r=>({ id:r.id, nombre:r.nombre, cat_id:r.concepto_id })),
@@ -14603,7 +14662,7 @@ const SK_SITE = {
         ct: l.insumo_id ? "i" : l.sub_semi_id ? "s" : "a", cid: l.insumo_id || l.sub_semi_id || l.sub_articulo_id,
         q: Number(l.cantidad)||0 })).filter(l=>l.pid && l.cid),
       compras: items.map(it=>{
-        const o = ordById[it.orden_id]; const qty = Number(it.cantidad)||0;
+        const o = ordById[it.orden_id]; const qty = qtyRec(it);
         if(!o || !it.insumo_id || qty<=0 || o.comprobante_tipo==="NC") return null;
         const f = o.fecha_comprobante || o.fecha_orden; if(!f) return null;
         return { insumo_id:it.insumo_id, fecha:String(f).slice(0,10), qty, unit:(Number(it.total)||0)/qty, prov:o.proveedor||"", orden_id:o.id };
