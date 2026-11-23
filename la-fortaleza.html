@@ -2466,6 +2466,16 @@
   .sk-scroll::-webkit-scrollbar-thumb,.sk-mb::-webkit-scrollbar-thumb,#ctabStock .sk-wrap::-webkit-scrollbar-thumb{background-color:#9AA3C7;border-radius:8px;border:3px solid #E7E9F4;}
   .sk-scroll::-webkit-scrollbar-thumb:hover,.sk-mb::-webkit-scrollbar-thumb:hover,#ctabStock .sk-wrap::-webkit-scrollbar-thumb:hover{background-color:#7C86B3;}
   .sk-mf .sk-grow{font-size:12px;color:var(--text-2)}
+  /* 23/11/2026 — el panel "Compras sin consumo en recetas" (sinRecPanel) arma su contenido adentro
+     de un <div id="skSrIn"> intermedio (porque se re-dibuja solo, con draw(), cada vez que Pancho
+     cambia una decisión) en vez de poner .sk-mh/.sk-mb/.sk-mf directo como hijos de .sk-side. Ese
+     div intermedio es un bloque común, no un hijo flex de .sk-side — entonces el `flex:1` de
+     .sk-mb no tiene ningún efecto (solo funciona entre un contenedor flex y su hijo directo), el
+     div crece tanto como todo su contenido, y lo que no entra en pantalla queda directamente
+     cortado por el `overflow:hidden` de .sk-side, sin ninguna barra posible: no es que faltara la
+     barra, es que ese contenedor nunca llegó a ser scrolleable. Se hace que #skSrIn actúe como un
+     "pasamanos" flex transparente, igual que si .sk-mh/.sk-mb/.sk-mf colgaran directo de .sk-side. */
+  #skSrIn{display:flex;flex-direction:column;flex:1;min-height:0}
   .sk-sec{margin:4px 0 16px}
   .sk-sec h5{margin:0 0 8px;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-weight:800}
   .sk-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
