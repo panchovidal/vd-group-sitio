@@ -4740,6 +4740,10 @@
         <div class="pagos-topbar">
           <div class="pagos-tab active" data-sktab="conteos" onclick="SK.goTab('conteos')"><span class="sk-tabicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Nuevo conteo de stock</span></div>
           <div class="pagos-tab" data-sktab="produccion" onclick="SK.goTab('produccion')"><span class="sk-tabicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 017.41 6a5.11 5.11 0 011.05-1.54 5 5 0 017.08 0A5.11 5.11 0 0116.59 6 4 4 0 0118 13.87V21H6z"/><path d="M6 17h12"/></svg>Nuevo conteo de producción</span></div>
+          <!-- 25/11/2026 — Consumo menú del día / Consumo Personal: cargas manuales que se tratan como
+               consumo (restan stock igual que una venta explotada por receta), no como producción. -->
+          <div class="pagos-tab" data-sktab="consumomenu" onclick="SK.goTab('consumomenu')"><span class="sk-tabicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 017.41 6a5.11 5.11 0 011.05-1.54 5 5 0 017.08 0A5.11 5.11 0 0116.59 6 4 4 0 0118 13.87V21H6z"/><path d="M6 17h12"/></svg>Consumo menú del día</span></div>
+          <div class="pagos-tab" data-sktab="consumopersonal" onclick="SK.goTab('consumopersonal')"><span class="sk-tabicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 017.41 6a5.11 5.11 0 011.05-1.54 5 5 0 017.08 0A5.11 5.11 0 0116.59 6 4 4 0 0118 13.87V21H6z"/><path d="M6 17h12"/></svg>Consumo Personal</span></div>
           <div class="spacer"></div>
           <div class="cx-tab-sep" style="width:1px;align-self:stretch;background:var(--border);margin:12px 8px"></div>
           <div class="pagos-tab" data-sktab="computo" onclick="SK.goTab('computo')"><span class="sk-tabicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M14 10h2M8 14h2M14 14h2M8 18h2M14 18h2"/></svg>Cómputo de stock</span></div>
@@ -4747,6 +4751,8 @@
         <div class="pagos-body">
           <section class="pagos-pane active" id="skPaneConteos"><div class="sk-empty">Cargando…</div></section>
           <section class="pagos-pane" id="skPaneProduccion"><div class="sk-empty">Cargando…</div></section>
+          <section class="pagos-pane" id="skPaneConsumomenu"><div class="sk-empty">Cargando…</div></section>
+          <section class="pagos-pane" id="skPaneConsumopersonal"><div class="sk-empty">Cargando…</div></section>
           <section class="pagos-pane sk-alt" id="skPaneComputo"><div class="sk-empty">Cargando…</div></section>
         </div>
       </div>
@@ -7159,7 +7165,7 @@ const SUB_TABS = {
   costeo:   { map:{ compras:"compras", insumos:"insumos", recetas:"recetas", precios:"precios" }, sel:"#costeoSubnav [data-cxtab]", attr:"cxtab" },
   sueldos:  { map:{ esquema:"esquema", liquidacion:"liquidacion", nuevoEmpleado:"esquema" }, sel:"#sueldosSubnav [data-stab]", attr:"stab",
               extra:{ esquema:["#ctaNuevoEmpleadoBtn","#btnActualizarSueldos","#btnBajaEmpleado"] } },
-  stock:    { map:{ conteos:"conteos", produccion:"produccion", computo:"computo" }, sel:"#stockSubnav [data-sktab]", attr:"sktab" },
+  stock:    { map:{ conteos:"conteos", produccion:"produccion", consumomenu:"consumomenu", consumopersonal:"consumopersonal", computo:"computo" }, sel:"#stockSubnav [data-sktab]", attr:"sktab" },
   config:   { map:{ compras:"compras", stock:"stock", socios:"socios", actividad:"actividad" }, sel:"#configSubnav [data-ctab]", attr:"ctab" }
 };
 function tieneSubseccion(mod, sub){
@@ -19657,6 +19663,7 @@ const S = {
   items:{}, artById:{}, semiById:{}, lin:{},
   modo:{}, modoMeta:{}, est:[],
   conteos:[], citems:{}, prodOrd:[], prodIt:[], computos:[], cres:{}, vmap:{},
+  menuOrd:[], menuIt:[], persOrd:[], persIt:[],
   layersI:{}, layersS:{}
 };
 async function loadAll(force){
@@ -19664,7 +19671,7 @@ async function loadAll(force){
   if(S.base && !force && Date.now()-S.loadedAt < 45000) return true;
   S.loading = (async()=>{
     try{
-      const [base, sItems, est, conteos, pOrd, pIt, comps, vmap] = await Promise.all([
+      const [base, sItems, est, conteos, pOrd, pIt, comps, vmap, mOrd, mIt, perOrd, perIt] = await Promise.all([
         SK_SITE.load(fetchAll),
         fetchAll(T("stock_items"),"item_tipo,item_id,modo,modificado_nombre,modificado_fecha,conteo_unidad,conteo_factor,sin_consumo","item_id"),
         fetchAll(T("stock_estaciones"),"id,grupo_tipo,grupo_id,nombre,orden"),
@@ -19672,7 +19679,13 @@ async function loadAll(force){
         fetchAll(T("produccion_ordenes"),"*"),
         fetchAll(T("produccion_items"),"*"),
         fetchAll(T("stock_computos"),"id,conteo_ini_id,conteo_fin_id,desde,hasta,totales,nota,creado_por_nombre,created_at,recalculado_fecha,recalculado_por_nombre,confirmado_fecha,confirmado_por_nombre"),
-        fetchAll(T("stock_ventas_map"),"*","nombre")
+        fetchAll(T("stock_ventas_map"),"*","nombre"),
+        /* 25/11/2026 — Consumo menú del día / Consumo Personal: cargas manuales que se tratan
+           como CONSUMO (ver computar()), no como producción. */
+        fetchAll(T("consumo_menu_ordenes"),"*"),
+        fetchAll(T("consumo_menu_items"),"*"),
+        fetchAll(T("consumo_personal_ordenes"),"*"),
+        fetchAll(T("consumo_personal_items"),"*")
       ]);
       S.base = base;
       S.modo = {}; S.modoMeta = {};
@@ -19682,6 +19695,10 @@ async function loadAll(force){
       S.prodOrd = pOrd; S.prodIt = pIt.map(x=>({...x, cantidad:Number(x.cantidad)||0, costo_unitario:x.costo_unitario==null?null:Number(x.costo_unitario)}));
       S.computos = comps.sort((a,b)=>a.desde<b.desde?1:a.desde>b.desde?-1:0);
       S.vmap = {}; vmap.forEach(m=>S.vmap[m.nombre]=m);
+      S.menuOrd = mOrd.sort((a,b)=>a.fecha<b.fecha?1:a.fecha>b.fecha?-1:0);
+      S.menuIt = mIt.map(x=>({...x, cantidad:Number(x.cantidad)||0}));
+      S.persOrd = perOrd.sort((a,b)=>a.fecha<b.fecha?1:a.fecha>b.fecha?-1:0);
+      S.persIt = perIt.map(x=>({...x, cantidad:Number(x.cantidad)||0}));
       S.citems = {}; S.cres = {};
       buildCatalog(); buildLayers();
       S.loadedAt = Date.now();
@@ -19860,6 +19877,16 @@ function prodEnPeriodo(desde, hasta){
   const ordF = {}; S.prodOrd.forEach(o=>ordF[o.id]=o.fecha);
   return S.prodIt.filter(it=>{ const f=ordF[it.orden_id]; return f && f>=desde && f<hasta; }).map(it=>({ ...it, fecha:ordF[it.orden_id] }));
 }
+/* 25/11/2026 — Consumo menú del día / Consumo Personal: ídem prodEnPeriodo, pero sobre las
+   órdenes de consumo manual (ver computar(), estas se suman como consumo, no como producción). */
+function menuEnPeriodo(desde, hasta){
+  const ordF = {}, ordT = {}; S.menuOrd.forEach(o=>{ ordF[o.id]=o.fecha; ordT[o.id]=o.titulo; });
+  return S.menuIt.filter(it=>{ const f=ordF[it.orden_id]; return f && f>=desde && f<hasta; }).map(it=>({ ...it, fecha:ordF[it.orden_id], titulo:ordT[it.orden_id] }));
+}
+function personalEnPeriodo(desde, hasta){
+  const ordF = {}, ordT = {}; S.persOrd.forEach(o=>{ ordF[o.id]=o.fecha; ordT[o.id]=o.titulo; });
+  return S.persIt.filter(it=>{ const f=ordF[it.orden_id]; return f && f>=desde && f<hasta; }).map(it=>({ ...it, fecha:ordF[it.orden_id], titulo:ordT[it.orden_id] }));
+}
 function topSrc(a, n){ if(!a) return []; return Object.entries(a.src).sort((x,y)=>y[1]-x[1]).slice(0,n||10).map(([s,q])=>[s,q]); }
 const r6 = v=>isNum(v) ? Math.round(v*1e6)/1e6 : v;
 const r2 = v=>isNum(v) ? Math.round(v*100)/100 : v;
@@ -19872,6 +19899,15 @@ async function computar(ini, fin, ventasRows){
   const acc = {};
   vres.list.forEach(v=>{ if(v.art && v.status==="ok") explode("a", v.art, v.unidades, acc, v.artN); });
   prodEnPeriodo(d0, d1).forEach(p=>{ if(modo("s:"+p.semi_id)==="real"){ const s=S.semiById[p.semi_id]; explode("s", p.semi_id, p.cantidad, acc, "Producción · "+(s?s.nombre:"semi-elaborado")); } });
+  /* 25/11/2026 — Consumo menú del día: se suma al consumo del período exactamente igual que una
+     venta (no es producción: no genera stock de nada, solo resta insumos). Consumo Personal
+     también se suma acá (para que el stock físico/la fuga lo expliquen), pero además se guarda
+     aparte en persAcc para poder descontar su valor del CMV y mostrarlo en Personal/Empleados
+     (ver más abajo y confirmarComputo/arRenderER). */
+  menuEnPeriodo(d0, d1).forEach(it=>accAdd(acc, "i:"+it.insumo_id, it.cantidad, "Menú del día"+(it.titulo?" · "+it.titulo:"")+" ("+fD(it.fecha)+")"));
+  const persAcc = {};
+  personalEnPeriodo(d0, d1).forEach(it=>{ const src = "Consumo personal"+(it.titulo?" · "+it.titulo:"")+" ("+fD(it.fecha)+")";
+    accAdd(acc, "i:"+it.insumo_id, it.cantidad, src); accAdd(persAcc, "i:"+it.insumo_id, it.cantidad, src); });
   const out = [];
   Object.values(S.items).forEach(it=>{
     const k = it.k, md = modo(k);
@@ -19905,13 +19941,23 @@ async function computar(ini, fin, ventasRows){
         if(r.sc==="gasto"){ r.c$ = r2(en$); r.cmv = r2(en$); r.cu = r2(en$/en); r.sinPrecio = false; } }
       if(a) r.si=r6(a.total); if(z) r.sf=r6(z.total);
     }
+    /* 25/11/2026 — ver nota más arriba: el consumo de Personal ya está sumado a "te"/fuga, pero
+       su $ se descuenta de cmv acá y queda expuesto en r.pers$ (mismo costo de referencia r.cu
+       que el resto del ítem, sea real o teórico) para que el Estado de Resultados lo muestre
+       aparte en vez de mezclarlo en Mercadería/CMV. */
+    const persQ = it.t==="i" && persAcc[k] ? persAcc[k].q : 0;
+    if(Math.abs(persQ)>1e-9){
+      r.pers = r6(persQ);
+      r.pers$ = isNum(r.cu) ? r2(persQ*r.cu) : null;
+      if(isNum(r.cmv) && isNum(r.pers$)) r.cmv = r2(r.cmv - r.pers$);
+    }
     out.push(r);
   });
   return { desde:d0, hasta:d1, ini:ini.id, fin:fin.id, items:out, tot:totales(out, vres), ventas:vres };
 }
 function totales(items, vres){
   const T0 = { cmv:0, cmvReal:0, cmvTeo:0, fuga:0, perdida:0, sobrante:0, compras:0, prod:0, comprasSinTeo:0, nReal:0, nSinConteo:0, nTeo:0, nSinPrecio:0, consReal:0,
-    siV:0, sfV:0, sinRecGasto:0, sinRecStock:0, nSinRec:0, noMerc:0, nNoMerc:0 };
+    siV:0, sfV:0, sinRecGasto:0, sinRecStock:0, nSinRec:0, noMerc:0, nNoMerc:0, personal:0, nPersonal:0, personalSinPrecio:0 };
   items.forEach(r=>{
     if(isNum(r.cmv)){ T0.cmv += r.cmv; if(r.m==="real") T0.cmvReal += r.cmv; else T0.cmvTeo += r.cmv; }
     if(r.t==="i") T0.compras += r.en$||0; else T0.prod += r.en$||0;
@@ -19923,6 +19969,9 @@ function totales(items, vres){
     else if(r.sc==="nomerc"){ T0.noMerc += r.en$||0; T0.nNoMerc++; }
     else if(r.t==="i" && r.m!=="real" && Math.abs(r.te||0)<1e-9 && (r.en$||0)>0) T0.comprasSinTeo += r.en$;
     if(r.sinPrecio) T0.nSinPrecio++;
+    /* 25/11/2026 — Consumo Personal: ya se descontó de r.cmv en computar(); acá solo se totaliza
+       para exponerlo (Estado de Resultados > Personal/Empleados, ver arRenderER). */
+    if(Math.abs(r.pers||0)>1e-9){ T0.nPersonal++; if(isNum(r.pers$)) T0.personal += r.pers$; else T0.personalSinPrecio++; }
   });
   if(vres){ Object.assign(T0, { ventas:vres.impTot, ventasOk:vres.impOk, vSinVinc:vres.nSinVinc, vSinRec:vres.nSinRec, vOk:vres.nOk, vIgn:vres.nIgn, impSinVinc:vres.impSinVinc, impSinRec:vres.impSinRec }); }
   Object.keys(T0).forEach(k=>T0[k]=r2(T0[k]));
@@ -19933,11 +19982,12 @@ function consolidar(list){
   const L = list.slice().sort((a,b)=>a.desde<b.desde?-1:1);
   const by = {};
   L.forEach((c,ix)=>{ (c.resultado.items||[]).forEach(r=>{
-    const x = by[r.k] || (by[r.k] = { k:r.k, t:r.t, id:r.id, n:r.n, u:r.u, g:r.g, c:r.c, en:0, en$:0, te:0, re:0, fu:0, f$:0, c$:0, cmv:0, ms:new Set(), src:{}, compras:[], _first:ix, _hasRe:false, _hasF:false, _hasC:false });
+    const x = by[r.k] || (by[r.k] = { k:r.k, t:r.t, id:r.id, n:r.n, u:r.u, g:r.g, c:r.c, en:0, en$:0, te:0, re:0, fu:0, f$:0, c$:0, cmv:0, pers:0, pers$:0, ms:new Set(), src:{}, compras:[], _first:ix, _hasRe:false, _hasF:false, _hasC:false, _hasPers$:false });
     x.n=r.n; x.u=r.u; x.g=r.g; x.c=r.c;
     x.en+=r.en||0; x.en$+=r.en$||0; x.te+=r.te||0; x.ms.add(r.m);
     if(isNum(r.re)){ x.re+=r.re; x._hasRe=true; } if(isNum(r.fu)) x.fu+=r.fu; if(isNum(r.f$)){ x.f$+=r.f$; x._hasF=true; }
     if(isNum(r.c$)){ x.c$+=r.c$; x._hasC=true; } if(isNum(r.cmv)) x.cmv+=r.cmv;
+    if(isNum(r.pers)) x.pers+=r.pers; if(isNum(r.pers$)){ x.pers$+=r.pers$; x._hasPers$=true; }
     if(ix===x._first && isNum(r.si)){ x.si=r.si; x.siV=r.siV; } if(isNum(r.sf)){ x.sf=r.sf; x.sfV=r.sfV; x._lastIx=ix; }
     (r.src||[]).forEach(([s,q])=>x.src[s]=(x.src[s]||0)+q);
     x.compras = x.compras.concat(r.compras||[]).slice(-12);
@@ -19947,9 +19997,10 @@ function consolidar(list){
     const ms=[...x.ms]; const m = ms.length===1 ? ms[0] : "mixto";
     const o = { ...x, m, src:Object.entries(x.src).sort((a,b)=>b[1]-a[1]).slice(0,12) };
     if(!x._hasRe){ o.re=null; o.fu=null; } if(!x._hasF) o.f$=null; if(!x._hasC) o.c$=null;
+    if(!x._hasPers$) o.pers$ = Math.abs(x.pers||0)>1e-9 ? null : 0;
     if(m!=="real" && m!=="mixto"){ delete o.si; delete o.sf; }
     o.cu = (isNum(o.re) && o.re>1e-9 && isNum(o.c$)) ? o.c$/o.re : (o.te>1e-9 && isNum(o.c$) ? o.c$/o.te : null);
-    delete o.ms; delete o._first; delete o._hasRe; delete o._hasF; delete o._hasC; delete o._lastIx;
+    delete o.ms; delete o._first; delete o._hasRe; delete o._hasF; delete o._hasC; delete o._hasPers$; delete o._lastIx;
     return o;
   });
   const tot = totales(items, null);
@@ -20699,6 +20750,144 @@ function prExcel(L){ /* formato tabla (16/10/2026) */
 }
 
 /* =====================================================================
+   STOCK › CONSUMO MENÚ DEL DÍA / CONSUMO PERSONAL (25/11/2026)
+   Cargas diarias manuales que se tratan como CONSUMO, no como producción:
+   se suman al mismo acumulador que las ventas explotadas por receta (ver
+   computar()), insumo por insumo, con la cantidad que se tipeó acá.
+   - Menú del día: el plato cambia a diario, así que no tiene una receta
+     fija para explotar (las bebidas sí siguen su receta de siempre). Acá
+     se carga, para cada día, qué insumos y cuánto se usó en el plato.
+   - Consumo Personal: comida del personal. Además de restar stock, su
+     costo se descuenta de Mercadería/CMV (computar() ya lo resta en
+     r.pers$) y se expone aparte, en Personal/Empleados, cuando se
+     confirma el cómputo (ver confirmarComputo / arRenderER en Ventas).
+   Mismo patrón de UI que Producción de semi-elaborados, pero sobre
+   insumos en vez de semi-elaborados, y sin generar ningún stock propio.
+   ===================================================================== */
+const CONSUMO = {
+  menu: { ordArr:"menuOrd", itArr:"menuIt", tabla_ord:"consumo_menu_ordenes", tabla_it:"consumo_menu_items", pane:"skPaneConsumomenu",
+    titulo:"Consumo de menú del día", tituloCampo:"Plato del día", tituloPh:"Ej. Bife a la criolla", tituloReq:true,
+    sub:"Cargá, para cada día, los insumos y cantidades que se usaron en el plato del menú del día (las bebidas de Menú del día ya se descuentan solas por receta — esto es sólo el plato, que cambia a diario). Se resta del stock exactamente igual que una venta.",
+    vacio:"Todavía no se cargó consumo de menú del día", nuevo:"Nuevo consumo de menú del día" },
+  personal: { ordArr:"persOrd", itArr:"persIt", tabla_ord:"consumo_personal_ordenes", tabla_it:"consumo_personal_items", pane:"skPaneConsumopersonal",
+    titulo:"Consumo Personal", tituloCampo:"Detalle (opcional)", tituloPh:"Ej. Almuerzo turno tarde", tituloReq:false,
+    sub:"Cargá los insumos y cantidades que se consumieron en la comida del personal. Se resta del stock igual que una venta, y su costo se descuenta de Mercadería y se muestra aparte, en Personal/Empleados, al confirmar el cómputo.",
+    vacio:"Todavía no se cargó consumo de personal", nuevo:"Nuevo consumo de personal" }
+};
+const CO = { menu:{per:"mes", q:"", open:{}}, personal:{per:"mes", q:"", open:{}} };
+function coRango(kind){
+  const st=CO[kind]; const t=hoy(), y=Number(t.slice(0,4)), m=Number(t.slice(5,7));
+  const ini=(yy,mm)=>`${yy}-${String(mm).padStart(2,"0")}-01`;
+  if(st.per==="mes") return [ini(y,m), addDays(t,1)];
+  if(st.per==="ant"){ const pm=m===1?12:m-1, py=m===1?y-1:y; return [ini(py,pm), ini(y,m)]; }
+  if(st.per==="90") return [addDays(t,-89), addDays(t,1)];
+  return ["0000-01-01","9999-12-31"];
+}
+const coInsNom = it=>{ const x=S.items["i:"+it.insumo_id]; return x?x.nombre:(it.insumo_nombre||"insumo eliminado"); };
+const coInsUn = id=>{ const it=S.items["i:"+id]; return it?it.u:"un"; };
+function coOrdenes(kind){
+  const cfg=CONSUMO[kind], st=CO[kind]; const [d,h]=coRango(kind); const q=norm(st.q);
+  const its = {}; S[cfg.itArr].forEach(it=>(its[it.orden_id]=its[it.orden_id]||[]).push(it));
+  return S[cfg.ordArr].filter(o=>o.fecha>=d && o.fecha<h).map(o=>({ ...o, items:(its[o.id]||[]).sort((a,b)=>(a.orden_index||0)-(b.orden_index||0)) }))
+    .filter(o=>!q || (o.titulo&&norm(o.titulo).includes(q)) || o.items.some(it=>norm(coInsNom(it)).includes(q)) || norm(o.nota||"").includes(q) || norm(o.creado_por_nombre||"").includes(q))
+    .sort((a,b)=>a.fecha<b.fecha?1:a.fecha>b.fecha?-1:String(b.created_at).localeCompare(String(a.created_at)));
+}
+function consumoRender(kind){
+  const cfg=CONSUMO[kind], st=CO[kind];
+  const P0=$("#"+cfg.pane); if(!P0) return;
+  const L = coOrdenes(kind);
+  const nIns = new Set(); let costo=0, sinC=0;
+  L.forEach(o=>o.items.forEach(it=>{ nIns.add(it.insumo_id); const u=insumoCostAt(it.insumo_id, o.fecha); if(u==null) sinC++; else costo+=u*it.cantidad; }));
+  let h = `<div class="sk-phead"><div class="sk-grow"><h1>${cfg.titulo}</h1><div class="sk-sub">${cfg.sub}</div></div>
+    <div class="sk-actions"><button type="button" class="sk-btn" data-act="xls" ${L.length?"":"disabled"}>${ICO.dl} Excel</button><button type="button" class="sk-btn pri" data-act="nueva">${ICO.plus} ${cfg.nuevo}</button></div></div>
+    <div class="sk-scroll">
+    <div class="sk-tools"><div class="sk-seg" id="skCo${kind}Per">${[["mes","Este mes"],["ant","Mes anterior"],["90","Últimos 90 días"],["todo","Todo"]].map(([v,l])=>`<button type="button" data-v="${v}" class="${st.per===v?"on":""}">${l}</button>`).join("")}</div>
+      <div class="sk-search">${ICO.srch}<input type="text" id="skCo${kind}Q" placeholder="Buscar insumo, plato, nota…" value="${esc(st.q)}"></div></div>
+    <div class="sk-kpis">${kpi("Cargas", L.length, st.per==="todo"?"En total":"En el período elegido","hl")}${kpi("Insumos", nIns.size)}${kpi("Costo cargado", money(costo), sinC?`${sinC} línea${sinC===1?"":"s"} sin costo (sin compras para valorizar)`:"Al costo de referencia del insumo a esa fecha")}</div>`;
+  if(!L.length) h += `<div class="sk-big"><div class="ic">${ICO.pot}</div><b class="t">${S[cfg.ordArr].length?"No hay cargas en este período":cfg.vacio}</b><div class="sk-actions"><button type="button" class="sk-btn pri" data-act="nueva">${ICO.plus} ${cfg.nuevo}</button></div></div>`;
+  else {
+    let mes=""; h += `<div class="sk-list">` + L.map(o=>{ const m=mesDe(o.fecha); const sep=m!==mes?`<div class="sk-month">${(mes=m)}</div>`:""; const [,mm,dd]=o.fecha.split("-");
+      const tot = sum(o.items,it=>{ const u=insumoCostAt(it.insumo_id,o.fecha); return u==null?0:u*it.cantidad; });
+      return sep + `<div class="sk-row" data-id="${o.id}" style="flex-wrap:wrap"><div class="dt"><b>${dd}</b><small>${MES3[Number(mm)-1]}</small></div>
+        <div class="tx"><div class="sk-mini">${o.items.map(it=>`<span>${esc(coInsNom(it))} · ${fmtQ(it.cantidad)} ${esc(it.unidad||coInsUn(it.insumo_id))}</span>`).join("")}</div><span style="margin-top:5px">${o.titulo?`<b>${esc(o.titulo)}</b> · `:""}${esc(o.creado_por_nombre||"—")}${o.nota?` · ${esc(o.nota)}`:""}</span></div>
+        <div class="mt"><div><small>Costo</small><b>${money(tot)}</b></div></div>
+        <div class="ac"><button type="button" class="sk-ibtn" data-h="edit" title="Editar">${ICO.pen}</button><button type="button" class="sk-ibtn del" data-h="del" title="Eliminar">${ICO.del}</button></div></div>`; }).join("") + `</div>`;
+  }
+  h += `</div>`;
+  P0.innerHTML = h;
+  P0.onclick = async e=>{
+    const b=e.target.closest("[data-act]"); if(b&&!b.disabled){ if(b.dataset.act==="nueva") return coModal(kind,null); if(b.dataset.act==="xls") return coExcel(kind,coOrdenes(kind)); }
+    const row=e.target.closest(".sk-row"); if(!row) return; const id=row.dataset.id; const hb=e.target.closest("[data-h]");
+    if(hb&&hb.dataset.h==="edit") return coModal(kind,id);
+    if(hb&&hb.dataset.h==="del"){ const o=S[cfg.ordArr].find(x=>x.id===id); if(!(await confirmar(`¿Eliminar esta carga del ${fD(o.fecha)}?`,"Si cae dentro de un cómputo guardado, recalculalo después.","Eliminar",true))) return;
+      const {error}=await sb.from(T(cfg.tabla_ord)).delete().eq("id",id); if(error){ toast("No se pudo eliminar","warn"); return; }
+      log(`Eliminó una carga de ${cfg.titulo.toLowerCase()}`, fD(o.fecha)); S[cfg.ordArr]=S[cfg.ordArr].filter(x=>x.id!==id); S[cfg.itArr]=S[cfg.itArr].filter(x=>x.orden_id!==id); consumoRender(kind); toast("Carga eliminada"); return; }
+  };
+  $$("#skCo"+kind+"Per button").forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); st.per=b.dataset.v; consumoRender(kind); });
+  const qi=$("#skCo"+kind+"Q"); let t; qi.oninput=()=>{ clearTimeout(t); t=setTimeout(()=>{ st.q=qi.value; const p=qi.selectionStart; consumoRender(kind); const n=$("#skCo"+kind+"Q"); n.focus(); n.setSelectionRange(p,p); },200); };
+}
+function coModal(kind, id){
+  const cfg=CONSUMO[kind];
+  const o = id ? S[cfg.ordArr].find(x=>x.id===id) : null;
+  const lines = o ? S[cfg.itArr].filter(x=>x.orden_id===id).sort((a,b)=>(a.orden_index||0)-(b.orden_index||0)).map(it=>({ insumo_id:it.insumo_id, q:fmtInput(it.cantidad), txt:S.items["i:"+it.insumo_id]?S.items["i:"+it.insumo_id].nombre:(it.insumo_nombre||"") })) : [{ insumo_id:null, q:"" }];
+  const st = { fecha:o?o.fecha:hoy(), titulo:o?(o.titulo||""):"", nota:o?(o.nota||""):"", lines };
+  const insumos = itemsDe("i").slice().sort(byName);
+  const opts = insumos.map(it=>`<option value="${esc(it.nombre)}"></option>`).join("");
+  const byLabel = {}; insumos.forEach(it=>byLabel[norm(it.nombre)]=it.id);
+  const sc = openLayer(mh(o?`Editar ${cfg.titulo.toLowerCase()}`:cfg.nuevo, cfg.sub) +
+    `<div class="sk-mb"><div class="sk-f2" style="margin-bottom:14px"><div class="sk-f"><label>Fecha</label><input type="date" id="skCoF" value="${st.fecha}" max="${hoy()}"></div>
+      <div class="sk-f"><label>${esc(cfg.tituloCampo)}</label><input type="text" id="skCoT" value="${esc(st.titulo)}" placeholder="${esc(cfg.tituloPh)}" maxlength="120"></div></div>
+      <div class="sk-lbl" style="margin-bottom:8px">Insumos consumidos</div><div id="skCoL"></div>
+      <button type="button" class="sk-btn sm ghost" id="skCoAdd">${ICO.plus} Agregar otro</button>
+      <div class="sk-f" style="margin-top:16px"><label>Nota (opcional)</label><input type="text" id="skCoN" value="${esc(st.nota)}" placeholder="Observación general" maxlength="160"></div>
+      <datalist id="skCoDl">${opts}</datalist></div>
+    <div class="sk-mf"><span class="sk-grow" id="skCoTot"></span><button type="button" class="sk-btn" data-close>Cancelar</button><button type="button" class="sk-btn pri" id="skCoSave">${ICO.ok} Guardar</button></div>`, { cls:"wide", sticky:true });
+  sc.dataset.sticky="1";
+  const draw = ()=>{
+    $("#skCoL",sc).innerHTML = st.lines.map((l,ix)=>{ const it=l.insumo_id?S.items["i:"+l.insumo_id]:null; const n=parseNum(l.q); const c=it?insumoCostAt(it.id,st.fecha):null;
+      return `<div class="sk-pl" data-ix="${ix}"><input type="text" list="skCoDl" data-f="s" value="${esc(it?it.nombre:(l.txt||""))}" placeholder="Buscar insumo…" class="${l.txt&&!it?"bad":""}"><input type="text" class="num ${n!=null&&(isNaN(n)||n<=0)?"bad":""}" data-f="q" value="${esc(l.q)}" inputmode="decimal" placeholder="Cantidad"><span class="u">${it?esc(it.u):""}</span><span class="c">${it&&c!=null&&n>0?money(c*n):it&&c==null?'<span class="sk-tag warn">sin costo</span>':""}</span><button type="button" class="sk-ibtn del" data-f="x" title="Quitar">${ICO.x}</button></div>`; }).join("");
+    upd();
+    $$(".sk-pl",sc).forEach(row=>{ const ix=Number(row.dataset.ix);
+      $('[data-f="s"]',row).onchange = ev=>{ const v=ev.target.value; const iid=byLabel[norm(v)]||null; if(st.lines[ix].txt===v && st.lines[ix].insumo_id===iid) return; st.lines[ix].insumo_id=iid; st.lines[ix].txt=v; setTimeout(()=>{ draw(); if(iid){ const q=$(`.sk-pl[data-ix="${ix}"] [data-f="q"]`,sc); if(q) q.focus(); } },0); };
+      $('[data-f="q"]',row).oninput = ev=>{ st.lines[ix].q=ev.target.value; const n=parseNum(ev.target.value); ev.target.classList.toggle("bad", n!=null&&(isNaN(n)||n<=0)); upd(); const iid=st.lines[ix].insumo_id; const c=iid?insumoCostAt(iid,st.fecha):null; $(".c",row).innerHTML = iid&&c!=null&&n>0?money(c*n):""; };
+      $('[data-f="x"]',row).onclick = ()=>{ st.lines.splice(ix,1); if(!st.lines.length) st.lines.push({insumo_id:null,q:""}); draw(); };
+    });
+  };
+  const upd = ()=>{ let tot=0; st.lines.forEach(l=>{ const n=parseNum(l.q); if(!l.insumo_id||!(n>0)) return; const c=insumoCostAt(l.insumo_id,st.fecha); if(c!=null) tot+=c*n; });
+    $("#skCoTot",sc).innerHTML = tot ? `Costo estimado: <b>${money(tot)}</b>` : ""; };
+  draw();
+  $("#skCoF",sc).onchange = e=>{ st.fecha=e.target.value||hoy(); draw(); };
+  $("#skCoT",sc).oninput = e=>{ st.titulo=e.target.value; };
+  $("#skCoN",sc).oninput = e=>{ st.nota=e.target.value; };
+  $("#skCoAdd",sc).onclick = ()=>{ st.lines.push({insumo_id:null,q:""}); draw(); const ins=$$('.sk-pl [data-f="s"]',sc); ins[ins.length-1].focus(); };
+  $("#skCoSave",sc).onclick = async ev=>{
+    const ok = st.lines.filter(l=>l.insumo_id || String(l.q).trim());
+    if(!ok.length){ toast("Agregá al menos un insumo","warn"); return; }
+    for(const l of ok){ const n=parseNum(l.q); if(!l.insumo_id){ toast("Hay un insumo que no está en la lista","warn"); return; } if(!(n>0)){ toast("Revisá las cantidades (tienen que ser mayores a 0)","warn"); return; } }
+    if(!st.fecha || st.fecha>hoy()){ toast("La fecha no puede ser futura","warn"); return; }
+    if(cfg.tituloReq && !st.titulo.trim()){ toast(`Completá "${cfg.tituloCampo}"`,"warn"); return; }
+    ev.target.disabled=true; ev.target.textContent="Guardando…";
+    try{
+      let oid=id; const now=new Date().toISOString();
+      if(oid){ const {error}=await sb.from(T(cfg.tabla_ord)).update({ fecha:st.fecha, titulo:st.titulo.trim()||null, nota:st.nota.trim()||null, modificado_por_nombre:uname(), modificado_fecha:now }).eq("id",oid); if(error) throw error;
+        const {error:e2}=await sb.from(T(cfg.tabla_it)).delete().eq("orden_id",oid); if(e2) throw e2; }
+      else { const {data,error}=await sb.from(T(cfg.tabla_ord)).insert({ fecha:st.fecha, titulo:st.titulo.trim()||null, nota:st.nota.trim()||null, creado_por:uid(), creado_por_nombre:uname() }).select("*").single(); if(error) throw error; oid=data.id; }
+      const rows = ok.map((l,ix)=>{ const it=S.items["i:"+l.insumo_id]; return { orden_id:oid, insumo_id:l.insumo_id, insumo_nombre:it?it.nombre:null, cantidad:parseNum(l.q), unidad:it?it.u:null, orden_index:ix }; });
+      const {error:e3}=await sb.from(T(cfg.tabla_it)).insert(rows); if(e3) throw e3;
+      log(id?`Editó una carga de ${cfg.titulo.toLowerCase()}`:`Registró una carga de ${cfg.titulo.toLowerCase()}`, `${fD(st.fecha)} · ${rows.map(r=>`${r.insumo_nombre} ${fmtQ(r.cantidad)} ${r.unidad}`).join(", ")}`);
+      closeLayer(sc); await loadAll(true); consumoRender(kind); toast("Carga guardada");
+    }catch(err){ console.warn(err); toast("No se pudo guardar","warn"); ev.target.disabled=false; ev.target.innerHTML=ICO.ok+" Guardar"; }
+  };
+  setTimeout(()=>{ const f=$('.sk-pl [data-f="s"]',sc); if(f&&!o) f.focus(); },40);
+}
+function coExcel(kind, L){
+  if(!xlsxOk()) return; const cfg=CONSUMO[kind]; const out=[];
+  L.slice().reverse().forEach(o=>o.items.forEach(it=>{ const u=insumoCostAt(it.insumo_id,o.fecha); const n=Number(it.cantidad);
+    out.push([o.fecha, o.titulo||"", coInsNom(it), n, it.unidad||coInsUn(it.insumo_id), u==null?null:Math.round(u*100)/100, u==null?null:Math.round(u*n*100)/100, o.creado_por_nombre||"", o.nota||""]); }));
+  vdXls(`${cfg.titulo} ${SK_SITE.club} ${hoy()}.xlsx`, [{h:"Fecha",t:"fecha"},{h:cfg.tituloCampo},{h:"Insumo"},{h:"Cantidad",t:"num"},{h:"Unidad"},{h:"Costo unitario",t:"$"},{h:"Costo total",t:"$"},{h:"Usuario"},{h:"Nota",w:30}], out, cfg.titulo);
+}
+
+/* =====================================================================
    STOCK › CÓMPUTO DE STOCK
    ===================================================================== */
 const K = { modo:"lista", sel:new Set(), wiz:null, res:null, tipo:"i", cat:"all", q:"", ver:"todos" };
@@ -21176,11 +21365,11 @@ function goTab(t){
   const pane = $("#skPane"+t.charAt(0).toUpperCase()+t.slice(1)); if(pane) pane.classList.add("active");
   renderTab();
 }
-function renderTab(){ if(!S.base) return; if(curTab==="conteos") conteosRender(); else if(curTab==="produccion") produccionRender(); else computoRender(); }
+function renderTab(){ if(!S.base) return; if(curTab==="conteos") conteosRender(); else if(curTab==="produccion") produccionRender(); else if(curTab==="consumomenu") consumoRender("menu"); else if(curTab==="consumopersonal") consumoRender("personal"); else computoRender(); }
 async function onEnterStock(){
   goTab(curTab);
   const editando = C.ed || K.modo!=="lista";
-  if(!S.base) ["Conteos","Produccion","Computo"].forEach(n=>{ const p=$("#skPane"+n); if(p) p.innerHTML=`<div class="sk-empty" style="margin:auto">Cargando…</div>`; });
+  if(!S.base) ["Conteos","Produccion","Consumomenu","Consumopersonal","Computo"].forEach(n=>{ const p=$("#skPane"+n); if(p) p.innerHTML=`<div class="sk-empty" style="margin:auto">Cargando…</div>`; });
   const ok = await loadAll(!editando && !!S.base); if(!ok){ const p=$("#skPane"+curTab.charAt(0).toUpperCase()+curTab.slice(1)); if(p) p.innerHTML=`<div class="sk-big" style="margin:40px auto"><b class="t">No se pudieron cargar los datos de Stock</b>Revisá la conexión y volvé a entrar al módulo.</div>`; return; }
   renderTab();
 }
@@ -21997,7 +22186,7 @@ window.SK = { onEnterStock, onEnterCfg:cfgOpen, goTab, _S:S, _engine:{ loadAll, 
     cajaMayor:[["Nuevo cierre de caja",'#cmSubnav [data-cmpane="imputacion"]'],["Historial de cierres de caja",'#cmSubnav [data-cmpane="historial"]']],
     pagos:    [["Lista de órdenes",'#pagosSubnav [data-pane="lista"]'],["Cuentas Corrientes",'#pagosSubnav [data-pane="cuentas"]']],
     costeo:   [["Carga de compras",'#costeoSubnav [data-cxtab="compras"]'],["Insumos",'#costeoSubnav [data-cxtab="insumos"]'],["Recetas",'#costeoSubnav [data-cxtab="recetas"]'],["Lista de precios",'#costeoSubnav [data-cxtab="precios"]']],
-    stock:    [["Nuevo conteo de stock",'#stockSubnav [data-sktab="conteos"]'],["Nuevo conteo de producción",'#stockSubnav [data-sktab="produccion"]'],["Cómputo de stock",'#stockSubnav [data-sktab="computo"]']],
+    stock:    [["Nuevo conteo de stock",'#stockSubnav [data-sktab="conteos"]'],["Nuevo conteo de producción",'#stockSubnav [data-sktab="produccion"]'],["Consumo menú del día",'#stockSubnav [data-sktab="consumomenu"]'],["Consumo Personal",'#stockSubnav [data-sktab="consumopersonal"]'],["Cómputo de stock",'#stockSubnav [data-sktab="computo"]']],
     sueldos:  [["Cuadrilla de personal",'#sueldosSubnav [data-stab="esquema"]'],["Liquidación de sueldos",'#sueldosSubnav [data-stab="liquidacion"]'],["Historial de sueldos",'#sueldosSubnav [data-stab="historial"]']],
     config:   [["Compras",'#configSubnav [data-ctab="compras"]'],["Stock",'#configSubnav [data-ctab="stock"]'],["Socios",'#configSubnav [data-ctab="socios"]'],["Actividad",'#configSubnav [data-ctab="actividad"]']]
   };
@@ -25848,8 +26037,14 @@ async function lfQuitarProveedorIns(id){
         try{
           const rk = await sb.from(P+"_stock_computos").select("id,desde,hasta,totales,resultado,confirmado_fecha").not("confirmado_fecha","is",null).order("desde");
           (rk.data||[]).forEach(k=>{ if(!k.desde || !k.hasta || !(k.hasta > k.desde)) return;
-            const its = (k.resultado && k.resultado.items) || []; const A = { real:0, teo:0, sinRec:0, si:0, compras:0, sf:0, fuga:0 }; const rubros = new Map();
-            its.forEach(r=>{ if(r.t==="i" && !merc.has(String(r.id))) return; // sólo mercadería (los semi-elaborados se toman como vienen)
+            const its = (k.resultado && k.resultado.items) || []; const A = { real:0, teo:0, sinRec:0, si:0, compras:0, sf:0, fuga:0, personal:0 }; const rubros = new Map();
+            its.forEach(r=>{
+              /* 25/11/2026 — Consumo Personal: ya está descontado de r.cmv (ver computar()), así que no
+                 se cuenta acá como mercadería; se suma aparte para ir a Personal/Empleados más abajo
+                 (arGastosRango). Cuenta sin el filtro de "sólo mercadería": el consumo de personal es
+                 un costo real haya o no haya quedado marcado el insumo como mercadería. */
+              if(typeof r.pers$==="number" && isFinite(r.pers$)) A.personal += r.pers$;
+              if(r.t==="i" && !merc.has(String(r.id))) return; // sólo mercadería (los semi-elaborados se toman como vienen)
               const v = Number(r.cmv); const vv = isFinite(v) ? v : 0;
               if(r.m==="real"){ A.real += vv; A.si += Number(r.siV)||0; A.sf += Number(r.sfV)||0; A.fuga += Number(r.f$)||0; if(r.t==="i") A.compras += Number(r.en$)||0; }
               else if(r.sc==="gasto") A.sinRec += vv; else A.teo += vv;
@@ -25884,7 +26079,7 @@ async function lfQuitarProveedorIns(id){
   // día cubierto por un cómputo de stock: [desde, hasta)
   function compDe(D, iso){ return (D.comps||[]).slice().reverse().find(k=>iso>=k.desde && iso<k.hasta) || null; }
   function arCmvRango(desde, hasta){
-    const D = arState.cmvData, out = { total:0, real:0, teo:0, sinRec:0, ap:{ si:0, compras:0, sf:0, fuga:0 }, diasReal:0, comps:new Set(), rubros:new Map(), sinCosto:new Map(), sinPrecio:new Map() };
+    const D = arState.cmvData, out = { total:0, real:0, teo:0, sinRec:0, personal:0, ap:{ si:0, compras:0, sf:0, fuga:0 }, diasReal:0, comps:new Set(), rubros:new Map(), sinCosto:new Map(), sinPrecio:new Map() };
     if(!D) return out;
     // días con cómputo confirmado: su CMV repartido por día
     if(D.comps && D.comps.length){
@@ -25892,6 +26087,9 @@ async function lfQuitarProveedorIns(id){
         const k = compDe(D, iso); if(!k) continue; const f = 1/k.n;
         out.real += k.real*f; out.teo += k.teo*f; out.sinRec += k.sinRec*f; out.total += (k.real+k.teo+k.sinRec)*f; out.diasReal++; out.comps.add(k.id);
         out.ap.si += k.si*f; out.ap.compras += k.compras*f; out.ap.sf += k.sf*f; out.ap.fuga += k.fuga*f;
+        /* 25/11/2026 — Consumo Personal: sólo cuenta en días cubiertos por un cómputo CONFIRMADO (como
+           pidió Pancho). Va aparte del total de CMV, a su propia categoría (ver arGastosRango). */
+        out.personal += (k.personal||0)*f;
         k.rubros.forEach((v,g)=>out.rubros.set(g,(out.rubros.get(g)||0)+v*f));
       }
     }
@@ -25948,6 +26146,14 @@ async function lfQuitarProveedorIns(id){
     if(CM){
       cmv = arCmvRango(desde, hasta);
       if(cmv.total){ const C = cat(AR_CMV_CAT); C.cmv = true; C.cmvReal = cmv.real; C.cmvTeo = cmv.teo + cmv.sinRec; C.total += cmv.total; C.fact += cmv.total; cmv.rubros.forEach((v,k)=>{ C.subs.set(k,v); C.subsFact.set(k,v); }); total += cmv.total; fact += cmv.total; }
+      /* 25/11/2026 — Consumo Personal (comida del personal, cargada en Stock › Consumo Personal):
+         Pancho pidió que no quede mezclado en CMV sino discriminado dentro de Personal/Empleados
+         (mismo Concepto que ya usan Sueldos/Adelantos — ver liqCat). Sólo aparece en los días que
+         cubre un cómputo de stock CONFIRMADO (arCmvRango ya lo filtra así). */
+      if(cmv.personal){ const C = cat("Personal / Empleados"); C.total += cmv.personal; C.fact += cmv.personal;
+        C.subs.set("Consumo interno (Stock)", (C.subs.get("Consumo interno (Stock)")||0)+cmv.personal);
+        C.subsFact.set("Consumo interno (Stock)", (C.subsFact.get("Consumo interno (Stock)")||0)+cmv.personal);
+        total += cmv.personal; fact += cmv.personal; }
       cmv.mercCompras = mercCompras; cmv.mercSinItems = mercSinItems; cmv.mercEnteras = mercEnteras;
     }
     [...cats.keys()].forEach(k=>{ const C = cats.get(k); if(Math.abs(C.total)<0.005 && !C.cmv) cats.delete(k); });
